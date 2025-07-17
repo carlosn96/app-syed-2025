@@ -50,7 +50,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
             <div className="flex justify-center items-center mb-4">
-                 <Image src="/UNIVERSIDAD UNE.jpg" alt="UNE Logo" width={160} height={57} className="w-40" />
+                 <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40" />
             </div>
           <CardTitle className="text-2xl font-headline">¡Bienvenido de Nuevo!</CardTitle>
           <CardDescription>
