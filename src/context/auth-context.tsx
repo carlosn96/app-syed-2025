@@ -9,23 +9,37 @@ interface User {
   id: number;
   name: string;
   role: Role;
+  email: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (role: Role) => void;
+  login: (email: string, password: string) => boolean;
   logout: () => void;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const mockUsers: Record<Role, User> = {
-  administrator: { id: 1, name: 'Admin User', role: 'administrator' },
-  coordinator: { id: 2, name: 'Coordinator User', role: 'coordinator' },
-  teacher: { id: 3, name: 'Teacher User', role: 'teacher' },
-  student: { id: 4, name: 'Student User', role: 'student' },
+const mockUsers: Record<string, { password: string; user: User }> = {
+  'admin@example.com': {
+    password: 'admin',
+    user: { id: 1, name: 'Admin User', role: 'administrator', email: 'admin@example.com' }
+  },
+  'coordinador@example.com': {
+    password: 'coordinador',
+    user: { id: 2, name: 'Coordinator User', role: 'coordinator', email: 'coordinador@example.com' }
+  },
+  'docente@example.com': {
+    password: 'docente',
+    user: { id: 3, name: 'Teacher User', role: 'teacher', email: 'docente@example.com' }
+  },
+  'alumno@example.com': {
+    password: 'alumno',
+    user: { id: 4, name: 'Student User', role: 'student', email: 'alumno@example.com' }
+  },
 };
+
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -57,11 +71,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isLoading, user, pathname, router]);
 
-  const login = (role: Role) => {
-    const userToLogin = mockUsers[role];
-    localStorage.setItem('user', JSON.stringify(userToLogin));
-    setUser(userToLogin);
-    router.push('/dashboard');
+  const login = (email: string, password: string): boolean => {
+    const userData = mockUsers[email];
+    if (userData && userData.password === password) {
+      const userToLogin = userData.user;
+      localStorage.setItem('user', JSON.stringify(userToLogin));
+      setUser(userToLogin);
+      router.push('/dashboard');
+      return true;
+    }
+    return false;
   };
 
   const logout = () => {

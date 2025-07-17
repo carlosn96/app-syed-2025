@@ -9,22 +9,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/auth-context";
 import { GraduationCap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-type Role = 'administrator' | 'coordinator' | 'teacher' | 'student';
-
 export default function LoginPage() {
-  const [selectedRole, setSelectedRole] = useState<Role | "">("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const { login, user, isLoading } = useAuth();
   const router = useRouter();
 
@@ -35,8 +30,10 @@ export default function LoginPage() {
   }, [user, isLoading, router]);
 
   const handleLogin = () => {
-    if (selectedRole) {
-      login(selectedRole);
+    setError('');
+    const success = login(email, password);
+    if (!success) {
+      setError("Invalid email or password.");
     }
   };
   
@@ -59,24 +56,35 @@ export default function LoginPage() {
             </div>
           <CardTitle className="text-2xl font-headline">Welcome Back!</CardTitle>
           <CardDescription>
-            Select a role to simulate login.
+            Enter your credentials to login.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          <Select onValueChange={(value) => setSelectedRole(value as Role)} value={selectedRole}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="administrator">Administrator</SelectItem>
-              <SelectItem value="coordinator">Coordinator</SelectItem>
-              <SelectItem value="teacher">Teacher</SelectItem>
-              <SelectItem value="student">Student</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input 
+              id="email" 
+              type="email" 
+              placeholder="m@example.com" 
+              required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="password">Password</Label>
+            <Input 
+              id="password" 
+              type="password" 
+              required 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
         </CardContent>
         <CardFooter>
-          <Button className="w-full" onClick={handleLogin} disabled={!selectedRole}>
+          <Button className="w-full" onClick={handleLogin}>
             Login
           </Button>
         </CardFooter>
