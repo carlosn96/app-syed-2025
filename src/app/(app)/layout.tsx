@@ -1,7 +1,7 @@
 import React from "react";
-import Image from "next/image";
 import { MainNav } from "@/components/layout/main-nav";
 import { UserNav } from "@/components/layout/user-nav";
+import { Logo } from "@/components/ui/logo";
 import {
   SidebarProvider,
   Sidebar,
@@ -18,13 +18,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-3">
-            <Image 
-              src="/logo.png" 
-              alt="UNE Logo" 
-              width={120} 
-              height={40}
-              className="object-contain"
-            />
+            <Logo className="w-28" />
           </div>
         </SidebarHeader>
         <SidebarContent>

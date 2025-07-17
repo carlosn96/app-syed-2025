@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/context/auth-context";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -50,7 +50,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
             <div className="flex justify-center items-center mb-4">
-                <Image src="/logo.png" alt="UNE Logo" width={160} height={50} className="object-contain" />
+                <Logo className="w-40" />
             </div>
           <CardTitle className="text-2xl font-headline">¡Bienvenido de Nuevo!</CardTitle>
           <CardDescription>
