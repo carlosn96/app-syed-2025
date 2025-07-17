@@ -48,11 +48,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (!isLoading && !user && pathname !== '/login') {
-      router.push('/login');
+    if (!isLoading) {
+        if (!user && pathname !== '/login') {
+            router.push('/login');
+        } else if (user && pathname === '/login') {
+            router.push('/dashboard');
+        }
     }
   }, [isLoading, user, pathname, router]);
-
 
   const login = (role: Role) => {
     const userToLogin = mockUsers[role];
@@ -68,9 +71,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const value = { user, login, logout, isLoading };
-  
+
   if (isLoading) {
-    return <div>Loading...</div>; // Or a proper loading spinner
+    return <div className="flex h-screen w-full items-center justify-center">Loading...</div>;
+  }
+  
+  if (!user && pathname !== '/login') {
+    return <div className="flex h-screen w-full items-center justify-center">Redirecting to login...</div>;
+  }
+  
+  if (user && pathname === '/login') {
+      return <div className="flex h-screen w-full items-center justify-center">Redirecting to dashboard...</div>;
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
