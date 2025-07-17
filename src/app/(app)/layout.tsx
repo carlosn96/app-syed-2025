@@ -18,7 +18,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-3">
-             <Image src="https://www.universidad-une.com/wp-content/uploads/2023/03/logo-une-azul.png" alt="UNE Logo" width={112} height={40} className="w-28" />
+             <Image src="/UNIVERSIDAD UNE.jpg" alt="UNE Logo" width={112} height={40} className="w-28" />
           </div>
         </SidebarHeader>
         <SidebarContent>
