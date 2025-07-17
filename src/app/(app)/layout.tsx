@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { MainNav } from "@/components/layout/main-nav";
 import { UserNav } from "@/components/layout/user-nav";
 import {
@@ -10,24 +11,20 @@ import {
   SidebarTrigger,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { GraduationCap } from "lucide-react";
-import { AuthProvider } from "@/context/auth-context";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader className="p-4">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-10 w-10 text-primary-foreground bg-primary/20 hover:bg-primary/30 rounded-full">
-              <GraduationCap className="h-6 w-6" />
-            </Button>
-            <div className="flex flex-col">
-              <h2 className="font-headline text-lg font-semibold tracking-tight">
-                Gestion Educativa
-              </h2>
-            </div>
+          <div className="flex items-center gap-3">
+            <Image 
+              src="/logo.png" 
+              alt="UNE Logo" 
+              width={120} 
+              height={40}
+              className="object-contain"
+            />
           </div>
         </SidebarHeader>
         <SidebarContent>

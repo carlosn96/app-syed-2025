@@ -15,11 +15,11 @@ export default function SupervisionPage() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="font-headline text-3xl font-semibold tracking-tight">
-          Schedule Supervision
+          Agendar Supervisión
         </h1>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          New Supervision
+          Nueva Supervisión
         </Button>
       </div>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -43,14 +43,14 @@ export default function SupervisionPage() {
         <div className="lg:col-span-1">
             <Card>
                 <CardHeader>
-                    <CardTitle>Upcoming Supervisións</CardTitle>
-                    <CardDescription>Your next scheduled sessions.</CardDescription>
+                    <CardTitle>Próximas Supervisiones</CardTitle>
+                    <CardDescription>Tus próximas sesiones agendadas.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4">
                     {supervisions.map((supervision) => (
                         <div key={supervision.id} className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50">
                             <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-md h-12 w-12 text-sm">
-                                <span>{supervision.date.toLocaleString('default', { month: 'short' })}</span>
+                                <span>{supervision.date.toLocaleString('es-ES', { month: 'short' })}</span>
                                 <span className="font-bold text-lg">{supervision.date.getDate()}</span>
                             </div>
                             <div className="grid gap-1">

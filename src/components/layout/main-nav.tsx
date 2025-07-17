@@ -21,14 +21,14 @@ import {
 import { useAuth } from "@/context/auth-context"
 
 const allLinks = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
-  { href: "/users", label: "Users", icon: Users, roles: ['administrator', 'coordinator'] },
-  { href: "/campuses", label: "Campuses", icon: Building, roles: ['administrator', 'coordinator'] },
-  { href: "/programs", label: "Programs", icon: BookOpenCheck, roles: ['administrator', 'coordinator'] },
-  { href: "/subjects", label: "Subjects", icon: Library, roles: ['administrator', 'coordinator', 'teacher'] },
-  { href: "/supervision", label: "Supervision", icon: CalendarDays, roles: ['administrator', 'coordinator', 'teacher'] },
-  { href: "/feedback", label: "Feedback", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
-  { href: "/evaluation", label: "Evaluation", icon: ClipboardEdit, roles: ['administrator', 'coordinator', 'student'] },
+  { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
+  { href: "/users", label: "Usuarios", icon: Users, roles: ['administrator', 'coordinator'] },
+  { href: "/campuses", label: "Campus", icon: Building, roles: ['administrator', 'coordinator'] },
+  { href: "/programs", label: "Programas", icon: BookOpenCheck, roles: ['administrator', 'coordinator'] },
+  { href: "/subjects", label: "Materias", icon: Library, roles: ['administrator', 'coordinator', 'teacher'] },
+  { href: "/supervision", label: "Supervisión", icon: CalendarDays, roles: ['administrator', 'coordinator', 'teacher'] },
+  { href: "/feedback", label: "Retroalimentación", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
+  { href: "/evaluation", label: "Evaluación", icon: ClipboardEdit, roles: ['administrator', 'coordinator', 'student'] },
 ]
 
 export function MainNav() {

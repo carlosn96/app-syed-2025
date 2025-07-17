@@ -30,24 +30,24 @@ export default function SubjectsPage() {
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-semibold tracking-tight">
-        Subjects
+        Materias
       </h1>
       <Card>
         <CardHeader>
-          <CardTitle>Subjects</CardTitle>
+          <CardTitle>Materias</CardTitle>
           <CardDescription>
-            Manage all subjects in the system.
+            Administra todas las materias en el sistema.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Program</TableHead>
-                <TableHead>Teacher</TableHead>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Programa</TableHead>
+                <TableHead>Docente</TableHead>
                 <TableHead>
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">Acciones</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -70,9 +70,9 @@ export default function SubjectsPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                        <DropdownMenuItem>Editar</DropdownMenuItem>
+                        <DropdownMenuItem>Eliminar</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -83,7 +83,7 @@ export default function SubjectsPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Showing <strong>1-4</strong> of <strong>4</strong> subjects
+            Mostrando <strong>1-4</strong> de <strong>4</strong> materias
           </div>
         </CardFooter>
       </Card>

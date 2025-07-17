@@ -19,7 +19,7 @@ async function moderateTeacherEvaluation(input: {
   evaluationText: string
 }): Promise<{ isFlagged: boolean; flaggingReasons: string[] }> {
   console.log(
-    "Simulating moderation for:",
+    "Simulando moderación para:",
     input.evaluationText.substring(0, 30) + "..."
   )
   // En un caso de uso real, aquí podría haber lógica de negocio
@@ -38,7 +38,7 @@ export async function submitEvaluation(
 
   if (!validatedFields.success) {
     return {
-      message: "Invalid form data.",
+      message: "Datos de formulario inválidos.",
       isFlagged: false,
       flaggingReasons: null,
       isSuccess: false,
@@ -54,7 +54,7 @@ export async function submitEvaluation(
 
     if (moderationResult.isFlagged) {
       return {
-        message: "Evaluation flagged for inappropriate content.",
+        message: "Evaluación marcada por contenido inapropiado.",
         isFlagged: true,
         flaggingReasons: moderationResult.flaggingReasons,
         isSuccess: false,
@@ -62,18 +62,18 @@ export async function submitEvaluation(
     }
 
     // Aquí normalmente guardarías la evaluación en tu base de datos
-    console.log("Evaluation submitted:", validatedFields.data)
+    console.log("Evaluación enviada:", validatedFields.data)
 
     return {
-      message: "Evaluation submitted successfully.",
+      message: "Evaluación enviada con éxito.",
       isFlagged: false,
       flaggingReasons: null,
       isSuccess: true,
     }
   } catch (error) {
-    console.error("Error during evaluation submission:", error)
+    console.error("Error durante el envío de la evaluación:", error)
     return {
-      message: "An unexpected error occurred. Please try again.",
+      message: "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.",
       isFlagged: false,
       flaggingReasons: null,
       isSuccess: false,

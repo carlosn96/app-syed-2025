@@ -32,14 +32,14 @@ import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
 import React from "react"
 
 const evaluationFormSchema = z.object({
-  teacherId: z.string({ required_error: "Please select a teacher." }),
-  clarity: z.string({ required_error: "Please rate clarity." }),
-  engagement: z.string({ required_error: "Please rate engagement." }),
-  punctuality: z.string({ required_error: "Please rate punctuality." }),
+  teacherId: z.string({ required_error: "Por favor, seleccione un docente." }),
+  clarity: z.string({ required_error: "Por favor, califique la claridad." }),
+  engagement: z.string({ required_error: "Por favor, califique el compromiso." }),
+  punctuality: z.string({ required_error: "Por favor, califique la puntualidad." }),
   evaluationText: z
     .string()
-    .min(10, { message: "Feedback must be at least 10 characters." })
-    .max(500, { message: "Feedback must not exceed 500 characters." }),
+    .min(10, { message: "Los comentarios deben tener al menos 10 caracteres." })
+    .max(500, { message: "Los comentarios no deben exceder los 500 caracteres." }),
 })
 
 type EvaluationFormValues = z.infer<typeof evaluationFormSchema>
@@ -59,10 +59,10 @@ function SubmitButton() {
       {pending ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Submitting...
+          Enviando...
         </>
       ) : (
-        "Submit Evaluation"
+        "Enviar Evaluación"
       )}
     </Button>
   )
@@ -82,8 +82,8 @@ export function EvaluationForm() {
   React.useEffect(() => {
     if (state.isSuccess) {
       toast({
-        title: "Evaluation Submitted",
-        description: "Thank you for your feedback!",
+        title: "Evaluación Enviada",
+        description: "¡Gracias por tus comentarios!",
         action: <CheckCircle2 className="text-green-500" />,
       })
       form.reset();
@@ -99,11 +99,11 @@ export function EvaluationForm() {
           name="teacherId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Teacher</FormLabel>
+              <FormLabel>Docente</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a teacher to evaluate" />
+                    <SelectValue placeholder="Selecciona un docente a evaluar" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -120,7 +120,7 @@ export function EvaluationForm() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {['clarity', 'engagement', 'punctuality'].map(criterion => (
+            {['claridad', 'compromiso', 'puntualidad'].map(criterion => (
                  <FormField
                     key={criterion}
                     control={form.control}
@@ -156,16 +156,16 @@ export function EvaluationForm() {
           name="evaluationText"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Feedback</FormLabel>
+              <FormLabel>Comentarios</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Provide detailed feedback on the teacher's performance..."
+                  placeholder="Proporcione comentarios detallados sobre el desempeño del docente..."
                   rows={6}
                   {...field}
                 />
               </FormControl>
               <FormDescription>
-                Your feedback will be reviewed. Please be respectful and constructive.
+                Tus comentarios serán revisados. Por favor, sé respetuoso y constructivo.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -175,13 +175,13 @@ export function EvaluationForm() {
         {state.isFlagged && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Content Flagged for Review</AlertTitle>
+            <AlertTitle>Contenido Marcado para Revisión</AlertTitle>
             <AlertDescription>
-              Your submission could not be accepted as it was flagged for the following reasons:
+              Tu envío no pudo ser aceptado porque fue marcado por las siguientes razones:
               <ul className="list-disc pl-5 mt-2">
                 {state.flaggingReasons?.map((reason, i) => <li key={i}>{reason}</li>)}
               </ul>
-              Please revise your feedback to be more constructive.
+              Por favor, revisa tus comentarios para que sean más constructivos.
             </AlertDescription>
           </Alert>
         )}

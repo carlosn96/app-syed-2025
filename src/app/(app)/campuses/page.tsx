@@ -30,24 +30,24 @@ export default function CampusesPage() {
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-semibold tracking-tight">
-        Campus Management
+        Gestión de Campus
       </h1>
       <Card>
         <CardHeader>
-          <CardTitle>Campuses</CardTitle>
+          <CardTitle>Campus</CardTitle>
           <CardDescription>
-            Manage all campuses in the system.
+            Administra todos los campus en el sistema.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Location</TableHead>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Ubicación</TableHead>
                 <TableHead>Director</TableHead>
                 <TableHead>
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">Acciones</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -70,9 +70,9 @@ export default function CampusesPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                        <DropdownMenuItem>Editar</DropdownMenuItem>
+                        <DropdownMenuItem>Eliminar</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -83,7 +83,7 @@ export default function CampusesPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Showing <strong>1-3</strong> of <strong>3</strong> campuses
+            Mostrando <strong>1-3</strong> de <strong>3</strong> campus
           </div>
         </CardFooter>
       </Card>

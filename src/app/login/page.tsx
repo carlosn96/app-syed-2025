@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/auth-context";
-import { GraduationCap } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -33,46 +33,44 @@ export default function LoginPage() {
     setError('');
     const success = login(email, password);
     if (!success) {
-      setError("Invalid email or password.");
+      setError("Correo o contraseña inválidos.");
     }
   };
   
   if (isLoading || user) {
       return (
         <div className="flex h-screen w-full items-center justify-center">
-            Loading...
+            Cargando...
         </div>
       )
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-muted/40">
+    <div className="flex h-screen w-full items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-            <div className="flex justify-center items-center gap-2 mb-4">
-                <Button variant="ghost" size="icon" className="h-12 w-12 text-primary-foreground bg-primary/20 hover:bg-primary/30 rounded-full">
-                    <GraduationCap className="h-7 w-7" />
-                </Button>
+            <div className="flex justify-center items-center mb-4">
+                <Image src="/logo.png" alt="UNE Logo" width={160} height={50} className="object-contain" />
             </div>
-          <CardTitle className="text-2xl font-headline">Welcome Back!</CardTitle>
+          <CardTitle className="text-2xl font-headline">¡Bienvenido de Nuevo!</CardTitle>
           <CardDescription>
-            Enter your credentials to login.
+            Ingresa tus credenciales para iniciar sesión.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Correo Electrónico</Label>
             <Input 
               id="email" 
               type="email" 
-              placeholder="m@example.com" 
+              placeholder="m@ejemplo.com" 
               required 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Contraseña</Label>
             <Input 
               id="password" 
               type="password" 
@@ -85,7 +83,7 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter>
           <Button className="w-full" onClick={handleLogin}>
-            Login
+            Iniciar Sesión
           </Button>
         </CardFooter>
       </Card>

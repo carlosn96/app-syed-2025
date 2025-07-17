@@ -1,4 +1,5 @@
 "use client"
+import React from "react"
 import {
   Card,
   CardContent,
@@ -8,8 +9,6 @@ import {
 } from "@/components/ui/card"
 import {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart"
 import { Separator } from "@/components/ui/separator"
 import { evaluations } from "@/lib/data"
@@ -17,35 +16,35 @@ import { Star } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, LabelList } from "recharts"
 
 const chartData = [
-  { category: "Clarity", rating: 4.5, fill: "var(--color-clarity)" },
-  { category: "Engagement", rating: 4.8, fill: "var(--color-engagement)" },
-  { category: "Punctuality", rating: 4.9, fill: "var(--color-punctuality)" },
-  { category: "Knowledge", rating: 4.7, fill: "var(--color-knowledge)" },
-  { category: "Feedback", rating: 4.2, fill: "var(--color-feedback)" },
+  { category: "Claridad", rating: 4.5, fill: "var(--color-clarity)" },
+  { category: "Compromiso", rating: 4.8, fill: "var(--color-engagement)" },
+  { category: "Puntualidad", rating: 4.9, fill: "var(--color-punctuality)" },
+  { category: "Conocimiento", rating: 4.7, fill: "var(--color-knowledge)" },
+  { category: "Retroalimentación", rating: 4.2, fill: "var(--color-feedback)" },
 ]
 
 const chartConfig = {
   rating: {
-    label: "Rating",
+    label: "Calificación",
   },
   clarity: {
-    label: "Clarity",
+    label: "Claridad",
     color: "hsl(var(--chart-1))",
   },
   engagement: {
-    label: "Engagement",
+    label: "Compromiso",
     color: "hsl(var(--chart-2))",
   },
   punctuality: {
-    label: "Punctuality",
+    label: "Puntualidad",
     color: "hsl(var(--chart-3))",
   },
   knowledge: {
-    label: "Knowledge",
+    label: "Conocimiento",
     color: "hsl(var(--chart-4))",
   },
   feedback: {
-    label: "Feedback",
+    label: "Retroalimentación",
     color: "hsl(var(--chart-5))",
   },
 }
@@ -54,13 +53,13 @@ export default function FeedbackPage() {
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-semibold tracking-tight">
-        Performance Feedback
+        Retroalimentación de Desempeño
       </h1>
       <div className="grid gap-8 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Overall Teacher Performance</CardTitle>
-            <CardDescription>Average ratings across all categories.</CardDescription>
+            <CardTitle>Desempeño General de Docentes</CardTitle>
+            <CardDescription>Calificaciones promedio en todas las categorías.</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="h-64 w-full">
@@ -96,8 +95,8 @@ export default function FeedbackPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Recent Feedback</CardTitle>
-            <CardDescription>Qualitative feedback from students.</CardDescription>
+            <CardTitle>Comentarios Recientes</CardTitle>
+            <CardDescription>Retroalimentación cualitativa de los alumnos.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6">
             {evaluations.map((evaluation, index) => (

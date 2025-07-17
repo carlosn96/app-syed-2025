@@ -24,19 +24,19 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const mockUsers: Record<string, { password: string; user: User }> = {
   'admin@example.com': {
     password: 'admin',
-    user: { id: 1, name: 'Admin User', role: 'administrator', email: 'admin@example.com' }
+    user: { id: 1, name: 'Usuario Administrador', role: 'administrator', email: 'admin@example.com' }
   },
   'coordinador@example.com': {
     password: 'coordinador',
-    user: { id: 2, name: 'Coordinator User', role: 'coordinator', email: 'coordinador@example.com' }
+    user: { id: 2, name: 'Usuario Coordinador', role: 'coordinator', email: 'coordinador@example.com' }
   },
   'docente@example.com': {
     password: 'docente',
-    user: { id: 3, name: 'Teacher User', role: 'teacher', email: 'docente@example.com' }
+    user: { id: 3, name: 'Usuario Docente', role: 'teacher', email: 'docente@example.com' }
   },
   'alumno@example.com': {
     password: 'alumno',
-    user: { id: 4, name: 'Student User', role: 'student', email: 'alumno@example.com' }
+    user: { id: 4, name: 'Usuario Alumno', role: 'student', email: 'alumno@example.com' }
   },
 };
 
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error("Failed to parse user from localStorage", error);
+      console.error("Fallo al analizar el usuario desde localStorage", error);
       localStorage.removeItem('user');
     } finally {
       setIsLoading(false);
@@ -92,15 +92,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const value = { user, login, logout, isLoading };
 
   if (isLoading) {
-    return <div className="flex h-screen w-full items-center justify-center">Loading...</div>;
+    return <div className="flex h-screen w-full items-center justify-center">Cargando...</div>;
   }
   
   if (!user && pathname !== '/login') {
-    return <div className="flex h-screen w-full items-center justify-center">Redirecting to login...</div>;
+    return <div className="flex h-screen w-full items-center justify-center">Redirigiendo al inicio de sesión...</div>;
   }
   
   if (user && pathname === '/login') {
-      return <div className="flex h-screen w-full items-center justify-center">Redirecting to dashboard...</div>;
+      return <div className="flex h-screen w-full items-center justify-center">Redirigiendo al panel de control...</div>;
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   }
   return context;
 };

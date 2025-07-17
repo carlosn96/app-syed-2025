@@ -11,14 +11,14 @@ export default function EvaluationPage() {
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-semibold tracking-tight">
-        Teacher Evaluation
+        Evaluación de Docentes
       </h1>
       <Card>
         <CardHeader>
-          <CardTitle>Submit Your Feedback</CardTitle>
+          <CardTitle>Envía tus Comentarios</CardTitle>
           <CardDescription>
-            Your feedback is valuable for improving the quality of teaching.
-            Please be honest and constructive.
+            Tus comentarios son valiosos para mejorar la calidad de la enseñanza.
+            Por favor, sé honesto y constructivo.
           </CardDescription>
         </CardHeader>
         <CardContent>
