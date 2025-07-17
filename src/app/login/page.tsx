@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -50,7 +50,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
             <div className="flex justify-center items-center mb-4">
-                <Logo className="w-40" />
+                 <Image src="https://www.universidad-une.com/wp-content/uploads/2023/03/logo-une-azul.png" alt="UNE Logo" width={160} height={57} className="w-40" />
             </div>
           <CardTitle className="text-2xl font-headline">¡Bienvenido de Nuevo!</CardTitle>
           <CardDescription>
