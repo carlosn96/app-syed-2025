@@ -18,20 +18,24 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
+import { useAuth } from "@/context/auth-context"
 
-const links = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/users", label: "Users", icon: Users },
-  { href: "/campuses", label: "Campuses", icon: Building },
-  { href: "/programs", label: "Programs", icon: BookOpenCheck },
-  { href: "/subjects", label: "Subjects", icon: Library },
-  { href: "/supervision", label: "Supervision", icon: CalendarDays },
-  { href: "/feedback", label: "Feedback", icon: Star },
-  { href: "/evaluation", label: "Evaluation", icon: ClipboardEdit },
+const allLinks = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
+  { href: "/users", label: "Users", icon: Users, roles: ['administrator', 'coordinator'] },
+  { href: "/campuses", label: "Campuses", icon: Building, roles: ['administrator', 'coordinator'] },
+  { href: "/programs", label: "Programs", icon: BookOpenCheck, roles: ['administrator', 'coordinator'] },
+  { href: "/subjects", label: "Subjects", icon: Library, roles: ['administrator', 'coordinator', 'teacher'] },
+  { href: "/supervision", label: "Supervision", icon: CalendarDays, roles: ['administrator', 'coordinator', 'teacher'] },
+  { href: "/feedback", label: "Feedback", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
+  { href: "/evaluation", label: "Evaluation", icon: ClipboardEdit, roles: ['administrator', 'coordinator', 'student'] },
 ]
 
 export function MainNav() {
   const pathname = usePathname()
+  const { user } = useAuth()
+
+  const links = allLinks.filter(link => user && link.roles.includes(user.role));
 
   return (
     <SidebarMenu>
