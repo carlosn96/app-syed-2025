@@ -1,6 +1,5 @@
 "use server"
 
-import { moderateTeacherEvaluation } from "@/ai/flows/moderate-teacher-evaluation"
 import { z } from "zod"
 
 const evaluationSchema = z.object({
@@ -13,6 +12,19 @@ type State = {
   isFlagged: boolean
   flaggingReasons: string[] | null
   isSuccess: boolean
+}
+
+// Simula la moderación sin llamar a una API
+async function moderateTeacherEvaluation(input: {
+  evaluationText: string
+}): Promise<{ isFlagged: boolean; flaggingReasons: string[] }> {
+  console.log(
+    "Simulating moderation for:",
+    input.evaluationText.substring(0, 30) + "..."
+  )
+  // En un caso de uso real, aquí podría haber lógica de negocio
+  // Por ahora, aprobamos todas las evaluaciones
+  return Promise.resolve({ isFlagged: false, flaggingReasons: [] })
 }
 
 export async function submitEvaluation(
@@ -49,7 +61,7 @@ export async function submitEvaluation(
       }
     }
 
-    // Here you would typically save the evaluation to your database
+    // Aquí normalmente guardarías la evaluación en tu base de datos
     console.log("Evaluation submitted:", validatedFields.data)
 
     return {
