@@ -23,7 +23,7 @@ import { useAuth } from "@/context/auth-context"
 const allLinks = [
   { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
   { href: "/users", label: "Usuarios", icon: Users, roles: ['administrator', 'coordinator'] },
-  { href: "/campuses", label: "Planteles", icon: Building, roles: ['administrator', 'coordinator'] },
+  { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrator', 'coordinator'] },
   { href: "/programs", label: "Programas", icon: BookOpenCheck, roles: ['administrator', 'coordinator'] },
   { href: "/subjects", label: "Materias", icon: Library, roles: ['administrator', 'coordinator', 'teacher'] },
   { href: "/supervision", label: "Supervisión", icon: CalendarDays, roles: ['administrator', 'coordinator', 'teacher'] },
@@ -35,7 +35,7 @@ export function MainNav() {
   const pathname = usePathname()
   const { user } = useAuth()
 
-  const links = allLinks.filter(link => user && link.roles.includes(user.role));
+  const links = allLinks.filter(link => user && link.roles.includes(user.rol));
 
   return (
     <SidebarMenu>
