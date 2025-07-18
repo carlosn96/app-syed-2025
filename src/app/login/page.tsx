@@ -69,7 +69,7 @@ export default function LoginPage() {
               required 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              useAnimatedBorder
+              useAnimatedBorder={true}
             />
           </div>
           <div className="grid gap-2">
@@ -82,7 +82,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pr-10"
-                useAnimatedBorder
+                useAnimatedBorder={true}
               />
               <Button 
                 type="button" 
