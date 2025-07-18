@@ -1,3 +1,7 @@
+
+"use client"
+
+import { useState, useEffect } from "react"
 import { Pencil, Trash2 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -18,9 +22,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { users } from "@/lib/data"
+import { users as allUsers } from "@/lib/data"
+
+type Role = 'Administrador' | 'Coordinador' | 'Docente' | 'Alumno' | 'all';
 
 export default function UsersPage() {
+  const [filter, setFilter] = useState<Role>('all');
+  const [filteredUsers, setFilteredUsers] = useState(allUsers);
+
+  useEffect(() => {
+    if (filter === 'all') {
+      setFilteredUsers(allUsers);
+    } else {
+      setFilteredUsers(allUsers.filter((user) => user.role === filter));
+    }
+  }, [filter]);
+
+  const getRoleForFilter = (role: string): Role => {
+    const roleMap: { [key: string]: Role } = {
+      'Todos': 'all',
+      'Docente': 'Docente',
+      'Alumno': 'Alumno',
+      'Coordinador': 'Coordinador'
+    };
+    return roleMap[role] || 'all';
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-semibold tracking-tight">
@@ -28,10 +55,25 @@ export default function UsersPage() {
       </h1>
       <Card>
         <CardHeader>
-          <CardTitle>Usuarios</CardTitle>
-          <CardDescription>
-            Administra todas las cuentas de usuario en el sistema.
-          </CardDescription>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>Usuarios</CardTitle>
+              <CardDescription>
+                Administra todas las cuentas de usuario en el sistema.
+              </CardDescription>
+            </div>
+            <div className="flex gap-2">
+              {['Todos', 'Docente', 'Alumno', 'Coordinador'].map((role) => (
+                <Button
+                  key={role}
+                  variant={filter === getRoleForFilter(role) ? 'default' : 'outline-filter'}
+                  onClick={() => setFilter(getRoleForFilter(role))}
+                >
+                  {role}
+                </Button>
+              ))}
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
@@ -45,7 +87,7 @@ export default function UsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
@@ -70,7 +112,7 @@ export default function UsersPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-6</strong> de <strong>6</strong> usuarios
+            Mostrando <strong>{filteredUsers.length}</strong> de <strong>{allUsers.length}</strong> usuarios
           </div>
         </CardFooter>
       </Card>
