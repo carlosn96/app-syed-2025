@@ -7,9 +7,11 @@ type Role = 'administrator' | 'coordinator' | 'teacher' | 'student';
 
 interface User {
   id: number;
-  name: string;
-  role: Role;
-  email: string;
+  nombre: string;
+  apellido_paterno: string;
+  apellido_materno: string;
+  correo: string;
+  rol: Role;
 }
 
 interface AuthContextType {
@@ -24,19 +26,19 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const mockUsers: Record<string, { password: string; user: User }> = {
   'admin@example.com': {
     password: 'admin',
-    user: { id: 1, name: 'Usuario Administrador', role: 'administrator', email: 'admin@example.com' }
+    user: { id: 1, nombre: 'Usuario', apellido_paterno: 'Administrador', apellido_materno: '', correo: 'admin@example.com', rol: 'administrator' }
   },
-  'coordinador@example.com': {
+  'coordinator@example.com': {
     password: 'coordinador',
-    user: { id: 2, name: 'Usuario Coordinador', role: 'coordinator', email: 'coordinador@example.com' }
+    user: { id: 2, nombre: 'Usuario', apellido_paterno: 'Coordinador', apellido_materno: '', correo: 'coordinator@example.com', rol: 'coordinator' }
   },
-  'docente@example.com': {
+  'teacher@example.com': {
     password: 'docente',
-    user: { id: 3, name: 'Usuario Docente', role: 'teacher', email: 'docente@example.com' }
+    user: { id: 3, nombre: 'Usuario', apellido_paterno: 'Docente', apellido_materno: '', correo: 'teacher@example.com', rol: 'teacher' }
   },
-  'alumno@example.com': {
+  'student@example.com': {
     password: 'alumno',
-    user: { id: 4, name: 'Usuario Alumno', role: 'student', email: 'alumno@example.com' }
+    user: { id: 4, nombre: 'Usuario', apellido_paterno: 'Alumno', apellido_materno: '', correo: 'student@example.com', rol: 'student' }
   },
 };
 

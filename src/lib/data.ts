@@ -1,10 +1,24 @@
-export const users = [
-  { id: 1, name: 'Usuario Administrador', email: 'admin@example.com', role: 'Administrador', joined: '2023-01-15' },
-  { id: 2, name: 'Usuario Coordinador', email: 'coordinator@example.com', role: 'Coordinador', joined: '2023-02-20' },
-  { id: 3, name: 'Usuario Docente', email: 'teacher@example.com', role: 'Docente', joined: '2023-03-10' },
-  { id: 4, name: 'Usuario Alumno', email: 'student@example.com', role: 'Alumno', joined: '2023-09-01' },
-  { id: 5, name: 'John Doe', email: 'john.d@example.com', role: 'Docente', joined: '2022-08-21' },
-  { id: 6, name: 'Jane Smith', email: 'jane.s@example.com', role: 'Alumno', joined: '2023-09-01' },
+export type Role = 'Administrador' | 'Coordinador' | 'Docente' | 'Alumno';
+
+export interface User {
+  id: number;
+  nombre: string;
+  apellido_paterno: string;
+  apellido_materno: string;
+  correo: string;
+  contrasena: string;
+  rol: Role;
+  fecha_registro: string;
+  ultimo_acceso: string | null;
+}
+
+export const users: User[] = [
+  { id: 1, nombre: 'Admin', apellido_paterno: 'User', apellido_materno: 'System', correo: 'admin@example.com', contrasena: 'admin', rol: 'Administrador', fecha_registro: '2023-01-15T10:00:00Z', ultimo_acceso: '2024-05-20T12:30:00Z' },
+  { id: 2, nombre: 'Coordinador', apellido_paterno: 'User', apellido_materno: 'Staff', correo: 'coordinator@example.com', contrasena: 'coordinador', rol: 'Coordinador', fecha_registro: '2023-02-20T11:00:00Z', ultimo_acceso: '2024-05-21T09:00:00Z' },
+  { id: 3, nombre: 'Docente', apellido_paterno: 'User', apellido_materno: 'Faculty', correo: 'teacher@example.com', contrasena: 'docente', rol: 'Docente', fecha_registro: '2023-03-10T09:00:00Z', ultimo_acceso: '2024-05-22T14:00:00Z' },
+  { id: 4, nombre: 'Alumno', apellido_paterno: 'User', apellido_materno: 'Student', correo: 'student@example.com', contrasena: 'alumno', rol: 'Alumno', fecha_registro: '2023-09-01T08:00:00Z', ultimo_acceso: '2024-05-22T16:45:00Z' },
+  { id: 5, nombre: 'John', apellido_paterno: 'Doe', apellido_materno: 'Smith', correo: 'john.d@example.com', contrasena: 'password123', rol: 'Docente', fecha_registro: '2022-08-21T15:30:00Z', ultimo_acceso: '2024-05-19T11:00:00Z' },
+  { id: 6, nombre: 'Jane', apellido_paterno: 'Smith', apellido_materno: 'Doe', correo: 'jane.s@example.com', contrasena: 'password456', rol: 'Alumno', fecha_registro: '2023-09-01T08:15:00Z', ultimo_acceso: '2024-05-21T18:00:00Z' },
 ];
 
 export const campuses = [

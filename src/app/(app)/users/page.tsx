@@ -22,24 +22,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { users as allUsers } from "@/lib/data"
+import { users as allUsers, User } from "@/lib/data"
 
-type Role = 'Administrador' | 'Coordinador' | 'Docente' | 'Alumno' | 'all';
+type RoleFilter = 'Administrador' | 'Coordinador' | 'Docente' | 'Alumno' | 'all';
 
 export default function UsersPage() {
-  const [filter, setFilter] = useState<Role>('all');
-  const [filteredUsers, setFilteredUsers] = useState(allUsers);
+  const [filter, setFilter] = useState<RoleFilter>('all');
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(allUsers);
 
   useEffect(() => {
     if (filter === 'all') {
       setFilteredUsers(allUsers);
     } else {
-      setFilteredUsers(allUsers.filter((user) => user.role === filter));
+      setFilteredUsers(allUsers.filter((user) => user.rol === filter));
     }
   }, [filter]);
 
-  const getRoleForFilter = (role: string): Role => {
-    const roleMap: { [key: string]: Role } = {
+  const getRoleForFilter = (role: string): RoleFilter => {
+    const roleMap: { [key: string]: RoleFilter } = {
       'Todos': 'all',
       'Docente': 'Docente',
       'Alumno': 'Alumno',
@@ -79,22 +79,24 @@ export default function UsersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
+                <TableHead>Nombre Completo</TableHead>
                 <TableHead>Correo Electrónico</TableHead>
                 <TableHead>Rol</TableHead>
-                <TableHead>Fecha de Ingreso</TableHead>
+                <TableHead>Fecha de Registro</TableHead>
+                <TableHead>Último Acceso</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
+                  <TableCell className="font-medium">{`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`}</TableCell>
+                  <TableCell>{user.correo}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{user.role}</Badge>
+                    <Badge variant="outline">{user.rol}</Badge>
                   </TableCell>
-                  <TableCell>{user.joined}</TableCell>
+                  <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
+                  <TableCell>{user.ultimo_acceso ? new Date(user.ultimo_acceso).toLocaleString() : 'N/A'}</TableCell>
                   <TableCell className="flex gap-2">
                     <Button size="icon" variant="warning">
                       <Pencil className="h-4 w-4" />
