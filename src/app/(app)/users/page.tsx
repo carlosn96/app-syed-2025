@@ -22,9 +22,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { users as allUsers, User } from "@/lib/data"
+import { users as allUsers, User, Role } from "@/lib/data"
 
-type RoleFilter = 'Coordinador' | 'Docente' | 'Alumno' | 'all';
+type RoleFilter = Role | 'all';
 
 export default function UsersPage() {
   const [filter, setFilter] = useState<RoleFilter>('all');
@@ -37,17 +37,18 @@ export default function UsersPage() {
     } else {
       setFilteredUsers(usersToDisplay.filter((user) => user.rol === filter));
     }
-  }, [filter]);
+  }, [filter, allUsers]);
 
-  const getRoleForFilter = (role: string): RoleFilter => {
-    const roleMap: { [key: string]: RoleFilter } = {
-      'Todos': 'all',
-      'Docente': 'Docente',
-      'Alumno': 'Alumno',
-      'Coordinador': 'Coordinador'
-    };
-    return roleMap[role] || 'all';
-  }
+  const roleDisplayMap: { [key in RoleFilter]: string } = {
+    'all': 'Todos',
+    'student': 'Alumno',
+    'teacher': 'Docente',
+    'coordinator': 'Coordinador',
+    'administrator': 'Administrador'
+  };
+
+  const filterButtons: RoleFilter[] = ['all', 'teacher', 'student', 'coordinator'];
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -64,13 +65,13 @@ export default function UsersPage() {
               </CardDescription>
             </div>
             <div className="flex gap-2">
-              {['Todos', 'Docente', 'Alumno', 'Coordinador'].map((role) => (
+              {filterButtons.map((role) => (
                 <Button
                   key={role}
-                  variant={filter === getRoleForFilter(role) ? 'default' : 'outline-filter'}
-                  onClick={() => setFilter(getRoleForFilter(role))}
+                  variant={filter === role ? 'default' : 'outline-filter'}
+                  onClick={() => setFilter(role)}
                 >
-                  {role}
+                  {roleDisplayMap[role]}
                 </Button>
               ))}
             </div>
@@ -94,7 +95,7 @@ export default function UsersPage() {
                     <div className="text-sm text-muted-foreground">{user.correo}</div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{user.rol}</Badge>
+                    <Badge variant="outline">{roleDisplayMap[user.rol]}</Badge>
                   </TableCell>
                   <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
                   <TableCell>
