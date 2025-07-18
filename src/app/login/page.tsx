@@ -48,8 +48,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex h-screen w-full items-center justify-center login-background p-4">
+      <Card className="w-full max-w-sm drop-shadow-[0_0px_15px_hsl(var(--primary)/0.3)] dark:drop-shadow-[0_0px_15px_hsl(var(--accent)/0.3)]">
         <CardHeader className="text-center">
             <div className="flex justify-center items-center mb-4">
                  <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40" />
