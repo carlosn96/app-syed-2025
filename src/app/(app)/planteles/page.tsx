@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { campuses as planteles } from "@/lib/data"
+import { planteles } from "@/lib/data"
 
 export default function PlantelesPage() {
   return (
