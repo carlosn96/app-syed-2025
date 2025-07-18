@@ -22,8 +22,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { useAuth } from "@/context/auth-context"
 import { users as allUsers, User, Role } from "@/lib/data"
+import { CreateUserForm } from "@/components/create-user-form"
 
 type RoleFilter = Role | 'all';
 
@@ -31,6 +40,7 @@ export default function UsersPage() {
   const { user: loggedInUser, isLoading: isAuthLoading } = useAuth();
   const [filter, setFilter] = useState<RoleFilter>('all');
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const usersToDisplay = allUsers.filter(user => user.rol !== 'administrator');
@@ -68,10 +78,23 @@ export default function UsersPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {!isAuthLoading && loggedInUser?.rol === 'administrator' && (
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Crear Usuario
-                </Button>
+                <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Crear Usuario
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+                      <DialogDescription>
+                        Completa el formulario para registrar una nueva cuenta.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <CreateUserForm onSuccess={() => setIsModalOpen(false)} />
+                  </DialogContent>
+                </Dialog>
               )}
               <div className="flex gap-2">
                 {filterButtons.map((role) => (

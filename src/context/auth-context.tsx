@@ -1,46 +1,45 @@
+
 "use client"
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { User, Role, users as initialUsers } from '@/lib/data';
 
-type Role = 'administrator' | 'coordinator' | 'teacher' | 'student';
-
-interface User {
-  id: number;
+interface NewUserData {
   nombre: string;
   apellido_paterno: string;
   apellido_materno: string;
   correo: string;
-  rol: Role;
+  rol: 'coordinator' | 'teacher' | 'student';
+  password?: string;
 }
-
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => boolean;
   logout: () => void;
   isLoading: boolean;
+  addUser: (userData: NewUserData) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Initialize mock users with the admin user
 const mockUsers: Record<string, { password: string; user: User }> = {
   'admin@example.com': {
     password: 'admin',
-    user: { id: 1, nombre: 'Usuario', apellido_paterno: 'Administrador', apellido_materno: '', correo: 'admin@example.com', rol: 'administrator' }
-  },
-  'coordinator@example.com': {
-    password: 'coordinador',
-    user: { id: 2, nombre: 'Usuario', apellido_paterno: 'Coordinador', apellido_materno: '', correo: 'coordinator@example.com', rol: 'coordinator' }
-  },
-  'teacher@example.com': {
-    password: 'docente',
-    user: { id: 3, nombre: 'Usuario', apellido_paterno: 'Docente', apellido_materno: '', correo: 'teacher@example.com', rol: 'teacher' }
-  },
-  'student@example.com': {
-    password: 'alumno',
-    user: { id: 4, nombre: 'Usuario', apellido_paterno: 'Alumno', apellido_materno: '', correo: 'student@example.com', rol: 'student' }
+    user: { id: 1, nombre: 'Usuario', apellido_paterno: 'Administrador', apellido_materno: '', correo: 'admin@example.com', rol: 'administrator', fecha_registro: '2023-01-01T00:00:00Z', ultimo_acceso: null }
   },
 };
+
+// Populate mockUsers from the initialUsers data
+initialUsers.forEach(user => {
+    if (!mockUsers[user.correo]) {
+        mockUsers[user.correo] = {
+            password: 'password', // Default password for sample users
+            user: user
+        };
+    }
+});
 
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -72,6 +71,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }
   }, [isLoading, user, pathname, router]);
+  
+  const addUser = (userData: NewUserData) => {
+    if (mockUsers[userData.correo]) {
+        throw new Error("El correo electrónico ya está en uso.");
+    }
+    
+    const newId = Math.max(...Object.values(mockUsers).map(u => u.user.id), 0) + 1;
+    const newUser: User = {
+        id: newId,
+        ...userData,
+        rol: userData.rol,
+        fecha_registro: new Date().toISOString(),
+        ultimo_acceso: null,
+    };
+
+    initialUsers.push(newUser); // Add to the data array for the users page
+    mockUsers[userData.correo] = {
+        password: userData.password || 'password', // Store password for mock login
+        user: newUser,
+    };
+  };
 
   const login = (email: string, password: string): boolean => {
     const userData = mockUsers[email];
@@ -91,19 +111,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push('/login');
   };
 
-  const value = { user, login, logout, isLoading };
+  const value = { user, login, logout, isLoading, addUser };
   
   if (isLoading) {
     return <div className="flex h-screen w-full items-center justify-center">Cargando...</div>;
   }
   
-  // While loading, or if no user is logged in on a protected route,
-  // don't render the children. This avoids content flashes.
   if (!user && pathname !== '/login') {
     return <div className="flex h-screen w-full items-center justify-center">Redirigiendo al inicio de sesión...</div>;
   }
   
-  // If a user is logged in but on the login page, redirect them.
   if (user && pathname === '/login') {
       return <div className="flex h-screen w-full items-center justify-center">Redirigiendo al panel de control...</div>;
   }
