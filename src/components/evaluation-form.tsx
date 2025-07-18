@@ -161,7 +161,6 @@ export function EvaluationForm() {
                 <Textarea
                   placeholder="Proporcione comentarios detallados sobre el desempeño del docente..."
                   rows={6}
-                  useAnimatedBorder
                   {...field}
                 />
               </FormControl>

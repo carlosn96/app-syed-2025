@@ -86,18 +86,3 @@ body {
     @apply bg-background text-foreground;
   }
 }
-
-@layer components {
-  .animated-border-input:focus-within {
-    animation: border-glow 1s infinite alternate;
-  }
-}
-
-@keyframes border-glow {
-  from {
-    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.5);
-  }
-  to {
-    box-shadow: 0 0 4px 2px hsl(var(--primary) / 0.8);
-  }
-}
