@@ -33,7 +33,7 @@ export function UserNav() {
   }
   
   const userName = `${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`.trim();
-  const nameInitial = user.nombre.charAt(0).toUpperCase();
+  const nameInitial = user.nombre ? user.nombre.charAt(0).toUpperCase() : '';
 
   return (
     <DropdownMenu>
