@@ -15,10 +15,12 @@ import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const { login, user, isLoading } = useAuth();
   const router = useRouter();
@@ -36,7 +38,7 @@ export default function LoginPage() {
       setError("Correo o contraseña inválidos.");
     }
   };
-  
+
   if (isLoading || user) {
       return (
         <div className="flex h-screen w-full items-center justify-center">
@@ -67,17 +69,32 @@ export default function LoginPage() {
               required 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              useAnimatedBorder
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Contraseña</Label>
-            <Input 
-              id="password" 
-              type="password" 
-              required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+               <Input 
+                id="password" 
+                type={showPassword ? 'text' : 'password'} 
+                required 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pr-10"
+                useAnimatedBorder
+              />
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="icon" 
+                className="absolute inset-y-0 right-0 h-full px-3"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                <span className="sr-only">{showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}</span>
+              </Button>
+            </div>
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
         </CardContent>
