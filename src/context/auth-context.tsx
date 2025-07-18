@@ -92,15 +92,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const value = { user, login, logout, isLoading };
-
+  
   if (isLoading) {
     return <div className="flex h-screen w-full items-center justify-center">Cargando...</div>;
   }
   
+  // While loading, or if no user is logged in on a protected route,
+  // don't render the children. This avoids content flashes.
   if (!user && pathname !== '/login') {
     return <div className="flex h-screen w-full items-center justify-center">Redirigiendo al inicio de sesión...</div>;
   }
   
+  // If a user is logged in but on the login page, redirect them.
   if (user && pathname === '/login') {
       return <div className="flex h-screen w-full items-center justify-center">Redirigiendo al panel de control...</div>;
   }

@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Pencil, Trash2 } from "lucide-react"
+import { Pencil, PlusCircle, Trash2 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -22,11 +22,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useAuth } from "@/context/auth-context"
 import { users as allUsers, User, Role } from "@/lib/data"
 
 type RoleFilter = Role | 'all';
 
 export default function UsersPage() {
+  const { user: loggedInUser, isLoading: isAuthLoading } = useAuth();
   const [filter, setFilter] = useState<RoleFilter>('all');
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
 
@@ -37,7 +39,7 @@ export default function UsersPage() {
     } else {
       setFilteredUsers(usersToDisplay.filter((user) => user.rol === filter));
     }
-  }, [filter, allUsers]);
+  }, [filter]);
 
   const roleDisplayMap: { [key in RoleFilter]: string } = {
     'all': 'Todos',
@@ -64,16 +66,24 @@ export default function UsersPage() {
                 Administra todas las cuentas de usuario en el sistema.
               </CardDescription>
             </div>
-            <div className="flex gap-2">
-              {filterButtons.map((role) => (
-                <Button
-                  key={role}
-                  variant={filter === role ? 'default' : 'outline-filter'}
-                  onClick={() => setFilter(role)}
-                >
-                  {roleDisplayMap[role]}
+            <div className="flex flex-wrap items-center gap-2">
+              {!isAuthLoading && loggedInUser?.rol === 'administrator' && (
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Crear Usuario
                 </Button>
-              ))}
+              )}
+              <div className="flex gap-2">
+                {filterButtons.map((role) => (
+                  <Button
+                    key={role}
+                    variant={filter === role ? 'default' : 'outline-filter'}
+                    onClick={() => setFilter(role)}
+                  >
+                    {roleDisplayMap[role]}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
         </CardHeader>
