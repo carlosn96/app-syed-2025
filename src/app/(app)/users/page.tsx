@@ -81,8 +81,8 @@ export default function UsersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
-                <TableHead className="hidden md:table-cell">Rol</TableHead>
-                <TableHead className="hidden lg:table-cell">Fecha de Registro</TableHead>
+                <TableHead>Rol</TableHead>
+                <TableHead>Fecha de Registro</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
@@ -91,13 +91,12 @@ export default function UsersPage() {
                 <TableRow key={user.id}>
                   <TableCell>
                     <div className="font-medium">{`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`}</div>
-                    <div className="text-sm text-muted-foreground md:hidden">{user.rol}</div>
                     <div className="text-sm text-muted-foreground">{user.correo}</div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">
+                  <TableCell>
                     <Badge variant="outline">{user.rol}</Badge>
                   </TableCell>
-                  <TableCell className="hidden lg:table-cell">{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button size="icon" variant="warning">

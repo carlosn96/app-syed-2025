@@ -37,20 +37,17 @@ export default function ProgramsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Programa</TableHead>
-                <TableHead className="hidden md:table-cell">Plantel</TableHead>
-                <TableHead className="hidden lg:table-cell">Duración</TableHead>
+                <TableHead>Plantel</TableHead>
+                <TableHead>Duración</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {programs.map((program) => (
                 <TableRow key={program.id}>
-                  <TableCell>
-                    <div className="font-medium">{program.name}</div>
-                    <div className="text-sm text-muted-foreground md:hidden">{program.campus}</div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">{program.campus}</TableCell>
-                  <TableCell className="hidden lg:table-cell">{program.duration}</TableCell>
+                  <TableCell className="font-medium">{program.name}</TableCell>
+                  <TableCell>{program.campus}</TableCell>
+                  <TableCell>{program.duration}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                         <Button size="icon" variant="warning">
