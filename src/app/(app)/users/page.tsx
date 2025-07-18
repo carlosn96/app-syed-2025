@@ -28,7 +28,7 @@ type RoleFilter = 'Coordinador' | 'Docente' | 'Alumno' | 'all';
 
 export default function UsersPage() {
   const [filter, setFilter] = useState<RoleFilter>('all');
-  const [filteredUsers, setFilteredUsers] = useState<User[]>(allUsers);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
 
   useEffect(() => {
     const usersToDisplay = allUsers.filter(user => user.rol !== 'administrator');
@@ -48,10 +48,6 @@ export default function UsersPage() {
     };
     return roleMap[role] || 'all';
   }
-
-  const displayedUsers = filter === 'all' 
-    ? allUsers.filter(user => user.rol !== 'administrator') 
-    : allUsers.filter(user => user.rol === filter);
 
   return (
     <div className="flex flex-col gap-8">
@@ -84,33 +80,35 @@ export default function UsersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre Completo</TableHead>
-                <TableHead>Correo Electrónico</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Fecha de Registro</TableHead>
-                <TableHead>Último Acceso</TableHead>
+                <TableHead>Nombre</TableHead>
+                <TableHead className="hidden md:table-cell">Rol</TableHead>
+                <TableHead className="hidden lg:table-cell">Fecha de Registro</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">{`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`}</TableCell>
-                  <TableCell>{user.correo}</TableCell>
                   <TableCell>
+                    <div className="font-medium">{`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`}</div>
+                    <div className="text-sm text-muted-foreground md:hidden">{user.rol}</div>
+                    <div className="text-sm text-muted-foreground">{user.correo}</div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <Badge variant="outline">{user.rol}</Badge>
                   </TableCell>
-                  <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
-                  <TableCell>{user.ultimo_acceso ? new Date(user.ultimo_acceso).toLocaleString() : 'N/A'}</TableCell>
-                  <TableCell className="flex gap-2">
-                    <Button size="icon" variant="warning">
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Editar</span>
-                    </Button>
-                    <Button size="icon" variant="destructive-outline">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Eliminar</span>
-                    </Button>
+                  <TableCell className="hidden lg:table-cell">{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button size="icon" variant="warning">
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Editar</span>
+                      </Button>
+                      <Button size="icon" variant="destructive-outline">
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Eliminar</span>
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

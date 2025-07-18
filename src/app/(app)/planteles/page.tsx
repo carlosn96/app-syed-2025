@@ -37,26 +37,30 @@ export default function PlantelesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
-                <TableHead>Ubicación</TableHead>
-                <TableHead>Director</TableHead>
+                <TableHead className="hidden md:table-cell">Director</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {planteles.map((plantel) => (
                 <TableRow key={plantel.id}>
-                  <TableCell className="font-medium">{plantel.name}</TableCell>
-                  <TableCell>{plantel.location}</TableCell>
-                  <TableCell>{plantel.director}</TableCell>
-                  <TableCell className="flex gap-2">
-                    <Button size="icon" variant="warning">
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Editar</span>
-                    </Button>
-                    <Button size="icon" variant="destructive-outline">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Eliminar</span>
-                    </Button>
+                  <TableCell>
+                    <div className="font-medium">{plantel.name}</div>
+                    <div className="text-sm text-muted-foreground">{plantel.location}</div>
+                    <div className="text-sm text-muted-foreground md:hidden">{plantel.director}</div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">{plantel.director}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                        <Button size="icon" variant="warning">
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Editar</span>
+                        </Button>
+                        <Button size="icon" variant="destructive-outline">
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Eliminar</span>
+                        </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

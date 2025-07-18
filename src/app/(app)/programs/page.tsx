@@ -36,27 +36,32 @@ export default function ProgramsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Plantel</TableHead>
-                <TableHead>Duración</TableHead>
+                <TableHead>Programa</TableHead>
+                <TableHead className="hidden md:table-cell">Plantel</TableHead>
+                <TableHead className="hidden lg:table-cell">Duración</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {programs.map((program) => (
                 <TableRow key={program.id}>
-                  <TableCell className="font-medium">{program.name}</TableCell>
-                  <TableCell>{program.campus}</TableCell>
-                  <TableCell>{program.duration}</TableCell>
-                  <TableCell className="flex gap-2">
-                    <Button size="icon" variant="warning">
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Editar</span>
-                    </Button>
-                    <Button size="icon" variant="destructive-outline">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Eliminar</span>
-                    </Button>
+                  <TableCell>
+                    <div className="font-medium">{program.name}</div>
+                    <div className="text-sm text-muted-foreground md:hidden">{program.campus}</div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">{program.campus}</TableCell>
+                  <TableCell className="hidden lg:table-cell">{program.duration}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                        <Button size="icon" variant="warning">
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Editar</span>
+                        </Button>
+                        <Button size="icon" variant="destructive-outline">
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Eliminar</span>
+                        </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
