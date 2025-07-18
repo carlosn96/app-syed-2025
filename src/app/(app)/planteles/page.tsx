@@ -1,4 +1,4 @@
-import { MoreHorizontal } from "lucide-react"
+import { Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     Card,
@@ -8,13 +8,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
     Table,
     TableBody,
@@ -45,9 +38,7 @@ export default function PlantelesPage() {
                                 <TableHead>Nombre</TableHead>
                                 <TableHead>Ubicación</TableHead>
                                 <TableHead>Director</TableHead>
-                                <TableHead>
-                                    <span className="sr-only">Acciones</span>
-                                </TableHead>
+                                <TableHead>Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -57,23 +48,16 @@ export default function PlantelesPage() {
                                     <TableCell>{plantel.location}</TableCell>
                                     <TableCell>{plantel.director}</TableCell>
                                     <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    aria-haspopup="true"
-                                                    size="icon"
-                                                    variant="ghost"
-                                                >
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                    <span className="sr-only">Toggle menu</span>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                                <DropdownMenuItem>Editar</DropdownMenuItem>
-                                                <DropdownMenuItem>Eliminar</DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        <div className="flex gap-2">
+                                            <Button size="icon" variant="warning">
+                                                <Pencil className="h-4 w-4" />
+                                                <span className="sr-only">Editar</span>
+                                            </Button>
+                                            <Button size="icon" variant="destructive-outline">
+                                                <Trash2 className="h-4 w-4" />
+                                                <span className="sr-only">Eliminar</span>
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
