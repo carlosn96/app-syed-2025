@@ -24,17 +24,18 @@ import {
 } from "@/components/ui/table"
 import { users as allUsers, User } from "@/lib/data"
 
-type RoleFilter = 'Administrador' | 'Coordinador' | 'Docente' | 'Alumno' | 'all';
+type RoleFilter = 'Coordinador' | 'Docente' | 'Alumno' | 'all';
 
 export default function UsersPage() {
   const [filter, setFilter] = useState<RoleFilter>('all');
   const [filteredUsers, setFilteredUsers] = useState<User[]>(allUsers);
 
   useEffect(() => {
+    const usersToDisplay = allUsers.filter(user => user.rol !== 'administrator');
     if (filter === 'all') {
-      setFilteredUsers(allUsers);
+      setFilteredUsers(usersToDisplay);
     } else {
-      setFilteredUsers(allUsers.filter((user) => user.rol === filter));
+      setFilteredUsers(usersToDisplay.filter((user) => user.rol === filter));
     }
   }, [filter]);
 
@@ -47,6 +48,10 @@ export default function UsersPage() {
     };
     return roleMap[role] || 'all';
   }
+
+  const displayedUsers = filter === 'all' 
+    ? allUsers.filter(user => user.rol !== 'administrator') 
+    : allUsers.filter(user => user.rol === filter);
 
   return (
     <div className="flex flex-col gap-8">
@@ -114,7 +119,7 @@ export default function UsersPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Mostrando <strong>{filteredUsers.length}</strong> de <strong>{allUsers.length}</strong> usuarios
+            Mostrando <strong>{filteredUsers.length}</strong> de <strong>{allUsers.filter(u => u.rol !== 'administrator').length}</strong> usuarios
           </div>
         </CardFooter>
       </Card>
