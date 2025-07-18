@@ -2,18 +2,37 @@ import * as React from 'react';
 
 import {cn} from '@/lib/utils';
 
-const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<'textarea'>>(
-  ({className, ...props}, ref) => {
-    return (
+export interface TextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  useAnimatedBorder?: boolean;
+}
+
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({className, useAnimatedBorder = false, ...props}, ref) => {
+    const textareaElement = (
       <textarea
         className={cn(
           'flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+          useAnimatedBorder && "focus-visible:ring-0 focus-visible:ring-offset-0 border-transparent",
           className
         )}
         ref={ref}
         {...props}
       />
     );
+
+    if (useAnimatedBorder) {
+      return (
+        <div className="relative">
+          <div className="animated-border-input absolute inset-0 rounded-md border border-input bg-transparent transition-shadow duration-300" />
+          <div className="relative">
+            {textareaElement}
+          </div>
+        </div>
+      );
+    }
+
+    return textareaElement;
   }
 );
 Textarea.displayName = 'Textarea';
