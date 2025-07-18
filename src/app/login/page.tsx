@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -31,7 +31,8 @@ export default function LoginPage() {
     }
   }, [user, isLoading, router]);
 
-  const handleLogin = () => {
+  const handleLogin = (e: FormEvent) => {
+    e.preventDefault();
     setError('');
     const success = login(email, password);
     if (!success) {
@@ -50,57 +51,59 @@ export default function LoginPage() {
   return (
     <div className="flex h-screen w-full items-center justify-center login-background p-4">
       <Card className="w-full max-w-sm drop-shadow-[0_0px_15px_hsl(var(--primary)/0.3)] dark:drop-shadow-[0_0px_15px_hsl(var(--accent)/0.3)]">
-        <CardHeader className="text-center">
-            <div className="flex justify-center items-center mb-4">
-                 <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40" />
-            </div>
-          <CardTitle className="text-2xl font-headline">¡Bienvenido de Nuevo!</CardTitle>
-          <CardDescription>
-            Ingresa tus credenciales para iniciar sesión.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Correo Electrónico</Label>
-            <Input 
-              id="email" 
-              type="email" 
-              placeholder="m@ejemplo.com" 
-              required 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Contraseña</Label>
-            <div className="relative">
-               <Input 
-                id="password" 
-                type={showPassword ? 'text' : 'password'} 
-                required 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pr-10"
-              />
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="icon" 
-                className="absolute inset-y-0 right-0 h-full px-3"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                <span className="sr-only">{showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}</span>
+        <form onSubmit={handleLogin}>
+            <CardHeader className="text-center">
+                <div className="flex justify-center items-center mb-4">
+                     <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40" />
+                </div>
+              <CardTitle className="text-2xl font-headline">¡Bienvenido de Nuevo!</CardTitle>
+              <CardDescription>
+                Ingresa tus credenciales para iniciar sesión.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Correo Electrónico</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="m@ejemplo.com" 
+                  required 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Contraseña</Label>
+                <div className="relative">
+                   <Input 
+                    id="password" 
+                    type={showPassword ? 'text' : 'password'} 
+                    required 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pr-10"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute inset-y-0 right-0 h-full px-3"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    <span className="sr-only">{showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}</span>
+                  </Button>
+                </div>
+              </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full">
+                Iniciar Sesión
               </Button>
-            </div>
-          </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-        </CardContent>
-        <CardFooter>
-          <Button className="w-full" onClick={handleLogin}>
-            Iniciar Sesión
-          </Button>
-        </CardFooter>
+            </CardFooter>
+        </form>
       </Card>
     </div>
   );
