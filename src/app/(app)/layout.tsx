@@ -17,8 +17,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader className="p-4">
-          <div className="flex items-center gap-3">
-             <Image src="/UNELOGO.png" alt="UNE Logo" width={112} height={40} className="w-28" />
+          <div className="flex items-center justify-center w-full">
+            <Image 
+              src="/UNELOGO.png" 
+              alt="UNE Logo" 
+              width={112} 
+              height={40} 
+              className="w-28 drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]" 
+            />
           </div>
         </SidebarHeader>
         <SidebarContent>
