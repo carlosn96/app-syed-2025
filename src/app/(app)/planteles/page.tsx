@@ -1,6 +1,5 @@
 import { Pencil, Trash2 } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -18,19 +17,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { users } from "@/lib/data"
+import { campuses as planteles } from "@/lib/data"
 
-export default function UsersPage() {
+export default function PlantelesPage() {
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-semibold tracking-tight">
-        Gestión de Usuarios
+        Gestión de Planteles
       </h1>
       <Card>
         <CardHeader>
-          <CardTitle>Usuarios</CardTitle>
+          <CardTitle>Planteles</CardTitle>
           <CardDescription>
-            Administra todas las cuentas de usuario en el sistema.
+            Administra todos los planteles en el sistema.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -38,21 +37,17 @@ export default function UsersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
-                <TableHead>Correo Electrónico</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Fecha de Ingreso</TableHead>
+                <TableHead>Ubicación</TableHead>
+                <TableHead>Director</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{user.role}</Badge>
-                  </TableCell>
-                  <TableCell>{user.joined}</TableCell>
+              {planteles.map((plantel) => (
+                <TableRow key={plantel.id}>
+                  <TableCell className="font-medium">{plantel.name}</TableCell>
+                  <TableCell>{plantel.location}</TableCell>
+                  <TableCell>{plantel.director}</TableCell>
                   <TableCell className="flex gap-2">
                     <Button size="icon" variant="warning">
                       <Pencil className="h-4 w-4" />
@@ -70,7 +65,7 @@ export default function UsersPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-6</strong> de <strong>6</strong> usuarios
+            Mostrando <strong>1-3</strong> de <strong>3</strong> planteles
           </div>
         </CardFooter>
       </Card>
