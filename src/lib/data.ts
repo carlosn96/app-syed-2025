@@ -8,16 +8,16 @@ export const users = [
 ];
 
 export const campuses = [
-  { id: 1, name: 'Campus Principal', location: 'Centro de la Ciudad', director: 'Dra. Alice Johnson' },
-  { id: 2, name: 'Campus Norte', location: 'Suburbios del Norte', director: 'Sr. Bob Williams' },
-  { id: 3, name: 'Campus Sur', location: 'Distrito Sur', director: 'Sra. Carol White' },
+  { id: 1, name: 'Plantel Principal', location: 'Centro de la Ciudad', director: 'Dra. Alice Johnson' },
+  { id: 2, name: 'Plantel Norte', location: 'Suburbios del Norte', director: 'Sr. Bob Williams' },
+  { id: 3, name: 'Plantel Sur', location: 'Distrito Sur', director: 'Sra. Carol White' },
 ];
 
 export const programs = [
-  { id: 1, name: 'Ciencias de la Computación', campus: 'Campus Principal', duration: '4 Años' },
-  { id: 2, name: 'Administración de Empresas', campus: 'Campus Principal', duration: '4 Años' },
-  { id: 3, name: 'Ingeniería Mecánica', campus: 'Campus Norte', duration: '5 Años' },
-  { id: 4, name: 'Bellas Artes', campus: 'Campus Sur', duration: '3 Años' },
+  { id: 1, name: 'Ciencias de la Computación', campus: 'Plantel Principal', duration: '4 Años' },
+  { id: 2, name: 'Administración de Empresas', campus: 'Plantel Principal', duration: '4 Años' },
+  { id: 3, name: 'Ingeniería Mecánica', campus: 'Plantel Norte', duration: '5 Años' },
+  { id: 4, name: 'Bellas Artes', campus: 'Plantel Sur', duration: '3 Años' },
 ];
 
 export const subjects = [

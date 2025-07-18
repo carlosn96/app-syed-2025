@@ -30,13 +30,13 @@ export default function CampusesPage() {
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-semibold tracking-tight">
-        Gestión de Campus
+        Gestión de Planteles
       </h1>
       <Card>
         <CardHeader>
-          <CardTitle>Campus</CardTitle>
+          <CardTitle>Planteles</CardTitle>
           <CardDescription>
-            Administra todos los campus en el sistema.
+            Administra todos los planteles en el sistema.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -83,7 +83,7 @@ export default function CampusesPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-3</strong> de <strong>3</strong> campus
+            Mostrando <strong>1-3</strong> de <strong>3</strong> planteles
           </div>
         </CardFooter>
       </Card>

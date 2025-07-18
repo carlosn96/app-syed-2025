@@ -44,7 +44,7 @@ export default function ProgramsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
-                <TableHead>Campus</TableHead>
+                <TableHead>Plantel</TableHead>
                 <TableHead>Duración</TableHead>
                 <TableHead>
                   <span className="sr-only">Acciones</span>
