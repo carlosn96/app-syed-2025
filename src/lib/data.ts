@@ -39,9 +39,18 @@ export const subjects = [
   { id: 2, name: 'Estructuras de Datos', career: 'Ciencias de la Computación', teacher: 'Dra. Ada Lovelace', semester: 2 },
   { id: 11, name: 'Algoritmos Avanzados', career: 'Ciencias de la Computación', teacher: 'Dr. Donald Knuth', semester: 3 },
   { id: 12, name: 'Bases de Datos', career: 'Ciencias de la Computación', teacher: 'Dr. Edgar Codd', semester: 4 },
+  { id: 14, name: 'Sistemas Operativos', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 5 },
+  { id: 15, name: 'Redes de Computadoras', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 5 },
+  { id: 16, name: 'Ingeniería de Software', career: 'Ciencias de la Computación', teacher: 'Dr. Ian Sommerville', semester: 6 },
+  { id: 17, name: 'Inteligencia Artificial', career: 'Ciencias de la Computación', teacher: 'Dr. Stuart Russell', semester: 7 },
   { id: 3, name: 'Principios de Marketing', career: 'Administración de Empresas', teacher: 'Prof. Philip Kotler', semester: 1 },
   { id: 13, name: 'Contabilidad Financiera', career: 'Administración de Empresas', teacher: 'C.P. Luca Pacioli', semester: 2 },
+  { id: 18, name: 'Gestión de Recursos Humanos', career: 'Administración de Empresas', teacher: 'Prof. Idalberto Chiavenato', semester: 3 },
+  { id: 19, name: 'Finanzas Corporativas', career: 'Administración de Empresas', teacher: 'Dr. Stephen Ross', semester: 4 },
+  { id: 20, name: 'Derecho Mercantil', career: 'Administración de Empresas', teacher: 'Lic. Jorge Barrera Graf', semester: 5 },
   { id: 4, name: 'Termodinámica', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 1 },
+  { id: 21, name: 'Mecánica de Fluidos', career: 'Ingeniería Mecánica', teacher: 'Dr. Frank M. White', semester: 2 },
+  { id: 22, name: 'Diseño Asistido por Computadora (CAD)', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 3 },
 ];
 
 export const teachers = [
@@ -53,6 +62,13 @@ export const teachers = [
   { id: 11, name: 'Dr. Donald Knuth' },
   { id: 12, name: 'Dr. Edgar Codd' },
   { id: 13, name: 'C.P. Luca Pacioli' },
+  { id: 14, name: 'Dr. Andrew Tanenbaum' },
+  { id: 15, name: 'Dr. Ian Sommerville' },
+  { id: 16, name: 'Dr. Stuart Russell' },
+  { id: 17, name: 'Prof. Idalberto Chiavenato' },
+  { id: 18, name: 'Dr. Stephen Ross' },
+  { id: 19, name: 'Lic. Jorge Barrera Graf' },
+  { id: 20, name: 'Dr. Frank M. White' },
 ];
 
 export const evaluations = [
