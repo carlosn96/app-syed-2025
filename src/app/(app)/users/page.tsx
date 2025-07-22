@@ -116,6 +116,7 @@ export default function UsersPage() {
               <TableRow>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Rol</TableHead>
+                <TableHead>Grupo</TableHead>
                 <TableHead>Fecha de Registro</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
@@ -130,6 +131,7 @@ export default function UsersPage() {
                   <TableCell>
                     <Badge variant="outline">{roleDisplayMap[user.rol]}</Badge>
                   </TableCell>
+                  <TableCell>{user.rol === 'student' ? user.grupo : 'N/A'}</TableCell>
                   <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">

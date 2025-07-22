@@ -11,6 +11,7 @@ interface NewUserData {
   apellido_materno: string;
   correo: string;
   rol: 'coordinator' | 'teacher' | 'student';
+  grupo?: string;
   password?: string;
 }
 interface AuthContextType {
@@ -80,8 +81,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const newId = Math.max(...Object.values(mockUsers).map(u => u.user.id), 0) + 1;
     const newUser: User = {
         id: newId,
-        ...userData,
+        nombre: userData.nombre,
+        apellido_paterno: userData.apellido_paterno,
+        apellido_materno: userData.apellido_materno,
+        correo: userData.correo,
         rol: userData.rol,
+        grupo: userData.grupo,
         fecha_registro: new Date().toISOString(),
         ultimo_acceso: null,
     };

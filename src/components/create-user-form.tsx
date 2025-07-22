@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select"
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
+import { groups } from "@/lib/data"
 
 const createUserSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido."),
@@ -32,11 +33,15 @@ const createUserSchema = z.object({
   rol: z.enum(["coordinator", "teacher", "student"], {
     required_error: "Por favor, seleccione un rol.",
   }),
+  grupo: z.string().optional(),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
   confirmPassword: z.string(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Las contraseñas no coinciden.",
   path: ["confirmPassword"],
+}).refine(data => data.rol !== 'student' || (data.rol === 'student' && data.grupo), {
+    message: "Por favor, seleccione un grupo para el alumno.",
+    path: ["grupo"],
 });
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
@@ -62,6 +67,8 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
       confirmPassword: "",
     },
   });
+  
+  const selectedRole = form.watch("rol");
 
   const onSubmit = (data: CreateUserFormValues) => {
     try {
@@ -164,6 +171,32 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
             </FormItem>
           )}
         />
+         {selectedRole === 'student' && (
+          <FormField
+            control={form.control}
+            name="grupo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Grupo</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un grupo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {groups.map((group) => (
+                      <SelectItem key={group.id} value={group.name}>
+                        {group.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
          <FormField
           control={form.control}
           name="password"
