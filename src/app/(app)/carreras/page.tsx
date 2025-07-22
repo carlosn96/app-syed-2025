@@ -30,6 +30,10 @@ export default function CareersPage() {
     setActiveTabs((prev) => ({ ...prev, [careerId]: value }))
   }
 
+  const getOrdinal = (n: number) => {
+    return `${n}°`;
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
@@ -66,7 +70,7 @@ export default function CareersPage() {
             semesters.length > 0 ? `sem-${semesters[0]}` : ""
 
           return (
-            <Card key={career.id}>
+            <Card key={career.id} className="flex flex-col">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
@@ -85,40 +89,45 @@ export default function CareersPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col flex-grow">
                 {semesters.length > 0 ? (
                   <Tabs
                     defaultValue={defaultTabValue}
                     value={activeTabs[career.id] || defaultTabValue}
                     onValueChange={(value) => handleTabChange(career.id, value)}
-                    className="w-full"
+                    className="flex flex-col flex-grow w-full"
                   >
-                    <TabsList className="grid w-full grid-cols-4">
+                    <div className="flex-grow">
+                      {semesters.map((semester) => (
+                        <TabsContent key={semester} value={`sem-${semester}`}>
+                          <ul className="space-y-3">
+                            {filteredSubjects
+                              .filter((s) => s.semester === semester)
+                              .map((subject) => (
+                                <li
+                                  key={subject.id}
+                                  className="rounded-md border p-3"
+                                >
+                                  <h4 className="font-medium">{subject.name}</h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    Docente: {subject.teacher}
+                                  </p>
+                                </li>
+                              ))}
+                          </ul>
+                        </TabsContent>
+                      ))}
+                    </div>
+                    <TabsList 
+                      className="grid w-full mt-4" 
+                      style={{ gridTemplateColumns: `repeat(${semesters.length}, minmax(0, 1fr))`}}
+                    >
                       {semesters.map((semester) => (
                         <TabsTrigger key={semester} value={`sem-${semester}`}>
-                          Sem. {semester}
+                          {getOrdinal(semester)}
                         </TabsTrigger>
                       ))}
                     </TabsList>
-                    {semesters.map((semester) => (
-                      <TabsContent key={semester} value={`sem-${semester}`}>
-                        <ul className="mt-4 space-y-3">
-                          {filteredSubjects
-                            .filter((s) => s.semester === semester)
-                            .map((subject) => (
-                              <li
-                                key={subject.id}
-                                className="rounded-md border p-3"
-                              >
-                                <h4 className="font-medium">{subject.name}</h4>
-                                <p className="text-sm text-muted-foreground">
-                                  Docente: {subject.teacher}
-                                </p>
-                              </li>
-                            ))}
-                        </ul>
-                      </TabsContent>
-                    ))}
                   </Tabs>
                 ) : (
                   <p className="text-sm text-muted-foreground">
