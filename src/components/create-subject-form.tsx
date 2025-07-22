@@ -22,12 +22,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { subjects, teachers, careers } from "@/lib/data"
+import { subjects, teachers } from "@/lib/data"
 
 const createSubjectSchema = z.object({
   name: z.string().min(1, "El nombre de la materia es requerido."),
   teacher: z.string().min(1, "Por favor, seleccione un docente."),
-  career: z.string().min(1, "Por favor, seleccione una carrera."),
+  semester: z.coerce.number().min(1, "El semestre debe ser al menos 1.").max(12, "El semestre no puede ser mayor a 12."),
 });
 
 type CreateSubjectFormValues = z.infer<typeof createSubjectSchema>;
@@ -35,12 +35,12 @@ type CreateSubjectFormValues = z.infer<typeof createSubjectSchema>;
 // This is a mock function, in a real app this would be an API call
 const addSubject = (data: CreateSubjectFormValues) => {
     const newId = Math.max(...subjects.map(s => s.id), 0) + 1;
-    // For now, we add a mock semester, this would be handled differently
-    // when we can assign subjects to a career's curriculum dynamically.
     const newSubject = {
         id: newId,
         ...data,
-        semester: 1 
+        // The career will be assigned elsewhere.
+        // For mock purposes, we can leave it empty or assign a default.
+        career: "Sin Asignar"
     };
     subjects.push(newSubject);
     console.log("Materia creada:", newSubject);
@@ -54,7 +54,7 @@ export function CreateSubjectForm({ onSuccess }: { onSuccess?: () => void }) {
     defaultValues: {
       name: "",
       teacher: "",
-      career: "",
+      semester: 1,
     },
   });
 
@@ -120,24 +120,13 @@ export function CreateSubjectForm({ onSuccess }: { onSuccess?: () => void }) {
         />
         <FormField
           control={form.control}
-          name="career"
+          name="semester"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Carrera</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione una carrera" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {careers.map((career) => (
-                    <SelectItem key={career.id} value={career.name}>
-                      {career.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormLabel>Semestre</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
