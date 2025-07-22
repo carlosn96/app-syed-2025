@@ -89,7 +89,7 @@ export default function CareersPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="flex flex-col flex-grow">
+              <CardContent className="flex flex-col flex-grow pb-4">
                 {semesters.length > 0 ? (
                   <Tabs
                     defaultValue={defaultTabValue}
@@ -97,7 +97,7 @@ export default function CareersPage() {
                     onValueChange={(value) => handleTabChange(career.id, value)}
                     className="flex flex-col flex-grow w-full"
                   >
-                    <div className="flex-grow">
+                    <div className="flex-grow min-h-[150px]">
                       {semesters.map((semester) => (
                         <TabsContent key={semester} value={`sem-${semester}`}>
                           <ul className="space-y-3">
@@ -123,16 +123,22 @@ export default function CareersPage() {
                       style={{ gridTemplateColumns: `repeat(${semesters.length}, minmax(0, 1fr))`}}
                     >
                       {semesters.map((semester) => (
-                        <TabsTrigger key={semester} value={`sem-${semester}`}>
+                        <TabsTrigger 
+                          key={semester} 
+                          value={`sem-${semester}`}
+                          className="px-2 py-1 h-auto text-xs"
+                        >
                           {getOrdinal(semester)}
                         </TabsTrigger>
                       ))}
                     </TabsList>
                   </Tabs>
                 ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No hay materias asignadas para esta carrera aún.
-                  </p>
+                  <div className="flex-grow flex items-center justify-center">
+                    <p className="text-sm text-muted-foreground">
+                      No hay materias asignadas para esta carrera aún.
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
