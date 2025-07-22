@@ -65,14 +65,7 @@ const addCareer = (data: CreateCareerFormValues) => {
 export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
   const { toast } = useToast();
 
-  const subjectsBySemester = subjects.reduce((acc, subject) => {
-    const semester = subject.semester;
-    if (!acc[semester]) {
-      acc[semester] = [];
-    }
-    acc[semester].push(subject);
-    return acc;
-  }, {} as Record<number, typeof subjects>);
+  const sortedSubjects = [...subjects].sort((a, b) => a.semester - b.semester);
 
   const form = useForm<CreateCareerFormValues>({
     resolver: zodResolver(createCareerSchema),
@@ -170,43 +163,38 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
               </div>
                <ScrollArea className="h-72 w-full rounded-md border">
                  <div className="p-4">
-                    {Object.entries(subjectsBySemester).map(([semester, subjectList]) => (
-                        <div key={semester} className="mb-4">
-                            <h4 className="font-semibold mb-2">Semestre {semester}</h4>
-                            {subjectList.map((subject) => (
-                                <FormField
+                    {sortedSubjects.map((subject) => (
+                        <FormField
+                        key={subject.id}
+                        control={form.control}
+                        name="subjectIds"
+                        render={({ field }) => {
+                            return (
+                            <FormItem
                                 key={subject.id}
-                                control={form.control}
-                                name="subjectIds"
-                                render={({ field }) => {
-                                    return (
-                                    <FormItem
-                                        key={subject.id}
-                                        className="flex flex-row items-start space-x-3 space-y-0"
-                                    >
-                                        <FormControl>
-                                        <Checkbox
-                                            checked={field.value?.includes(subject.id)}
-                                            onCheckedChange={(checked) => {
-                                            return checked
-                                                ? field.onChange([...(field.value ?? []), subject.id])
-                                                : field.onChange(
-                                                    field.value?.filter(
-                                                    (value) => value !== subject.id
-                                                    )
-                                                )
-                                            }}
-                                        />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                            {subject.name}
-                                        </FormLabel>
-                                    </FormItem>
-                                    )
-                                }}
+                                className="flex flex-row items-start space-x-3 space-y-0"
+                            >
+                                <FormControl>
+                                <Checkbox
+                                    checked={field.value?.includes(subject.id)}
+                                    onCheckedChange={(checked) => {
+                                    return checked
+                                        ? field.onChange([...(field.value ?? []), subject.id])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                            (value) => value !== subject.id
+                                            )
+                                        )
+                                    }}
                                 />
-                            ))}
-                        </div>
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                   {subject.semester}° - {subject.name}
+                                </FormLabel>
+                            </FormItem>
+                            )
+                        }}
+                        />
                     ))}
                  </div>
               </ScrollArea>
