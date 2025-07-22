@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -19,6 +20,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/context/auth-context"
+import { cn } from "@/lib/utils"
 
 const allLinks = [
   { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
@@ -40,20 +42,25 @@ export function MainNav() {
 
   return (
     <SidebarMenu>
-      {links.map((link) => (
-        <SidebarMenuItem key={link.href}>
-          <SidebarMenuButton
-            asChild
-            isActive={pathname === link.href}
-            tooltip={link.label}
-          >
-            <Link href={link.href}>
-              <link.icon />
-              <span>{link.label}</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
+      {links.map((link) => {
+        const Icon = link.icon
+        return (
+          <SidebarMenuItem key={link.href}>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === link.href}
+              tooltip={link.label}
+            >
+              <Link href={link.href}>
+                <Icon className={cn(
+                  link.href === '/users' && "drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]"
+                )} />
+                <span>{link.label}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )
+      })}
     </SidebarMenu>
   )
 }
