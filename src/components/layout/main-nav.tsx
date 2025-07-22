@@ -25,6 +25,7 @@ const allLinks = [
   { href: "/users", label: "Usuarios", icon: Users, roles: ['administrator', 'coordinator'] },
   { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrator', 'coordinator'] },
   { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrator', 'coordinator'] },
+  { href: "/groups", label: "Grupos", icon: Users, roles: ['administrator', 'coordinator'] },
   { href: "/subjects", label: "Materias", icon: Library, roles: ['administrator', 'coordinator', 'teacher'] },
   { href: "/supervision", label: "Supervisión", icon: CalendarDays, roles: ['administrator', 'coordinator', 'teacher'] },
   { href: "/feedback", label: "Retroalimentación", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'] },

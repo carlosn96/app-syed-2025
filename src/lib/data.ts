@@ -58,3 +58,16 @@ export const supervisions = [
     { id: 2, date: new Date(new Date().setDate(new Date().getDate() + 2)), teacher: 'Dra. Ada Lovelace', subject: 'Estructuras de Datos', coordinator: 'Usuario Coordinador' },
     { id: 3, date: new Date(new Date().setDate(new Date().getDate() + 5)), teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Usuario Coordinador' },
 ];
+
+export interface Group {
+  id: number;
+  name: string;
+  career: string;
+  semester: number;
+  students: number[];
+}
+
+export const groups: Group[] = [
+  { id: 1, name: 'Grupo A - Matutino', career: 'Ciencias de la Computación', semester: 1, students: [4, 6] },
+  { id: 2, name: 'Grupo B - Vespertino', career: 'Administración de Empresas', semester: 2, students: [] },
+];
