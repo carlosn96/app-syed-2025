@@ -37,7 +37,7 @@ export default function SubjectsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Materia</TableHead>
-                <TableHead>Programa</TableHead>
+                <TableHead>Carrera</TableHead>
                 <TableHead>Docente</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
@@ -46,7 +46,7 @@ export default function SubjectsPage() {
               {subjects.map((subject) => (
                 <TableRow key={subject.id}>
                   <TableCell className="font-medium">{subject.name}</TableCell>
-                  <TableCell>{subject.program}</TableCell>
+                  <TableCell>{subject.career}</TableCell>
                   <TableCell>{subject.teacher}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">

@@ -25,7 +25,7 @@ export const planteles = [
   { id: 3, name: 'Plantel Sur', location: 'Distrito Sur', director: 'Sra. Carol White' },
 ];
 
-export const programs = [
+export const careers = [
   { id: 1, name: 'Ciencias de la Computación', campus: 'Plantel Principal', duration: '4 Años' },
   { id: 2, name: 'Administración de Empresas', campus: 'Plantel Principal', duration: '4 Años' },
   { id: 3, name: 'Ingeniería Mecánica', campus: 'Plantel Norte', duration: '5 Años' },
@@ -33,10 +33,10 @@ export const programs = [
 ];
 
 export const subjects = [
-  { id: 1, name: 'Introducción a la Programación', program: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing' },
-  { id: 2, name: 'Estructuras de Datos', program: 'Ciencias de la Computación', teacher: 'Dra. Ada Lovelace' },
-  { id: 3, name: 'Principios de Marketing', program: 'Administración de Empresas', teacher: 'Prof. Philip Kotler' },
-  { id: 4, name: 'Termodinámica', program: 'Ingeniería Mecánica', teacher: 'Dr. James Watt' },
+  { id: 1, name: 'Introducción a la Programación', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing' },
+  { id: 2, name: 'Estructuras de Datos', career: 'Ciencias de la Computación', teacher: 'Dra. Ada Lovelace' },
+  { id: 3, name: 'Principios de Marketing', career: 'Administración de Empresas', teacher: 'Prof. Philip Kotler' },
+  { id: 4, name: 'Termodinámica', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt' },
 ];
 
 export const teachers = [

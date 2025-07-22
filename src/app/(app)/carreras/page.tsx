@@ -17,37 +17,37 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { programs } from "@/lib/data"
+import { careers } from "@/lib/data"
 
-export default function ProgramsPage() {
+export default function CareersPage() {
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-semibold tracking-tight">
-        Programas Académicos
+        Carreras
       </h1>
       <Card>
         <CardHeader>
-          <CardTitle>Programas</CardTitle>
+          <CardTitle>Carreras</CardTitle>
           <CardDescription>
-            Administra todos los programas académicos en el sistema.
+            Administra todas las carreras en el sistema.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Programa</TableHead>
+                <TableHead>Carrera</TableHead>
                 <TableHead>Plantel</TableHead>
                 <TableHead>Duración</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {programs.map((program) => (
-                <TableRow key={program.id}>
-                  <TableCell className="font-medium">{program.name}</TableCell>
-                  <TableCell>{program.campus}</TableCell>
-                  <TableCell>{program.duration}</TableCell>
+              {careers.map((career) => (
+                <TableRow key={career.id}>
+                  <TableCell className="font-medium">{career.name}</TableCell>
+                  <TableCell>{career.campus}</TableCell>
+                  <TableCell>{career.duration}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                         <Button size="icon" variant="warning">
@@ -67,7 +67,7 @@ export default function ProgramsPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-4</strong> de <strong>4</strong> programas
+            Mostrando <strong>1-4</strong> de <strong>4</strong> carreras
           </div>
         </CardFooter>
       </Card>
