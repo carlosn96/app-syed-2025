@@ -53,7 +53,7 @@ export function MainNav() {
             >
               <Link href={link.href}>
                 <Icon className={cn(
-                  link.href === '/users' && "drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]"
+                  link.href === '/users' && "drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]"
                 )} />
                 <span>{link.label}</span>
               </Link>
