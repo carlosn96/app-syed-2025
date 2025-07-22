@@ -1,76 +1,89 @@
-import { Pencil, Trash2 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+"use client"
+import { useState } from "react"
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { careers } from "@/lib/data"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { careers, subjects } from "@/lib/data"
 
 export default function CareersPage() {
+  const [activeTabs, setActiveTabs] = useState<Record<number, string>>({})
+
+  const handleTabChange = (careerId: number, value: string) => {
+    setActiveTabs((prev) => ({ ...prev, [careerId]: value }))
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-semibold tracking-tight">
-        Carreras
+        Planes de Estudio por Carrera
       </h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Carreras</CardTitle>
-          <CardDescription>
-            Administra todas las carreras en el sistema.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Carrera</TableHead>
-                <TableHead>Plantel</TableHead>
-                <TableHead>Duración</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {careers.map((career) => (
-                <TableRow key={career.id}>
-                  <TableCell className="font-medium">{career.name}</TableCell>
-                  <TableCell>{career.campus}</TableCell>
-                  <TableCell>{career.duration}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                        <Button size="icon" variant="warning">
-                        <Pencil className="h-4 w-4" />
-                        <span className="sr-only">Editar</span>
-                        </Button>
-                        <Button size="icon" variant="destructive-outline">
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Eliminar</span>
-                        </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-        <CardFooter>
-          <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-4</strong> de <strong>4</strong> carreras
-          </div>
-        </CardFooter>
-      </Card>
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        {careers.map((career) => {
+          const filteredSubjects = subjects.filter(
+            (subject) => subject.career === career.name
+          )
+          const semesters = Array.from(
+            new Set(filteredSubjects.map((s) => s.semester))
+          ).sort((a, b) => a - b)
+          const defaultTabValue = semesters.length > 0 ? `sem-${semesters[0]}` : ""
+
+          return (
+            <Card key={career.id}>
+              <CardHeader>
+                <CardTitle>{career.name}</CardTitle>
+                <CardDescription>{career.campus}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {semesters.length > 0 ? (
+                  <Tabs 
+                    defaultValue={defaultTabValue}
+                    value={activeTabs[career.id] || defaultTabValue}
+                    onValueChange={(value) => handleTabChange(career.id, value)} 
+                    className="w-full"
+                  >
+                    <TabsList className="grid w-full grid-cols-4">
+                      {semesters.map((semester) => (
+                        <TabsTrigger key={semester} value={`sem-${semester}`}>
+                          Sem. {semester}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                    {semesters.map((semester) => (
+                      <TabsContent key={semester} value={`sem-${semester}`}>
+                        <ul className="mt-4 space-y-3">
+                          {filteredSubjects
+                            .filter((s) => s.semester === semester)
+                            .map((subject) => (
+                              <li
+                                key={subject.id}
+                                className="rounded-md border p-3"
+                              >
+                                <h4 className="font-medium">{subject.name}</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Docente: {subject.teacher}
+                                </p>
+                              </li>
+                            ))}
+                        </ul>
+                      </TabsContent>
+                    ))}
+                  </Tabs>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No hay materias asignadas para esta carrera aún.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
     </div>
   )
 }

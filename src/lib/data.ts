@@ -28,17 +28,20 @@ export const planteles = [
 ];
 
 export const careers = [
-  { id: 1, name: 'Ciencias de la Computación', campus: 'Plantel Principal', duration: '4 Años' },
-  { id: 2, name: 'Administración de Empresas', campus: 'Plantel Principal', duration: '4 Años' },
-  { id: 3, name: 'Ingeniería Mecánica', campus: 'Plantel Norte', duration: '5 Años' },
-  { id: 4, name: 'Bellas Artes', campus: 'Plantel Sur', duration: '3 Años' },
+  { id: 1, name: 'Ciencias de la Computación', campus: 'Plantel Principal', semesters: 8 },
+  { id: 2, name: 'Administración de Empresas', campus: 'Plantel Principal', semesters: 8 },
+  { id: 3, name: 'Ingeniería Mecánica', campus: 'Plantel Norte', semesters: 10 },
+  { id: 4, name: 'Bellas Artes', campus: 'Plantel Sur', semesters: 6 },
 ];
 
 export const subjects = [
-  { id: 1, name: 'Introducción a la Programación', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing' },
-  { id: 2, name: 'Estructuras de Datos', career: 'Ciencias de la Computación', teacher: 'Dra. Ada Lovelace' },
-  { id: 3, name: 'Principios de Marketing', career: 'Administración de Empresas', teacher: 'Prof. Philip Kotler' },
-  { id: 4, name: 'Termodinámica', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt' },
+  { id: 1, name: 'Introducción a la Programación', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
+  { id: 2, name: 'Estructuras de Datos', career: 'Ciencias de la Computación', teacher: 'Dra. Ada Lovelace', semester: 2 },
+  { id: 11, name: 'Algoritmos Avanzados', career: 'Ciencias de la Computación', teacher: 'Dr. Donald Knuth', semester: 3 },
+  { id: 12, name: 'Bases de Datos', career: 'Ciencias de la Computación', teacher: 'Dr. Edgar Codd', semester: 4 },
+  { id: 3, name: 'Principios de Marketing', career: 'Administración de Empresas', teacher: 'Prof. Philip Kotler', semester: 1 },
+  { id: 13, name: 'Contabilidad Financiera', career: 'Administración de Empresas', teacher: 'C.P. Luca Pacioli', semester: 2 },
+  { id: 4, name: 'Termodinámica', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 1 },
 ];
 
 export const teachers = [
@@ -47,6 +50,9 @@ export const teachers = [
   { id: 3, name: 'Prof. Philip Kotler' },
   { id: 4, name: 'Dr. James Watt' },
   { id: 5, name: 'Prof. Marie Curie' },
+  { id: 11, name: 'Dr. Donald Knuth' },
+  { id: 12, name: 'Dr. Edgar Codd' },
+  { id: 13, name: 'C.P. Luca Pacioli' },
 ];
 
 export const evaluations = [
