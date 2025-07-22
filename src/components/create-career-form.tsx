@@ -77,6 +77,8 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
     },
   });
 
+  const numberOfSemesters = form.watch("semesters");
+
   const onSubmit = (data: CreateCareerFormValues) => {
     try {
       addCareer(data);
@@ -163,7 +165,9 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
               </div>
                <ScrollArea className="h-72 w-full rounded-md border">
                  <div className="p-4">
-                    {sortedSubjects.map((subject) => (
+                    {sortedSubjects
+                        .filter(subject => subject.semester <= numberOfSemesters)
+                        .map((subject) => (
                         <FormField
                         key={subject.id}
                         control={form.control}
