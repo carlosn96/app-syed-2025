@@ -50,14 +50,14 @@ export default function LoginPage() {
 
   return (
     <div className="flex h-screen w-full items-center justify-center login-background p-4">
-      <Card className="w-full max-w-sm drop-shadow-[0_0px_15px_hsl(var(--primary)/0.3)] dark:drop-shadow-[0_0px_15px_hsl(var(--accent)/0.3)]">
+      <Card className="w-full max-w-sm drop-shadow-[0_0px_15px_hsl(var(--primary)/0.3)] dark:drop-shadow-[0_0px_15px_hsl(var(--accent)/0.3)] header-background text-primary-foreground">
         <form onSubmit={handleLogin}>
             <CardHeader className="text-center">
                 <div className="flex justify-center items-center mb-4">
-                     <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40" />
+                     <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40 drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]" />
                 </div>
               <CardTitle className="text-2xl font-headline">¡Bienvenido de Nuevo!</CardTitle>
-              <CardDescription>
+              <CardDescription className="text-primary-foreground/90">
                 Ingresa tus credenciales para iniciar sesión.
               </CardDescription>
             </CardHeader>
@@ -71,6 +71,7 @@ export default function LoginPage() {
                   required 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="bg-background/20 placeholder:text-muted-foreground/80 border-white/40 focus:bg-background/30"
                 />
               </div>
               <div className="grid gap-2">
@@ -82,13 +83,13 @@ export default function LoginPage() {
                     required 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10"
+                    className="pr-10 bg-background/20 placeholder:text-muted-foreground/80 border-white/40 focus:bg-background/30"
                   />
                   <Button 
                     type="button" 
                     variant="ghost" 
                     size="icon" 
-                    className="absolute inset-y-0 right-0 h-full px-3"
+                    className="absolute inset-y-0 right-0 h-full px-3 text-primary-foreground/80 hover:text-primary-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -96,10 +97,10 @@ export default function LoginPage() {
                   </Button>
                 </div>
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {error && <p className="text-sm text-destructive-foreground bg-destructive/50 p-2 rounded-md">{error}</p>}
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" variant="secondary">
                 Iniciar Sesión
               </Button>
             </CardFooter>
