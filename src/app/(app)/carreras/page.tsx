@@ -12,9 +12,19 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { careers, subjects } from "@/lib/data"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { CreateCareerForm } from "@/components/create-career-form"
 
 export default function CareersPage() {
   const [activeTabs, setActiveTabs] = useState<Record<number, string>>({})
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleTabChange = (careerId: number, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [careerId]: value }))
@@ -26,10 +36,23 @@ export default function CareersPage() {
         <h1 className="font-headline text-3xl font-semibold tracking-tight">
           Planes de Estudio por Carrera
         </h1>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Crear Carrera
-        </Button>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Crear Carrera
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Crear Nueva Carrera</DialogTitle>
+                    <DialogDescription>
+                        Completa el formulario para registrar una nueva carrera.
+                    </DialogDescription>
+                </DialogHeader>
+                <CreateCareerForm onSuccess={() => setIsModalOpen(false)} />
+            </DialogContent>
+        </Dialog>
       </div>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         {careers.map((career) => {
