@@ -106,7 +106,7 @@ export default function CareersPage() {
                               .filter((s) => s.semester === semester)
                               .map((subject) => (
                                 <li key={subject.id}>
-                                  <h4 className="font-medium">{subject.name}</h4>
+                                  <p className="font-medium">{subject.name}</p>
                                   <p className="text-xs text-muted-foreground">
                                     {subject.teacher}
                                   </p>
