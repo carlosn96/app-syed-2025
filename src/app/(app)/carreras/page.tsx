@@ -98,7 +98,7 @@ export default function CareersPage() {
                     onValueChange={(value) => handleTabChange(career.id, value)}
                     className="flex flex-col flex-grow w-full"
                   >
-                    <div className="flex-grow min-h-[150px]">
+                    <div className="flex-grow">
                       {semesters.map((semester) => (
                         <TabsContent key={semester} value={`sem-${semester}`}>
                           <ul className="space-y-3">
