@@ -35,19 +35,45 @@ export const careers = [
 ];
 
 export const subjects = [
+  // Ciencias de la Computación
   { id: 1, name: 'Introducción a la Programación', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
+  { id: 23, name: 'Matemáticas Discretas', career: 'Ciencias de la Computación', teacher: 'Dr. Edsger Dijkstra', semester: 1 },
+  { id: 24, name: 'Cálculo I', career: 'Ciencias de la Computación', teacher: 'Dr. Isaac Newton', semester: 1 },
+  { id: 25, name: 'Fundamentos de Hardware', career: 'Ciencias de la Computación', teacher: 'Dr. Gordon Moore', semester: 1 },
+  { id: 26, name: 'Lógica Computacional', career: 'Ciencias de la Computación', teacher: 'Dr. George Boole', semester: 1 },
+  { id: 27, name: 'Comunicación Oral y Escrita', career: 'Ciencias de la Computación', teacher: 'Prof. Dale Carnegie', semester: 1 },
+  
   { id: 2, name: 'Estructuras de Datos', career: 'Ciencias de la Computación', teacher: 'Dra. Ada Lovelace', semester: 2 },
+  { id: 28, name: 'Programación Orientada a Objetos', career: 'Ciencias de la Computación', teacher: 'Dr. Bjarne Stroustrup', semester: 2 },
+  { id: 29, name: 'Cálculo II', career: 'Ciencias de la Computación', teacher: 'Dr. Isaac Newton', semester: 2 },
+  { id: 30, name: 'Álgebra Lineal', career: 'Ciencias de la Computación', teacher: 'Dr. Gilbert Strang', semester: 2 },
+  { id: 31, name: 'Ensamblador', career: 'Ciencias de la Computación', teacher: 'Dr. Gordon Moore', semester: 2 },
+  
   { id: 11, name: 'Algoritmos Avanzados', career: 'Ciencias de la Computación', teacher: 'Dr. Donald Knuth', semester: 3 },
   { id: 12, name: 'Bases de Datos', career: 'Ciencias de la Computación', teacher: 'Dr. Edgar Codd', semester: 4 },
   { id: 14, name: 'Sistemas Operativos', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 5 },
   { id: 15, name: 'Redes de Computadoras', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 5 },
   { id: 16, name: 'Ingeniería de Software', career: 'Ciencias de la Computación', teacher: 'Dr. Ian Sommerville', semester: 6 },
   { id: 17, name: 'Inteligencia Artificial', career: 'Ciencias de la Computación', teacher: 'Dr. Stuart Russell', semester: 7 },
+
+  // Administración de Empresas
   { id: 3, name: 'Principios de Marketing', career: 'Administración de Empresas', teacher: 'Prof. Philip Kotler', semester: 1 },
+  { id: 32, name: 'Fundamentos de Administración', career: 'Administración de Empresas', teacher: 'Prof. Peter Drucker', semester: 1 },
+  { id: 33, name: 'Matemáticas Financieras', career: 'Administración de Empresas', teacher: 'C.P. Luca Pacioli', semester: 1 },
+  { id: 34, name: 'Derecho y Empresa', career: 'Administración de Empresas', teacher: 'Lic. Jorge Barrera Graf', semester: 1 },
+  { id: 35, name: 'Microeconomía', career: 'Administración de Empresas', teacher: 'Dr. Adam Smith', semester: 1 },
+
   { id: 13, name: 'Contabilidad Financiera', career: 'Administración de Empresas', teacher: 'C.P. Luca Pacioli', semester: 2 },
+  { id: 36, name: 'Estadística para Negocios', career: 'Administración de Empresas', teacher: 'Dr. George Box', semester: 2 },
+  { id: 37, name: 'Macroeconomía', career: 'Administración de Empresas', teacher: 'Dr. John Maynard Keynes', semester: 2 },
+  { id: 38, name: 'Comportamiento Organizacional', career: 'Administración de Empresas', teacher: 'Prof. Idalberto Chiavenato', semester: 2 },
+  { id: 39, name: 'Informática para Negocios', career: 'Administración de Empresas', teacher: 'Dr. Edgar Codd', semester: 2 },
+
   { id: 18, name: 'Gestión de Recursos Humanos', career: 'Administración de Empresas', teacher: 'Prof. Idalberto Chiavenato', semester: 3 },
   { id: 19, name: 'Finanzas Corporativas', career: 'Administración de Empresas', teacher: 'Dr. Stephen Ross', semester: 4 },
   { id: 20, name: 'Derecho Mercantil', career: 'Administración de Empresas', teacher: 'Lic. Jorge Barrera Graf', semester: 5 },
+
+  // Ingeniería Mecánica
   { id: 4, name: 'Termodinámica', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 1 },
   { id: 21, name: 'Mecánica de Fluidos', career: 'Ingeniería Mecánica', teacher: 'Dr. Frank M. White', semester: 2 },
   { id: 22, name: 'Diseño Asistido por Computadora (CAD)', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 3 },
@@ -69,6 +95,17 @@ export const teachers = [
   { id: 18, name: 'Dr. Stephen Ross' },
   { id: 19, name: 'Lic. Jorge Barrera Graf' },
   { id: 20, name: 'Dr. Frank M. White' },
+  { id: 21, name: 'Dr. Edsger Dijkstra' },
+  { id: 22, name: 'Dr. Isaac Newton' },
+  { id: 23, name: 'Dr. Gordon Moore' },
+  { id: 24, name: 'Dr. George Boole' },
+  { id: 25, name: 'Prof. Dale Carnegie' },
+  { id: 26, name: 'Dr. Bjarne Stroustrup' },
+  { id: 27, name: 'Dr. Gilbert Strang' },
+  { id: 28, name: 'Prof. Peter Drucker' },
+  { id: 29, name: 'Dr. Adam Smith' },
+  { id: 30, name: 'Dr. George Box' },
+  { id: 31, name: 'Dr. John Maynard Keynes' },
 ];
 
 export const evaluations = [
