@@ -1,3 +1,7 @@
+
+"use client"
+
+import { useState } from "react"
 import { Pencil, PlusCircle, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -18,18 +22,42 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { subjects } from "@/lib/data"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { CreateSubjectForm } from "@/components/create-subject-form"
 
 export default function SubjectsPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="font-headline text-3xl font-semibold tracking-tight">
           Gestión de Materias
         </h1>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Crear Materia
-        </Button>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Crear Materia
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Crear Nueva Materia</DialogTitle>
+              <DialogDescription>
+                Completa el formulario para registrar una nueva materia.
+              </DialogDescription>
+            </DialogHeader>
+            <CreateSubjectForm onSuccess={() => setIsModalOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
       <Card>
         <CardHeader>
@@ -73,7 +101,8 @@ export default function SubjectsPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-{subjects.length}</strong> de <strong>{subjects.length}</strong> materias
+            Mostrando <strong>1-{subjects.length}</strong> de{" "}
+            <strong>{subjects.length}</strong> materias
           </div>
         </CardFooter>
       </Card>
