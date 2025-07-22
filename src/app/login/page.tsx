@@ -50,13 +50,13 @@ export default function LoginPage() {
 
   return (
     <div className="flex h-screen w-full items-center justify-center login-background p-4">
-      <Card className="w-full max-w-sm drop-shadow-[0_0px_15px_hsl(var(--primary)/0.3)] dark:drop-shadow-[0_0px_15px_hsl(var(--accent)/0.3)] header-background text-primary-foreground">
+      <Card className="w-full max-w-sm drop-shadow-[0_0px_15px_hsl(var(--primary)/0.3)] dark:drop-shadow-[0_0px_15px_hsl(var(--accent)/0.3)] login-card-background text-primary-foreground">
         <form onSubmit={handleLogin}>
             <CardHeader className="text-center">
                 <div className="flex justify-center items-center mb-4">
                      <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40 drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]" />
                 </div>
-              <CardTitle className="text-2xl font-headline">¡Bienvenido de Nuevo!</CardTitle>
+              <CardTitle className="text-2xl font-headline text-primary-foreground">¡Bienvenido de Nuevo!</CardTitle>
               <CardDescription className="text-primary-foreground/90">
                 Ingresa tus credenciales para iniciar sesión.
               </CardDescription>
