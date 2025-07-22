@@ -107,7 +107,7 @@ export default function CareersPage() {
                               .map((subject) => (
                                 <li key={subject.id}>
                                   <h4 className="font-medium">{subject.name}</h4>
-                                  <p className="text-sm text-muted-foreground">
+                                  <p className="text-xs text-muted-foreground">
                                     {subject.teacher}
                                   </p>
                                 </li>
