@@ -163,7 +163,7 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
                   Selecciona las materias que formarán parte de esta carrera.
                 </FormDescription>
               </div>
-               <ScrollArea className="h-72 w-full rounded-md border">
+               <ScrollArea className="h-64 w-full rounded-md border">
                  <div className="p-4">
                     {sortedSubjects
                         .filter(subject => subject.semester <= numberOfSemesters)
