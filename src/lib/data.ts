@@ -1,3 +1,4 @@
+
 export type Role = 'administrator' | 'coordinator' | 'teacher' | 'student';
 
 export interface User {
@@ -68,6 +69,7 @@ export interface Group {
 }
 
 export const groups: Group[] = [
-  { id: 1, name: 'Grupo A - Matutino', career: 'Ciencias de la Computación', semester: 1, students: [4, 6] },
-  { id: 2, name: 'Grupo B - Vespertino', career: 'Administración de Empresas', semester: 2, students: [] },
+  { id: 1, name: 'COMPINCO2025A', career: 'Ciencias de la Computación', semester: 1, students: [4, 6] },
+  { id: 2, name: 'ADMEM2025A', career: 'Administración de Empresas', semester: 2, students: [] },
+  { id: 3, name: 'COMPINCO2025B', career: 'Ciencias de la Computación', semester: 1, students: [] },
 ];

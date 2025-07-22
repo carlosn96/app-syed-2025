@@ -69,7 +69,7 @@ export default function GroupsPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-2</strong> de <strong>2</strong> grupos
+            Mostrando <strong>1-3</strong> de <strong>3</strong> grupos
           </div>
         </CardFooter>
       </Card>
