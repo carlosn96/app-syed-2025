@@ -90,7 +90,7 @@ export default function CareersPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="flex flex-col flex-grow pb-4">
+              <CardContent className="flex flex-col flex-grow pb-2">
                 {semesters.length > 0 ? (
                   <Tabs
                     defaultValue={defaultTabValue}
