@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Button } from "@/components/ui/button";
@@ -56,14 +57,14 @@ export default function LoginPage() {
                 <div className="flex justify-center items-center mb-4">
                      <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40 drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]" />
                 </div>
-              <CardTitle className="text-2xl font-headline text-primary-foreground">¡Bienvenido de Nuevo!</CardTitle>
-              <CardDescription className="text-primary-foreground/90">
+              <CardTitle className="text-2xl font-headline text-primary-foreground drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">¡Bienvenido de Nuevo!</CardTitle>
+              <CardDescription className="text-primary-foreground/90 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">
                 Ingresa tus credenciales para iniciar sesión.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Correo Electrónico</Label>
+                <Label htmlFor="email" className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Correo Electrónico</Label>
                 <Input 
                   id="email" 
                   type="email" 
@@ -75,7 +76,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password" className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Contraseña</Label>
                 <div className="relative">
                    <Input 
                     id="password" 
