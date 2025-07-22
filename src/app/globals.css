@@ -92,7 +92,7 @@ body {
 }
 
 .login-card-background {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.8), hsl(var(--accent) / 0.8));
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.6), hsl(var(--accent) / 0.6));
     color: hsl(var(--primary-foreground));
 }
 
