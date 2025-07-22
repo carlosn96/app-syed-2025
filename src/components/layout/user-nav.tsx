@@ -1,3 +1,4 @@
+
 "use client"
 
 import {
@@ -38,7 +39,7 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]">
           <Avatar className="h-8 w-8">
             <AvatarImage src={`https://placehold.co/100x100.png?text=${nameInitial}`} alt={userName} data-ai-hint="person avatar" />
             <AvatarFallback>{nameInitial}</AvatarFallback>
