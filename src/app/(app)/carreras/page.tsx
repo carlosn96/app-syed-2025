@@ -1,6 +1,7 @@
-
 "use client"
 import { useState } from "react"
+import { Pencil, PlusCircle, Trash2 } from "lucide-react"
+
 import {
   Card,
   CardContent,
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { careers, subjects } from "@/lib/data"
+import { Button } from "@/components/ui/button"
 
 export default function CareersPage() {
   const [activeTabs, setActiveTabs] = useState<Record<number, string>>({})
@@ -20,9 +22,15 @@ export default function CareersPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="font-headline text-3xl font-semibold tracking-tight">
-        Planes de Estudio por Carrera
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-headline text-3xl font-semibold tracking-tight">
+          Planes de Estudio por Carrera
+        </h1>
+        <Button>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Crear Carrera
+        </Button>
+      </div>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         {careers.map((career) => {
           const filteredSubjects = subjects.filter(
@@ -31,20 +39,35 @@ export default function CareersPage() {
           const semesters = Array.from(
             new Set(filteredSubjects.map((s) => s.semester))
           ).sort((a, b) => a - b)
-          const defaultTabValue = semesters.length > 0 ? `sem-${semesters[0]}` : ""
+          const defaultTabValue =
+            semesters.length > 0 ? `sem-${semesters[0]}` : ""
 
           return (
             <Card key={career.id}>
               <CardHeader>
-                <CardTitle>{career.name}</CardTitle>
-                <CardDescription>{career.campus}</CardDescription>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle>{career.name}</CardTitle>
+                    <CardDescription>{career.campus}</CardDescription>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="icon" variant="warning">
+                      <Pencil className="h-4 w-4" />
+                      <span className="sr-only">Editar</span>
+                    </Button>
+                    <Button size="icon" variant="destructive-outline">
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Eliminar</span>
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 {semesters.length > 0 ? (
-                  <Tabs 
+                  <Tabs
                     defaultValue={defaultTabValue}
                     value={activeTabs[career.id] || defaultTabValue}
-                    onValueChange={(value) => handleTabChange(career.id, value)} 
+                    onValueChange={(value) => handleTabChange(career.id, value)}
                     className="w-full"
                   >
                     <TabsList className="grid w-full grid-cols-4">
