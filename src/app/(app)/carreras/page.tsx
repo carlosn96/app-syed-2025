@@ -1,3 +1,4 @@
+
 "use client"
 import { useState } from "react"
 import { Pencil, PlusCircle, Trash2 } from "lucide-react"
@@ -107,7 +108,7 @@ export default function CareersPage() {
                                 <li key={subject.id}>
                                   <h4 className="font-medium">{subject.name}</h4>
                                   <p className="text-sm text-muted-foreground">
-                                    Docente: {subject.teacher}
+                                    {subject.teacher}
                                   </p>
                                 </li>
                               ))}
