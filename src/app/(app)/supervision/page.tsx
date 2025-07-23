@@ -34,6 +34,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Badge } from "@/components/ui/badge"
 
 export default function SupervisionPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -157,7 +158,11 @@ export default function SupervisionPage() {
                                     <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
                                     <TableCell className="py-2">{supervision.startTime} - {supervision.endTime}</TableCell>
                                     <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
-                                    <TableCell className="py-2">{supervision.status}</TableCell>
+                                    <TableCell className="py-2">
+                                        <Badge variant={supervision.status === 'Programada' ? 'warning' : 'success'}>
+                                            {supervision.status}
+                                        </Badge>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
