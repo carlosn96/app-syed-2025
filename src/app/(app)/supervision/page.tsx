@@ -1,3 +1,9 @@
+
+"use client"
+
+import { useState } from "react"
+import { PlusCircle } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
@@ -8,19 +14,42 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { supervisions } from "@/lib/data"
-import { PlusCircle } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { CreateSupervisionForm } from "@/components/create-supervision-form"
 
 export default function SupervisionPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="font-headline text-3xl font-semibold tracking-tight">
           Agendar Supervisión
         </h1>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Nueva Supervisión
-        </Button>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Nueva Supervisión
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Agendar Nueva Supervisión</DialogTitle>
+              <DialogDescription>
+                Completa el formulario para agendar una nueva supervisión.
+              </DialogDescription>
+            </DialogHeader>
+            <CreateSupervisionForm onSuccess={() => setIsModalOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         <div className="lg:col-span-2">
