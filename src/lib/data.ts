@@ -97,7 +97,12 @@ export const subjects: Subject[] = [
   { id: 22, name: 'Diseño Asistido por Computadora (CAD)', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 3 },
 ];
 
-export const teachers = [
+export interface Teacher {
+    id: number;
+    name: string;
+}
+
+export const teachers: Teacher[] = [
   { id: 1, name: 'Dr. Alan Turing' },
   { id: 2, name: 'Dra. Ada Lovelace' },
   { id: 3, name: 'Prof. Philip Kotler' },
@@ -110,9 +115,19 @@ export const teachers = [
   { id: 10, name: 'Dr. Isaac Newton' },
 ];
 
-export const supervisions = [
-    { id: 1, teacher: 'Dr. Alan Turing', subject: 'Introducción a la Programación', coordinator: 'Coordinador User', date: new Date(), status: 'Completada' },
-    { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: new Date(new Date().setDate(new Date().getDate() + 2)), status: 'Programada' },
+export interface Supervision {
+    id: number;
+    teacher: string;
+    subject: string;
+    coordinator: string;
+    date: Date;
+    status: 'Programada' | 'Completada';
+    groupId: number;
+}
+
+export const supervisions: Supervision[] = [
+    { id: 1, teacher: 'Dr. Alan Turing', subject: 'Introducción a la Programación', coordinator: 'Coordinador User', date: new Date(), status: 'Completada', groupId: 1 },
+    { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: new Date(new Date().setDate(new Date().getDate() + 2)), status: 'Programada', groupId: 2 },
 ];
 
 export const evaluations = [

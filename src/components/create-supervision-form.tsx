@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { supervisions, subjects, users, careers, teachers as allTeachers, Subject, User } from "@/lib/data"
+import { supervisions, subjects, users, careers, teachers as allTeachers, Subject, User, groups, schedules, Group, Teacher } from "@/lib/data"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
@@ -34,6 +34,7 @@ import { useAuth } from "@/context/auth-context"
 
 const createSupervisionSchema = z.object({
   coordinatorId: z.string().min(1, "Por favor, seleccione un coordinador."),
+  groupId: z.string().min(1, "Por favor, seleccione un grupo."),
   teacherId: z.string().min(1, "Por favor, seleccione un docente."),
   subjectId: z.string().min(1, "Por favor, seleccione una materia."),
   date: z.date({
@@ -57,6 +58,7 @@ const addSupervision = (data: CreateSupervisionFormValues) => {
         coordinator: coordinatorName,
         date: data.date,
         status: "Programada",
+        groupId: parseInt(data.groupId),
     };
     supervisions.push(newSupervision);
     supervisions.sort((a,b) => a.date.getTime() - b.date.getTime());
@@ -68,12 +70,43 @@ interface CreateSupervisionFormProps {
   selectedDate?: Date;
 }
 
+// Helper to get available options based on schedules
+const getAvailableOptions = (coordinatorId?: string, groupId?: string, teacherId?: string) => {
+  let availableGroups: Group[] = [];
+  let availableTeachers: Teacher[] = [];
+  let availableSubjects: Subject[] = [];
+
+  const coordinatorUser = users.find(u => u.id === Number(coordinatorId));
+  if (coordinatorUser) {
+    const coordinatorName = `${coordinatorUser.nombre} ${coordinatorUser.apellido_paterno}`.trim();
+    const coordinatedCareers = careers.filter(c => c.coordinator === coordinatorName).map(c => c.name);
+    availableGroups = groups.filter(g => coordinatedCareers.includes(g.career));
+  }
+
+  if (groupId) {
+      const scheduledTeachers = schedules
+          .filter(s => s.groupId === Number(groupId))
+          .map(s => s.teacherId);
+      availableTeachers = allTeachers.filter(t => scheduledTeachers.includes(t.id));
+  }
+
+  if (groupId && teacherId) {
+      const scheduledSubjects = schedules
+          .filter(s => s.groupId === Number(groupId) && s.teacherId === Number(teacherId))
+          .map(s => s.subjectId);
+      availableSubjects = subjects.filter(s => scheduledSubjects.includes(s.id));
+  }
+
+  return { availableGroups, availableTeachers, availableSubjects };
+};
+
 
 export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervisionFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   
-  const [availableTeachers, setAvailableTeachers] = useState<typeof allTeachers>([]);
+  const [availableGroups, setAvailableGroups] = useState<Group[]>([]);
+  const [availableTeachers, setAvailableTeachers] = useState<Teacher[]>([]);
   const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
   
   const coordinators = useMemo(() => users.filter(u => u.rol === 'coordinator'), []);
@@ -83,6 +116,7 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
     resolver: zodResolver(createSupervisionSchema),
     defaultValues: {
       coordinatorId: defaultCoordinator,
+      groupId: "",
       teacherId: "",
       subjectId: "",
       date: selectedDate,
@@ -96,40 +130,36 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
   }, [selectedDate, form]);
 
   const selectedCoordinatorId = form.watch("coordinatorId");
+  const selectedGroupId = form.watch("groupId");
   const selectedTeacherId = form.watch("teacherId");
   
   useEffect(() => {
+    form.resetField("groupId", { defaultValue: "" });
     form.resetField("teacherId", { defaultValue: "" });
     form.resetField("subjectId", { defaultValue: "" });
+    
+    const { availableGroups } = getAvailableOptions(selectedCoordinatorId);
+    setAvailableGroups(availableGroups);
+    setAvailableTeachers([]);
     setAvailableSubjects([]);
-
-    if (selectedCoordinatorId) {
-        const coordinatorUser = users.find(u => u.id === parseInt(selectedCoordinatorId));
-        if (coordinatorUser) {
-            const coordinatorName = `${coordinatorUser.nombre} ${coordinatorUser.apellido_paterno}`.trim();
-            const coordinatedCareers = careers
-                .filter(c => c.coordinator === coordinatorName)
-                .map(c => c.name);
-            const relevantSubjects = subjects.filter(s => coordinatedCareers.includes(s.career));
-            const teacherNames = [...new Set(relevantSubjects.map(s => s.teacher))];
-            setAvailableTeachers(allTeachers.filter(t => teacherNames.includes(t.name)));
-        }
-    } else {
-        setAvailableTeachers([]);
-    }
   }, [selectedCoordinatorId, form]);
 
   useEffect(() => {
+    form.resetField("teacherId", { defaultValue: "" });
     form.resetField("subjectId", { defaultValue: "" });
-    if (selectedTeacherId) {
-      const teacherName = allTeachers.find(t => t.id === parseInt(selectedTeacherId))?.name;
-      if (teacherName) {
-        setAvailableSubjects(subjects.filter(s => s.teacher === teacherName));
-      }
-    } else {
-      setAvailableSubjects([]);
-    }
-  }, [selectedTeacherId, form]);
+    
+    const { availableTeachers } = getAvailableOptions(selectedCoordinatorId, selectedGroupId);
+    setAvailableTeachers(availableTeachers);
+    setAvailableSubjects([]);
+  }, [selectedCoordinatorId, selectedGroupId, form]);
+
+  useEffect(() => {
+    form.resetField("subjectId", { defaultValue: "" });
+    
+    const { availableSubjects } = getAvailableOptions(selectedCoordinatorId, selectedGroupId, selectedTeacherId);
+    setAvailableSubjects(availableSubjects);
+  }, [selectedCoordinatorId, selectedGroupId, selectedTeacherId, form]);
+
 
   const onSubmit = (data: CreateSupervisionFormValues) => {
     try {
@@ -138,7 +168,7 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
         title: "Supervisión Agendada",
         description: `La supervisión para el ${format(data.date, "PPP", { locale: es })} ha sido agendada.`,
       });
-      form.reset({ coordinatorId: defaultCoordinator });
+      form.reset({ coordinatorId: defaultCoordinator, groupId: "", teacherId: "", subjectId: "" });
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
@@ -180,6 +210,34 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
         />
         <FormField
           control={form.control}
+          name="groupId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Grupo</FormLabel>
+              <Select 
+                onValueChange={field.onChange} 
+                value={field.value}
+                disabled={!selectedCoordinatorId}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un grupo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {availableGroups.map((group) => (
+                    <SelectItem key={group.id} value={String(group.id)}>
+                      {group.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="teacherId"
           render={({ field }) => (
             <FormItem>
@@ -187,7 +245,7 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
               <Select 
                 onValueChange={field.onChange} 
                 value={field.value}
-                disabled={!selectedCoordinatorId}
+                disabled={!selectedGroupId}
               >
                 <FormControl>
                   <SelectTrigger>
