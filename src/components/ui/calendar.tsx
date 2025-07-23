@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, DayProps, Day as DayComponent  } from "react-day-picker"
+import { DayPicker, DayProps, Day } from "react-day-picker"
 import { es } from 'date-fns/locale';
 
 import { cn } from "@/lib/utils"
@@ -28,10 +28,10 @@ function Calendar({
     const isEventDay = eventDates.has(new Date(date).setHours(0,0,0,0));
     
     return (
-      <div className="relative h-full">
-         <DayComponent {...dayProps} />
+      <div className="relative h-full flex items-center justify-center">
+         <Day {...dayProps} className="h-full w-full" />
         {isEventDay && displayMonth && (
-          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-primary" />
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-primary" />
         )}
       </div>
     )
@@ -43,7 +43,7 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       className={cn("p-3 h-full flex flex-col", className)}
       classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 flex-grow",
+        months: "flex flex-col flex-grow",
         month: "space-y-4 flex flex-col flex-grow",
         caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium",
@@ -55,14 +55,15 @@ function Calendar({
         nav_button_previous: "absolute left-1",
         nav_button_next: "absolute right-1",
         table: "w-full border-collapse space-y-1 flex-grow flex flex-col",
+        tbody: "flex-grow flex flex-col justify-between",
         head_row: "flex",
         head_cell:
           "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-        row: "flex w-full mt-2 flex-grow",
-        cell: "h-full w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+        row: "flex w-full mt-2",
+        cell: "w-9 h-auto text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-full w-9 p-0 font-normal aria-selected:opacity-100"
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
         ),
         day_range_end: "day-range-end",
         day_selected:

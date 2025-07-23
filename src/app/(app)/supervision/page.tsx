@@ -85,7 +85,7 @@ export default function SupervisionPage() {
                     mode="single"
                     selected={date}
                     onSelect={setDate}
-                    className="p-3 h-full"
+                    className="h-full"
                     locale={es}
                     events={supervisionDates}
                 />
