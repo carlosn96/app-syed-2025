@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { supervisions, subjects, users, careers, teachers as allTeachers, Subject, User, groups, schedules, Group, Teacher } from "@/lib/data"
+import { supervisions, subjects, users, careers, teachers as allTeachers, Subject, User, groups, schedules, Group, Teacher, Schedule } from "@/lib/data"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
@@ -51,6 +51,12 @@ const addSupervision = (data: CreateSupervisionFormValues) => {
     const coordinator = users.find(u => u.id === parseInt(data.coordinatorId));
     const coordinatorName = coordinator ? `${coordinator.nombre} ${coordinator.apellido_paterno}`.trim() : "N/A";
     
+    const scheduleEntry = schedules.find(s => 
+        s.groupId === parseInt(data.groupId) &&
+        s.teacherId === parseInt(data.teacherId) &&
+        s.subjectId === parseInt(data.subjectId)
+    );
+
     const newSupervision = {
         id: newId,
         teacher: teacherName,
@@ -59,6 +65,8 @@ const addSupervision = (data: CreateSupervisionFormValues) => {
         date: data.date,
         status: "Programada",
         groupId: parseInt(data.groupId),
+        startTime: scheduleEntry?.startTime || "00:00",
+        endTime: scheduleEntry?.endTime || "00:00",
     };
     supervisions.push(newSupervision);
     supervisions.sort((a,b) => a.date.getTime() - b.date.getTime());

@@ -123,6 +123,8 @@ export interface Supervision {
     date: Date;
     status: 'Programada' | 'Completada';
     groupId: number;
+    startTime: string;
+    endTime: string;
 }
 
 // Function to get a future date based on a specific day of the week
@@ -138,11 +140,11 @@ const getNextDateForDay = (dayOfWeek: number) => { // 0=Sun, 1=Mon, ...
 
 
 export const supervisions: Supervision[] = [
-    { id: 1, teacher: 'Dr. Alan Turing', subject: 'Introducción a la Programación', coordinator: 'Coordinador User', date: getNextDateForDay(1), status: 'Programada', groupId: 1 }, // Next Monday
-    { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: getNextDateForDay(1), status: 'Programada', groupId: 2 }, // Next Monday
-    { id: 3, teacher: 'Dr. Andrew Tanenbaum', subject: 'Fundamentos de Hardware', coordinator: 'Coordinador User', date: getNextDateForDay(2), status: 'Programada', groupId: 1 }, // Next Tuesday
-    { id: 4, teacher: 'Dra. Ada Lovelace', subject: 'Estructuras de Datos', coordinator: 'Coordinador User', date: getNextDateForDay(3), status: 'Programada', groupId: 1 }, // Next Wednesday
-    { id: 5, teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Laura García', date: new Date("2024-05-20"), status: 'Completada', groupId: 2 },
+    { id: 1, teacher: 'Dr. Alan Turing', subject: 'Introducción a la Programación', coordinator: 'Coordinador User', date: getNextDateForDay(1), status: 'Programada', groupId: 1, startTime: '07:00', endTime: '09:00' }, 
+    { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: getNextDateForDay(1), status: 'Programada', groupId: 2, startTime: '16:00', endTime: '18:00' }, 
+    { id: 3, teacher: 'Dr. Andrew Tanenbaum', subject: 'Fundamentos de Hardware', coordinator: 'Coordinador User', date: getNextDateForDay(2), status: 'Programada', groupId: 1, startTime: '08:00', endTime: '10:00' },
+    { id: 4, teacher: 'Dra. Ada Lovelace', subject: 'Estructuras de Datos', coordinator: 'Coordinador User', date: getNextDateForDay(3), status: 'Programada', groupId: 1, startTime: '09:00', endTime: '11:00' }, 
+    { id: 5, teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Laura García', date: new Date("2024-05-20"), status: 'Completada', groupId: 2, startTime: '18:00', endTime: '20:00' },
 ];
 
 

@@ -127,6 +127,9 @@ export default function SupervisionPage() {
                       <p className="text-xs text-muted-foreground">
                         {supervision.subject}
                       </p>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {supervision.startTime} - {supervision.endTime}
+                      </p>
                     </div>
                   </div>
                 ))
@@ -147,6 +150,7 @@ export default function SupervisionPage() {
                             <TableRow>
                                 <TableHead>Docente</TableHead>
                                 <TableHead>Fecha</TableHead>
+                                <TableHead>Horario</TableHead>
                                 <TableHead>Grupo</TableHead>
                                 <TableHead>Estado</TableHead>
                             </TableRow>
@@ -156,6 +160,7 @@ export default function SupervisionPage() {
                                 <TableRow key={supervision.id}>
                                     <TableCell className="font-medium py-2">{supervision.teacher}</TableCell>
                                     <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
+                                    <TableCell className="py-2">{supervision.startTime} - {supervision.endTime}</TableCell>
                                     <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
                                     <TableCell className="py-2">{supervision.status}</TableCell>
                                 </TableRow>
