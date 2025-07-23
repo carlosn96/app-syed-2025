@@ -26,12 +26,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { supervisions, teachers, subjects, users, Subject } from "@/lib/data"
+import { supervisions, teachers as allTeachers, subjects, users, Subject, careers } from "@/lib/data"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useAuth } from "@/context/auth-context"
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 
 const createSupervisionSchema = z.object({
   teacher: z.string().min(1, "Por favor, seleccione un docente."),
@@ -74,6 +74,21 @@ export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void })
         subject: "",
     }
   });
+
+  const availableTeachers = useMemo(() => {
+    if (user?.rol === 'coordinator') {
+      const coordinatorName = `${user.nombre} ${user.apellido_paterno}`.trim();
+      const coordinatedCareers = careers
+        .filter(career => career.coordinator === coordinatorName)
+        .map(career => career.name);
+      
+      const coordinatedSubjects = subjects.filter(subject => coordinatedCareers.includes(subject.career));
+      const uniqueTeacherNames = [...new Set(coordinatedSubjects.map(subject => subject.teacher))];
+      
+      return allTeachers.filter(teacher => uniqueTeacherNames.includes(teacher.name));
+    }
+    return allTeachers;
+  }, [user]);
 
   const selectedTeacher = form.watch("teacher");
 
@@ -150,7 +165,7 @@ export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void })
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {teachers.map((teacher) => (
+                  {availableTeachers.map((teacher) => (
                     <SelectItem key={teacher.id} value={teacher.name}>
                       {teacher.name}
                     </SelectItem>
