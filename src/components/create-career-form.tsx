@@ -23,18 +23,21 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { careers, planteles, subjects } from "@/lib/data"
+import { careers, planteles, subjects, users } from "@/lib/data"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 const createCareerSchema = z.object({
   name: z.string().min(1, "El nombre de la carrera es requerido."),
   campus: z.string().min(1, "Por favor, seleccione un plantel."),
+  coordinator: z.string().min(1, "Por favor, seleccione un coordinador."),
   semesters: z.coerce.number().min(1, "Debe haber al menos 1 semestre.").max(12, "No puede haber más de 12 semestres."),
   subjectIds: z.array(z.number()).optional(),
 });
 
 type CreateCareerFormValues = z.infer<typeof createCareerSchema>;
+
+const coordinators = users.filter(u => u.rol === 'coordinator');
 
 // This is a mock function, in a real app this would be an API call
 const addCareer = (data: CreateCareerFormValues) => {
@@ -43,6 +46,7 @@ const addCareer = (data: CreateCareerFormValues) => {
         id: newId,
         name: data.name,
         campus: data.campus,
+        coordinator: data.coordinator,
         semesters: data.semesters,
     };
     careers.push(newCareer);
@@ -72,6 +76,7 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
     defaultValues: {
       name: "",
       campus: "",
+      coordinator: "",
       semesters: 8,
       subjectIds: [],
     },
@@ -131,6 +136,30 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
                   {planteles.map((plantel) => (
                     <SelectItem key={plantel.id} value={plantel.name}>
                       {plantel.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="coordinator"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Coordinador</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un coordinador" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {coordinators.map((coordinator) => (
+                    <SelectItem key={coordinator.id} value={`${coordinator.nombre} ${coordinator.apellido_paterno}`.trim()}>
+                       {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
