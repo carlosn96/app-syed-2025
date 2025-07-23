@@ -40,15 +40,27 @@ export default function SupervisionPage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
 
   const proximasSupervisiones = supervisions
-    .filter(s => s.date >= new Date())
+    .filter(s => s.date >= new Date() && s.status === 'Programada')
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .slice(0, 3);
+  
+  const proximasIds = new Set(proximasSupervisiones.map(s => s.id));
 
   const getGroupName = (groupId: number) => {
     return groups.find(g => g.id === groupId)?.name || "N/A";
   }
   
-  const supervisionDates = supervisions.map(s => s.date);
+  const supervisionEvents = supervisions.map(s => {
+    let color = '';
+    if (proximasIds.has(s.id)) {
+        color = 'bg-red-500';
+    } else if (s.status === 'Completada') {
+        color = 'bg-green-500';
+    } else if (s.status === 'Programada') {
+        color = 'bg-yellow-400';
+    }
+    return { date: s.date, color };
+  });
 
   return (
     <div className="flex flex-col gap-8">
@@ -85,9 +97,9 @@ export default function SupervisionPage() {
                     mode="single"
                     selected={date}
                     onSelect={setDate}
-                    className="h-full"
+                    className="h-full w-full"
                     locale={es}
-                    events={supervisionDates}
+                    events={supervisionEvents}
                 />
             </Card>
             <Card className="lg:col-span-1">

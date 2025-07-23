@@ -3,14 +3,14 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, DayProps, Day } from "react-day-picker"
+import { DayPicker, DayProps } from "react-day-picker"
 import { es } from 'date-fns/locale';
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
-  events?: Date[];
+  events?: { date: Date; color: string }[];
 };
 
 function Calendar({
@@ -21,16 +21,27 @@ function Calendar({
   ...props
 }: CalendarProps) {
   
-  const eventDates = new Set(events.map(date => new Date(date).setHours(0,0,0,0)));
+  const eventMap = new Map(events.map(event => [new Date(event.date).setHours(0,0,0,0), event.color]));
+
+  const DayWithEvent = (dayProps: DayProps) => {
+    const dayTime = dayProps.date.setHours(0,0,0,0);
+    const eventColor = eventMap.get(dayTime);
+
+    return (
+      <div className="relative h-full w-full flex items-center justify-center">
+        {eventColor && !dayProps.displayMonth.outside && (
+          <div className={cn("absolute inset-0 m-auto h-8 w-8 rounded-full", eventColor)} />
+        )}
+        <span className="relative z-10">{dayProps.date.getDate()}</span>
+      </div>
+    );
+  }
 
   return (
     <DayPicker
       locale={es}
       showOutsideDays={showOutsideDays}
       className={cn("p-3 h-full flex flex-col w-full", className)}
-      dayClassName={(date) => 
-        eventDates.has(new Date(date).setHours(0,0,0,0)) ? "day-event" : ""
-      }
       classNames={{
         months: "flex flex-col flex-grow",
         month: "space-y-4 flex flex-col flex-grow",
@@ -57,8 +68,7 @@ function Calendar({
         day_range_end: "day-range-end",
         day_selected:
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
-        day_event: "bg-primary/80 text-primary-foreground",
+        day_today: "bg-accent text-accent-foreground rounded-full",
         day_outside:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
         day_disabled: "text-muted-foreground opacity-50",
@@ -74,7 +84,7 @@ function Calendar({
         IconRight: ({ className, ...props }) => (
           <ChevronRight className={cn("h-4 w-4", className)} {...props} />
         ),
-        Day: ({...dayProps}) => <Day {...dayProps} className="h-full w-full" />
+        Day: DayWithEvent,
       }}
       {...props}
     />
