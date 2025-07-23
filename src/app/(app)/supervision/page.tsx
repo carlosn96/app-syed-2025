@@ -83,7 +83,7 @@ export default function SupervisionPage() {
                     mode="single"
                     selected={date}
                     onSelect={setDate}
-                    className="w-full"
+                    className="w-full h-full"
                     locale={es}
                     disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                 />
