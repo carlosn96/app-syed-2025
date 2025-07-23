@@ -9,7 +9,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -25,15 +24,7 @@ import { CreateSupervisionForm } from "@/components/create-supervision-form"
 import { supervisions } from "@/lib/data"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { Badge } from "@/components/ui/badge"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Calendar } from "@/components/ui/calendar"
 
 export default function SupervisionPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -64,58 +55,54 @@ export default function SupervisionPage() {
         </Dialog>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Supervisiones Programadas</CardTitle>
-          <CardDescription>
-            Estas son las supervisiones que han sido agendadas.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Docente</TableHead>
-                <TableHead>Materia</TableHead>
-                <TableHead>Coordinador</TableHead>
-                <TableHead>Estado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {supervisions.map((supervision) => (
-                <TableRow key={supervision.id}>
-                  <TableCell>
-                    {format(supervision.date, "PPP", { locale: es })}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {supervision.teacher}
-                  </TableCell>
-                  <TableCell>{supervision.subject}</TableCell>
-                  <TableCell>{supervision.coordinator}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        supervision.status === "Completada"
-                          ? "default"
-                          : "secondary"
-                      }
-                       className={supervision.status === "Completada" ? "bg-green-600" : ""}
-                    >
-                      {supervision.status}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-         <CardFooter>
-          <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-{supervisions.length}</strong> de <strong>{supervisions.length}</strong> supervisiones
-          </div>
-        </CardFooter>
-      </Card>
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+            <Card>
+                <CardContent className="p-0">
+                    <Calendar
+                        mode="single"
+                        className="p-3 w-full"
+                        classNames={{
+                            months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                            month: "space-y-4 w-full",
+                            table: "w-full border-collapse space-y-1",
+                            head_row: "flex justify-around",
+                            row: "flex w-full mt-2 justify-around",
+                        }}
+                    />
+                </CardContent>
+            </Card>
+        </div>
+        <div className="lg:col-span-1">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Supervisiones Programadas</CardTitle>
+                    <CardDescription>Supervisiones agendadas.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-4">
+                    {supervisions.map((supervision) => (
+                        <div key={supervision.id} className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50">
+                            <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-md h-12 w-12 text-sm">
+                                <span>{format(supervision.date, "LLL", { locale: es })}</span>
+                                <span className="font-bold text-lg">{supervision.date.getDate()}</span>
+                            </div>
+                            <div className="grid gap-1">
+                                <p className="text-sm font-medium leading-none">
+                                    {supervision.teacher}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {supervision.subject}
+                                </p>
+                                 <p className="text-xs text-muted-foreground">
+                                    Coordina: {supervision.coordinator}
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+        </div>
+      </div>
     </div>
   )
 }
