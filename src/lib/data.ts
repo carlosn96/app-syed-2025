@@ -125,10 +125,26 @@ export interface Supervision {
     groupId: number;
 }
 
+// Function to get a future date based on a specific day of the week
+const getNextDateForDay = (dayOfWeek: number) => { // 0=Sun, 1=Mon, ...
+  const today = new Date();
+  const resultDate = new Date(today.getTime());
+  resultDate.setDate(today.getDate() + (dayOfWeek + 7 - today.getDay()) % 7);
+  if (resultDate <= today) {
+    resultDate.setDate(resultDate.getDate() + 7);
+  }
+  return resultDate;
+};
+
+
 export const supervisions: Supervision[] = [
-    { id: 1, teacher: 'Dr. Alan Turing', subject: 'Introducción a la Programación', coordinator: 'Coordinador User', date: new Date(), status: 'Completada', groupId: 1 },
-    { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: new Date(new Date().setDate(new Date().getDate() + 2)), status: 'Programada', groupId: 2 },
+    { id: 1, teacher: 'Dr. Alan Turing', subject: 'Introducción a la Programación', coordinator: 'Coordinador User', date: getNextDateForDay(1), status: 'Programada', groupId: 1 }, // Next Monday
+    { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: getNextDateForDay(1), status: 'Programada', groupId: 2 }, // Next Monday
+    { id: 3, teacher: 'Dr. Andrew Tanenbaum', subject: 'Fundamentos de Hardware', coordinator: 'Coordinador User', date: getNextDateForDay(2), status: 'Programada', groupId: 1 }, // Next Tuesday
+    { id: 4, teacher: 'Dra. Ada Lovelace', subject: 'Estructuras de Datos', coordinator: 'Coordinador User', date: getNextDateForDay(3), status: 'Programada', groupId: 1 }, // Next Wednesday
+    { id: 5, teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Laura García', date: new Date("2024-05-20"), status: 'Completada', groupId: 2 },
 ];
+
 
 export const evaluations = [
   { id: 1, student: 'Jane Smith', feedback: '¡Clase genial, muy participativa!', rating: 5, date: '2024-05-10' },
