@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react"
-import { PlusCircle } from "lucide-react"
+import { Pencil, PlusCircle, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -119,7 +119,7 @@ export default function SupervisionPage() {
                         <p className="text-xs text-muted-foreground font-semibold">
                             {supervision.coordinator}
                         </p>
-                        <p className="text-xs text-muted-foreground font-mono">
+                        <p className="text-xs text-primary font-mono">
                             {supervision.startTime} - {supervision.endTime}
                         </p>
                         </div>
@@ -156,7 +156,7 @@ export default function SupervisionPage() {
                                     <TableCell className="font-medium py-2">{supervision.teacher}</TableCell>
                                     <TableCell className="font-medium py-2">{supervision.coordinator}</TableCell>
                                     <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
-                                    <TableCell className="py-2">{supervision.startTime} - {supervision.endTime}</TableCell>
+                                    <TableCell className="py-2 text-primary font-mono">{supervision.startTime} - {supervision.endTime}</TableCell>
                                     <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
                                     <TableCell className="py-2">
                                         <Badge variant={supervision.status === 'Programada' ? 'warning' : 'success'}>
