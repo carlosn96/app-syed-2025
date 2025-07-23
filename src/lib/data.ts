@@ -110,6 +110,11 @@ export const teachers = [
   { id: 22, name: 'Dr. Isaac Newton' },
 ];
 
+export const supervisions = [
+    { id: 1, teacher: 'Dr. Alan Turing', subject: 'Introducción a la Programación', coordinator: 'Coordinador User', date: new Date(), status: 'Completada' },
+    { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: new Date(new Date().setDate(new Date().getDate() + 2)), status: 'Programada' },
+];
+
 export const evaluations = [
   { id: 1, student: 'Jane Smith', feedback: '¡Clase genial, muy participativa!', rating: 5, date: '2024-05-10' },
   { id: 2, student: 'Usuario Alumno', feedback: 'El profesor tiene mucho conocimiento pero el ritmo es un poco rápido.', rating: 4, date: '2024-05-11' },

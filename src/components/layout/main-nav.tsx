@@ -10,6 +10,7 @@ import {
   ClipboardEdit,
   LayoutDashboard,
   Library,
+  ShieldCheck,
   Star,
   Users,
 } from "lucide-react"
@@ -20,7 +21,6 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/context/auth-context"
-import { cn } from "@/lib/utils"
 
 const allLinks = [
   { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
@@ -29,6 +29,7 @@ const allLinks = [
   { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
   { href: "/subjects", label: "Materias", icon: Library, roles: ['administrator', 'coordinator', 'teacher'] },
   { href: "/groups", label: "Grupos", icon: Users, roles: ['administrator', 'coordinator'] },
+  { href: "/supervision", label: "Supervisión", icon: ShieldCheck, roles: ['administrator', 'coordinator'] },
   { href: "/evaluaciones", label: "Evaluaciones", icon: CalendarDays, roles: ['administrator', 'coordinator'] },
   { href: "/feedback", label: "Retroalimentación", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
   { href: "/evaluation", label: "Evaluación", icon: ClipboardEdit, roles: ['administrator', 'coordinator', 'student'] },

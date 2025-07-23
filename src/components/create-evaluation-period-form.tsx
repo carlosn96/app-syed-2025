@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useAuth } from "@/context/auth-context"
+import { Input } from "./ui/input"
 
 const createEvaluationPeriodSchema = z.object({
   groupId: z.string().min(1, "Por favor, seleccione un grupo."),
@@ -99,7 +100,7 @@ export function CreateEvaluationPeriodForm({ onSuccess }: { onSuccess?: () => vo
   }, [user]);
 
   useEffect(() => {
-    form.setValue("subjectId", "");
+    form.resetField("subjectId", { defaultValue: "" });
     setSelectedTeacher("");
     if (selectedGroupId) {
       const group = groups.find(g => g.id === parseInt(selectedGroupId));

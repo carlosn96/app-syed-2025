@@ -39,7 +39,7 @@ export default function EvaluationsPage() {
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Programar Evaluación
+              Programar Período
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
@@ -74,7 +74,7 @@ export default function EvaluationsPage() {
         <div className="lg:col-span-1">
             <Card>
                 <CardHeader>
-                    <CardTitle>Evaluaciones Programadas</CardTitle>
+                    <CardTitle>Períodos Programados</CardTitle>
                     <CardDescription>Períodos de evaluación activos y futuros.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4">
