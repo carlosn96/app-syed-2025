@@ -141,7 +141,7 @@ export default function SupervisionPage() {
                 <CardDescription>Historial y próximas supervisiones.</CardDescription>
             </CardHeader>
             <CardContent>
-                <ScrollArea className="h-[280px]">
+                <ScrollArea className="h-[320px]">
                     <Table>
                         <TableHeader>
                             <TableRow>
