@@ -78,103 +78,101 @@ export default function SupervisionPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <Card>
+                <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    className="p-3 w-full"
+                    locale={es}
+                    disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
+                    classNames={{
+                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        month: "space-y-4 w-full",
+                        caption: "flex justify-center pt-1 relative items-center w-full",
+                        table: "w-full border-collapse space-y-1",
+                        head_row: "flex justify-around",
+                        row: "flex w-full mt-2 justify-around",
+                    }}
+                    />
+            </Card>
+          </div>
+          <div className="lg:col-span-1">
+              <Card>
+                  <CardHeader>
+                  <CardTitle>Supervisiones Próximas</CardTitle>
+                  <CardDescription>Eventos de supervisión más cercanos.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-3">
+                  {proximasSupervisiones.length > 0 ? (
+                      proximasSupervisiones.map((supervision) => (
+                      <div
+                          key={supervision.id}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50"
+                      >
+                          <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-md h-10 w-10 text-xs shrink-0">
+                          <span className="capitalize">
+                              {format(supervision.date, "LLL", { locale: es })}
+                          </span>
+                          <span className="font-bold text-base">
+                              {supervision.date.getDate()}
+                          </span>
+                          </div>
+                          <div className="grid gap-0.5">
+                          <p className="text-sm font-medium leading-none">
+                              {supervision.teacher}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                              {supervision.subject}
+                          </p>
+                          <p className="text-xs text-muted-foreground font-mono">
+                              {supervision.startTime} - {supervision.endTime}
+                          </p>
+                          </div>
+                      </div>
+                      ))
+                  ) : (
+                      <p className="text-sm text-muted-foreground text-center">No hay supervisiones próximas.</p>
+                  )}
+                  </CardContent>
+              </Card>
+          </div>
+        </div>
+
         <Card>
-            <CardContent className="p-0">
-            <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="p-3 w-full"
-                locale={es}
-                disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-                classNames={{
-                    months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                    month: "space-y-4 w-full",
-                    caption: "flex justify-center pt-1 relative items-center w-full",
-                    table: "w-full border-collapse space-y-1",
-                    head_row: "flex justify-around",
-                    row: "flex w-full mt-2 justify-around",
-                }}
-                />
+            <CardHeader>
+                <CardTitle>Lista de Supervisiones</CardTitle>
+                <CardDescription>Historial y próximas supervisiones.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ScrollArea className="h-auto max-h-[400px]">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Docente</TableHead>
+                                <TableHead>Fecha</TableHead>
+                                <TableHead>Horario</TableHead>
+                                <TableHead>Grupo</TableHead>
+                                <TableHead>Estado</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {supervisions.map((supervision) => (
+                                <TableRow key={supervision.id}>
+                                    <TableCell className="font-medium py-2">{supervision.teacher}</TableCell>
+                                    <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
+                                    <TableCell className="py-2">{supervision.startTime} - {supervision.endTime}</TableCell>
+                                    <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
+                                    <TableCell className="py-2">{supervision.status}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
             </CardContent>
         </Card>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-1">
-                <Card>
-                    <CardHeader>
-                    <CardTitle>Supervisiones Próximas</CardTitle>
-                    <CardDescription>Eventos de supervisión más cercanos.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid gap-3">
-                    {proximasSupervisiones.length > 0 ? (
-                        proximasSupervisiones.map((supervision) => (
-                        <div
-                            key={supervision.id}
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50"
-                        >
-                            <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-md h-10 w-10 text-xs shrink-0">
-                            <span className="capitalize">
-                                {format(supervision.date, "LLL", { locale: es })}
-                            </span>
-                            <span className="font-bold text-base">
-                                {supervision.date.getDate()}
-                            </span>
-                            </div>
-                            <div className="grid gap-0.5">
-                            <p className="text-sm font-medium leading-none">
-                                {supervision.teacher}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                                {supervision.subject}
-                            </p>
-                            <p className="text-xs text-muted-foreground font-mono">
-                                {supervision.startTime} - {supervision.endTime}
-                            </p>
-                            </div>
-                        </div>
-                        ))
-                    ) : (
-                        <p className="text-sm text-muted-foreground text-center">No hay supervisiones próximas.</p>
-                    )}
-                    </CardContent>
-                </Card>
-            </div>
-            <div className="lg:col-span-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Lista de Supervisiones</CardTitle>
-                        <CardDescription>Historial y próximas supervisiones.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ScrollArea className="h-auto max-h-[400px]">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Docente</TableHead>
-                                        <TableHead>Fecha</TableHead>
-                                        <TableHead>Horario</TableHead>
-                                        <TableHead>Grupo</TableHead>
-                                        <TableHead>Estado</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {supervisions.map((supervision) => (
-                                        <TableRow key={supervision.id}>
-                                            <TableCell className="font-medium py-2">{supervision.teacher}</TableCell>
-                                            <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
-                                            <TableCell className="py-2">{supervision.startTime} - {supervision.endTime}</TableCell>
-                                            <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
-                                            <TableCell className="py-2">{supervision.status}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </ScrollArea>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
       </div>
     </div>
   )
