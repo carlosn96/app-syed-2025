@@ -78,7 +78,7 @@ export default function SupervisionPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="h-full">
+        <Card>
             <Calendar
                 mode="single"
                 selected={date}
@@ -90,7 +90,7 @@ export default function SupervisionPage() {
                     months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                     month: "space-y-4 w-full",
                     caption: "flex justify-center pt-1 relative items-center w-full",
-                    table: "w-full border-collapse space-y-1 h-full",
+                    table: "w-full border-collapse space-y-1",
                     head_row: "flex justify-around",
                     row: "flex w-full mt-2 justify-around",
                     day: "h-auto aspect-video",
