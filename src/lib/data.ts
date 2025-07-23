@@ -28,10 +28,10 @@ export const planteles = [
 ];
 
 export const careers = [
-  { id: 1, name: 'Ciencias de la Computación', campus: 'Plantel Principal', semesters: 8 },
-  { id: 2, name: 'Administración de Empresas', campus: 'Plantel Principal', semesters: 8 },
-  { id: 3, name: 'Ingeniería Mecánica', campus: 'Plantel Norte', semesters: 10 },
-  { id: 4, name: 'Bellas Artes', campus: 'Plantel Sur', semesters: 6 },
+  { id: 1, name: 'Ciencias de la Computación', campus: 'Plantel Principal', semesters: 8, coordinator: 'Coordinador User' },
+  { id: 2, name: 'Administración de Empresas', campus: 'Plantel Principal', semesters: 8, coordinator: 'Coordinador User' },
+  { id: 3, name: 'Ingeniería Mecánica', campus: 'Plantel Norte', semesters: 10, coordinator: 'Coordinador User' },
+  { id: 4, name: 'Bellas Artes', campus: 'Plantel Sur', semesters: 6, coordinator: 'Coordinador User' },
 ];
 
 export interface Subject {

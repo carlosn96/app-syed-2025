@@ -77,6 +77,7 @@ export default function CareersPage() {
                   <div>
                     <CardTitle>{career.name}</CardTitle>
                     <CardDescription>{career.campus}</CardDescription>
+                     <p className="text-xs text-muted-foreground pt-1">{career.coordinator}</p>
                   </div>
                   <div className="flex gap-2">
                     <Button size="icon" variant="warning">
