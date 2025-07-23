@@ -26,16 +26,16 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { supervisions, subjects, users, careers, teachers, Subject } from "@/lib/data"
+import { supervisions, subjects, users, careers, teachers as allTeachers, Subject, User } from "@/lib/data"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useAuth } from "@/context/auth-context"
 
 const createSupervisionSchema = z.object({
+  coordinatorId: z.string().min(1, "Por favor, seleccione un coordinador."),
   teacherId: z.string().min(1, "Por favor, seleccione un docente."),
   subjectId: z.string().min(1, "Por favor, seleccione una materia."),
-  coordinatorId: z.string().min(1, "Por favor, seleccione un coordinador."),
   date: z.date({
     required_error: "Se requiere una fecha para la supervisión.",
   }),
@@ -45,7 +45,7 @@ type CreateSupervisionFormValues = z.infer<typeof createSupervisionSchema>;
 
 const addSupervision = (data: CreateSupervisionFormValues) => {
     const newId = Math.max(...supervisions.map(s => s.id), 0) + 1;
-    const teacherName = teachers.find(t => t.id === parseInt(data.teacherId))?.name || "N/A";
+    const teacherName = allTeachers.find(t => t.id === parseInt(data.teacherId))?.name || "N/A";
     const subjectName = subjects.find(s => s.id === parseInt(data.subjectId))?.name || "N/A";
     const coordinator = users.find(u => u.id === parseInt(data.coordinatorId));
     const coordinatorName = coordinator ? `${coordinator.nombre} ${coordinator.apellido_paterno}`.trim() : "N/A";
@@ -67,41 +67,49 @@ export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void })
   const { toast } = useToast();
   const { user } = useAuth();
   
+  const [availableTeachers, setAvailableTeachers] = useState<typeof allTeachers>([]);
   const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
-
+  
+  const coordinators = useMemo(() => users.filter(u => u.rol === 'coordinator'), []);
   const defaultCoordinator = user?.rol === 'coordinator' ? String(user.id) : "";
 
   const form = useForm<CreateSupervisionFormValues>({
     resolver: zodResolver(createSupervisionSchema),
     defaultValues: {
+      coordinatorId: defaultCoordinator,
       teacherId: "",
       subjectId: "",
-      coordinatorId: defaultCoordinator,
     }
   });
 
+  const selectedCoordinatorId = form.watch("coordinatorId");
   const selectedTeacherId = form.watch("teacherId");
   
-  const coordinators = useMemo(() => users.filter(u => u.rol === 'coordinator'), []);
-  
-  const availableTeachers = useMemo(() => {
-    if (user?.rol === 'coordinator') {
-      const coordinatorName = `${user.nombre} ${user.apellido_paterno}`.trim();
-      const coordinatedCareers = careers
-        .filter(career => career.coordinator === coordinatorName)
-        .map(career => career.name);
-      
-      const relevantSubjects = subjects.filter(subject => coordinatedCareers.includes(subject.career));
-      const teacherNames = [...new Set(relevantSubjects.map(subject => subject.teacher))];
-      return teachers.filter(teacher => teacherNames.includes(teacher.name));
+  useEffect(() => {
+    form.resetField("teacherId", { defaultValue: "" });
+    form.resetField("subjectId", { defaultValue: "" });
+    setAvailableSubjects([]);
+
+    if (selectedCoordinatorId) {
+        const coordinatorUser = users.find(u => u.id === parseInt(selectedCoordinatorId));
+        if (coordinatorUser) {
+            const coordinatorName = `${coordinatorUser.nombre} ${coordinatorUser.apellido_paterno}`.trim();
+            const coordinatedCareers = careers
+                .filter(c => c.coordinator === coordinatorName)
+                .map(c => c.name);
+            const relevantSubjects = subjects.filter(s => coordinatedCareers.includes(s.career));
+            const teacherNames = [...new Set(relevantSubjects.map(s => s.teacher))];
+            setAvailableTeachers(allTeachers.filter(t => teacherNames.includes(t.name)));
+        }
+    } else {
+        setAvailableTeachers([]);
     }
-    return teachers;
-  }, [user]);
+  }, [selectedCoordinatorId, form]);
 
   useEffect(() => {
     form.resetField("subjectId", { defaultValue: "" });
     if (selectedTeacherId) {
-      const teacherName = teachers.find(t => t.id === parseInt(selectedTeacherId))?.name;
+      const teacherName = allTeachers.find(t => t.id === parseInt(selectedTeacherId))?.name;
       if (teacherName) {
         setAvailableSubjects(subjects.filter(s => s.teacher === teacherName));
       }
@@ -117,7 +125,7 @@ export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void })
         title: "Supervisión Agendada",
         description: `La supervisión para el ${format(data.date, "PPP", { locale: es })} ha sido agendada.`,
       });
-      form.reset();
+      form.reset({ coordinatorId: defaultCoordinator });
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
@@ -135,11 +143,39 @@ export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void })
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
+          name="coordinatorId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Coordinador</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={user?.rol === 'coordinator'}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un coordinador" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {coordinators.map((coordinator) => (
+                    <SelectItem key={coordinator.id} value={String(coordinator.id)}>
+                      {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="teacherId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Docente a Evaluar</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select 
+                onValueChange={field.onChange} 
+                value={field.value}
+                disabled={!selectedCoordinatorId}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione un docente" />
@@ -177,30 +213,6 @@ export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void })
                   {availableSubjects.map((subject) => (
                     <SelectItem key={subject.id} value={String(subject.id)}>
                       {subject.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-         <FormField
-          control={form.control}
-          name="coordinatorId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Coordinador</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={user?.rol === 'coordinator'}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un coordinador" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {coordinators.map((coordinator) => (
-                    <SelectItem key={coordinator.id} value={String(coordinator.id)}>
-                      {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
