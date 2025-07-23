@@ -40,7 +40,7 @@ export default function SupervisionPage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
 
   const proximasSupervisiones = supervisions
-    .filter(s => s.date >= new Date() && s.status === 'Programada')
+    .filter(s => s.status === 'Programada' && s.date >= new Date())
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .slice(0, 3);
   
@@ -50,17 +50,23 @@ export default function SupervisionPage() {
     return groups.find(g => g.id === groupId)?.name || "N/A";
   }
   
-  const supervisionEvents = supervisions.map(s => {
-    let color = '';
-    if (proximasIds.has(s.id)) {
-        color = 'bg-red-500';
-    } else if (s.status === 'Completada') {
-        color = 'bg-green-500';
-    } else if (s.status === 'Programada') {
-        color = 'bg-yellow-400';
-    }
-    return { date: s.date, color };
-  });
+  const eventModifiers = {
+    proximas: supervisions
+      .filter(s => proximasIds.has(s.id))
+      .map(s => s.date),
+    completadas: supervisions
+      .filter(s => s.status === 'Completada' && !proximasIds.has(s.id))
+      .map(s => s.date),
+    programadas: supervisions
+      .filter(s => s.status === 'Programada' && !proximasIds.has(s.id))
+      .map(s => s.date),
+  };
+
+  const modifierClassNames = {
+    proximas: "event-prox",
+    completadas: "event-comp",
+    programadas: "event-prog",
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -92,14 +98,16 @@ export default function SupervisionPage() {
 
       <div className="grid grid-cols-1 gap-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 h-full">
                 <Calendar
                     mode="single"
                     selected={date}
                     onSelect={setDate}
-                    className="w-full"
+                    className="w-full h-full"
                     locale={es}
-                    events={supervisionEvents}
+                    modifiers={eventModifiers}
+                    modifierClassNames={modifierClassNames}
+                    disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                 />
             </Card>
             <Card className="lg:col-span-1">
@@ -114,7 +122,7 @@ export default function SupervisionPage() {
                         key={supervision.id}
                         className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50"
                     >
-                        <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-md h-10 w-10 text-xs shrink-0">
+                        <div className="flex flex-col items-center justify-center bg-destructive text-destructive-foreground rounded-md h-10 w-10 text-xs shrink-0">
                         <span className="capitalize">
                             {format(supervision.date, "LLL", { locale: es })}
                         </span>

@@ -3,27 +3,77 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, DayProps } from "react-day-picker"
+import { DayPicker } from "react-day-picker"
 import { es } from 'date-fns/locale';
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
-  events?: { date: Date; color: string }[];
-};
+export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  events = [],
   ...props
 }: CalendarProps) {
   
-  const eventMap = new Map(events.map(event => [new Date(event.date).setHours(0,0,0,0), event.color]));
-
   return (
+    <>
+    <style>{`
+      .rdp-day_event-prox { 
+        position: relative;
+      }
+      .rdp-day_event-prox::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background-color: hsl(var(--destructive) / 0.8);
+        z-index: 0;
+      }
+      .rdp-day_event-comp { 
+        position: relative;
+      }
+      .rdp-day_event-comp::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background-color: hsl(var(--chart-4));
+        z-index: 0;
+      }
+      .rdp-day_event-prog { 
+        position: relative;
+      }
+      .rdp-day_event-prog::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background-color: hsl(var(--chart-5));
+        z-index: 0;
+      }
+      .rdp-day_selected::before {
+        display: none;
+      }
+      .rdp-button {
+         position: relative;
+         z-index: 1;
+      }
+    `}</style>
     <DayPicker
       locale={es}
       showOutsideDays={showOutsideDays}
@@ -49,7 +99,7 @@ function Calendar({
         cell: "w-full h-full text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-full w-full p-0 font-normal aria-selected:opacity-100 relative z-10"
+          "h-full w-full p-0 font-normal aria-selected:opacity-100 relative"
         ),
         day_range_end: "day-range-end",
         day_selected:
@@ -70,24 +120,12 @@ function Calendar({
         IconRight: ({ className, ...props }) => (
           <ChevronRight className={cn("h-4 w-4", className)} {...props} />
         ),
-        Day: ({ date, ...dayProps }) => {
-            const dayTime = date.setHours(0, 0, 0, 0);
-            const eventColor = eventMap.get(dayTime);
-            return (
-              <div className="relative h-full w-full flex items-center justify-center">
-                {eventColor && !dayProps.displayMonth.outside && (
-                  <div className={cn("absolute inset-0 m-auto h-8 w-8 rounded-full z-0", eventColor)} />
-                )}
-                <DayPicker.Day date={date} {...dayProps} />
-              </div>
-            );
-        },
       }}
       {...props}
     />
+    </>
   )
 }
 Calendar.displayName = "Calendar"
 
 export { Calendar }
-
