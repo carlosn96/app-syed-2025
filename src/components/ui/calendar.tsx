@@ -1,21 +1,42 @@
+
 "use client"
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { DayPicker, DayProps } from "react-day-picker"
 import { es } from 'date-fns/locale';
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  events?: Date[];
+};
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  events = [],
   ...props
 }: CalendarProps) {
+  
+  const eventDates = new Set(events.map(date => date.setHours(0,0,0,0)));
+
+  const DayWithEvent = (dayProps: DayProps) => {
+    const { date } = dayProps;
+    const isEventDay = eventDates.has(new Date(date).setHours(0,0,0,0));
+    
+    return (
+      <div className="relative">
+        <DayPicker.Day {...dayProps} />
+        {isEventDay && !dayProps.displayMonth.outside && (
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-primary" />
+        )}
+      </div>
+    )
+  }
+
   return (
     <DayPicker
       locale={es}
@@ -48,7 +69,7 @@ function Calendar({
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
         day_today: "bg-accent text-accent-foreground",
         day_outside:
-          "day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
+          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
         day_disabled: "text-muted-foreground opacity-50",
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
@@ -62,6 +83,7 @@ function Calendar({
         IconRight: ({ className, ...props }) => (
           <ChevronRight className={cn("h-4 w-4", className)} {...props} />
         ),
+        Day: DayWithEvent,
       }}
       {...props}
     />

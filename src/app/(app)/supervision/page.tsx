@@ -47,6 +47,8 @@ export default function SupervisionPage() {
   const getGroupName = (groupId: number) => {
     return groups.find(g => g.id === groupId)?.name || "N/A";
   }
+  
+  const supervisionDates = supervisions.map(s => s.date);
 
   return (
     <div className="flex flex-col gap-8">
@@ -85,14 +87,7 @@ export default function SupervisionPage() {
                     onSelect={setDate}
                     className="p-3"
                     locale={es}
-                    classNames={{
-                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                        month: "space-y-4 w-full",
-                        caption: "flex justify-center pt-1 relative items-center w-full",
-                        table: "w-full border-collapse space-y-1",
-                        head_row: "flex justify-around",
-                        row: "flex w-full mt-2 justify-around",
-                    }}
+                    events={supervisionDates}
                 />
             </Card>
             <Card className="lg:col-span-1">
