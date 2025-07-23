@@ -1,14 +1,22 @@
 
 "use client"
 
+import { useState } from "react"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { schedules, teachers, groups, subjects } from "@/lib/data"
-import React, { useState } from "react"
 import {
   Select,
   SelectContent,
@@ -103,45 +111,51 @@ export default function SchedulesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-        {daysOfWeek.map((day) => (
-          <Card key={day} className="flex flex-col">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-center font-headline text-xl">
-                {day}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3 overflow-y-auto">
-              {getSchedulesForDay(day).length > 0 ? (
-                getSchedulesForDay(day).map((schedule) => (
-                  <div
-                    key={schedule.id}
-                    className="rounded-lg border bg-card p-3 shadow-sm"
-                  >
-                    <p className="font-semibold">
-                      {getEntityName("subject", schedule.subjectId)}
-                    </p>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
+        {daysOfWeek.map((day) => {
+          const dailySchedules = getSchedulesForDay(day);
+          return (
+            <Card key={day} className="flex flex-col">
+              <CardHeader className="pb-4">
+                <CardTitle className="font-headline text-xl">
+                  {day}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {dailySchedules.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[150px]">Hora</TableHead>
+                        <TableHead>Materia</TableHead>
+                        <TableHead>Docente</TableHead>
+                        <TableHead>Grupo</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dailySchedules.map((schedule) => (
+                        <TableRow key={schedule.id}>
+                          <TableCell className="font-medium text-primary">
+                            {schedule.startTime} - {schedule.endTime}
+                          </TableCell>
+                          <TableCell className="font-semibold">{getEntityName("subject", schedule.subjectId)}</TableCell>
+                          <TableCell>{getEntityName("teacher", schedule.teacherId)}</TableCell>
+                          <TableCell>{getEntityName("group", schedule.groupId)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="flex h-24 items-center justify-center">
                     <p className="text-sm text-muted-foreground">
-                      {getEntityName("teacher", schedule.teacherId)}
-                    </p>
-                     <p className="text-xs text-muted-foreground font-medium">
-                      Grupo: {getEntityName("group", schedule.groupId)}
-                    </p>
-                    <p className="mt-2 text-sm font-medium text-primary">
-                      {schedule.startTime} - {schedule.endTime}
+                      No hay clases programadas.
                     </p>
                   </div>
-                ))
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-sm text-muted-foreground">
-                    No hay clases programadas.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   )
