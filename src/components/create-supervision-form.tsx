@@ -70,11 +70,20 @@ interface CreateSupervisionFormProps {
   selectedDate?: Date;
 }
 
+const dayMapping: { [key: string]: number } = {
+  'Lunes': 1,
+  'Martes': 2,
+  'Miércoles': 3,
+  'Jueves': 4,
+  'Viernes': 5,
+};
+
 // Helper to get available options based on schedules
-const getAvailableOptions = (coordinatorId?: string, groupId?: string, teacherId?: string) => {
+const getAvailableOptions = (coordinatorId?: string, groupId?: string, teacherId?: string, subjectId?: string) => {
   let availableGroups: Group[] = [];
   let availableTeachers: Teacher[] = [];
   let availableSubjects: Subject[] = [];
+  let scheduledDay: number | null = null;
 
   const coordinatorUser = users.find(u => u.id === Number(coordinatorId));
   if (coordinatorUser) {
@@ -87,27 +96,41 @@ const getAvailableOptions = (coordinatorId?: string, groupId?: string, teacherId
       const scheduledTeachers = schedules
           .filter(s => s.groupId === Number(groupId))
           .map(s => s.teacherId);
-      availableTeachers = allTeachers.filter(t => scheduledTeachers.includes(t.id));
+      const uniqueTeacherIds = [...new Set(scheduledTeachers)];
+      availableTeachers = allTeachers.filter(t => uniqueTeacherIds.includes(t.id));
   }
 
   if (groupId && teacherId) {
       const scheduledSubjects = schedules
           .filter(s => s.groupId === Number(groupId) && s.teacherId === Number(teacherId))
           .map(s => s.subjectId);
-      availableSubjects = subjects.filter(s => scheduledSubjects.includes(s.id));
+      const uniqueSubjectIds = [...new Set(scheduledSubjects)];
+      availableSubjects = subjects.filter(s => uniqueSubjectIds.includes(s.id));
   }
 
-  return { availableGroups, availableTeachers, availableSubjects };
+  if (groupId && teacherId && subjectId) {
+      const schedule = schedules.find(s => 
+          s.groupId === Number(groupId) && 
+          s.teacherId === Number(teacherId) && 
+          s.subjectId === Number(subjectId)
+      );
+      if (schedule) {
+          scheduledDay = dayMapping[schedule.dayOfWeek];
+      }
+  }
+
+  return { availableGroups, availableTeachers, availableSubjects, scheduledDay };
 };
 
 
-export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervisionFormProps) {
+export function CreateSupervisionForm({ onSuccess, selectedDate: initialSelectedDate }: CreateSupervisionFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   
   const [availableGroups, setAvailableGroups] = useState<Group[]>([]);
   const [availableTeachers, setAvailableTeachers] = useState<Teacher[]>([]);
   const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
+  const [scheduledDay, setScheduledDay] = useState<number | null>(null);
   
   const coordinators = useMemo(() => users.filter(u => u.rol === 'coordinator'), []);
   const defaultCoordinator = user?.rol === 'coordinator' ? String(user.id) : "";
@@ -119,46 +142,60 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
       groupId: "",
       teacherId: "",
       subjectId: "",
-      date: selectedDate,
+      date: initialSelectedDate,
     }
   });
   
   useEffect(() => {
-    if (selectedDate) {
-        form.setValue("date", selectedDate);
+    if (initialSelectedDate) {
+        form.setValue("date", initialSelectedDate);
     }
-  }, [selectedDate, form]);
+  }, [initialSelectedDate, form]);
 
   const selectedCoordinatorId = form.watch("coordinatorId");
   const selectedGroupId = form.watch("groupId");
   const selectedTeacherId = form.watch("teacherId");
+  const selectedSubjectId = form.watch("subjectId");
   
   useEffect(() => {
     form.resetField("groupId", { defaultValue: "" });
     form.resetField("teacherId", { defaultValue: "" });
     form.resetField("subjectId", { defaultValue: "" });
+    form.resetField("date");
     
     const { availableGroups } = getAvailableOptions(selectedCoordinatorId);
     setAvailableGroups(availableGroups);
     setAvailableTeachers([]);
     setAvailableSubjects([]);
+    setScheduledDay(null);
   }, [selectedCoordinatorId, form]);
 
   useEffect(() => {
     form.resetField("teacherId", { defaultValue: "" });
     form.resetField("subjectId", { defaultValue: "" });
+    form.resetField("date");
     
     const { availableTeachers } = getAvailableOptions(selectedCoordinatorId, selectedGroupId);
     setAvailableTeachers(availableTeachers);
     setAvailableSubjects([]);
+    setScheduledDay(null);
   }, [selectedCoordinatorId, selectedGroupId, form]);
 
   useEffect(() => {
     form.resetField("subjectId", { defaultValue: "" });
-    
+    form.resetField("date");
+
     const { availableSubjects } = getAvailableOptions(selectedCoordinatorId, selectedGroupId, selectedTeacherId);
     setAvailableSubjects(availableSubjects);
+    setScheduledDay(null);
   }, [selectedCoordinatorId, selectedGroupId, selectedTeacherId, form]);
+
+  useEffect(() => {
+    form.resetField("date");
+
+    const { scheduledDay } = getAvailableOptions(selectedCoordinatorId, selectedGroupId, selectedTeacherId, selectedSubjectId);
+    setScheduledDay(scheduledDay);
+  }, [selectedCoordinatorId, selectedGroupId, selectedTeacherId, selectedSubjectId, form]);
 
 
   const onSubmit = (data: CreateSupervisionFormValues) => {
@@ -217,7 +254,7 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
               <Select 
                 onValueChange={field.onChange} 
                 value={field.value}
-                disabled={!selectedCoordinatorId}
+                disabled={!selectedCoordinatorId || availableGroups.length === 0}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -245,7 +282,7 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
               <Select 
                 onValueChange={field.onChange} 
                 value={field.value}
-                disabled={!selectedGroupId}
+                disabled={!selectedGroupId || availableTeachers.length === 0}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -273,7 +310,7 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
               <Select 
                 onValueChange={field.onChange} 
                 value={field.value}
-                disabled={!selectedTeacherId}
+                disabled={!selectedTeacherId || availableSubjects.length === 0}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -307,6 +344,7 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
+                      disabled={!selectedSubjectId || scheduledDay === null}
                     >
                       {field.value ? (
                         format(field.value, "PPP", { locale: es})
@@ -322,9 +360,13 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date(new Date().setHours(0,0,0,0))
-                    }
+                    disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0,0,0,0);
+                        if (date < today) return true;
+                        if (scheduledDay !== null && date.getDay() !== scheduledDay) return true;
+                        return false;
+                    }}
                     initialFocus
                     locale={es}
                   />
@@ -339,3 +381,5 @@ export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervi
     </Form>
   )
 }
+
+    
