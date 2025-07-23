@@ -23,25 +23,14 @@ function Calendar({
   
   const eventDates = new Set(events.map(date => new Date(date).setHours(0,0,0,0)));
 
-  const DayWithEvent = (dayProps: DayProps) => {
-    const { date, displayMonth } = dayProps;
-    const isEventDay = eventDates.has(new Date(date).setHours(0,0,0,0));
-    
-    return (
-      <div className="relative h-full flex items-center justify-center">
-         <Day {...dayProps} className="h-full w-full" />
-        {isEventDay && displayMonth && (
-          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-primary" />
-        )}
-      </div>
-    )
-  }
-
   return (
     <DayPicker
       locale={es}
       showOutsideDays={showOutsideDays}
       className={cn("p-3 h-full flex flex-col w-full", className)}
+      dayClassName={(date) => 
+        eventDates.has(new Date(date).setHours(0,0,0,0)) ? "day-event" : ""
+      }
       classNames={{
         months: "flex flex-col flex-grow",
         month: "space-y-4 flex flex-col flex-grow",
@@ -69,6 +58,7 @@ function Calendar({
         day_selected:
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
         day_today: "bg-accent text-accent-foreground",
+        day_event: "bg-primary/80 text-primary-foreground",
         day_outside:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
         day_disabled: "text-muted-foreground opacity-50",
@@ -84,7 +74,7 @@ function Calendar({
         IconRight: ({ className, ...props }) => (
           <ChevronRight className={cn("h-4 w-4", className)} {...props} />
         ),
-        Day: DayWithEvent,
+        Day: ({...dayProps}) => <Day {...dayProps} className="h-full w-full" />
       }}
       {...props}
     />
