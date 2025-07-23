@@ -1,7 +1,8 @@
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useFormState, useFormStatus } from "react-dom"
+import { useFormStatus } from "react-dom"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -29,7 +30,7 @@ import { useToast } from "@/hooks/use-toast"
 import { teachers } from "@/lib/data"
 import { submitEvaluation } from "@/app/(app)/evaluation/actions"
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
-import React from "react"
+import React, { useActionState } from "react"
 
 const evaluationFormSchema = z.object({
   teacherId: z.string({ required_error: "Por favor, seleccione un docente." }),
@@ -69,7 +70,7 @@ function SubmitButton() {
 }
 
 export function EvaluationForm() {
-  const [state, formAction] = useFormState(submitEvaluation, initialState)
+  const [state, formAction] = useActionState(submitEvaluation, initialState)
   const { toast } = useToast()
 
   const form = useForm<EvaluationFormValues>({
