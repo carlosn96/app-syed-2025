@@ -29,7 +29,7 @@ const allLinks = [
   { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
   { href: "/subjects", label: "Materias", icon: Library, roles: ['administrator', 'coordinator', 'teacher'] },
   { href: "/groups", label: "Grupos", icon: Users, roles: ['administrator', 'coordinator'] },
-  { href: "/supervision", label: "Supervisión", icon: CalendarDays, roles: ['administrator', 'coordinator', 'teacher'] },
+  { href: "/evaluaciones", label: "Evaluaciones", icon: CalendarDays, roles: ['administrator', 'coordinator'] },
   { href: "/feedback", label: "Retroalimentación", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
   { href: "/evaluation", label: "Evaluación", icon: ClipboardEdit, roles: ['administrator', 'coordinator', 'student'] },
 ]

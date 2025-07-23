@@ -55,7 +55,7 @@ export interface Subject {
 export const subjects: Subject[] = [
   // Ciencias de la Computación
   { id: 1, name: 'Introducción a la Programación', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
-  { id: 23, name: 'Matemáticas Discretas', career: 'Ciencias de la Computación', teacher: 'Dr. Isaac Newton', semester: 1 },
+  { id: 23, name: 'Matemáticas Discretas', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
   { id: 24, name: 'Cálculo I', career: 'Ciencias de la Computación', teacher: 'Dr. Isaac Newton', semester: 1 },
   { id: 25, name: 'Fundamentos de Hardware', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 1 },
   { id: 26, name: 'Lógica Computacional', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
@@ -116,10 +116,9 @@ export const evaluations = [
   { id: 3, student: 'John Appleseed', feedback: 'Aprendí mucho. Los ejemplos prácticos fueron muy útiles.', rating: 5, date: '2024-05-12' },
 ];
 
-export const supervisions = [
-    { id: 1, date: new Date(), teacher: 'Dr. Alan Turing', subject: 'Intro a Programación', coordinator: 'Usuario Coordinador' },
-    { id: 2, date: new Date(new Date().setDate(new Date().getDate() + 2)), teacher: 'Dra. Ada Lovelace', subject: 'Estructuras de Datos', coordinator: 'Usuario Coordinador' },
-    { id: 3, date: new Date(new Date().setDate(new Date().getDate() + 5)), teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Usuario Coordinador' },
+export const evaluationPeriods = [
+    { id: 1, group: 'COMPINCO2025A', subject: 'Introducción a la Programación', teacher: 'Dr. Alan Turing', startDate: new Date(), endDate: new Date(new Date().setDate(new Date().getDate() + 7)) },
+    { id: 2, group: 'ADMEM2025A', subject: 'Contabilidad Financiera', teacher: 'C.P. Luca Pacioli', startDate: new Date(new Date().setDate(new Date().getDate() + 2)), endDate: new Date(new Date().setDate(new Date().getDate() + 9)) },
 ];
 
 export interface Group {

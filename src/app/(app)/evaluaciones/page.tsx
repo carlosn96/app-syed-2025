@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { supervisions } from "@/lib/data"
+import { evaluationPeriods } from "@/lib/data"
 import {
   Dialog,
   DialogContent,
@@ -22,32 +22,34 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { CreateSupervisionForm } from "@/components/create-supervision-form"
+import { CreateEvaluationPeriodForm } from "@/components/create-evaluation-period-form"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
 
-export default function SupervisionPage() {
+export default function EvaluationsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="font-headline text-3xl font-semibold tracking-tight">
-          Agendar Supervisión
+          Programar Evaluaciones
         </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Nueva Supervisión
+              Programar Evaluación
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Agendar Nueva Supervisión</DialogTitle>
+              <DialogTitle>Programar Período de Evaluación</DialogTitle>
               <DialogDescription>
-                Completa el formulario para agendar una nueva supervisión.
+                Define un período para que un grupo evalúe a un docente.
               </DialogDescription>
             </DialogHeader>
-            <CreateSupervisionForm onSuccess={() => setIsModalOpen(false)} />
+            <CreateEvaluationPeriodForm onSuccess={() => setIsModalOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -72,22 +74,25 @@ export default function SupervisionPage() {
         <div className="lg:col-span-1">
             <Card>
                 <CardHeader>
-                    <CardTitle>Próximas Supervisiones</CardTitle>
-                    <CardDescription>Tus próximas sesiones agendadas.</CardDescription>
+                    <CardTitle>Evaluaciones Programadas</CardTitle>
+                    <CardDescription>Períodos de evaluación activos y futuros.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4">
-                    {supervisions.map((supervision) => (
-                        <div key={supervision.id} className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50">
+                    {evaluationPeriods.map((period) => (
+                        <div key={period.id} className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50">
                             <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-md h-12 w-12 text-sm">
-                                <span>{supervision.date.toLocaleString('es-ES', { month: 'short' })}</span>
-                                <span className="font-bold text-lg">{supervision.date.getDate()}</span>
+                                <span>{format(period.startDate, "LLL", { locale: es })}</span>
+                                <span className="font-bold text-lg">{period.startDate.getDate()}</span>
                             </div>
                             <div className="grid gap-1">
                                 <p className="text-sm font-medium leading-none">
-                                    {supervision.teacher}
+                                    {period.group} - {period.teacher}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    {supervision.subject}
+                                    {period.subject}
+                                </p>
+                                 <p className="text-xs text-muted-foreground">
+                                    Finaliza: {format(period.endDate, "PPP", { locale: es })}
                                 </p>
                             </div>
                         </div>
