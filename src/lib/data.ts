@@ -136,3 +136,33 @@ export const groups: Group[] = [
   { id: 2, name: 'ADMEM2025A', career: 'Administración de Empresas', semester: 2, cycle: '2025-A', turno: 'Vespertino', students: [] },
   { id: 3, name: 'COMPINCO2025B', career: 'Ciencias de la Computación', semester: 1, cycle: '2025-B', turno: 'Matutino', students: [] },
 ];
+
+export interface Schedule {
+  id: number;
+  teacherId: number;
+  subjectId: number;
+  groupId: number;
+  dayOfWeek: 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes';
+  startTime: string; // "HH:MM"
+  endTime: string; // "HH:MM"
+}
+
+export const schedules: Schedule[] = [
+    { id: 1, teacherId: 1, subjectId: 1, groupId: 1, dayOfWeek: 'Lunes', startTime: '07:00', endTime: '09:00' },
+    { id: 2, teacherId: 2, subjectId: 2, groupId: 1, dayOfWeek: 'Lunes', startTime: '09:00', endTime: '11:00' },
+    { id: 3, teacherId: 10, subjectId: 24, groupId: 1, dayOfWeek: 'Lunes', startTime: '11:00', endTime: '13:00' },
+
+    { id: 4, teacherId: 7, subjectId: 25, groupId: 1, dayOfWeek: 'Martes', startTime: '08:00', endTime: '10:00' },
+    { id: 5, teacherId: 1, subjectId: 23, groupId: 1, dayOfWeek: 'Martes', startTime: '10:00', endTime: '12:00' },
+
+    { id: 6, teacherId: 1, subjectId: 1, groupId: 1, dayOfWeek: 'Miércoles', startTime: '07:00', endTime: '09:00' },
+    { id: 7, teacherId: 2, subjectId: 2, groupId: 1, dayOfWeek: 'Miércoles', startTime: '09:00', endTime: '11:00' },
+    { id: 8, teacherId: 10, subjectId: 24, groupId: 1, dayOfWeek: 'Miércoles', startTime: '11:00', endTime: '13:00' },
+
+    { id: 9, teacherId: 7, subjectId: 25, groupId: 1, dayOfWeek: 'Jueves', startTime: '08:00', endTime: '10:00' },
+    { id: 10, teacherId: 1, subjectId: 26, groupId: 1, dayOfWeek: 'Jueves', startTime: '10:00', endTime: '12:00' },
+
+    { id: 11, teacherId: 8, subjectId: 27, groupId: 1, dayOfWeek: 'Viernes', startTime: '09:00', endTime: '11:00' },
+    { id: 12, teacherId: 6, subjectId: 13, groupId: 2, dayOfWeek: 'Lunes', startTime: '16:00', endTime: '18:00' },
+    { id: 13, teacherId: 3, subjectId: 3, groupId: 2, dayOfWeek: 'Martes', startTime: '18:00', endTime: '20:00' },
+];

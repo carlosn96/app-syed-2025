@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import {
   BookOpenCheck,
   Building,
+  CalendarClock,
   LayoutDashboard,
   Library,
   ShieldCheck,
@@ -27,6 +28,7 @@ const allLinks = [
   { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
   { href: "/subjects", label: "Materias", icon: Library, roles: ['administrator', 'coordinator', 'teacher'] },
   { href: "/groups", label: "Grupos", icon: Users, roles: ['administrator', 'coordinator'] },
+  { href: "/schedules", label: "Horarios", icon: CalendarClock, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
   { href: "/supervision", label: "Supervisión", icon: ShieldCheck, roles: ['administrator', 'coordinator'] },
   { href: "/feedback", label: "Retroalimentación", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
 ]
