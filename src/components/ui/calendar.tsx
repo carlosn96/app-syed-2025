@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, DayProps } from "react-day-picker"
+import { DayPicker, DayProps, Day as DayComponent  } from "react-day-picker"
 import { es } from 'date-fns/locale';
 
 import { cn } from "@/lib/utils"
@@ -21,16 +21,16 @@ function Calendar({
   ...props
 }: CalendarProps) {
   
-  const eventDates = new Set(events.map(date => date.setHours(0,0,0,0)));
+  const eventDates = new Set(events.map(date => new Date(date).setHours(0,0,0,0)));
 
   const DayWithEvent = (dayProps: DayProps) => {
-    const { date } = dayProps;
+    const { date, displayMonth } = dayProps;
     const isEventDay = eventDates.has(new Date(date).setHours(0,0,0,0));
     
     return (
       <div className="relative">
-        <DayPicker.Day {...dayProps} />
-        {isEventDay && !dayProps.displayMonth.outside && (
+         <DayComponent {...dayProps} />
+        {isEventDay && !displayMonth.outside && (
           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-primary" />
         )}
       </div>
