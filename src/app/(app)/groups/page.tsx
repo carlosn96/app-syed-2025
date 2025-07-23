@@ -73,6 +73,7 @@ export default function GroupsPage() {
                 <TableHead>Grupo</TableHead>
                 <TableHead>Carrera</TableHead>
                 <TableHead>Semestre</TableHead>
+                <TableHead>Ciclo</TableHead>
                 <TableHead>Alumnos</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
@@ -83,6 +84,7 @@ export default function GroupsPage() {
                   <TableCell className="font-medium">{group.name}</TableCell>
                   <TableCell>{group.career}</TableCell>
                   <TableCell>{group.semester}</TableCell>
+                  <TableCell>{group.cycle}</TableCell>
                   <TableCell>{group.students.length}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">

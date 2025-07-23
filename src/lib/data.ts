@@ -126,11 +126,12 @@ export interface Group {
   name: string;
   career: string;
   semester: number;
+  cycle: string;
   students: number[];
 }
 
 export const groups: Group[] = [
-  { id: 1, name: 'COMPINCO2025A', career: 'Ciencias de la Computación', semester: 1, students: [4, 6] },
-  { id: 2, name: 'ADMEM2025A', career: 'Administración de Empresas', semester: 2, students: [] },
-  { id: 3, name: 'COMPINCO2025B', career: 'Ciencias de la Computación', semester: 1, students: [] },
+  { id: 1, name: 'COMPINCO2025A', career: 'Ciencias de la Computación', semester: 1, cycle: '2025-A', students: [4, 6] },
+  { id: 2, name: 'ADMEM2025A', career: 'Administración de Empresas', semester: 2, cycle: '2025-A', students: [] },
+  { id: 3, name: 'COMPINCO2025B', career: 'Ciencias de la Computación', semester: 1, cycle: '2025-B', students: [] },
 ];

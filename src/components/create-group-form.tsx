@@ -31,10 +31,13 @@ const createGroupSchema = z.object({
   name: z.string().min(1, "El nombre del grupo es requerido."),
   career: z.string().min(1, "Por favor, seleccione una carrera."),
   semester: z.coerce.number().min(1, "El semestre debe ser al menos 1.").max(12, "El semestre no puede ser mayor a 12."),
+  cycle: z.string().min(1, "Por favor, seleccione un ciclo."),
   studentIds: z.array(z.number()).optional(),
 });
 
 type CreateGroupFormValues = z.infer<typeof createGroupSchema>;
+
+const availableCycles = ["2024-A", "2024-B", "2025-A", "2025-B"];
 
 const studentUsers = users.filter(u => u.rol === 'student');
 
@@ -46,6 +49,7 @@ const addGroup = (data: CreateGroupFormValues) => {
         name: data.name,
         career: data.career,
         semester: data.semester,
+        cycle: data.cycle,
         students: data.studentIds || [],
     };
     groups.push(newGroup);
@@ -73,6 +77,7 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
       name: "",
       career: "",
       semester: 1,
+      cycle: "",
       studentIds: [],
     },
   });
@@ -146,6 +151,30 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
               <FormControl>
                 <Input type="number" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="cycle"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ciclo</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un ciclo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {availableCycles.map((cycle) => (
+                    <SelectItem key={cycle} value={cycle}>
+                      {cycle}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
