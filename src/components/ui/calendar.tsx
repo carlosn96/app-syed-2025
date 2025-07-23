@@ -29,10 +29,10 @@ function Calendar({
 
     return (
       <div className="relative h-full w-full flex items-center justify-center">
-        {eventColor && !dayProps.displayMonth.outside && (
-          <div className={cn("absolute inset-0 m-auto h-8 w-8 rounded-full", eventColor)} />
+         {eventColor && !dayProps.displayMonth.outside && (
+          <div className={cn("absolute inset-0 m-auto h-8 w-8 rounded-full z-0", eventColor)} />
         )}
-        <span className="relative z-10">{dayProps.date.getDate()}</span>
+        <DayPicker.Day {...dayProps} />
       </div>
     );
   }
@@ -60,10 +60,10 @@ function Calendar({
         head_cell:
           "text-muted-foreground rounded-md w-full font-normal text-[0.8rem]",
         row: "flex w-full mt-2 flex-grow",
-        cell: "w-full h-full text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+        cell: "w-full h-full text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-full w-full p-0 font-normal aria-selected:opacity-100"
+          "h-full w-full p-0 font-normal aria-selected:opacity-100 relative z-10"
         ),
         day_range_end: "day-range-end",
         day_selected:
