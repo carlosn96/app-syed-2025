@@ -63,7 +63,13 @@ const addSupervision = (data: CreateSupervisionFormValues) => {
     console.log("Supervisión creada:", newSupervision);
 };
 
-export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void }) {
+interface CreateSupervisionFormProps {
+  onSuccess?: () => void;
+  selectedDate?: Date;
+}
+
+
+export function CreateSupervisionForm({ onSuccess, selectedDate }: CreateSupervisionFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   
@@ -79,8 +85,15 @@ export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void })
       coordinatorId: defaultCoordinator,
       teacherId: "",
       subjectId: "",
+      date: selectedDate,
     }
   });
+  
+  useEffect(() => {
+    if (selectedDate) {
+        form.setValue("date", selectedDate);
+    }
+  }, [selectedDate, form]);
 
   const selectedCoordinatorId = form.watch("coordinatorId");
   const selectedTeacherId = form.watch("teacherId");
