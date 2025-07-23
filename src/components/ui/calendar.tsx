@@ -20,60 +20,6 @@ function Calendar({
   
   return (
     <>
-    <style>{`
-      .rdp-day_event-prox { 
-        position: relative;
-      }
-      .rdp-day_event-prox::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 2.25rem;
-        height: 2.25rem;
-        border-radius: 50%;
-        background-color: hsl(var(--destructive) / 0.8);
-        z-index: 0;
-      }
-      .rdp-day_event-comp { 
-        position: relative;
-      }
-      .rdp-day_event-comp::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 2.25rem;
-        height: 2.25rem;
-        border-radius: 50%;
-        background-color: hsl(var(--chart-4));
-        z-index: 0;
-      }
-      .rdp-day_event-prog { 
-        position: relative;
-      }
-      .rdp-day_event-prog::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 2.25rem;
-        height: 2.25rem;
-        border-radius: 50%;
-        background-color: hsl(var(--chart-5));
-        z-index: 0;
-      }
-      .rdp-day_selected::before {
-        display: none;
-      }
-      .rdp-button {
-         position: relative;
-         z-index: 1;
-      }
-    `}</style>
     <DayPicker
       locale={es}
       showOutsideDays={showOutsideDays}
@@ -99,12 +45,12 @@ function Calendar({
         cell: "w-full h-full text-center text-sm p-0 relative focus-within:relative focus-within:z-20 flex items-center justify-center",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-full"
+          "h-full w-full p-0 font-normal aria-selected:opacity-100"
         ),
         day_range_end: "day-range-end",
         day_selected:
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground rounded-full",
+        day_today: "bg-accent text-accent-foreground",
         day_outside:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
         day_disabled: "text-muted-foreground opacity-50",

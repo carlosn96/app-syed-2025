@@ -43,28 +43,10 @@ export default function SupervisionPage() {
     .filter(s => s.status === 'Programada' && s.date >= new Date())
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .slice(0, 3);
-  
-  const proximasIds = new Set(proximasSupervisiones.map(s => s.id));
 
   const getGroupName = (groupId: number) => {
     return groups.find(g => g.id === groupId)?.name || "N/A";
   }
-  
-  const eventModifiers = {
-    proximas: proximasSupervisiones.map(s => s.date),
-    completadas: supervisions
-      .filter(s => s.status === 'Completada')
-      .map(s => s.date),
-    programadas: supervisions
-      .filter(s => s.status === 'Programada' && !proximasIds.has(s.id))
-      .map(s => s.date),
-  };
-
-  const modifierClassNames = {
-    proximas: "event-prox",
-    completadas: "event-comp",
-    programadas: "event-prog",
-  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -103,8 +85,6 @@ export default function SupervisionPage() {
                     onSelect={setDate}
                     className="w-full"
                     locale={es}
-                    modifiers={eventModifiers}
-                    modifierClassNames={modifierClassNames}
                     disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                 />
             </Card>
@@ -162,7 +142,6 @@ export default function SupervisionPage() {
                                 <TableHead>Fecha</TableHead>
                                 <TableHead>Horario</TableHead>
                                 <TableHead>Grupo</TableHead>
-                                <TableHead>Coordinador</TableHead>
                                 <TableHead>Estado</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -173,7 +152,6 @@ export default function SupervisionPage() {
                                     <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
                                     <TableCell className="py-2">{supervision.startTime} - {supervision.endTime}</TableCell>
                                     <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
-                                    <TableCell className="py-2">{supervision.coordinator}</TableCell>
                                     <TableCell className="py-2">{supervision.status}</TableCell>
                                 </TableRow>
                             ))}
