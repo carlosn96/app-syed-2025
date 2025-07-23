@@ -1,4 +1,8 @@
-import { Pencil, Trash2 } from "lucide-react"
+
+"use client"
+
+import { useState } from "react"
+import { Pencil, PlusCircle, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,14 +21,44 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { groups } from "@/lib/data"
+import { CreateGroupForm } from "@/components/create-group-form"
 
 export default function GroupsPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="font-headline text-3xl font-semibold tracking-tight">
-        Grupos
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-headline text-3xl font-semibold tracking-tight">
+          Grupos
+        </h1>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Crear Grupo
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Crear Nuevo Grupo</DialogTitle>
+                    <DialogDescription>
+                        Completa el formulario para registrar un nuevo grupo.
+                    </DialogDescription>
+                </DialogHeader>
+                <CreateGroupForm onSuccess={() => setIsModalOpen(false)} />
+            </DialogContent>
+        </Dialog>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Grupos</CardTitle>
@@ -69,7 +103,7 @@ export default function GroupsPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-3</strong> de <strong>3</strong> grupos
+            Mostrando <strong>1-{groups.length}</strong> de <strong>{groups.length}</strong> grupos
           </div>
         </CardFooter>
       </Card>
