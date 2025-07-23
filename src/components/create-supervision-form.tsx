@@ -26,11 +26,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { supervisions, teachers, subjects, users } from "@/lib/data"
+import { supervisions, teachers, subjects, users, Subject } from "@/lib/data"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useAuth } from "@/context/auth-context"
+import React, { useState, useEffect } from "react"
 
 const createSupervisionSchema = z.object({
   teacher: z.string().min(1, "Por favor, seleccione un docente."),
@@ -63,13 +64,29 @@ const addSupervision = (data: CreateSupervisionFormValues) => {
 export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void }) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
 
   const form = useForm<CreateSupervisionFormValues>({
     resolver: zodResolver(createSupervisionSchema),
     defaultValues: {
         coordinator: user?.rol !== 'administrator' ? `${user?.nombre} ${user?.apellido_paterno}`.trim() : "",
+        teacher: "",
+        subject: "",
     }
   });
+
+  const selectedTeacher = form.watch("teacher");
+
+  useEffect(() => {
+    if (selectedTeacher) {
+      const filteredSubjects = subjects.filter(subject => subject.teacher === selectedTeacher);
+      setAvailableSubjects(filteredSubjects);
+      form.setValue("subject", ""); // Reset subject when teacher changes
+    } else {
+      setAvailableSubjects([]);
+    }
+  }, [selectedTeacher, form]);
+
 
   const onSubmit = (data: CreateSupervisionFormValues) => {
     try {
@@ -150,14 +167,18 @@ export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void })
           render={({ field }) => (
             <FormItem>
               <FormLabel>Materia</FormLabel>
-               <Select onValueChange={field.onChange} defaultValue={field.value}>
+               <Select 
+                onValueChange={field.onChange} 
+                value={field.value}
+                disabled={!selectedTeacher}
+               >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione una materia" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {subjects.map((subject) => (
+                  {availableSubjects.map((subject) => (
                     <SelectItem key={subject.id} value={subject.name}>
                       {subject.name}
                     </SelectItem>

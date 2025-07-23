@@ -34,7 +34,15 @@ export const careers = [
   { id: 4, name: 'Bellas Artes', campus: 'Plantel Sur', semesters: 6 },
 ];
 
-export const subjects = [
+export interface Subject {
+  id: number;
+  name: string;
+  career: string;
+  teacher: string;
+  semester: number;
+}
+
+export const subjects: Subject[] = [
   // Ciencias de la Computación
   { id: 1, name: 'Introducción a la Programación', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
   { id: 23, name: 'Matemáticas Discretas', career: 'Ciencias de la Computación', teacher: 'Dr. Edsger Dijkstra', semester: 1 },
