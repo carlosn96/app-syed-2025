@@ -79,18 +79,19 @@ export default function SupervisionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-            <Card>
-                <CardContent className="p-0">
+            <Card className="h-full">
+                <CardContent className="p-0 h-full">
                 <Calendar
                     mode="single"
                     selected={date}
                     onSelect={setDate}
-                    className="p-3 w-full"
+                    className="p-3 w-full h-full"
                     locale={es}
                     disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                     classNames={{
                         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                         month: "space-y-4 w-full",
+                        caption: "flex justify-center pt-1 relative items-center w-full",
                         table: "w-full border-collapse space-y-1",
                         head_row: "flex justify-around",
                         row: "flex w-full mt-2 justify-around",
@@ -112,7 +113,7 @@ export default function SupervisionPage() {
                     key={supervision.id}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50"
                   >
-                    <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-md h-10 w-10 text-xs">
+                    <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-md h-10 w-10 text-xs shrink-0">
                       <span className="capitalize">
                         {format(supervision.date, "LLL", { locale: es })}
                       </span>
@@ -138,12 +139,12 @@ export default function SupervisionPage() {
               )}
             </CardContent>
           </Card>
-           <Card className="flex-grow">
+           <Card className="flex-grow flex flex-col">
             <CardHeader>
                 <CardTitle>Lista de Supervisiones</CardTitle>
                 <CardDescription>Historial y próximas supervisiones.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-grow">
                 <ScrollArea className="h-[320px]">
                     <Table>
                         <TableHeader>
