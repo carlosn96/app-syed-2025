@@ -64,9 +64,30 @@ export default function UsersPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="font-headline text-3xl font-semibold tracking-tight">
-        Gestión de Usuarios
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-headline text-3xl font-semibold tracking-tight">
+          Gestión de Usuarios
+        </h1>
+        {!isAuthLoading && loggedInUser?.rol === 'administrator' && (
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Crear Usuario
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+                <DialogDescription>
+                  Completa el formulario para registrar una nueva cuenta.
+                </DialogDescription>
+              </DialogHeader>
+              <CreateUserForm onSuccess={() => setIsModalOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -77,25 +98,6 @@ export default function UsersPage() {
               </CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              {!isAuthLoading && loggedInUser?.rol === 'administrator' && (
-                <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Crear Usuario
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Crear Nuevo Usuario</DialogTitle>
-                      <DialogDescription>
-                        Completa el formulario para registrar una nueva cuenta.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <CreateUserForm onSuccess={() => setIsModalOpen(false)} />
-                  </DialogContent>
-                </Dialog>
-              )}
               <div className="flex gap-2">
                 {filterButtons.map((role) => (
                   <Button
