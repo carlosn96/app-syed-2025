@@ -4,7 +4,6 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -75,7 +74,7 @@ export default function SchedulesPage() {
           Horarios de Clase
         </h1>
         <div className="flex items-center gap-2">
-            <Select value={filterType} onValueChange={setFilterType}>
+            <Select value={filterType} onValueChange={(value) => { setFilterType(value); setSelectedFilter(null); }}>
                 <SelectTrigger className="w-[150px]">
                     <SelectValue placeholder="Filtrar por..." />
                 </SelectTrigger>
@@ -147,4 +146,3 @@ export default function SchedulesPage() {
     </div>
   )
 }
-
