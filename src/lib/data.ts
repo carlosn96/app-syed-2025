@@ -19,6 +19,8 @@ export const users: User[] = [
   { id: 4, nombre: 'Alumno', apellido_paterno: 'User', apellido_materno: 'Student', correo: 'student@example.com', rol: 'student', grupo: 'COMPINCO2025A', fecha_registro: '2023-09-01T08:00:00Z', ultimo_acceso: '2024-05-22T16:45:00Z' },
   { id: 5, nombre: 'John', apellido_paterno: 'Doe', apellido_materno: 'Smith', correo: 'john.d@example.com', rol: 'teacher', fecha_registro: '2022-08-21T15:30:00Z', ultimo_acceso: '2024-05-19T11:00:00Z' },
   { id: 6, nombre: 'Jane', apellido_paterno: 'Smith', apellido_materno: 'Doe', correo: 'jane.s@example.com', rol: 'student', grupo: 'COMPINCO2025A', fecha_registro: '2023-09-01T08:15:00Z', ultimo_acceso: '2024-05-21T18:00:00Z' },
+  { id: 7, nombre: 'Laura', apellido_paterno: 'García', apellido_materno: 'Perez', correo: 'laura.g@example.com', rol: 'coordinator', fecha_registro: '2023-01-15T10:00:00Z', ultimo_acceso: '2024-05-23T10:00:00Z' },
+  { id: 8, nombre: 'Carlos', apellido_paterno: 'Martínez', apellido_materno: 'Rodriguez', correo: 'carlos.m@example.com', rol: 'coordinator', fecha_registro: '2023-01-18T12:00:00Z', ultimo_acceso: '2024-05-23T11:30:00Z' },
 ];
 
 export const planteles = [
@@ -29,9 +31,9 @@ export const planteles = [
 
 export const careers = [
   { id: 1, name: 'Ciencias de la Computación', campus: 'Plantel Principal', semesters: 8, coordinator: 'Coordinador User' },
-  { id: 2, name: 'Administración de Empresas', campus: 'Plantel Principal', semesters: 8, coordinator: 'Coordinador User' },
-  { id: 3, name: 'Ingeniería Mecánica', campus: 'Plantel Norte', semesters: 10, coordinator: 'Coordinador User' },
-  { id: 4, name: 'Bellas Artes', campus: 'Plantel Sur', semesters: 6, coordinator: 'Coordinador User' },
+  { id: 2, name: 'Administración de Empresas', campus: 'Plantel Principal', semesters: 8, coordinator: 'Laura García' },
+  { id: 3, name: 'Ingeniería Mecánica', campus: 'Plantel Norte', semesters: 10, coordinator: 'Carlos Martínez' },
+  { id: 4, name: 'Bellas Artes', campus: 'Plantel Sur', semesters: 6, coordinator: 'Laura García' },
 ];
 
 export interface Subject {
