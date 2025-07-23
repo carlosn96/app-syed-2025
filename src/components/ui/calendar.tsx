@@ -23,20 +23,6 @@ function Calendar({
   
   const eventMap = new Map(events.map(event => [new Date(event.date).setHours(0,0,0,0), event.color]));
 
-  const DayWithEvent = (dayProps: DayProps) => {
-    const dayTime = dayProps.date.setHours(0,0,0,0);
-    const eventColor = eventMap.get(dayTime);
-
-    return (
-      <div className="relative h-full w-full flex items-center justify-center">
-         {eventColor && !dayProps.displayMonth.outside && (
-          <div className={cn("absolute inset-0 m-auto h-8 w-8 rounded-full z-0", eventColor)} />
-        )}
-        <DayPicker.Day {...dayProps} />
-      </div>
-    );
-  }
-
   return (
     <DayPicker
       locale={es}
@@ -84,7 +70,18 @@ function Calendar({
         IconRight: ({ className, ...props }) => (
           <ChevronRight className={cn("h-4 w-4", className)} {...props} />
         ),
-        Day: DayWithEvent,
+        Day: ({ date, ...dayProps }) => {
+            const dayTime = date.setHours(0, 0, 0, 0);
+            const eventColor = eventMap.get(dayTime);
+            return (
+              <div className="relative h-full w-full flex items-center justify-center">
+                {eventColor && !dayProps.displayMonth.outside && (
+                  <div className={cn("absolute inset-0 m-auto h-8 w-8 rounded-full z-0", eventColor)} />
+                )}
+                <DayPicker.Day date={date} {...dayProps} />
+              </div>
+            );
+        },
       }}
       {...props}
     />
@@ -93,3 +90,4 @@ function Calendar({
 Calendar.displayName = "Calendar"
 
 export { Calendar }
+
