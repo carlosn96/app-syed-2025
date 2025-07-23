@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { DayPicker, type DayProps } from "react-day-picker"
 import { es } from 'date-fns/locale';
 
 import { cn } from "@/lib/utils"
@@ -96,14 +96,14 @@ function Calendar({
         head_cell:
           "text-muted-foreground rounded-md w-full font-normal text-[0.8rem]",
         row: "flex w-full mt-2 flex-grow",
-        cell: "w-full h-full text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+        cell: "w-full h-full text-center text-sm p-0 relative focus-within:relative focus-within:z-20 flex items-center justify-center",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-full w-full p-0 font-normal aria-selected:opacity-100 relative"
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
         ),
         day_range_end: "day-range-end",
         day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground rounded-full",
         day_today: "bg-accent text-accent-foreground rounded-full",
         day_outside:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
