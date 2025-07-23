@@ -11,7 +11,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter
 } from "@/components/ui/card"
 import {
   Table,
@@ -77,28 +76,26 @@ export default function SupervisionPage() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
-            <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="p-3 w-full"
-                locale={es}
-                disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-                classNames={{
-                    months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                    month: "space-y-4 w-full",
-                    caption: "flex justify-center pt-1 relative items-center w-full",
-                    table: "w-full border-collapse space-y-1",
-                    head_row: "flex justify-around",
-                    row: "flex w-full mt-2 justify-around",
-                    day: "h-auto aspect-video",
-                }}
+      <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <Card className="lg:col-span-2">
+                <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    className="p-3"
+                    locale={es}
+                    classNames={{
+                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        month: "space-y-4 w-full",
+                        caption: "flex justify-center pt-1 relative items-center w-full",
+                        table: "w-full border-collapse space-y-1",
+                        head_row: "flex justify-around",
+                        row: "flex w-full mt-2 justify-around",
+                    }}
                 />
-        </Card>
-        <div className="flex flex-col gap-8">
-            <Card>
+            </Card>
+            <Card className="lg:col-span-1">
                 <CardHeader>
                 <CardTitle>Supervisiones Próximas</CardTitle>
                 <CardDescription>Eventos de supervisión más cercanos.</CardDescription>
@@ -136,40 +133,40 @@ export default function SupervisionPage() {
                 )}
                 </CardContent>
             </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Lista de Supervisiones</CardTitle>
-                    <CardDescription>Historial y próximas supervisiones.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ScrollArea className="h-auto max-h-[400px]">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Docente</TableHead>
-                                    <TableHead>Fecha</TableHead>
-                                    <TableHead>Horario</TableHead>
-                                    <TableHead>Grupo</TableHead>
-                                    <TableHead>Estado</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {supervisions.map((supervision) => (
-                                    <TableRow key={supervision.id}>
-                                        <TableCell className="font-medium py-2">{supervision.teacher}</TableCell>
-                                        <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
-                                        <TableCell className="py-2">{supervision.startTime} - {supervision.endTime}</TableCell>
-                                        <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
-                                        <TableCell className="py-2">{supervision.status}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </ScrollArea>
-                </CardContent>
-            </Card>
         </div>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Lista de Supervisiones</CardTitle>
+                <CardDescription>Historial y próximas supervisiones.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ScrollArea className="h-auto max-h-[400px]">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Docente</TableHead>
+                                <TableHead>Fecha</TableHead>
+                                <TableHead>Horario</TableHead>
+                                <TableHead>Grupo</TableHead>
+                                <TableHead>Estado</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {supervisions.map((supervision) => (
+                                <TableRow key={supervision.id}>
+                                    <TableCell className="font-medium py-2">{supervision.teacher}</TableCell>
+                                    <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
+                                    <TableCell className="py-2">{supervision.startTime} - {supervision.endTime}</TableCell>
+                                    <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
+                                    <TableCell className="py-2">{supervision.status}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
+            </CardContent>
+        </Card>
       </div>
     </div>
   )
