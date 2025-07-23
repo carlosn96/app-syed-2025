@@ -80,12 +80,12 @@ export default function SupervisionPage() {
 
       <div className="grid grid-cols-1 gap-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 h-full">
                 <Calendar
                     mode="single"
                     selected={date}
                     onSelect={setDate}
-                    className="p-3"
+                    className="p-3 h-full"
                     locale={es}
                     events={supervisionDates}
                 />
