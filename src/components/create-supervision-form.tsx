@@ -67,7 +67,6 @@ const addSupervision = (data: CreateSupervisionFormValues) => {
 
 interface CreateSupervisionFormProps {
   onSuccess?: () => void;
-  selectedDate?: Date;
 }
 
 const dayMapping: { [key: string]: number } = {
@@ -123,7 +122,7 @@ const getAvailableOptions = (coordinatorId?: string, groupId?: string, teacherId
 };
 
 
-export function CreateSupervisionForm({ onSuccess, selectedDate: initialSelectedDate }: CreateSupervisionFormProps) {
+export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   
@@ -142,15 +141,9 @@ export function CreateSupervisionForm({ onSuccess, selectedDate: initialSelected
       groupId: "",
       teacherId: "",
       subjectId: "",
-      date: initialSelectedDate,
+      date: undefined,
     }
   });
-  
-  useEffect(() => {
-    if (initialSelectedDate) {
-        form.setValue("date", initialSelectedDate);
-    }
-  }, [initialSelectedDate, form]);
 
   const selectedCoordinatorId = form.watch("coordinatorId");
   const selectedGroupId = form.watch("groupId");
@@ -381,5 +374,3 @@ export function CreateSupervisionForm({ onSuccess, selectedDate: initialSelected
     </Form>
   )
 }
-
-    

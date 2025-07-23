@@ -28,21 +28,7 @@ import { Calendar } from "@/components/ui/calendar"
 
 export default function SupervisionPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        if (date >= today) {
-            setSelectedDate(date);
-        } else {
-            setSelectedDate(undefined);
-        }
-    } else {
-        setSelectedDate(undefined);
-    }
-  }
+  const [date, setDate] = useState<Date | undefined>(new Date())
 
   return (
     <div className="flex flex-col gap-8">
@@ -52,7 +38,7 @@ export default function SupervisionPage() {
         </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
-            <Button disabled={!selectedDate}>
+            <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
               Nueva Supervisión
             </Button>
@@ -67,7 +53,6 @@ export default function SupervisionPage() {
             </DialogHeader>
             <CreateSupervisionForm 
                 onSuccess={() => setIsModalOpen(false)} 
-                selectedDate={selectedDate}
             />
           </DialogContent>
         </Dialog>
@@ -79,8 +64,8 @@ export default function SupervisionPage() {
             <CardContent className="p-0">
               <Calendar
                 mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
+                selected={date}
+                onSelect={setDate}
                 className="p-3 w-full"
                  disabled={(date) => date < new Date(new Date().setHours(0,0,0,0)) }
                 classNames={{
