@@ -29,15 +29,17 @@ import { Checkbox } from "./ui/checkbox"
 
 const createGroupSchema = z.object({
   name: z.string().min(1, "El nombre del grupo es requerido."),
+  cycle: z.string().min(1, "Por favor, seleccione un ciclo."),
+  turno: z.string().min(1, "Por favor, seleccione un turno."),
   career: z.string().min(1, "Por favor, seleccione una carrera."),
   semester: z.coerce.number().min(1, "El semestre debe ser al menos 1.").max(12, "El semestre no puede ser mayor a 12."),
-  cycle: z.string().min(1, "Por favor, seleccione un ciclo."),
   studentIds: z.array(z.number()).optional(),
 });
 
 type CreateGroupFormValues = z.infer<typeof createGroupSchema>;
 
 const availableCycles = ["2024-A", "2024-B", "2025-A", "2025-B"];
+const availableTurnos = ["Matutino", "Vespertino"];
 
 const studentUsers = users.filter(u => u.rol === 'student');
 
@@ -50,6 +52,7 @@ const addGroup = (data: CreateGroupFormValues) => {
         career: data.career,
         semester: data.semester,
         cycle: data.cycle,
+        turno: data.turno,
         students: data.studentIds || [],
     };
     groups.push(newGroup);
@@ -78,9 +81,12 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
       career: "",
       semester: 1,
       cycle: "",
+      turno: "",
       studentIds: [],
     },
   });
+  
+  const selectedCycle = form.watch("cycle");
 
   const onSubmit = (data: CreateGroupFormValues) => {
     try {
@@ -120,11 +126,59 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
         />
         <FormField
           control={form.control}
+          name="cycle"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ciclo</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un ciclo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {availableCycles.map((cycle) => (
+                    <SelectItem key={cycle} value={cycle}>
+                      {cycle}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="turno"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Turno</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un turno" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {availableTurnos.map((turno) => (
+                    <SelectItem key={turno} value={turno}>
+                      {turno}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="career"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Carrera</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCycle}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione una carrera" />
@@ -151,30 +205,6 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
               <FormControl>
                 <Input type="number" {...field} />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="cycle"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ciclo</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un ciclo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {availableCycles.map((cycle) => (
-                    <SelectItem key={cycle} value={cycle}>
-                      {cycle}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}

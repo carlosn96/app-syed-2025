@@ -74,6 +74,7 @@ export default function GroupsPage() {
                 <TableHead>Carrera</TableHead>
                 <TableHead>Semestre</TableHead>
                 <TableHead>Ciclo</TableHead>
+                <TableHead>Turno</TableHead>
                 <TableHead>Alumnos</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
@@ -85,6 +86,7 @@ export default function GroupsPage() {
                   <TableCell>{group.career}</TableCell>
                   <TableCell>{group.semester}</TableCell>
                   <TableCell>{group.cycle}</TableCell>
+                  <TableCell>{group.turno}</TableCell>
                   <TableCell>{group.students.length}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">

@@ -102,12 +102,12 @@ export const teachers = [
   { id: 2, name: 'Dra. Ada Lovelace' },
   { id: 3, name: 'Prof. Philip Kotler' },
   { id: 4, name: 'Dr. James Watt' },
-  { id: 12, name: 'Dr. Edgar Codd' },
-  { id: 13, name: 'C.P. Luca Pacioli' },
-  { id: 14, name: 'Dr. Andrew Tanenbaum' },
-  { id: 17, name: 'Prof. Idalberto Chiavenato' },
-  { id: 19, name: 'Lic. Jorge Barrera Graf' },
-  { id: 22, name: 'Dr. Isaac Newton' },
+  { id: 5, name: 'Dr. Edgar Codd' },
+  { id: 6, name: 'C.P. Luca Pacioli' },
+  { id: 7, name: 'Dr. Andrew Tanenbaum' },
+  { id: 8, name: 'Prof. Idalberto Chiavenato' },
+  { id: 9, name: 'Lic. Jorge Barrera Graf' },
+  { id: 10, name: 'Dr. Isaac Newton' },
 ];
 
 export const supervisions = [
@@ -127,11 +127,12 @@ export interface Group {
   career: string;
   semester: number;
   cycle: string;
+  turno: string;
   students: number[];
 }
 
 export const groups: Group[] = [
-  { id: 1, name: 'COMPINCO2025A', career: 'Ciencias de la Computación', semester: 1, cycle: '2025-A', students: [4, 6] },
-  { id: 2, name: 'ADMEM2025A', career: 'Administración de Empresas', semester: 2, cycle: '2025-A', students: [] },
-  { id: 3, name: 'COMPINCO2025B', career: 'Ciencias de la Computación', semester: 1, cycle: '2025-B', students: [] },
+  { id: 1, name: 'COMPINCO2025A', career: 'Ciencias de la Computación', semester: 1, cycle: '2025-A', turno: 'Matutino', students: [4, 6] },
+  { id: 2, name: 'ADMEM2025A', career: 'Administración de Empresas', semester: 2, cycle: '2025-A', turno: 'Vespertino', students: [] },
+  { id: 3, name: 'COMPINCO2025B', career: 'Ciencias de la Computación', semester: 1, cycle: '2025-B', turno: 'Matutino', students: [] },
 ];
