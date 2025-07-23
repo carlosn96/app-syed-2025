@@ -7,7 +7,6 @@ import {
   BookOpenCheck,
   Building,
   CalendarDays,
-  ClipboardEdit,
   LayoutDashboard,
   Library,
   ShieldCheck,
@@ -32,7 +31,6 @@ const allLinks = [
   { href: "/supervision", label: "Supervisión", icon: ShieldCheck, roles: ['administrator', 'coordinator'] },
   { href: "/evaluaciones", label: "Evaluaciones", icon: CalendarDays, roles: ['administrator', 'coordinator'] },
   { href: "/feedback", label: "Retroalimentación", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
-  { href: "/evaluation", label: "Evaluación", icon: ClipboardEdit, roles: ['administrator', 'coordinator', 'student'] },
 ]
 
 export function MainNav() {
