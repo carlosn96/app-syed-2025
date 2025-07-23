@@ -121,11 +121,6 @@ export const evaluations = [
   { id: 3, student: 'John Appleseed', feedback: 'Aprendí mucho. Los ejemplos prácticos fueron muy útiles.', rating: 5, date: '2024-05-12' },
 ];
 
-export const evaluationPeriods = [
-    { id: 1, group: 'COMPINCO2025A', subject: 'Introducción a la Programación', teacher: 'Dr. Alan Turing', startDate: new Date(), endDate: new Date(new Date().setDate(new Date().getDate() + 7)) },
-    { id: 2, group: 'ADMEM2025A', subject: 'Contabilidad Financiera', teacher: 'C.P. Luca Pacioli', startDate: new Date(new Date().setDate(new Date().getDate() + 2)), endDate: new Date(new Date().setDate(new Date().getDate() + 9)) },
-];
-
 export interface Group {
   id: number;
   name: string;

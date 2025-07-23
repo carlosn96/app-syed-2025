@@ -1,271 +1,135 @@
+export type Role = 'administrator' | 'coordinator' | 'teacher' | 'student';
 
-"use client"
-
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { addDays, format } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
-import { es } from "date-fns/locale"
-import React, { useState, useEffect, useMemo } from "react"
-import { DateRange } from "react-day-picker"
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form"
-import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
-import { evaluationPeriods, groups, subjects, users, careers, teachers as allTeachers, Subject } from "@/lib/data"
-import { cn } from "@/lib/utils"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { useAuth } from "@/context/auth-context"
-import { Input } from "./ui/input"
-
-const createEvaluationPeriodSchema = z.object({
-  groupId: z.string().min(1, "Por favor, seleccione un grupo."),
-  subjectId: z.string().min(1, "Por favor, seleccione una materia."),
-  teacher: z.string().min(1, "El docente es requerido."),
-  dateRange: z.object({
-    from: z.date({ required_error: "Se requiere una fecha de inicio." }),
-    to: z.date({ required_error: "Se requiere una fecha de fin." }),
-  }),
-});
-
-type CreateEvaluationPeriodFormValues = z.infer<typeof createEvaluationPeriodSchema>;
-
-const addEvaluationPeriod = (data: CreateEvaluationPeriodFormValues) => {
-    const newId = Math.max(...evaluationPeriods.map(s => s.id), 0) + 1;
-    const groupName = groups.find(g => g.id === parseInt(data.groupId))?.name || "N/A";
-    const subjectName = subjects.find(s => s.id === parseInt(data.subjectId))?.name || "N/A";
-    
-    const newEvaluationPeriod = {
-        id: newId,
-        group: groupName,
-        subject: subjectName,
-        teacher: data.teacher,
-        startDate: data.dateRange.from,
-        endDate: data.dateRange.to,
-    };
-    evaluationPeriods.push(newEvaluationPeriod);
-    evaluationPeriods.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-    console.log("Período de evaluación creado:", newEvaluationPeriod);
-};
-
-export function CreateEvaluationPeriodForm({ onSuccess }: { onSuccess?: () => void }) {
-  const { toast } = useToast();
-  const { user } = useAuth();
-  
-  const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
-  const [selectedTeacher, setSelectedTeacher] = useState<string>("");
-
-  const form = useForm<CreateEvaluationPeriodFormValues>({
-    resolver: zodResolver(createEvaluationPeriodSchema),
-    defaultValues: {
-      groupId: "",
-      subjectId: "",
-      teacher: "",
-      dateRange: {
-        from: new Date(),
-        to: addDays(new Date(), 7),
-      },
-    }
-  });
-
-  const selectedGroupId = form.watch("groupId");
-  const selectedSubjectId = form.watch("subjectId");
-
-  const availableGroups = useMemo(() => {
-    if (user?.rol === 'coordinator') {
-        const coordinatorName = `${user.nombre} ${user.apellido_paterno}`.trim();
-        const coordinatedCareers = careers
-            .filter(career => career.coordinator === coordinatorName)
-            .map(career => career.name);
-        return groups.filter(group => coordinatedCareers.includes(group.career));
-    }
-    return groups;
-  }, [user]);
-
-  useEffect(() => {
-    form.resetField("subjectId", { defaultValue: "" });
-    setSelectedTeacher("");
-    if (selectedGroupId) {
-      const group = groups.find(g => g.id === parseInt(selectedGroupId));
-      if (group) {
-        const filteredSubjects = subjects.filter(subject => subject.career === group.career && subject.semester === group.semester);
-        setAvailableSubjects(filteredSubjects);
-      }
-    } else {
-      setAvailableSubjects([]);
-    }
-  }, [selectedGroupId, form]);
-  
-  useEffect(() => {
-    if (selectedSubjectId) {
-        const subject = availableSubjects.find(s => s.id === parseInt(selectedSubjectId));
-        const teacherName = subject ? subject.teacher : "";
-        setSelectedTeacher(teacherName);
-        form.setValue("teacher", teacherName);
-    } else {
-        setSelectedTeacher("");
-        form.setValue("teacher", "");
-    }
-  }, [selectedSubjectId, availableSubjects, form]);
-
-
-  const onSubmit = (data: CreateEvaluationPeriodFormValues) => {
-    try {
-      addEvaluationPeriod(data);
-      toast({
-        title: "Período de Evaluación Programado",
-        description: `El período ha sido programado con éxito.`,
-      });
-      form.reset();
-      onSuccess?.();
-    } catch (error) {
-      if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al programar",
-            description: error.message,
-        });
-      }
-    }
-  };
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="groupId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Grupo</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un grupo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {availableGroups.map((group) => (
-                    <SelectItem key={group.id} value={String(group.id)}>
-                      {group.name} ({group.career})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="subjectId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Materia</FormLabel>
-               <Select 
-                onValueChange={field.onChange} 
-                value={field.value}
-                disabled={!selectedGroupId}
-               >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione una materia" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {availableSubjects.map((subject) => (
-                    <SelectItem key={subject.id} value={String(subject.id)}>
-                      {subject.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {selectedTeacher && (
-             <FormItem>
-              <FormLabel>Docente</FormLabel>
-              <FormControl>
-                <Input value={selectedTeacher} readOnly disabled />
-              </FormControl>
-            </FormItem>
-        )}
-       
-        <FormField
-          control={form.control}
-          name="dateRange"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Período de Evaluación</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      id="date"
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !field.value.from && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value.from ? (
-                        field.value.to ? (
-                          <>
-                            {format(field.value.from, "LLL dd, y", { locale: es })} -{" "}
-                            {format(field.value.to, "LLL dd, y", { locale: es })}
-                          </>
-                        ) : (
-                          format(field.value.from, "LLL dd, y")
-                        )
-                      ) : (
-                        <span>Seleccione un rango</span>
-                      )}
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                   <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={field.value.from}
-                    selected={{ from: field.value.from, to: field.value.to }}
-                    onSelect={field.onChange}
-                    numberOfMonths={1}
-                    locale={es}
-                     disabled={(date) => date < new Date(new Date().setHours(0,0,0,0)) }
-                  />
-                </PopoverContent>
-              </Popover>
-               <FormDescription>
-                Los alumnos de este grupo podrán evaluar durante este período.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full">Programar Período</Button>
-      </form>
-    </Form>
-  )
+export interface User {
+  id: number;
+  nombre: string;
+  apellido_paterno: string;
+  apellido_materno: string;
+  correo: string;
+  rol: Role;
+  grupo?: string;
+  fecha_registro: string;
+  ultimo_acceso: string | null;
 }
+
+export const users: User[] = [
+  { id: 2, nombre: 'Coordinador', apellido_paterno: 'User', apellido_materno: 'Staff', correo: 'coordinator@example.com', rol: 'coordinator', fecha_registro: '2023-02-20T11:00:00Z', ultimo_acceso: '2024-05-21T09:00:00Z' },
+  { id: 3, nombre: 'Docente', apellido_paterno: 'User', apellido_materno: 'Faculty', correo: 'teacher@example.com', rol: 'teacher', fecha_registro: '2023-03-10T09:00:00Z', ultimo_acceso: '2024-05-22T14:00:00Z' },
+  { id: 4, nombre: 'Alumno', apellido_paterno: 'User', apellido_materno: 'Student', correo: 'student@example.com', rol: 'student', grupo: 'COMPINCO2025A', fecha_registro: '2023-09-01T08:00:00Z', ultimo_acceso: '2024-05-22T16:45:00Z' },
+  { id: 5, nombre: 'John', apellido_paterno: 'Doe', apellido_materno: 'Smith', correo: 'john.d@example.com', rol: 'teacher', fecha_registro: '2022-08-21T15:30:00Z', ultimo_acceso: '2024-05-19T11:00:00Z' },
+  { id: 6, nombre: 'Jane', apellido_paterno: 'Smith', apellido_materno: 'Doe', correo: 'jane.s@example.com', rol: 'student', grupo: 'COMPINCO2025A', fecha_registro: '2023-09-01T08:15:00Z', ultimo_acceso: '2024-05-21T18:00:00Z' },
+  { id: 7, nombre: 'Laura', apellido_paterno: 'García', apellido_materno: 'Perez', correo: 'laura.g@example.com', rol: 'coordinator', fecha_registro: '2023-01-15T10:00:00Z', ultimo_acceso: '2024-05-23T10:00:00Z' },
+  { id: 8, nombre: 'Carlos', apellido_paterno: 'Martínez', apellido_materno: 'Rodriguez', correo: 'carlos.m@example.com', rol: 'coordinator', fecha_registro: '2023-01-18T12:00:00Z', ultimo_acceso: '2024-05-23T11:30:00Z' },
+];
+
+export const planteles = [
+  { id: 1, name: 'Plantel Principal', location: 'Centro de la Ciudad', director: 'Dra. Alice Johnson' },
+  { id: 2, name: 'Plantel Norte', location: 'Suburbios del Norte', director: 'Sr. Bob Williams' },
+  { id: 3, name: 'Plantel Sur', location: 'Distrito Sur', director: 'Sra. Carol White' },
+];
+
+export interface Career {
+  id: number;
+  name: string;
+  campus: string;
+  semesters: number;
+  coordinator: string;
+}
+
+export const careers: Career[] = [
+  { id: 1, name: 'Ciencias de la Computación', campus: 'Plantel Principal', semesters: 8, coordinator: 'Coordinador User' },
+  { id: 2, name: 'Administración de Empresas', campus: 'Plantel Principal', semesters: 8, coordinator: 'Laura García' },
+  { id: 3, name: 'Ingeniería Mecánica', campus: 'Plantel Norte', semesters: 10, coordinator: 'Carlos Martínez' },
+  { id: 4, name: 'Bellas Artes', campus: 'Plantel Sur', semesters: 6, coordinator: 'Laura García' },
+];
+
+export interface Subject {
+  id: number;
+  name: string;
+  career: string;
+  teacher: string;
+  semester: number;
+}
+
+export const subjects: Subject[] = [
+  // Ciencias de la Computación
+  { id: 1, name: 'Introducción a la Programación', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
+  { id: 23, name: 'Matemáticas Discretas', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
+  { id: 24, name: 'Cálculo I', career: 'Ciencias de la Computación', teacher: 'Dr. Isaac Newton', semester: 1 },
+  { id: 25, name: 'Fundamentos de Hardware', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 1 },
+  { id: 26, name: 'Lógica Computacional', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
+  { id: 27, name: 'Comunicación Oral y Escrita', career: 'Ciencias de la Computación', teacher: 'Prof. Idalberto Chiavenato', semester: 1 },
+  
+  { id: 2, name: 'Estructuras de Datos', career: 'Ciencias de la Computación', teacher: 'Dra. Ada Lovelace', semester: 2 },
+  { id: 28, name: 'Programación Orientada a Objetos', career: 'Ciencias de la Computación', teacher: 'Dra. Ada Lovelace', semester: 2 },
+  { id: 29, name: 'Cálculo II', career: 'Ciencias de la Computación', teacher: 'Dr. Isaac Newton', semester: 2 },
+  { id: 30, name: 'Álgebra Lineal', career: 'Ciencias de la Computación', teacher: 'Dr. Isaac Newton', semester: 2 },
+  { id: 31, name: 'Ensamblador', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 2 },
+  
+  { id: 11, name: 'Algoritmos Avanzados', career: 'Ciencias de la Computación', teacher: 'Dra. Ada Lovelace', semester: 3 },
+  { id: 12, name: 'Bases de Datos', career: 'Ciencias de la Computación', teacher: 'Dr. Edgar Codd', semester: 4 },
+  { id: 14, name: 'Sistemas Operativos', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 5 },
+  { id: 15, name: 'Redes de Computadoras', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 5 },
+  { id: 16, name: 'Ingeniería de Software', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 6 },
+  { id: 17, name: 'Inteligencia Artificial', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 7 },
+
+  // Administración de Empresas
+  { id: 3, name: 'Principios de Marketing', career: 'Administración de Empresas', teacher: 'Prof. Philip Kotler', semester: 1 },
+  { id: 32, name: 'Fundamentos de Administración', career: 'Administración de Empresas', teacher: 'Prof. Idalberto Chiavenato', semester: 1 },
+  { id: 33, name: 'Matemáticas Financieras', career: 'Administración de Empresas', teacher: 'C.P. Luca Pacioli', semester: 1 },
+  { id: 34, name: 'Derecho y Empresa', career: 'Administración de Empresas', teacher: 'Lic. Jorge Barrera Graf', semester: 1 },
+  { id: 35, name: 'Microeconomía', career: 'Administración de Empresas', teacher: 'Prof. Philip Kotler', semester: 1 },
+
+  { id: 13, name: 'Contabilidad Financiera', career: 'Administración de Empresas', teacher: 'C.P. Luca Pacioli', semester: 2 },
+  { id: 36, name: 'Estadística para Negocios', career: 'Administración de Empresas', teacher: 'Dr. Isaac Newton', semester: 2 },
+  { id: 37, name: 'Macroeconomía', career: 'Administración de Empresas', teacher: 'Prof. Philip Kotler', semester: 2 },
+  { id: 38, name: 'Comportamiento Organizacional', career: 'Administración de Empresas', teacher: 'Prof. Idalberto Chiavenato', semester: 2 },
+  { id: 39, name: 'Informática para Negocios', career: 'Administración de Empresas', teacher: 'Dr. Edgar Codd', semester: 2 },
+
+  { id: 18, name: 'Gestión de Recursos Humanos', career: 'Administración de Empresas', teacher: 'Prof. Idalberto Chiavenato', semester: 3 },
+  { id: 19, name: 'Finanzas Corporativas', career: 'Administración de Empresas', teacher: 'C.P. Luca Pacioli', semester: 4 },
+  { id: 20, name: 'Derecho Mercantil', career: 'Administración de Empresas', teacher: 'Lic. Jorge Barrera Graf', semester: 5 },
+
+  // Ingeniería Mecánica
+  { id: 4, name: 'Termodinámica', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 1 },
+  { id: 21, name: 'Mecánica de Fluidos', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 2 },
+  { id: 22, name: 'Diseño Asistido por Computadora (CAD)', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 3 },
+];
+
+export const teachers = [
+  { id: 1, name: 'Dr. Alan Turing' },
+  { id: 2, name: 'Dra. Ada Lovelace' },
+  { id: 3, name: 'Prof. Philip Kotler' },
+  { id: 4, name: 'Dr. James Watt' },
+  { id: 12, name: 'Dr. Edgar Codd' },
+  { id: 13, name: 'C.P. Luca Pacioli' },
+  { id: 14, name: 'Dr. Andrew Tanenbaum' },
+  { id: 17, name: 'Prof. Idalberto Chiavenato' },
+  { id: 19, name: 'Lic. Jorge Barrera Graf' },
+  { id: 22, name: 'Dr. Isaac Newton' },
+];
+
+export const supervisions = [
+    { id: 1, teacher: 'Dr. Alan Turing', subject: 'Introducción a la Programación', coordinator: 'Coordinador User', date: new Date(), status: 'Completada' },
+    { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: new Date(new Date().setDate(new Date().getDate() + 2)), status: 'Programada' },
+];
+
+export const evaluations = [
+  { id: 1, student: 'Jane Smith', feedback: '¡Clase genial, muy participativa!', rating: 5, date: '2024-05-10' },
+  { id: 2, student: 'Usuario Alumno', feedback: 'El profesor tiene mucho conocimiento pero el ritmo es un poco rápido.', rating: 4, date: '2024-05-11' },
+  { id: 3, student: 'John Appleseed', feedback: 'Aprendí mucho. Los ejemplos prácticos fueron muy útiles.', rating: 5, date: '2024-05-12' },
+];
+
+export interface Group {
+  id: number;
+  name: string;
+  career: string;
+  semester: number;
+  students: number[];
+}
+
+export const groups: Group[] = [
+  { id: 1, name: 'COMPINCO2025A', career: 'Ciencias de la Computación', semester: 1, students: [4, 6] },
+  { id: 2, name: 'ADMEM2025A', career: 'Administración de Empresas', semester: 2, students: [] },
+  { id: 3, name: 'COMPINCO2025B', career: 'Ciencias de la Computación', semester: 1, students: [] },
+];
