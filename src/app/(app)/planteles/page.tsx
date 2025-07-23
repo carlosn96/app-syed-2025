@@ -1,4 +1,9 @@
-import { Pencil, Trash2 } from "lucide-react"
+
+"use client"
+
+import { useState } from "react"
+import { Pencil, PlusCircle, Trash2 } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import {
     Card,
@@ -16,14 +21,45 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 import { planteles } from "@/lib/data"
+import { CreatePlantelForm } from "@/components/create-plantel-form"
+
 
 export default function PlantelesPage() {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     return (
         <div className="flex flex-col gap-8">
-            <h1 className="font-headline text-3xl font-semibold tracking-tight">
-                Gestión de Planteles
-            </h1>
+            <div className="flex items-center justify-between">
+                <h1 className="font-headline text-3xl font-semibold tracking-tight">
+                    Gestión de Planteles
+                </h1>
+                <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Crear Plantel
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Crear Nuevo Plantel</DialogTitle>
+                            <DialogDescription>
+                                Completa el formulario para registrar un nuevo plantel.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <CreatePlantelForm onSuccess={() => setIsModalOpen(false)} />
+                    </DialogContent>
+                </Dialog>
+            </div>
             <Card>
                 <CardHeader>
                     <CardTitle>Planteles</CardTitle>
@@ -66,7 +102,7 @@ export default function PlantelesPage() {
                 </CardContent>
                 <CardFooter>
                     <div className="text-xs text-muted-foreground">
-                        Mostrando <strong>1-3</strong> de <strong>3</strong> planteles
+                        Mostrando <strong>1-{planteles.length}</strong> de <strong>{planteles.length}</strong> planteles
                     </div>
                 </CardFooter>
             </Card>
