@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { supervisions, teachers, subjects } from "@/lib/data"
+import { supervisions, teachers, subjects, users } from "@/lib/data"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
@@ -38,19 +38,22 @@ const createSupervisionSchema = z.object({
   date: z.date({
     required_error: "Se requiere una fecha para la supervisión.",
   }),
+  coordinator: z.string().min(1, "Por favor, seleccione un coordinador."),
 });
 
 type CreateSupervisionFormValues = z.infer<typeof createSupervisionSchema>;
 
+const coordinators = users.filter(u => u.rol === 'coordinator');
+
 // This is a mock function, in a real app this would be an API call
-const addSupervision = (data: CreateSupervisionFormValues, coordinatorName: string) => {
+const addSupervision = (data: CreateSupervisionFormValues) => {
     const newId = Math.max(...supervisions.map(s => s.id), 0) + 1;
     const newSupervision = {
         id: newId,
         date: data.date,
         teacher: data.teacher,
         subject: data.subject,
-        coordinator: coordinatorName,
+        coordinator: data.coordinator,
     };
     supervisions.push(newSupervision);
     supervisions.sort((a, b) => a.date.getTime() - b.date.getTime()); // Keep it sorted
@@ -63,20 +66,14 @@ export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void })
 
   const form = useForm<CreateSupervisionFormValues>({
     resolver: zodResolver(createSupervisionSchema),
+    defaultValues: {
+        coordinator: user?.rol !== 'administrator' ? `${user?.nombre} ${user?.apellido_paterno}`.trim() : "",
+    }
   });
 
   const onSubmit = (data: CreateSupervisionFormValues) => {
-    if (!user) {
-        toast({
-            variant: "destructive",
-            title: "Error de Autenticación",
-            description: "No se pudo identificar al coordinador.",
-        });
-        return;
-    }
-
     try {
-      addSupervision(data, `${user.nombre} ${user.apellido_paterno}`);
+      addSupervision(data);
       toast({
         title: "Supervisión Agendada",
         description: `La supervisión para ${data.teacher} ha sido agendada con éxito.`,
@@ -97,12 +94,38 @@ export function CreateSupervisionForm({ onSuccess }: { onSuccess?: () => void })
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {user?.rol === 'administrator' && (
+             <FormField
+                control={form.control}
+                name="coordinator"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Coordinador</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Seleccione un coordinador" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        {coordinators.map((coordinator) => (
+                            <SelectItem key={coordinator.id} value={`${coordinator.nombre} ${coordinator.apellido_paterno}`.trim()}>
+                                {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+        )}
         <FormField
           control={form.control}
           name="teacher"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Docente</FormLabel>
+              <FormLabel>Docente a Evaluar</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
