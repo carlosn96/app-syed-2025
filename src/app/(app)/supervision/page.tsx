@@ -55,7 +55,7 @@ export default function SupervisionPage() {
       .filter(s => proximasIds.has(s.id))
       .map(s => s.date),
     completadas: supervisions
-      .filter(s => s.status === 'Completada' && !proximasIds.has(s.id))
+      .filter(s => s.status === 'Completada')
       .map(s => s.date),
     programadas: supervisions
       .filter(s => s.status === 'Programada' && !proximasIds.has(s.id))
