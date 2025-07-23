@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, type DayProps } from "react-day-picker"
+import { DayPicker } from "react-day-picker"
 import { es } from 'date-fns/locale';
 
 import { cn } from "@/lib/utils"
@@ -30,8 +30,8 @@ function Calendar({
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 2rem;
-        height: 2rem;
+        width: 2.25rem;
+        height: 2.25rem;
         border-radius: 50%;
         background-color: hsl(var(--destructive) / 0.8);
         z-index: 0;
@@ -45,8 +45,8 @@ function Calendar({
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 2rem;
-        height: 2rem;
+        width: 2.25rem;
+        height: 2.25rem;
         border-radius: 50%;
         background-color: hsl(var(--chart-4));
         z-index: 0;
@@ -60,8 +60,8 @@ function Calendar({
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 2rem;
-        height: 2rem;
+        width: 2.25rem;
+        height: 2.25rem;
         border-radius: 50%;
         background-color: hsl(var(--chart-5));
         z-index: 0;
@@ -77,7 +77,7 @@ function Calendar({
     <DayPicker
       locale={es}
       showOutsideDays={showOutsideDays}
-      className={cn("p-3 h-full flex flex-col w-full", className)}
+      className={cn("p-3 flex flex-col w-full", className)}
       classNames={{
         months: "flex flex-col flex-grow",
         month: "space-y-4 flex flex-col flex-grow",
@@ -99,11 +99,11 @@ function Calendar({
         cell: "w-full h-full text-center text-sm p-0 relative focus-within:relative focus-within:z-20 flex items-center justify-center",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-full"
         ),
         day_range_end: "day-range-end",
         day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground rounded-full",
+          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
         day_today: "bg-accent text-accent-foreground rounded-full",
         day_outside:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground",

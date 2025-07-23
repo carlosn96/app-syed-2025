@@ -51,9 +51,7 @@ export default function SupervisionPage() {
   }
   
   const eventModifiers = {
-    proximas: supervisions
-      .filter(s => proximasIds.has(s.id))
-      .map(s => s.date),
+    proximas: proximasSupervisiones.map(s => s.date),
     completadas: supervisions
       .filter(s => s.status === 'Completada')
       .map(s => s.date),
@@ -103,7 +101,7 @@ export default function SupervisionPage() {
                     mode="single"
                     selected={date}
                     onSelect={setDate}
-                    className="w-full h-full"
+                    className="w-full"
                     locale={es}
                     modifiers={eventModifiers}
                     modifierClassNames={modifierClassNames}
@@ -164,6 +162,7 @@ export default function SupervisionPage() {
                                 <TableHead>Fecha</TableHead>
                                 <TableHead>Horario</TableHead>
                                 <TableHead>Grupo</TableHead>
+                                <TableHead>Coordinador</TableHead>
                                 <TableHead>Estado</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -174,6 +173,7 @@ export default function SupervisionPage() {
                                     <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
                                     <TableCell className="py-2">{supervision.startTime} - {supervision.endTime}</TableCell>
                                     <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
+                                    <TableCell className="py-2">{supervision.coordinator}</TableCell>
                                     <TableCell className="py-2">{supervision.status}</TableCell>
                                 </TableRow>
                             ))}
