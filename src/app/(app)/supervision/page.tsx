@@ -83,7 +83,7 @@ export default function SupervisionPage() {
                     mode="single"
                     selected={date}
                     onSelect={setDate}
-                    className="w-full h-full"
+                    className="w-full"
                     locale={es}
                     disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                 />
@@ -115,6 +115,9 @@ export default function SupervisionPage() {
                         <p className="text-xs text-muted-foreground">
                             {supervision.subject}
                         </p>
+                        <p className="text-xs text-muted-foreground font-semibold">
+                            {supervision.coordinator}
+                        </p>
                         <p className="text-xs text-muted-foreground font-mono">
                             {supervision.startTime} - {supervision.endTime}
                         </p>
@@ -139,6 +142,7 @@ export default function SupervisionPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Docente</TableHead>
+                                <TableHead>Coordinador</TableHead>
                                 <TableHead>Fecha</TableHead>
                                 <TableHead>Horario</TableHead>
                                 <TableHead>Grupo</TableHead>
@@ -149,6 +153,7 @@ export default function SupervisionPage() {
                             {supervisions.map((supervision) => (
                                 <TableRow key={supervision.id}>
                                     <TableCell className="font-medium py-2">{supervision.teacher}</TableCell>
+                                    <TableCell className="font-medium py-2">{supervision.coordinator}</TableCell>
                                     <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
                                     <TableCell className="py-2">{supervision.startTime} - {supervision.endTime}</TableCell>
                                     <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
