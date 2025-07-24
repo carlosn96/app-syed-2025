@@ -50,21 +50,29 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex h-screen w-full items-center justify-center bg-background p-4 login-background">
+      <Card 
+        className="w-full max-w-sm"
+        style={{
+            background: 'linear-gradient(to bottom right, rgba(32, 45, 93, 0.8), rgba(223, 28, 26, 0.8))',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        }}
+      >
         <form onSubmit={handleLogin}>
             <CardHeader className="text-center">
                 <div className="flex justify-center items-center mb-4">
                      <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40" />
                 </div>
-              <CardTitle className="text-2xl font-headline">¡Bienvenido de Nuevo!</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl font-headline text-white">¡Bienvenido de Nuevo!</CardTitle>
+              <CardDescription className="text-white/80">
                 Ingresa tus credenciales para iniciar sesión.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Correo Electrónico</Label>
+                <Label htmlFor="email" className="text-white/90">Correo Electrónico</Label>
                 <Input 
                   id="email" 
                   type="email" 
@@ -72,10 +80,11 @@ export default function LoginPage() {
                   required 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="bg-white/10 text-white placeholder:text-white/60 border-white/20 focus:ring-white/80"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password" className="text-white/90">Contraseña</Label>
                 <div className="relative">
                    <Input 
                     id="password" 
@@ -83,13 +92,13 @@ export default function LoginPage() {
                     required 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10"
+                    className="pr-10 bg-white/10 text-white placeholder:text-white/60 border-white/20 focus:ring-white/80"
                   />
                   <Button 
                     type="button" 
                     variant="ghost" 
                     size="icon" 
-                    className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:text-foreground"
+                    className="absolute inset-y-0 right-0 h-full px-3 text-white/60 hover:text-white"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -100,7 +109,7 @@ export default function LoginPage() {
               {error && <p className="text-sm text-destructive bg-destructive/20 p-2 rounded-md">{error}</p>}
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full bg-white/90 text-primary hover:bg-white">
                 Iniciar Sesión
               </Button>
             </CardFooter>
