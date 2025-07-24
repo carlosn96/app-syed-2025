@@ -32,14 +32,14 @@ body {
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --sidebar-background: 229 44% 50%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 0 0% 98%;
-    --sidebar-primary-foreground: 229 44% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 229 25% 25%;
+    --sidebar-primary: 227 100% 22%;
+    --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 0 0% 100% / 0.1;
     --sidebar-accent-foreground: hsl(var(--sidebar-primary));
-    --sidebar-border: 0 0% 100% / 0.1;
-    --sidebar-ring: 3 80% 51%;
+    --sidebar-border: 229 20% 89.8%;
+    --sidebar-ring: 227 100% 22%;
   }
   .dark {
     --background: 240 6% 10%;
@@ -66,14 +66,14 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 229 44% 50%;
+    --sidebar-background: 240 6% 10%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 0 0% 98%;
-    --sidebar-primary-foreground: 229 44% 50%;
+    --sidebar-primary: 229 44% 60%;
+    --sidebar-primary-foreground: 227 100% 22%;
     --sidebar-accent: 229 44% 60%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 229 44% 55%;
-    --sidebar-ring: 3 80% 60%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 229 44% 60%;
   }
 }
 
@@ -88,17 +88,6 @@ body {
     background-image: url('https://images.unsplash.com/photo-1533134486753-c833f0ed4866?q=80&w=2070&auto=format&fit=crop');
     background-size: cover;
     background-position: center;
-  }
-  .header-background {
-    background: linear-gradient(to bottom right, rgba(32, 45, 93, 0.8), rgba(223, 28, 26, 0.8));
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-  }
-  .glass-sidebar {
-    background: linear-gradient(to bottom, rgba(32, 45, 93, 0.8), rgba(255, 255, 255, 0.1));
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   }
   .glass-card {
     background: rgba(255, 255, 255, 0.15);
