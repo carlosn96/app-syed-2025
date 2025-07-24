@@ -33,13 +33,13 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --sidebar-background: 229 44% 50%; /* #4d5fb3 */
-    --sidebar-foreground: 0 0% 98%;
+    --sidebar-background: 229 44% 50%;
+    --sidebar-foreground: hsl(var(--primary));
     --sidebar-primary: 0 0% 98%;
     --sidebar-primary-foreground: 229 44% 50%;
-    --sidebar-accent: 229 44% 60%; /* Lighter blue for selection */
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 229 44% 55%;
+    --sidebar-accent: hsl(var(--primary) / 0.2);
+    --sidebar-accent-foreground: hsl(var(--primary));
+    --sidebar-border: hsl(var(--primary) / 0.2);
     --sidebar-ring: 3 80% 51%;
   }
   .dark {
