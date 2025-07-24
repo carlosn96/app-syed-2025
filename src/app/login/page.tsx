@@ -63,7 +63,7 @@ export default function LoginPage() {
         <form onSubmit={handleLogin}>
             <CardHeader className="text-center">
                 <div className="flex justify-center items-center mb-4">
-                     <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40" />
+                     <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]" />
                 </div>
               <CardTitle className="text-2xl font-headline text-white">¡Bienvenido de Nuevo!</CardTitle>
               <CardDescription className="text-white/80">
