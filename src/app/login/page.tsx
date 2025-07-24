@@ -50,15 +50,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center glass-background p-4">
-      <Card className="w-full max-w-sm glass-card text-white">
+    <div className="flex h-screen w-full items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-sm">
         <form onSubmit={handleLogin}>
             <CardHeader className="text-center">
                 <div className="flex justify-center items-center mb-4">
                      <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40" />
                 </div>
               <CardTitle className="text-2xl font-headline">¡Bienvenido de Nuevo!</CardTitle>
-              <CardDescription className="text-gray-200">
+              <CardDescription>
                 Ingresa tus credenciales para iniciar sesión.
               </CardDescription>
             </CardHeader>
@@ -72,7 +72,6 @@ export default function LoginPage() {
                   required 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/10 border-white/20 placeholder:text-gray-300"
                 />
               </div>
               <div className="grid gap-2">
@@ -84,13 +83,13 @@ export default function LoginPage() {
                     required 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10 bg-white/10 border-white/20 placeholder:text-gray-300"
+                    className="pr-10"
                   />
                   <Button 
                     type="button" 
                     variant="ghost" 
                     size="icon" 
-                    className="absolute inset-y-0 right-0 h-full px-3 text-gray-300 hover:text-white"
+                    className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
