@@ -37,9 +37,9 @@ body {
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 0 0% 98%;
     --sidebar-primary-foreground: 229 44% 50%;
-    --sidebar-accent: hsl(var(--primary));
+    --sidebar-accent: 0 0% 100% / 0.1;
     --sidebar-accent-foreground: hsl(var(--sidebar-primary));
-    --sidebar-border: hsl(var(--primary) / 0.1);
+    --sidebar-border: 0 0% 100% / 0.1;
     --sidebar-ring: 3 80% 51%;
   }
   .dark {
