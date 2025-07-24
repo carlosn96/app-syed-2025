@@ -199,10 +199,13 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            className="w-[--sidebar-width] p-0 text-sidebar-foreground [&>button]:hidden"
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+                background: 'linear-gradient(to bottom right, rgba(32, 45, 93, 0.8), rgba(223, 28, 26, 0.8))',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(10px)',
               } as React.CSSProperties
             }
             side={side}
@@ -249,7 +252,12 @@ const Sidebar = React.forwardRef<
         >
           <div
             data-sidebar="sidebar"
-            className="flex h-full w-full flex-col rounded-md bg-sidebar text-sidebar-foreground"
+            className="flex h-full w-full flex-col rounded-md text-sidebar-foreground"
+            style={{
+                background: 'linear-gradient(to bottom right, rgba(32, 45, 93, 0.8), rgba(223, 28, 26, 0.8))',
+                borderRight: '1px solid rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(10px)',
+            }}
           >
             {children}
           </div>
@@ -272,7 +280,7 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7", className)}
+      className={cn("h-7 w-7 text-white", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()

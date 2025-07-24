@@ -90,4 +90,9 @@ body {
     background-size: cover;
     background-position: center;
   }
+  .header-background {
+    background: linear-gradient(to bottom right, rgba(32, 45, 93, 0.8), rgba(223, 28, 26, 0.8));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+  }
 }
