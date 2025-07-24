@@ -14,7 +14,7 @@ import {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="login-background">
+    <div className="login-background min-h-screen">
       <SidebarProvider>
         <Sidebar side="left" collapsible="icon">
           <SidebarHeader className="p-4">
