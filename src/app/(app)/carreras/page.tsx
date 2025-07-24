@@ -39,7 +39,7 @@ export default function CareersPage() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="font-headline text-3xl font-semibold tracking-tight">
-          Planes de Estudio por Carrera
+          Planes de Estudio
         </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
@@ -73,13 +73,13 @@ export default function CareersPage() {
           return (
             <Card key={career.id} className="flex flex-col">
               <CardHeader>
-                <div className="flex items-start justify-between">
+                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div>
                     <CardTitle>{career.name}</CardTitle>
                     <CardDescription>{career.campus}</CardDescription>
                      <p className="text-xs text-muted-foreground pt-1">{career.coordinator}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 shrink-0">
                     <Button size="icon" variant="warning">
                       <Pencil className="h-4 w-4" />
                       <span className="sr-only">Editar</span>

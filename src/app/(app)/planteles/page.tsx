@@ -32,7 +32,6 @@ import {
 import { planteles } from "@/lib/data"
 import { CreatePlantelForm } from "@/components/create-plantel-form"
 
-
 export default function PlantelesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -60,7 +59,41 @@ export default function PlantelesPage() {
                     </DialogContent>
                 </Dialog>
             </div>
-            <Card>
+
+            {/* Mobile View - Card List */}
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+                {planteles.map((plantel) => (
+                <Card key={plantel.id}>
+                    <CardHeader>
+                    <div className="flex items-start justify-between">
+                        <div>
+                        <CardTitle>{plantel.name}</CardTitle>
+                        <CardDescription>{plantel.location}</CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                        <Button size="icon" variant="warning">
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Editar</span>
+                        </Button>
+                        <Button size="icon" variant="destructive-outline">
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Eliminar</span>
+                        </Button>
+                        </div>
+                    </div>
+                    </CardHeader>
+                    <CardContent>
+                    <div className="text-sm text-muted-foreground">
+                        <span className="font-semibold text-foreground">Director: </span>
+                        {plantel.director}
+                    </div>
+                    </CardContent>
+                </Card>
+                ))}
+            </div>
+
+            {/* Desktop View - Table */}
+            <Card className="hidden md:block">
                 <CardHeader>
                     <CardTitle>Planteles</CardTitle>
                     <CardDescription>

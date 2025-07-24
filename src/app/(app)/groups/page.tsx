@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dialog"
 import { groups } from "@/lib/data"
 import { CreateGroupForm } from "@/components/create-group-form"
+import { Separator } from "@/components/ui/separator"
 
 export default function GroupsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,7 +60,48 @@ export default function GroupsPage() {
             </DialogContent>
         </Dialog>
       </div>
-      <Card>
+
+       {/* Mobile View - Card List */}
+      <div className="md:hidden flex flex-col gap-4">
+        {groups.map((group) => (
+          <Card key={group.id}>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle>{group.name}</CardTitle>
+                  <CardDescription>{group.career}</CardDescription>
+                </div>
+                 <div className="flex gap-2">
+                    <Button size="icon" variant="warning">
+                      <Pencil className="h-4 w-4" />
+                      <span className="sr-only">Editar</span>
+                    </Button>
+                    <Button size="icon" variant="destructive-outline">
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Eliminar</span>
+                    </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+                <Separator className="my-2"/>
+                <div className="grid grid-cols-2 gap-2 text-sm mt-4">
+                    <div className="font-semibold">Semestre:</div>
+                    <div>{group.semester}</div>
+                    <div className="font-semibold">Ciclo:</div>
+                    <div>{group.cycle}</div>
+                    <div className="font-semibold">Turno:</div>
+                    <div>{group.turno}</div>
+                    <div className="font-semibold">Alumnos:</div>
+                    <div>{group.students.length}</div>
+                </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Desktop View - Table */}
+      <Card className="hidden md:block">
         <CardHeader>
           <CardTitle>Grupos</CardTitle>
           <CardDescription>

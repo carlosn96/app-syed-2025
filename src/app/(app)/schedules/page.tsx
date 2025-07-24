@@ -77,13 +77,13 @@ export default function SchedulesPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="font-headline text-3xl font-semibold tracking-tight">
           Horarios de Clase
         </h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
             <Select value={filterType} onValueChange={(value) => { setFilterType(value); setSelectedFilter(null); }}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-full md:w-[150px]">
                     <SelectValue placeholder="Filtrar por..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -92,7 +92,7 @@ export default function SchedulesPage() {
                 </SelectContent>
             </Select>
             <Select value={selectedFilter || ''} onValueChange={setSelectedFilter}>
-                <SelectTrigger className="w-[220px]">
+                <SelectTrigger className="w-full md:w-[220px]">
                     <SelectValue placeholder={`Seleccionar ${filterType === 'teacher' ? 'docente' : 'grupo'}`} />
                 </SelectTrigger>
                 <SelectContent>
@@ -111,7 +111,7 @@ export default function SchedulesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
+      <div className="grid grid-cols-1 gap-6">
         {daysOfWeek.map((day) => {
           const dailySchedules = getSchedulesForDay(day);
           return (
@@ -126,21 +126,25 @@ export default function SchedulesPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[150px]">Hora</TableHead>
+                        <TableHead className="w-[100px] md:w-[150px]">Hora</TableHead>
                         <TableHead>Materia</TableHead>
-                        <TableHead>Docente</TableHead>
-                        <TableHead>Grupo</TableHead>
+                        <TableHead className="hidden sm:table-cell">Docente</TableHead>
+                        <TableHead className="hidden sm:table-cell">Grupo</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {dailySchedules.map((schedule) => (
                         <TableRow key={schedule.id}>
-                          <TableCell className="font-medium text-primary">
+                          <TableCell className="font-medium text-primary text-xs sm:text-sm">
                             {schedule.startTime} - {schedule.endTime}
                           </TableCell>
-                          <TableCell className="font-semibold">{getEntityName("subject", schedule.subjectId)}</TableCell>
-                          <TableCell>{getEntityName("teacher", schedule.teacherId)}</TableCell>
-                          <TableCell>{getEntityName("group", schedule.groupId)}</TableCell>
+                          <TableCell className="font-semibold">
+                            <div>{getEntityName("subject", schedule.subjectId)}</div>
+                            <div className="sm:hidden text-xs text-muted-foreground font-normal">{getEntityName("teacher", schedule.teacherId)}</div>
+                            <div className="sm:hidden text-xs text-muted-foreground font-normal">Grupo: {getEntityName("group", schedule.groupId)}</div>
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell">{getEntityName("teacher", schedule.teacherId)}</TableCell>
+                          <TableCell className="hidden sm:table-cell">{getEntityName("group", schedule.groupId)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

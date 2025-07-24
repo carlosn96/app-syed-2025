@@ -59,7 +59,41 @@ export default function SubjectsPage() {
           </DialogContent>
         </Dialog>
       </div>
-      <Card>
+
+       {/* Mobile View - Card List */}
+      <div className="grid grid-cols-1 gap-4 md:hidden">
+        {subjects.map((subject) => (
+          <Card key={subject.id}>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle>{subject.name}</CardTitle>
+                  <CardDescription>Carrera: {subject.career}</CardDescription>
+                </div>
+                 <div className="flex gap-2">
+                    <Button size="icon" variant="warning">
+                      <Pencil className="h-4 w-4" />
+                      <span className="sr-only">Editar</span>
+                    </Button>
+                    <Button size="icon" variant="destructive-outline">
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Eliminar</span>
+                    </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">Docente: </span>
+                {subject.teacher}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Desktop View - Table */}
+      <Card className="hidden md:block">
         <CardHeader>
           <CardTitle>Materias</CardTitle>
           <CardDescription>

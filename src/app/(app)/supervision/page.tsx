@@ -53,13 +53,13 @@ export default function SupervisionPage() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="font-headline text-3xl font-semibold tracking-tight">
-          Supervisión de Docentes
+          Supervisión
         </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Nueva Supervisión
+              Agendar
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
@@ -138,7 +138,31 @@ export default function SupervisionPage() {
                 <CardDescription>Historial y próximas supervisiones.</CardDescription>
             </CardHeader>
             <CardContent>
-                <ScrollArea className="h-auto max-h-[400px]">
+                 {/* Mobile View - Card List */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {supervisions.map((supervision) => (
+                    <Card key={supervision.id} className="w-full">
+                        <CardHeader>
+                        <CardTitle className="text-base">{supervision.teacher}</CardTitle>
+                        <CardDescription>{supervision.subject}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="text-sm space-y-2">
+                        <p><span className="font-semibold">Coordinador:</span> {supervision.coordinator}</p>
+                        <p><span className="font-semibold">Fecha:</span> {format(supervision.date, "P", { locale: es })}</p>
+                        <p><span className="font-semibold">Horario:</span> <span className="text-primary font-mono">{supervision.startTime} - {supervision.endTime}</span></p>
+                        <p><span className="font-semibold">Grupo:</span> {getGroupName(supervision.groupId)}</p>
+                        <div className="flex items-center justify-between pt-2">
+                            <Badge variant={supervision.status === 'Programada' ? 'warning' : 'success'}>
+                                {supervision.status}
+                            </Badge>
+                        </div>
+                        </CardContent>
+                    </Card>
+                    ))}
+                </div>
+
+                {/* Desktop View - Table */}
+                <ScrollArea className="hidden md:block h-auto max-h-[400px]">
                     <Table>
                         <TableHeader>
                             <TableRow>

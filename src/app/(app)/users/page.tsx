@@ -88,7 +88,52 @@ export default function UsersPage() {
           </Dialog>
         )}
       </div>
-      <Card>
+
+       {/* Mobile View - Card List */}
+      <div className="grid grid-cols-1 gap-4 md:hidden">
+        <div className="flex flex-wrap items-center gap-2">
+            {filterButtons.map((role) => (
+                <Button
+                key={role}
+                variant={filter === role ? 'default' : 'outline-filter'}
+                size="sm"
+                onClick={() => setFilter(role)}
+                >
+                {roleDisplayMap[role]}
+                </Button>
+            ))}
+        </div>
+        {filteredUsers.map((user) => (
+          <Card key={user.id}>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="text-base">{`${user.nombre} ${user.apellido_paterno}`}</CardTitle>
+                  <CardDescription>{user.correo}</CardDescription>
+                </div>
+                <Badge variant="outline">{roleDisplayMap[user.rol]}</Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="text-sm space-y-2">
+              <p><span className="font-semibold">Grupo:</span> {user.rol === 'student' ? user.grupo : 'N/A'}</p>
+              <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
+              <div className="flex gap-2 pt-2">
+                <Button size="sm" variant="warning" className="flex-1">
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Editar
+                </Button>
+                <Button size="sm" variant="destructive-outline" className="flex-1">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Eliminar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      
+      {/* Desktop View - Table */}
+      <Card className="hidden md:block">
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>

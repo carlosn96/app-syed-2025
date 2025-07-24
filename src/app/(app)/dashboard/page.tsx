@@ -18,29 +18,36 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-
-const chartData = [
-  { month: "Ene", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Feb", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Mar", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Abr", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "May", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Jun", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Jul", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Ago", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Sep", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Oct", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Nov", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Dic", total: Math.floor(Math.random() * 5000) + 1000 },
-]
+import { useEffect, useState } from "react"
 
 export default function DashboardPage() {
+  const [chartData, setChartData] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Evita el error de hidratación de React con valores aleatorios.
+    // Esto asegura que el código solo se ejecute en el cliente después del montaje.
+    setChartData([
+      { month: "Ene", total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: "Feb", total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: "Mar", total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: "Abr", total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: "May", total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: "Jun", total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: "Jul", total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: "Ago", total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: "Sep", total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: "Oct", total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: "Nov", total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: "Dic", total: Math.floor(Math.random() * 5000) + 1000 },
+    ]);
+  }, []);
+
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-semibold tracking-tight">
         Panel de Control
       </h1>
-      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-4 md:gap-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -75,7 +82,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">24</div>
             <p className="text-xs text-muted-foreground">
-              +2 carreras nuevas este año
+              +2 nuevas este año
             </p>
           </CardContent>
         </Card>
@@ -92,10 +99,11 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="font-headline">Resumen de Inscripción de Alumnos</CardTitle>
+            <CardTitle className="font-headline">Resumen de Inscripción</CardTitle>
+            <CardDescription>Evolución mensual de nuevos alumnos.</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
             <ResponsiveContainer width="100%" height={350}>
@@ -123,20 +131,22 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="lg:col-span-3">
-          <CardHeader className="flex flex-row items-center">
-             <div className="grid gap-2">
-                <CardTitle className="font-headline">Evaluaciones Recientes</CardTitle>
-                <CardDescription>
-                  Comentarios recientes de los alumnos sobre la calidad de la enseñanza.
-                </CardDescription>
+        <Card>
+          <CardHeader>
+             <div className="flex items-center justify-between">
+                <div>
+                    <CardTitle className="font-headline">Evaluaciones</CardTitle>
+                    <CardDescription>
+                    Comentarios recientes.
+                    </CardDescription>
+                </div>
+                <Button asChild size="sm" className="gap-1">
+                    <Link href="/feedback">
+                    Ver Todo
+                    <ArrowUpRight className="h-4 w-4" />
+                    </Link>
+                </Button>
               </div>
-              <Button asChild size="sm" className="ml-auto gap-1">
-                <Link href="/feedback">
-                  Ver Todo
-                  <ArrowUpRight className="h-4 w-4" />
-                </Link>
-              </Button>
           </CardHeader>
           <CardContent>
             <div className=" space-y-8">
