@@ -34,11 +34,11 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
     --sidebar-background: 229 44% 50%;
-    --sidebar-foreground: hsl(var(--primary));
+    --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 0 0% 98%;
     --sidebar-primary-foreground: 229 44% 50%;
-    --sidebar-accent: hsl(var(--primary) / 0.2);
-    --sidebar-accent-foreground: hsl(var(--primary));
+    --sidebar-accent: hsl(var(--primary));
+    --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: hsl(var(--primary) / 0.2);
     --sidebar-ring: 3 80% 51%;
   }
@@ -85,24 +85,4 @@ body {
   body {
     @apply bg-background text-foreground;
   }
-}
-
-.glass-background {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-    background-attachment: fixed;
-}
-
-.glass-card {
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-}
-
-.header-background {
-    background: transparent;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
 }
