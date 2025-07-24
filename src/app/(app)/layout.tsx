@@ -16,7 +16,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <Sidebar side="left" collapsible="icon">
-        <SidebarHeader className="p-4 bg-sidebar">
+        <SidebarHeader className="p-4 bg-sidebar/80">
           <div className="flex items-center justify-center w-full">
             <Image 
               src="/UNELOGO.png" 
@@ -27,15 +27,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             />
           </div>
         </SidebarHeader>
-        <SidebarContent className="bg-sidebar">
+        <SidebarContent className="bg-sidebar/80">
           <MainNav />
         </SidebarContent>
-        <SidebarFooter className="bg-sidebar">
+        <SidebarFooter className="bg-sidebar/80">
             <UserNav />
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset>
-        <header className="flex h-14 items-center justify-between border-b bg-background px-4 lg:px-8">
+      <SidebarInset className="glass-background">
+        <header className="flex h-14 items-center justify-between border-b px-4 lg:px-8 header-background">
           <div className="md:hidden">
             <SidebarTrigger />
           </div>

@@ -15,12 +15,12 @@ body {
     --popover: 0 0% 100%;
     --popover-foreground: 229 25% 25%;
     --primary: 229 80% 63%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 229 25% 97.5%;
-    --secondary-foreground: 227 100% 22%;
+    --primary-foreground: 229 80% 63%;
+    --secondary: 229 80% 63%;
+    --secondary-foreground: 0 0% 98%;
     --muted: 229 25% 97.5%;
     --muted-foreground: 229 15% 45.1%;
-    --accent: 3 80% 51%; /* #e22319 */
+    --accent: 3 80% 51%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -34,12 +34,12 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
     --sidebar-background: 229 44% 50%;
-    --sidebar-foreground: 0 0% 98%;
+    --sidebar-foreground: 229 80% 63%;
     --sidebar-primary: 0 0% 98%;
     --sidebar-primary-foreground: 229 44% 50%;
-    --sidebar-accent: hsl(var(--primary));
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: hsl(var(--primary) / 0.2);
+    --sidebar-accent: hsl(var(--primary) / 0.1);
+    --sidebar-accent-foreground: hsl(var(--primary));
+    --sidebar-border: hsl(var(--primary) / 0.1);
     --sidebar-ring: 3 80% 51%;
   }
   .dark {
@@ -84,5 +84,22 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+  .glass-background {
+    background-image: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
+  }
+  .glass-card {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+  .dark .glass-card {
+    background: rgba(30, 30, 40, 0.3);
+     border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .header-background {
+    background-color: hsl(var(--background) / 0.5);
+    backdrop-filter: blur(8px);
   }
 }
