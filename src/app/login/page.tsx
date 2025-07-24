@@ -50,8 +50,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center login-background p-4">
-      <Card className="w-full max-w-sm drop-shadow-[0_0px_15px_hsl(var(--primary)/0.3)] dark:drop-shadow-[0_0px_15px_hsl(var(--accent)/0.3)] login-card-background text-primary-foreground">
+    <div className="flex h-screen w-full items-center justify-center glass-background p-4">
+      <Card className="w-full max-w-sm glass-card text-primary-foreground">
         <form onSubmit={handleLogin}>
             <CardHeader className="text-center">
                 <div className="flex justify-center items-center mb-4">
