@@ -36,7 +36,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-          <header className="flex h-14 items-center justify-between px-4 lg:px-8 glass-card border-b border-white/20">
+          <header className="flex h-14 items-center justify-between px-4 lg:px-8 glass-card border-b border-white/20 sticky top-0 z-10">
             <div className="md:hidden">
               <SidebarTrigger />
             </div>
