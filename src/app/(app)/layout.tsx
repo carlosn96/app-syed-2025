@@ -1,3 +1,4 @@
+
 import React from "react";
 import Image from "next/image";
 import { MainNav } from "@/components/layout/main-nav";
@@ -17,7 +18,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="login-background min-h-screen">
       <SidebarProvider>
         <Sidebar side="left" collapsible="icon">
-          <SidebarHeader className="p-4">
+          <SidebarHeader className="p-4 flex items-center justify-between">
             <div className="flex items-center justify-center w-full">
               <Image 
                 src="/UNELOGO.png" 
@@ -26,6 +27,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 height={40} 
                 className="w-28 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]"
               />
+            </div>
+             <div className="md:hidden">
+              <SidebarTrigger />
             </div>
           </SidebarHeader>
           <SidebarContent>
@@ -36,18 +40,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-          <header className="flex h-14 items-center justify-between px-4 lg:px-8 glass-card border-b border-white/20 sticky top-0 z-10">
-            <div className="md:hidden">
-              <SidebarTrigger />
-            </div>
-            <div className="hidden md:block">
-              {/* Can add breadcrumbs here */}
-            </div>
-            <div className="ml-auto">
-              <UserNav />
-            </div>
-          </header>
-          <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-gradient-to-br from-white/15 to-[#e11b1a]/15 rounded-xl">
+          <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-gradient-to-br from-white/15 to-[#e11b1a]/15">
             {children}
           </main>
         </SidebarInset>
