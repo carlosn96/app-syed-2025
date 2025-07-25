@@ -122,7 +122,7 @@ export default function UsersPage() {
                   <Pencil className="mr-2 h-4 w-4" />
                   Editar
                 </Button>
-                <Button size="sm" variant="destructive-outline" className="flex-1">
+                <Button size="sm" variant="destructive" className="flex-1">
                   <Trash2 className="mr-2 h-4 w-4" />
                   Eliminar
                 </Button>
@@ -186,7 +186,7 @@ export default function UsersPage() {
                         <Pencil className="h-4 w-4" />
                         <span className="sr-only">Editar</span>
                       </Button>
-                      <Button size="icon" variant="destructive-outline">
+                      <Button size="icon" variant="destructive">
                         <Trash2 className="h-4 w-4" />
                         <span className="sr-only">Eliminar</span>
                       </Button>

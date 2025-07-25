@@ -76,7 +76,7 @@ export default function GroupsPage() {
                       <Pencil className="h-4 w-4" />
                       <span className="sr-only">Editar</span>
                     </Button>
-                    <Button size="icon" variant="destructive-outline">
+                    <Button size="icon" variant="destructive">
                       <Trash2 className="h-4 w-4" />
                       <span className="sr-only">Eliminar</span>
                     </Button>
@@ -136,7 +136,7 @@ export default function GroupsPage() {
                         <Pencil className="h-4 w-4" />
                         <span className="sr-only">Editar</span>
                         </Button>
-                        <Button size="icon" variant="destructive-outline">
+                        <Button size="icon" variant="destructive">
                         <Trash2 className="h-4 w-4" />
                         <span className="sr-only">Eliminar</span>
                         </Button>
