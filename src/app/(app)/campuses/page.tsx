@@ -29,7 +29,7 @@ import { campuses } from "@/lib/data"
 export default function CampusesPage() {
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="font-headline text-3xl font-semibold tracking-tight">
+      <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
         Gestión de Planteles
       </h1>
       <Card>

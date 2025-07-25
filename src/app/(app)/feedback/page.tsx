@@ -52,7 +52,7 @@ const chartConfig = {
 export default function FeedbackPage() {
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="font-headline text-3xl font-semibold tracking-tight">
+      <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
         Retroalimentación de Desempeño
       </h1>
       <div className="grid gap-8 md:grid-cols-2">

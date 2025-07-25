@@ -38,7 +38,7 @@ export default function PlantelesPage() {
     return (
         <div className="flex flex-col gap-8">
             <div className="flex items-center justify-between">
-                <h1 className="font-headline text-3xl font-semibold tracking-tight">
+                <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
                     Gestión de Planteles
                 </h1>
                 <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
