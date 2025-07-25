@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react"
-import { Pencil, PlusCircle, Trash2 } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -29,41 +29,62 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { groups } from "@/lib/data"
+import { groups as allGroups } from "@/lib/data"
 import { CreateGroupForm } from "@/components/create-group-form"
 import { Separator } from "@/components/ui/separator"
+import { Input } from "@/components/ui/input"
 
 export default function GroupsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredGroups = allGroups.filter(group => 
+    group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    group.career.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    group.cycle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    group.turno.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Grupos
         </h1>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Crear Grupo
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Crear Nuevo Grupo</DialogTitle>
-                    <DialogDescription>
-                        Completa el formulario para registrar un nuevo grupo.
-                    </DialogDescription>
-                </DialogHeader>
-                <CreateGroupForm onSuccess={() => setIsModalOpen(false)} />
-            </DialogContent>
-        </Dialog>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                  type="search"
+                  placeholder="Buscar grupos..."
+                  className="pl-9 w-full sm:w-[250px]"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+              />
+          </div>
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <DialogTrigger asChild>
+                  <Button className="w-full sm:w-auto">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Crear Grupo
+                  </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                      <DialogTitle>Crear Nuevo Grupo</DialogTitle>
+                      <DialogDescription>
+                          Completa el formulario para registrar un nuevo grupo.
+                      </DialogDescription>
+                  </DialogHeader>
+                  <CreateGroupForm onSuccess={() => setIsModalOpen(false)} />
+              </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
        {/* Mobile View - Card List */}
       <div className="md:hidden flex flex-col gap-4">
-        {groups.map((group) => (
+        {filteredGroups.map((group) => (
           <Card key={group.id} className="rounded-xl">
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -122,7 +143,7 @@ export default function GroupsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {groups.map((group) => (
+              {filteredGroups.map((group) => (
                 <TableRow key={group.id}>
                   <TableCell className="font-medium">{group.name}</TableCell>
                   <TableCell>{group.career}</TableCell>
@@ -149,7 +170,7 @@ export default function GroupsPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-{groups.length}</strong> de <strong>{groups.length}</strong> grupos
+            Mostrando <strong>1-{filteredGroups.length}</strong> de <strong>{allGroups.length}</strong> grupos
           </div>
         </CardFooter>
       </Card>

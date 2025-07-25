@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Pencil, PlusCircle, Trash2 } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -31,25 +31,39 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useAuth } from "@/context/auth-context"
-import { users as allUsers, User, Role } from "@/lib/data"
+import { users as allUsersData, User, Role } from "@/lib/data"
 import { CreateUserForm } from "@/components/create-user-form"
+import { Input } from "@/components/ui/input"
 
 type RoleFilter = Role | 'all';
 
 export default function UsersPage() {
   const { user: loggedInUser, isLoading: isAuthLoading } = useAuth();
   const [filter, setFilter] = useState<RoleFilter>('all');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Exclude administrator from the list that can be managed
+  const allUsers = allUsersData.filter(user => user.rol !== 'administrator');
+
   useEffect(() => {
-    const usersToDisplay = allUsers.filter(user => user.rol !== 'administrator');
-    if (filter === 'all') {
-      setFilteredUsers(usersToDisplay);
-    } else {
-      setFilteredUsers(usersToDisplay.filter((user) => user.rol === filter));
+    let usersToDisplay = allUsers;
+
+    if (filter !== 'all') {
+      usersToDisplay = usersToDisplay.filter((user) => user.rol === filter);
     }
-  }, [filter]);
+    
+    if (searchTerm) {
+      usersToDisplay = usersToDisplay.filter(user =>
+        `${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (user.grupo && user.grupo.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    setFilteredUsers(usersToDisplay);
+  }, [filter, searchTerm]);
 
   const roleDisplayMap: { [key in RoleFilter]: string } = {
     'all': 'Todos',
@@ -64,28 +78,40 @@ export default function UsersPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Gestión de Usuarios
         </h1>
         {!isAuthLoading && loggedInUser?.rol === 'administrator' && (
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Crear Usuario
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Crear Nuevo Usuario</DialogTitle>
-                <DialogDescription>
-                  Completa el formulario para registrar una nueva cuenta.
-                </DialogDescription>
-              </DialogHeader>
-              <CreateUserForm onSuccess={() => setIsModalOpen(false)} />
-            </DialogContent>
-          </Dialog>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:w-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                  type="search"
+                  placeholder="Buscar usuarios..."
+                  className="pl-9 w-full sm:w-[250px]"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Crear Usuario
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+                  <DialogDescription>
+                    Completa el formulario para registrar una nueva cuenta.
+                  </DialogDescription>
+                </DialogHeader>
+                <CreateUserForm onSuccess={() => setIsModalOpen(false)} />
+              </DialogContent>
+            </Dialog>
+          </div>
         )}
       </div>
 
@@ -199,7 +225,7 @@ export default function UsersPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Mostrando <strong>{filteredUsers.length}</strong> de <strong>{allUsers.filter(u => u.rol !== 'administrator').length}</strong> usuarios
+            Mostrando <strong>{filteredUsers.length}</strong> de <strong>{allUsers.length}</strong> usuarios
           </div>
         </CardFooter>
       </Card>

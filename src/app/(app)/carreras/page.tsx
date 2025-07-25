@@ -1,7 +1,7 @@
 
 "use client"
 import { useState } from "react"
-import { Pencil, PlusCircle, Trash2 } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search } from "lucide-react"
 
 import {
   Card,
@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { careers, subjects } from "@/lib/data"
+import { careers as allCareers, subjects } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -22,10 +22,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CreateCareerForm } from "@/components/create-career-form"
+import { Input } from "@/components/ui/input"
 
 export default function CareersPage() {
   const [activeTabs, setActiveTabs] = useState<Record<number, string>>({})
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleTabChange = (careerId: number, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [careerId]: value }))
@@ -35,32 +37,50 @@ export default function CareersPage() {
     return `${n}°`;
   }
 
+  const filteredCareers = allCareers.filter(career => 
+    career.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    career.campus.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    career.coordinator.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Planes de Estudio
         </h1>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Crear Carrera
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Crear Nueva Carrera</DialogTitle>
-                    <DialogDescription>
-                        Completa el formulario para registrar una nueva carrera.
-                    </DialogDescription>
-                </DialogHeader>
-                <CreateCareerForm onSuccess={() => setIsModalOpen(false)} />
-            </DialogContent>
-        </Dialog>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                  type="search"
+                  placeholder="Buscar carreras..."
+                  className="pl-9 w-full sm:w-[250px]"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+              />
+          </div>
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <DialogTrigger asChild>
+                  <Button className="w-full sm:w-auto">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Crear Carrera
+                  </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                      <DialogTitle>Crear Nueva Carrera</DialogTitle>
+                      <DialogDescription>
+                          Completa el formulario para registrar una nueva carrera.
+                      </DialogDescription>
+                  </DialogHeader>
+                  <CreateCareerForm onSuccess={() => setIsModalOpen(false)} />
+              </DialogContent>
+          </Dialog>
+        </div>
       </div>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        {careers.map((career) => {
+        {filteredCareers.map((career) => {
           const filteredSubjects = subjects.filter(
             (subject) => subject.career === career.name
           )

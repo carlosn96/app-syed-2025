@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react"
-import { Pencil, PlusCircle, Trash2 } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -29,40 +29,60 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { planteles } from "@/lib/data"
+import { planteles as allPlanteles } from "@/lib/data"
 import { CreatePlantelForm } from "@/components/create-plantel-form"
+import { Input } from "@/components/ui/input"
 
 export default function PlantelesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const filteredPlanteles = allPlanteles.filter(plantel => 
+        plantel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        plantel.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        plantel.director.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className="flex flex-col gap-8">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
                     Gestión de Planteles
                 </h1>
-                <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Crear Plantel
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Crear Nuevo Plantel</DialogTitle>
-                            <DialogDescription>
-                                Completa el formulario para registrar un nuevo plantel.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <CreatePlantelForm onSuccess={() => setIsModalOpen(false)} />
-                    </DialogContent>
-                </Dialog>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                    <div className="relative w-full sm:w-auto">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="search"
+                            placeholder="Buscar planteles..."
+                            className="pl-9 w-full sm:w-[250px]"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="w-full sm:w-auto">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Crear Plantel
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Crear Nuevo Plantel</DialogTitle>
+                                <DialogDescription>
+                                    Completa el formulario para registrar un nuevo plantel.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <CreatePlantelForm onSuccess={() => setIsModalOpen(false)} />
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
             {/* Mobile View - Card List */}
             <div className="grid grid-cols-1 gap-4 md:hidden">
-                {planteles.map((plantel) => (
+                {filteredPlanteles.map((plantel) => (
                 <Card key={plantel.id} className="rounded-xl">
                     <CardHeader>
                     <div className="flex items-start justify-between">
@@ -111,7 +131,7 @@ export default function PlantelesPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {planteles.map((plantel) => (
+                            {filteredPlanteles.map((plantel) => (
                                 <TableRow key={plantel.id}>
                                     <TableCell className="font-medium">{plantel.name}</TableCell>
                                     <TableCell>{plantel.location}</TableCell>
@@ -135,7 +155,7 @@ export default function PlantelesPage() {
                 </CardContent>
                 <CardFooter>
                     <div className="text-xs text-muted-foreground">
-                        Mostrando <strong>1-{planteles.length}</strong> de <strong>{planteles.length}</strong> planteles
+                        Mostrando <strong>1-{filteredPlanteles.length}</strong> de <strong>{allPlanteles.length}</strong> planteles
                     </div>
                 </CardFooter>
             </Card>
