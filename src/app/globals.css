@@ -11,7 +11,7 @@ body {
     --background: 229 25% 97.5%;
     --foreground: 229 25% 25%;
     --card: 0 0% 100%;
-    --card-foreground: 229 25% 25%;
+    --card-foreground: 0 0% 100%;
     --popover: 0 0% 100%;
     --popover-foreground: 229 25% 25%;
     --primary: 227 100% 22%;
@@ -27,6 +27,7 @@ body {
     --border: 229 20% 89.8%;
     --input: 229 20% 89.8%;
     --ring: 227 100% 22%;
+    --radius: 1.5rem;
     --chart-1: 227 100% 22%;
     --chart-2: 3 80% 51%;
     --chart-3: 197 37% 24%;
@@ -95,6 +96,6 @@ body {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
 }
