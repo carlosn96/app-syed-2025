@@ -250,7 +250,7 @@ const Sidebar = React.forwardRef<
         >
           <div
             data-sidebar="sidebar"
-            className="flex h-full w-full flex-col rounded-md text-sidebar-foreground glass-card"
+            className="flex h-full w-full flex-col text-sidebar-foreground glass-card"
           >
             {children}
           </div>
