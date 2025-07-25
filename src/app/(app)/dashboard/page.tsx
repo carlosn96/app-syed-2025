@@ -1,3 +1,4 @@
+
 "use client"
 import {
   ArrowUpRight,
@@ -133,14 +134,14 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-             <div className="flex items-center justify-between">
+             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div>
                     <CardTitle className="font-headline">Evaluaciones</CardTitle>
                     <CardDescription>
                     Comentarios recientes.
                     </CardDescription>
                 </div>
-                <Button asChild size="sm" className="gap-1">
+                <Button asChild size="sm" className="gap-1 shrink-0">
                     <Link href="/feedback">
                     Ver Todo
                     <ArrowUpRight className="h-4 w-4" />
