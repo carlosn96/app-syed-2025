@@ -104,7 +104,7 @@ export default function UsersPage() {
             ))}
         </div>
         {filteredUsers.map((user) => (
-          <Card key={user.id}>
+          <Card key={user.id} className="rounded-xl">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div>
@@ -133,7 +133,7 @@ export default function UsersPage() {
       </div>
       
       {/* Desktop View - Table */}
-      <Card className="hidden md:block">
+      <Card className="hidden md:block rounded-xl">
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>

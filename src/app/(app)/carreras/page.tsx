@@ -71,7 +71,7 @@ export default function CareersPage() {
             semesters.length > 0 ? `sem-${semesters[0]}` : ""
 
           return (
-            <Card key={career.id} className="flex flex-col">
+            <Card key={career.id} className="flex flex-col rounded-xl">
               <CardHeader>
                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div>

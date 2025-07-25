@@ -64,7 +64,7 @@ export default function GroupsPage() {
        {/* Mobile View - Card List */}
       <div className="md:hidden flex flex-col gap-4">
         {groups.map((group) => (
-          <Card key={group.id}>
+          <Card key={group.id} className="rounded-xl">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div>
@@ -101,7 +101,7 @@ export default function GroupsPage() {
       </div>
 
       {/* Desktop View - Table */}
-      <Card className="hidden md:block">
+      <Card className="hidden md:block rounded-xl">
         <CardHeader>
           <CardTitle>Grupos</CardTitle>
           <CardDescription>

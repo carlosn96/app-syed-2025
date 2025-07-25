@@ -56,7 +56,7 @@ export default function FeedbackPage() {
         Retroalimentación de Desempeño
       </h1>
       <div className="grid gap-8 md:grid-cols-2">
-        <Card>
+        <Card className="rounded-xl">
           <CardHeader>
             <CardTitle>Desempeño General de Docentes</CardTitle>
             <CardDescription>Calificaciones promedio en todas las categorías.</CardDescription>
@@ -93,7 +93,7 @@ export default function FeedbackPage() {
             </ChartContainer>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-xl">
           <CardHeader>
             <CardTitle>Comentarios Recientes</CardTitle>
             <CardDescription>Retroalimentación cualitativa de los alumnos.</CardDescription>

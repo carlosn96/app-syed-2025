@@ -63,7 +63,7 @@ export default function PlantelesPage() {
             {/* Mobile View - Card List */}
             <div className="grid grid-cols-1 gap-4 md:hidden">
                 {planteles.map((plantel) => (
-                <Card key={plantel.id}>
+                <Card key={plantel.id} className="rounded-xl">
                     <CardHeader>
                     <div className="flex items-start justify-between">
                         <div>
@@ -93,7 +93,7 @@ export default function PlantelesPage() {
             </div>
 
             {/* Desktop View - Table */}
-            <Card className="hidden md:block">
+            <Card className="hidden md:block rounded-xl">
                 <CardHeader>
                     <CardTitle>Planteles</CardTitle>
                     <CardDescription>

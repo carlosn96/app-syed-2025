@@ -79,7 +79,7 @@ export default function SupervisionPage() {
 
       <div className="grid grid-cols-1 gap-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2 h-full">
+            <Card className="lg:col-span-2 h-full rounded-xl">
                 <Calendar
                     mode="single"
                     selected={date}
@@ -89,7 +89,7 @@ export default function SupervisionPage() {
                     disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                 />
             </Card>
-            <Card className="lg:col-span-1">
+            <Card className="lg:col-span-1 rounded-xl">
                 <CardHeader>
                 <CardTitle>Supervisiones Próximas</CardTitle>
                 <CardDescription>Eventos de supervisión más cercanos.</CardDescription>
@@ -132,7 +132,7 @@ export default function SupervisionPage() {
             </Card>
         </div>
 
-        <Card>
+        <Card className="rounded-xl">
             <CardHeader>
                 <CardTitle>Lista de Supervisiones</CardTitle>
                 <CardDescription>Historial y próximas supervisiones.</CardDescription>
@@ -141,7 +141,7 @@ export default function SupervisionPage() {
                  {/* Mobile View - Card List */}
                 <div className="grid grid-cols-1 gap-4 md:hidden">
                     {supervisions.map((supervision) => (
-                    <Card key={supervision.id} className="w-full">
+                    <Card key={supervision.id} className="w-full rounded-xl">
                         <CardHeader>
                         <CardTitle className="text-base">{supervision.teacher}</CardTitle>
                         <CardDescription>{supervision.subject}</CardDescription>

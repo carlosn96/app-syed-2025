@@ -32,7 +32,7 @@ export default function CampusesPage() {
       <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
         Gestión de Planteles
       </h1>
-      <Card>
+      <Card className="rounded-xl">
         <CardHeader>
           <CardTitle>Planteles</CardTitle>
           <CardDescription>

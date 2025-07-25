@@ -63,7 +63,7 @@ export default function SubjectsPage() {
        {/* Mobile View - Card List */}
       <div className="grid grid-cols-1 gap-4 md:hidden">
         {subjects.map((subject) => (
-          <Card key={subject.id}>
+          <Card key={subject.id} className="rounded-xl">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div>
@@ -93,7 +93,7 @@ export default function SubjectsPage() {
       </div>
 
       {/* Desktop View - Table */}
-      <Card className="hidden md:block">
+      <Card className="hidden md:block rounded-xl">
         <CardHeader>
           <CardTitle>Materias</CardTitle>
           <CardDescription>

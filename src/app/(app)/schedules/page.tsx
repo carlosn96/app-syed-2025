@@ -115,7 +115,7 @@ export default function SchedulesPage() {
         {daysOfWeek.map((day) => {
           const dailySchedules = getSchedulesForDay(day);
           return (
-            <Card key={day} className="flex flex-col">
+            <Card key={day} className="flex flex-col rounded-xl">
               <CardHeader className="pb-4">
                 <CardTitle className="font-headline text-xl">
                   {day}
