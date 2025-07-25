@@ -101,7 +101,7 @@ export default function DashboardPage() {
         </Card>
       </div>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 rounded-xl">
           <CardHeader>
             <CardTitle className="font-headline">Resumen de Inscripción</CardTitle>
             <CardDescription>Evolución mensual de nuevos alumnos.</CardDescription>
@@ -111,17 +111,19 @@ export default function DashboardPage() {
               <BarChart data={chartData}>
                 <XAxis
                   dataKey="month"
-                  stroke="#888888"
+                  stroke="hsl(var(--primary))"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
+                  fontWeight={600}
                 />
                 <YAxis
-                  stroke="#888888"
+                  stroke="hsl(var(--primary))"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(value) => `$${value / 1000}K`}
+                  fontWeight={600}
                 />
                 <Bar
                   dataKey="total"
@@ -132,7 +134,7 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-xl">
           <CardHeader>
              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div>
@@ -141,7 +143,7 @@ export default function DashboardPage() {
                     Comentarios recientes.
                     </CardDescription>
                 </div>
-                <Button asChild size="sm" className="gap-1 shrink-0">
+                <Button asChild size="sm" className="gap-1 shrink-0 bg-violet-600 hover:bg-violet-800 hover:underline">
                     <Link href="/feedback">
                     Ver Todo
                     <ArrowUpRight className="h-4 w-4" />
