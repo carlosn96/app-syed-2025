@@ -125,7 +125,7 @@ export default function CareersPage() {
                         <TabsTrigger 
                           key={semester} 
                           value={`sem-${semester}`}
-                          className="px-2 py-1 h-auto text-xs"
+                          className="text-xs"
                         >
                           {getOrdinal(semester)}
                         </TabsTrigger>
