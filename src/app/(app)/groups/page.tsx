@@ -52,31 +52,32 @@ export default function GroupsPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Grupos
         </h1>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-          <div className="relative w-full sm:w-auto">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                  type="search"
-                  placeholder="Buscar grupos..."
-                  className="pl-9 w-full sm:w-[250px]"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-              />
-          </div>
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-              <DialogTrigger asChild>
-                  <FloatingButton text="Crear Grupo" />
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                      <DialogTitle>Crear Nuevo Grupo</DialogTitle>
-                      <DialogDescription>
-                          Completa el formulario para registrar un nuevo grupo.
-                      </DialogDescription>
-                  </DialogHeader>
-                  <CreateGroupForm onSuccess={() => setIsModalOpen(false)} />
-              </DialogContent>
-          </Dialog>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+                <FloatingButton text="Crear Grupo" />
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Crear Nuevo Grupo</DialogTitle>
+                    <DialogDescription>
+                        Completa el formulario para registrar un nuevo grupo.
+                    </DialogDescription>
+                </DialogHeader>
+                <CreateGroupForm onSuccess={() => setIsModalOpen(false)} />
+            </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+        <div className="relative w-full sm:w-auto">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+                type="search"
+                placeholder="Buscar grupos..."
+                className="pl-9 w-full sm:w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
         </div>
       </div>
 

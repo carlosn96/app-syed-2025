@@ -50,31 +50,32 @@ export default function PlantelesPage() {
                 <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
                     Gestión de Planteles
                 </h1>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                    <div className="relative w-full sm:w-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Buscar planteles..."
-                            className="pl-9 w-full sm:w-[250px]"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                        <DialogTrigger asChild>
-                           <FloatingButton text="Crear Plantel" />
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>Crear Nuevo Plantel</DialogTitle>
-                                <DialogDescription>
-                                    Completa el formulario para registrar un nuevo plantel.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <CreatePlantelForm onSuccess={() => setIsModalOpen(false)} />
-                        </DialogContent>
-                    </Dialog>
+                <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                    <DialogTrigger asChild>
+                       <FloatingButton text="Crear Plantel" />
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Crear Nuevo Plantel</DialogTitle>
+                            <DialogDescription>
+                                Completa el formulario para registrar un nuevo plantel.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <CreatePlantelForm onSuccess={() => setIsModalOpen(false)} />
+                    </DialogContent>
+                </Dialog>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                <div className="relative w-full sm:w-auto">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Buscar planteles..."
+                        className="pl-9 w-full sm:w-full"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
             </div>
 
