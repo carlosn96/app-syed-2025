@@ -222,30 +222,32 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="coordinatorId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Coordinador</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={user?.rol === 'coordinator'}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un coordinador" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {coordinators.map((coordinator) => (
-                    <SelectItem key={coordinator.id} value={String(coordinator.id)}>
-                      {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {user?.rol !== 'coordinator' && (
+            <FormField
+            control={form.control}
+            name="coordinatorId"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Coordinador</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={user?.rol === 'coordinator'}>
+                    <FormControl>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un coordinador" />
+                    </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                    {coordinators.map((coordinator) => (
+                        <SelectItem key={coordinator.id} value={String(coordinator.id)}>
+                        {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
+                        </SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+        )}
         <FormField
           control={form.control}
           name="groupId"
