@@ -92,9 +92,9 @@ export const subjects: Subject[] = [
   { id: 20, name: 'Derecho Mercantil', career: 'Administración de Empresas', teacher: 'Lic. Jorge Barrera Graf', semester: 5 },
 
   // Ingeniería Mecánica
-  { id: 4, name: 'Termodinámica', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 1 },
-  { id: 21, name: 'Mecánica de Fluidos', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 2 },
-  { id: 22, name: 'Diseño Asistido por Computadora (CAD)', career: 'Ingeniería Mecánica', teacher: 'Dr. James Watt', semester: 3 },
+  { id: 4, name: 'Termodinámica', career: 'Ingeniería Mecánica', teacher: 'John Doe Smith', semester: 1 },
+  { id: 21, name: 'Mecánica de Fluidos', career: 'Ingeniería Mecánica', teacher: 'John Doe Smith', semester: 2 },
+  { id: 22, name: 'Diseño Asistido por Computadora (CAD)', career: 'Ingeniería Mecánica', teacher: 'John Doe Smith', semester: 3 },
 ];
 
 export interface Teacher {
@@ -146,9 +146,22 @@ export const supervisions: Supervision[] = [
     { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: getNextDateForDay(1), status: 'Programada', groupId: 2, startTime: '16:00', endTime: '18:00' }, 
     { id: 3, teacher: 'Dr. Andrew Tanenbaum', subject: 'Fundamentos de Hardware', coordinator: 'Coordinador User', date: getNextDateForDay(2), status: 'Programada', groupId: 1, startTime: '08:00', endTime: '10:00' },
     { id: 4, teacher: 'Dra. Ada Lovelace', subject: 'Estructuras de Datos', coordinator: 'Coordinador User', date: getNextDateForDay(3), status: 'Programada', groupId: 1, startTime: '09:00', endTime: '11:00' }, 
-    { id: 5, teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Laura García', date: new Date("2024-05-20"), status: 'Completada', groupId: 2, startTime: '18:00', endTime: '20:00', score: 95 },
-    { id: 6, teacher: 'Docente User Faculty', subject: 'Matemáticas Discretas', coordinator: 'Coordinador User', date: new Date("2024-05-21"), status: 'Completada', groupId: 1, startTime: '10:00', endTime: '12:00', score: 88},
-    { id: 7, teacher: 'John Doe Smith', subject: 'Termodinámica', coordinator: 'Carlos Martínez', date: new Date("2024-05-22"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 92},
+    
+    // -- Completed Supervisions with scores --
+    // Teacher: Docente User Faculty
+    { id: 5, teacher: 'Docente User Faculty', subject: 'Matemáticas Discretas', coordinator: 'Coordinador User', date: new Date("2024-03-15"), status: 'Completada', groupId: 1, startTime: '10:00', endTime: '12:00', score: 85},
+    { id: 6, teacher: 'Docente User Faculty', subject: 'Lógica Computacional', coordinator: 'Coordinador User', date: new Date("2024-04-22"), status: 'Completada', groupId: 1, startTime: '10:00', endTime: '12:00', score: 88},
+    { id: 7, teacher: 'Docente User Faculty', subject: 'Ingeniería de Software', coordinator: 'Coordinador User', date: new Date("2024-05-20"), status: 'Completada', groupId: 1, startTime: '10:00', endTime: '12:00', score: 92},
+    
+    // Teacher: John Doe Smith
+    { id: 8, teacher: 'John Doe Smith', subject: 'Termodinámica', coordinator: 'Carlos Martínez', date: new Date("2024-04-10"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 90},
+    { id: 9, teacher: 'John Doe Smith', subject: 'Mecánica de Fluidos', coordinator: 'Carlos Martínez', date: new Date("2024-05-15"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 94},
+
+    // Teacher: Dra. Ada Lovelace
+    { id: 10, teacher: 'Dra. Ada Lovelace', subject: 'Programación Orientada a Objetos', coordinator: 'Coordinador User', date: new Date("2024-05-01"), status: 'Completada', groupId: 1, startTime: '09:00', endTime: '11:00', score: 98},
+
+    // Teacher: Prof. Philip Kotler
+    { id: 11, teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Laura García', date: new Date("2024-05-20"), status: 'Completada', groupId: 2, startTime: '18:00', endTime: '20:00', score: 95 },
 ];
 
 export interface Evaluation {
@@ -219,4 +232,8 @@ export const schedules: Schedule[] = [
     { id: 12, teacherId: 6, subjectId: 13, groupId: 2, dayOfWeek: 'Lunes', startTime: '16:00', endTime: '18:00' },
     { id: 13, teacherId: 3, subjectId: 3, groupId: 2, dayOfWeek: 'Martes', startTime: '18:00', endTime: '20:00' },
     { id: 14, teacherId: 11, subjectId: 4, groupId: 3, dayOfWeek: 'Martes', startTime: '10:00', endTime: '12:00' },
+    { id: 15, teacherId: 11, subjectId: 21, groupId: 3, dayOfWeek: 'Jueves', startTime: '10:00', endTime: '12:00' },
 ];
+
+
+    
