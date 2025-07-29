@@ -108,6 +108,7 @@ export default function TeacherProfilePage() {
                                         data={radialChartData} 
                                         startAngle={90} 
                                         endAngle={-270}
+                                        barSize={10}
                                     >
                                         <PolarGrid 
                                             gridType="circle" 
@@ -125,7 +126,6 @@ export default function TeacherProfilePage() {
                                     <span className="text-2xl font-bold text-white">{averageScore}%</span>
                                 </div>
                             </div>
-                             <p className="text-xs font-semibold text-muted-foreground mt-1">Promedio</p>
                         </div>
                     </div>
                 </CardHeader>
