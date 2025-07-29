@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Pencil, PlusCircle, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -13,14 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -29,17 +21,27 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CreateSupervisionForm } from "@/components/create-supervision-form"
-import { supervisions, groups } from "@/lib/data"
+import { supervisions as allSupervisions, groups } from "@/lib/data"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { FloatingButton } from "@/components/ui/floating-button"
+import { useAuth } from "@/context/auth-context"
 
 export default function SupervisionPage() {
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [date, setDate] = useState<Date | undefined>(new Date())
+
+  const supervisions = useMemo(() => {
+    if (user?.rol === 'coordinator') {
+      const coordinatorName = `${user.nombre} ${user.apellido_paterno}`.trim();
+      return allSupervisions.filter(s => s.coordinator === coordinatorName);
+    }
+    return allSupervisions;
+  }, [user]);
 
   const proximasSupervisiones = supervisions
     .filter(s => s.status === 'Programada' && s.date >= new Date())
