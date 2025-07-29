@@ -46,11 +46,15 @@ export default function UsersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Exclude administrator from the list that can be managed
-  const allUsers = useMemo(() => allUsersData.filter(user => user.rol !== 'administrator'), [allUsersData]);
+  const allUsers = useMemo(() => allUsersData.filter(user => user.rol !== 'administrator'), []);
 
   useEffect(() => {
     let usersToDisplay = allUsers;
 
+    if (loggedInUser?.rol === 'coordinator') {
+      usersToDisplay = usersToDisplay.filter(user => user.rol !== 'coordinator');
+    }
+    
     if (filter !== 'all') {
       usersToDisplay = usersToDisplay.filter((user) => user.rol === filter);
     }
@@ -64,7 +68,7 @@ export default function UsersPage() {
     }
 
     setFilteredUsers(usersToDisplay);
-  }, [filter, searchTerm, allUsers]);
+  }, [filter, searchTerm, allUsers, loggedInUser]);
 
   const roleDisplayMap: { [key in RoleFilter]: string } = {
     'all': 'Todos',
@@ -74,7 +78,12 @@ export default function UsersPage() {
     'administrator': 'Administrador'
   };
 
-  const filterButtons: RoleFilter[] = ['all', 'teacher', 'student', 'coordinator'];
+  const filterButtons: RoleFilter[] = useMemo(() => {
+    if (loggedInUser?.rol === 'coordinator') {
+      return ['all', 'teacher', 'student'];
+    }
+    return ['all', 'teacher', 'student', 'coordinator'];
+  }, [loggedInUser]);
 
 
   return (
@@ -83,7 +92,7 @@ export default function UsersPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Gestión de Usuarios
         </h1>
-        {!isAuthLoading && loggedInUser?.rol === 'administrator' && (
+        {!isAuthLoading && (loggedInUser?.rol === 'administrator' || loggedInUser?.rol === 'coordinator') && (
            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
                 <FloatingButton text="Crear Usuario" />
@@ -223,7 +232,7 @@ export default function UsersPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Mostrando <strong>{filteredUsers.length}</strong> de <strong>{allUsers.length}</strong> usuarios
+            Mostrando <strong>{filteredUsers.length}</strong> de <strong>{allUsers.filter(u => loggedInUser?.rol === 'coordinator' ? u.rol !== 'coordinator' : true).length}</strong> usuarios
           </div>
         </CardFooter>
       </Card>

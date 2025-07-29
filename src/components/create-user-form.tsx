@@ -24,6 +24,7 @@ import {
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { groups } from "@/lib/data"
+import { useMemo } from "react"
 
 const createUserSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido."),
@@ -46,15 +47,23 @@ const createUserSchema = z.object({
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
 
-const roleDisplayMap = {
+const baseRoleDisplayMap = {
   coordinator: "Coordinador",
   teacher: "Docente",
   student: "Alumno",
 };
 
 export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
-  const { addUser } = useAuth();
+  const { addUser, user: loggedInUser } = useAuth();
   const { toast } = useToast();
+
+  const roleDisplayMap = useMemo(() => {
+    if (loggedInUser?.rol === 'coordinator') {
+      const { coordinator, ...rest } = baseRoleDisplayMap;
+      return rest;
+    }
+    return baseRoleDisplayMap;
+  }, [loggedInUser]);
 
   const form = useForm<CreateUserFormValues>({
     resolver: zodResolver(createUserSchema),
