@@ -1,5 +1,7 @@
-import { MoreHorizontal } from "lucide-react"
 
+"use client"
+import { MoreHorizontal } from "lucide-react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -27,6 +29,8 @@ import {
 import { campuses } from "@/lib/data"
 
 export default function CampusesPage() {
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
@@ -58,23 +62,28 @@ export default function CampusesPage() {
                   <TableCell>{campus.location}</TableCell>
                   <TableCell>{campus.director}</TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          aria-haspopup="true"
-                          size="icon"
-                          variant="ghost"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuItem>Editar</DropdownMenuItem>
-                        <DropdownMenuItem>Eliminar</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div
+                      onMouseEnter={() => setOpenMenuId(campus.id)}
+                      onMouseLeave={() => setOpenMenuId(null)}
+                    >
+                      <DropdownMenu open={openMenuId === campus.id} onOpenChange={(isOpen) => isOpen ? setOpenMenuId(campus.id) : setOpenMenuId(null)}>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            aria-haspopup="true"
+                            size="icon"
+                            variant="ghost"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                          <DropdownMenuItem>Editar</DropdownMenuItem>
+                          <DropdownMenuItem>Eliminar</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
