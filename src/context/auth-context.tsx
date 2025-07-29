@@ -30,6 +30,10 @@ const mockUsers: Record<string, { password: string; user: User }> = {
     password: 'admin',
     user: { id: 1, nombre: 'Usuario', apellido_paterno: 'Administrador', apellido_materno: '', correo: 'admin@example.com', rol: 'administrator', fecha_registro: '2023-01-01T00:00:00Z', ultimo_acceso: null }
   },
+  'coordinator@example.com': {
+    password: 'coordinador',
+    user: initialUsers.find(u => u.correo === 'coordinator@example.com')!
+  },
 };
 
 // Populate mockUsers from the initialUsers data
