@@ -49,7 +49,12 @@ export default function UsersPage() {
   const [teacherSearch, setTeacherSearch] = useState("");
   const [studentSearch, setStudentSearch] = useState("");
 
-  const allUsers = useMemo(() => allUsersData, []);
+  const allUsers = useMemo(() => {
+      if (loggedInUser?.rol === 'coordinator') {
+          return allUsersData.filter(u => u.rol === 'teacher' || u.rol === 'student');
+      }
+      return allUsersData;
+  }, [loggedInUser]);
 
   const { teachers, students } = useMemo(() => {
     const teachers = allUsers.filter(user => user.rol === 'teacher');
@@ -266,7 +271,6 @@ export default function UsersPage() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Nombre</TableHead>
-                            <TableHead>Rol</TableHead>
                             <TableHead>Fecha de Registro</TableHead>
                             <TableHead>Acciones</TableHead>
                         </TableRow>
@@ -278,7 +282,6 @@ export default function UsersPage() {
                                     <div className="font-medium">{`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`}</div>
                                     <div className="text-sm text-muted-foreground">{user.correo}</div>
                                 </TableCell>
-                                <TableCell><Badge variant="outline">{roleDisplayMap[user.rol]}</Badge></TableCell>
                                 <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
                                 <TableCell>
                                     <div className="flex gap-2">
