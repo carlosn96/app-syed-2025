@@ -54,11 +54,11 @@ export interface Subject {
 
 export const subjects: Subject[] = [
   // Ciencias de la Computación
-  { id: 1, name: 'Introducción a la Programación', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
-  { id: 23, name: 'Matemáticas Discretas', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
+  { id: 1, name: 'Introducción a la Programación', career: 'Ciencias de la Computación', teacher: 'Docente User Faculty', semester: 1 },
+  { id: 23, name: 'Matemáticas Discretas', career: 'Ciencias de la Computación', teacher: 'Docente User Faculty', semester: 1 },
   { id: 24, name: 'Cálculo I', career: 'Ciencias de la Computación', teacher: 'Dr. Isaac Newton', semester: 1 },
   { id: 25, name: 'Fundamentos de Hardware', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 1 },
-  { id: 26, name: 'Lógica Computacional', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 1 },
+  { id: 26, name: 'Lógica Computacional', career: 'Ciencias de la Computación', teacher: 'Docente User Faculty', semester: 1 },
   { id: 27, name: 'Comunicación Oral y Escrita', career: 'Ciencias de la Computación', teacher: 'Prof. Idalberto Chiavenato', semester: 1 },
   
   { id: 2, name: 'Estructuras de Datos', career: 'Ciencias de la Computación', teacher: 'Dra. Ada Lovelace', semester: 2 },
@@ -71,8 +71,8 @@ export const subjects: Subject[] = [
   { id: 12, name: 'Bases de Datos', career: 'Ciencias de la Computación', teacher: 'Dr. Edgar Codd', semester: 4 },
   { id: 14, name: 'Sistemas Operativos', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 5 },
   { id: 15, name: 'Redes de Computadoras', career: 'Ciencias de la Computación', teacher: 'Dr. Andrew Tanenbaum', semester: 5 },
-  { id: 16, name: 'Ingeniería de Software', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 6 },
-  { id: 17, name: 'Inteligencia Artificial', career: 'Ciencias de la Computación', teacher: 'Dr. Alan Turing', semester: 7 },
+  { id: 16, name: 'Ingeniería de Software', career: 'Ciencias de la Computación', teacher: 'Docente User Faculty', semester: 6 },
+  { id: 17, name: 'Inteligencia Artificial', career: 'Ciencias de la Computación', teacher: 'Docente User Faculty', semester: 7 },
 
   // Administración de Empresas
   { id: 3, name: 'Principios de Marketing', career: 'Administración de Empresas', teacher: 'Prof. Philip Kotler', semester: 1 },
@@ -103,7 +103,7 @@ export interface Teacher {
 }
 
 export const teachers: Teacher[] = [
-  { id: 1, name: 'Dr. Alan Turing' },
+  { id: 1, name: 'Docente User Faculty' },
   { id: 2, name: 'Dra. Ada Lovelace' },
   { id: 3, name: 'Prof. Philip Kotler' },
   { id: 4, name: 'Dr. James Watt' },
@@ -113,6 +113,7 @@ export const teachers: Teacher[] = [
   { id: 8, name: 'Prof. Idalberto Chiavenato' },
   { id: 9, name: 'Lic. Jorge Barrera Graf' },
   { id: 10, name: 'Dr. Isaac Newton' },
+  { id: 11, name: 'John Doe Smith' },
 ];
 
 export interface Supervision {
@@ -140,18 +141,35 @@ const getNextDateForDay = (dayOfWeek: number) => { // 0=Sun, 1=Mon, ...
 
 
 export const supervisions: Supervision[] = [
-    { id: 1, teacher: 'Dr. Alan Turing', subject: 'Introducción a la Programación', coordinator: 'Coordinador User', date: getNextDateForDay(1), status: 'Programada', groupId: 1, startTime: '07:00', endTime: '09:00' }, 
+    { id: 1, teacher: 'Docente User Faculty', subject: 'Introducción a la Programación', coordinator: 'Coordinador User', date: getNextDateForDay(1), status: 'Programada', groupId: 1, startTime: '07:00', endTime: '09:00' }, 
     { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: getNextDateForDay(1), status: 'Programada', groupId: 2, startTime: '16:00', endTime: '18:00' }, 
     { id: 3, teacher: 'Dr. Andrew Tanenbaum', subject: 'Fundamentos de Hardware', coordinator: 'Coordinador User', date: getNextDateForDay(2), status: 'Programada', groupId: 1, startTime: '08:00', endTime: '10:00' },
     { id: 4, teacher: 'Dra. Ada Lovelace', subject: 'Estructuras de Datos', coordinator: 'Coordinador User', date: getNextDateForDay(3), status: 'Programada', groupId: 1, startTime: '09:00', endTime: '11:00' }, 
     { id: 5, teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Laura García', date: new Date("2024-05-20"), status: 'Completada', groupId: 2, startTime: '18:00', endTime: '20:00' },
+    { id: 6, teacher: 'Docente User Faculty', subject: 'Matemáticas Discretas', coordinator: 'Coordinador User', date: new Date("2024-05-21"), status: 'Completada', groupId: 1, startTime: '10:00', endTime: '12:00'},
 ];
 
+export interface Evaluation {
+  id: number;
+  student: string;
+  teacherName: string;
+  feedback: string;
+  date: string;
+  overallRating: number;
+  ratings: {
+    clarity: number;
+    engagement: number;
+    punctuality: number;
+    knowledge: number;
+    feedback: number;
+  };
+}
 
-export const evaluations = [
-  { id: 1, student: 'Jane Smith', feedback: '¡Clase genial, muy participativa!', rating: 5, date: '2024-05-10' },
-  { id: 2, student: 'Usuario Alumno', feedback: 'El profesor tiene mucho conocimiento pero el ritmo es un poco rápido.', rating: 4, date: '2024-05-11' },
-  { id: 3, student: 'John Appleseed', feedback: 'Aprendí mucho. Los ejemplos prácticos fueron muy útiles.', rating: 5, date: '2024-05-12' },
+export const evaluations: Evaluation[] = [
+  { id: 1, student: 'Jane Smith', teacherName: 'Docente User Faculty', feedback: '¡Clase genial, muy participativa!', date: '2024-05-10', overallRating: 5, ratings: { clarity: 5, engagement: 5, punctuality: 5, knowledge: 5, feedback: 4 } },
+  { id: 2, student: 'Alumno User Student', teacherName: 'Docente User Faculty', feedback: 'El profesor tiene mucho conocimiento pero el ritmo es un poco rápido.', date: '2024-05-11', overallRating: 4, ratings: { clarity: 3, engagement: 4, punctuality: 5, knowledge: 5, feedback: 3 } },
+  { id: 3, student: 'John Appleseed', teacherName: 'John Doe Smith', feedback: 'Aprendí mucho. Los ejemplos prácticos fueron muy útiles.', date: '2024-05-12', overallRating: 5, ratings: { clarity: 5, engagement: 5, punctuality: 4, knowledge: 5, feedback: 5 } },
+  { id: 4, student: 'Emily White', teacherName: 'Docente User Faculty', feedback: 'Necesita mejorar la puntualidad, pero las explicaciones son excelentes.', date: '2024-05-15', overallRating: 4, ratings: { clarity: 5, engagement: 4, punctuality: 3, knowledge: 5, feedback: 4 } },
 ];
 
 export interface Group {

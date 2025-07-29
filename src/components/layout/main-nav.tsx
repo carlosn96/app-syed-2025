@@ -22,15 +22,15 @@ import {
 import { useAuth } from "@/context/auth-context"
 
 const allLinks = [
-  { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
-  { href: "/users", label: "Usuarios", icon: Users, roles: ['administrator', 'coordinator'] },
-  { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrator'] },
-  { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
-  { href: "/subjects", label: "Materias", icon: Library, roles: ['administrator', 'coordinator', 'teacher'] },
-  { href: "/groups", label: "Grupos", icon: Users, roles: ['administrator', 'coordinator'] },
-  { href: "/schedules", label: "Horarios", icon: CalendarClock, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
-  { href: "/supervision", label: "Supervisión", icon: ShieldCheck, roles: ['administrator', 'coordinator'] },
-  { href: "/feedback", label: "Retroalimentación", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
+  { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
+  { href: "/users", label: "Usuarios", icon: Users, roles: ['administrator', 'coordinator'], exact: false },
+  { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrator'], exact: true },
+  { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
+  { href: "/subjects", label: "Materias", icon: Library, roles: ['administrator', 'coordinator', 'teacher'], exact: true },
+  { href: "/groups", label: "Grupos", icon: Users, roles: ['administrator', 'coordinator'], exact: true },
+  { href: "/schedules", label: "Horarios", icon: CalendarClock, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
+  { href: "/supervision", label: "Supervisión", icon: ShieldCheck, roles: ['administrator', 'coordinator'], exact: true },
+  { href: "/feedback", label: "Retroalimentación", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
 ]
 
 export function MainNav() {
@@ -43,11 +43,12 @@ export function MainNav() {
     <SidebarMenu>
       {links.map((link) => {
         const Icon = link.icon
+        const isActive = link.exact ? pathname === link.href : pathname.startsWith(link.href)
         return (
           <SidebarMenuItem key={link.href}>
             <SidebarMenuButton
               asChild
-              isActive={pathname === link.href}
+              isActive={isActive}
               tooltip={link.label}
             >
               <Link href={link.href}>
