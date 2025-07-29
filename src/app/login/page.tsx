@@ -98,7 +98,7 @@ export default function LoginPage() {
                     type="button" 
                     variant="ghost" 
                     size="icon" 
-                    className="absolute inset-y-0 right-0 h-full px-3 text-white/60 hover:text-white"
+                    className="absolute inset-y-0 right-0 h-full px-3 text-white/60 hover:text-white rounded-full hover:shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all duration-300"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -118,6 +118,7 @@ export default function LoginPage() {
     </div>
   );
 }
+
 
 
 
