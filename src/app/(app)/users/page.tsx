@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Pencil, PlusCircle, Trash2, Search } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -46,7 +46,7 @@ export default function UsersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Exclude administrator from the list that can be managed
-  const allUsers = allUsersData.filter(user => user.rol !== 'administrator');
+  const allUsers = useMemo(() => allUsersData.filter(user => user.rol !== 'administrator'), [allUsersData]);
 
   useEffect(() => {
     let usersToDisplay = allUsers;
