@@ -2,7 +2,8 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Pencil, PlusCircle, Trash2, Search } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search, Eye } from "lucide-react"
+import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -102,7 +103,12 @@ export default function UsersPage() {
     'administrator': 'Administrador'
   };
 
-  const filterButtons: RoleFilter[] = ['all', 'teacher', 'student', 'coordinator'];
+  const filterButtons: RoleFilter[] = useMemo(() => {
+      if (loggedInUser?.rol === 'coordinator') {
+          return ['teacher', 'student'];
+      }
+      return ['all', 'teacher', 'student', 'coordinator'];
+  }, [loggedInUser]);
   
   const renderUserCard = (user: User) => (
     <Card key={user.id} className="rounded-xl">
@@ -119,6 +125,14 @@ export default function UsersPage() {
         <p><span className="font-semibold">Grupo:</span> {user.rol === 'student' ? user.grupo : 'N/A'}</p>
         <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
         <div className="flex gap-2 pt-2">
+           {user.rol === 'teacher' && (
+             <Button asChild size="sm" variant="outline" className="flex-1">
+                <Link href={`/users/teachers/${user.id}`}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Ver Perfil
+                </Link>
+             </Button>
+           )}
           <Button size="sm" variant="warning" className="flex-1">
             <Pencil className="mr-2 h-4 w-4" />
             Editar
@@ -145,6 +159,14 @@ export default function UsersPage() {
       <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
       <TableCell>
         <div className="flex gap-2">
+           {user.rol === 'teacher' && (
+            <Button asChild size="icon" variant="outline">
+                <Link href={`/users/teachers/${user.id}`}>
+                    <Eye className="h-4 w-4" />
+                    <span className="sr-only">Ver Perfil</span>
+                </Link>
+            </Button>
+           )}
           <Button size="icon" variant="warning">
             <Pencil className="h-4 w-4" />
             <span className="sr-only">Editar</span>
@@ -180,7 +202,7 @@ export default function UsersPage() {
                 key={role}
                 variant={filter === role ? 'default' : 'outline-filter'}
                 size="sm"
-                onClick={() => setFilter(role)}
+                onClick={() => setFilter(role as RoleFilter)}
                 >
                 {roleDisplayMap[role]}
                 </Button>
@@ -205,7 +227,7 @@ export default function UsersPage() {
                   <Button
                     key={role}
                     variant={filter === role ? 'default' : 'outline-filter'}
-                    onClick={() => setFilter(role)}
+                    onClick={() => setFilter(role as RoleFilter)}
                   >
                     {roleDisplayMap[role]}
                   </Button>
@@ -285,6 +307,12 @@ export default function UsersPage() {
                                 <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
                                 <TableCell>
                                     <div className="flex gap-2">
+                                        <Button asChild size="icon" variant="outline">
+                                            <Link href={`/users/teachers/${user.id}`}>
+                                                <Eye className="h-4 w-4" />
+                                                <span className="sr-only">Ver Perfil</span>
+                                            </Link>
+                                        </Button>
                                         <Button size="icon" variant="warning"><Pencil className="h-4 w-4" /><span className="sr-only">Editar</span></Button>
                                         <Button size="icon" variant="destructive"><Trash2 className="h-4 w-4" /><span className="sr-only">Eliminar</span></Button>
                                     </div>
