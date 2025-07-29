@@ -123,9 +123,11 @@ export default function SupervisionPage() {
                         <p className="text-xs text-muted-foreground">
                             {supervision.subject}
                         </p>
-                        <p className="text-xs text-muted-foreground font-semibold">
+                        {user?.rol !== 'coordinator' && (
+                          <p className="text-xs text-muted-foreground font-semibold">
                             {supervision.coordinator}
-                        </p>
+                          </p>
+                        )}
                         <p className="text-xs text-primary font-mono">
                             {supervision.startTime} - {supervision.endTime}
                         </p>
@@ -154,7 +156,9 @@ export default function SupervisionPage() {
                         <CardDescription>{supervision.subject}</CardDescription>
                         </CardHeader>
                         <CardContent className="text-sm space-y-2">
-                        <p><span className="font-semibold">Coordinador:</span> {supervision.coordinator}</p>
+                        {user?.rol !== 'coordinator' && (
+                            <p><span className="font-semibold">Coordinador:</span> {supervision.coordinator}</p>
+                        )}
                         <p><span className="font-semibold">Fecha:</span> {format(supervision.date, "P", { locale: es })}</p>
                         <p><span className="font-semibold">Horario:</span> <span className="text-primary font-mono">{supervision.startTime} - {supervision.endTime}</span></p>
                         <p><span className="font-semibold">Grupo:</span> {getGroupName(supervision.groupId)}</p>
@@ -174,7 +178,7 @@ export default function SupervisionPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Docente</TableHead>
-                                <TableHead>Coordinador</TableHead>
+                                {user?.rol !== 'coordinator' && <TableHead>Coordinador</TableHead>}
                                 <TableHead>Fecha</TableHead>
                                 <TableHead>Horario</TableHead>
                                 <TableHead>Grupo</TableHead>
@@ -185,7 +189,7 @@ export default function SupervisionPage() {
                             {supervisions.map((supervision) => (
                                 <TableRow key={supervision.id}>
                                     <TableCell className="font-medium py-2">{supervision.teacher}</TableCell>
-                                    <TableCell className="font-medium py-2">{supervision.coordinator}</TableCell>
+                                    {user?.rol !== 'coordinator' && <TableCell className="font-medium py-2">{supervision.coordinator}</TableCell>}
                                     <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
                                     <TableCell className="py-2 text-primary font-mono">{supervision.startTime} - {supervision.endTime}</TableCell>
                                     <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
