@@ -2,8 +2,9 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts"
 import { Star } from "lucide-react"
+import React from "react"
 
 import {
   users,
@@ -31,16 +32,13 @@ import { Badge } from "@/components/ui/badge"
 import { ChartContainer } from "@/components/ui/chart"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import React from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const chartConfig = {
-  rating: { label: "Calificación" },
-  clarity: { label: "Claridad", color: "hsl(var(--chart-1))" },
-  engagement: { label: "Compromiso", color: "hsl(var(--chart-2))" },
-  punctuality: { label: "Puntualidad", color: "hsl(var(--chart-3))" },
-  knowledge: { label: "Conocimiento", color: "hsl(var(--chart-4))" },
-  feedback: { label: "Retroalimentación", color: "hsl(var(--chart-5))" },
+  rendimiento: {
+    label: "Rendimiento",
+    color: "hsl(var(--chart-1))",
+  },
 }
 
 export default function TeacherProfilePage() {
@@ -68,20 +66,13 @@ export default function TeacherProfilePage() {
     (e) => e.teacherName === teacherFullName
   )
   
-  const averageRatings = teacherEvaluations.reduce((acc, curr) => {
-    Object.entries(curr.ratings).forEach(([key, value]) => {
-      if (!acc[key]) acc[key] = { total: 0, count: 0 };
-      acc[key].total += value;
-      acc[key].count += 1;
-    });
-    return acc;
-  }, {} as Record<string, {total: number, count: number}>);
+  const completedSupervisions = teacherSupervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
+  const averagePerformance = completedSupervisions.length > 0 
+    ? completedSupervisions.reduce((acc, curr) => acc + curr.score!, 0) / completedSupervisions.length
+    : 0;
 
-  const chartData = Object.entries(averageRatings).map(([key, {total, count}]) => ({
-    category: chartConfig[key as keyof typeof chartConfig]?.label,
-    rating: parseFloat((total / count).toFixed(1)),
-    fill: `var(--color-${key})`
-  }));
+  const chartData = [{ name: "rendimiento", value: averagePerformance, fill: "var(--color-rendimiento)" }]
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -106,30 +97,49 @@ export default function TeacherProfilePage() {
             <Card className="rounded-xl">
                 <CardHeader>
                     <CardTitle>Rendimiento General</CardTitle>
-                    <CardDescription>Calificaciones promedio basadas en la retroalimentación de los alumnos.</CardDescription>
+                    <CardDescription>Promedio de rendimiento basado en las supervisiones completadas.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <ChartContainer config={chartConfig} className="h-64 w-full">
-                        <BarChart accessibilityLayer data={chartData} layout="vertical" margin={{ left: 10 }}>
-                            <CartesianGrid horizontal={false} />
-                            <XAxis type="number" dataKey="rating" hide />
-                            <Bar dataKey="rating" layout="vertical" radius={5}>
-                            <LabelList
-                                dataKey="category"
-                                position="insideLeft"
-                                offset={8}
-                                className="fill-background font-semibold"
-                                fontSize={12}
-                            />
-                            <LabelList
-                                dataKey="rating"
-                                position="right"
-                                offset={8}
-                                className="fill-foreground font-semibold"
-                                fontSize={12}
-                            />
-                            </Bar>
-                        </BarChart>
+                <CardContent className="flex items-center justify-center">
+                  <ChartContainer
+                      config={chartConfig}
+                      className="mx-auto aspect-square h-64 w-full"
+                    >
+                      <RadialBarChart
+                        data={chartData}
+                        startAngle={-90}
+                        endAngle={270}
+                        innerRadius="70%"
+                        outerRadius="100%"
+                        barSize={30}
+                      >
+                        <PolarGrid
+                          gridType="circle"
+                          radialLines={false}
+                          stroke="none"
+                          className="first:fill-muted last:fill-background"
+                          polarRadius={[100, 75]}
+                        />
+                         <RadialBar
+                          dataKey="value"
+                          background
+                          cornerRadius={15}
+                        />
+                        <PolarAngleAxis
+                          type="number"
+                          domain={[0, 100]}
+                          dataKey="value"
+                          tick={false}
+                        />
+                        <text
+                          x="50%"
+                          y="50%"
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          className="fill-foreground text-4xl font-bold"
+                        >
+                          {chartData[0].value.toFixed(0)}%
+                        </text>
+                      </RadialBarChart>
                     </ChartContainer>
                 </CardContent>
             </Card>
@@ -151,6 +161,7 @@ export default function TeacherProfilePage() {
                     <TableHead>Coordinador</TableHead>
                     <TableHead>Fecha</TableHead>
                     <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Calificación</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -173,6 +184,9 @@ export default function TeacherProfilePage() {
                         >
                           {supervision.status}
                         </Badge>
+                      </TableCell>
+                       <TableCell className="text-right font-mono">
+                        {supervision.score !== undefined ? `${supervision.score}%` : "N/A"}
                       </TableCell>
                     </TableRow>
                   ))}

@@ -126,6 +126,7 @@ export interface Supervision {
     groupId: number;
     startTime: string;
     endTime: string;
+    score?: number;
 }
 
 // Function to get a future date based on a specific day of the week
@@ -145,8 +146,9 @@ export const supervisions: Supervision[] = [
     { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: getNextDateForDay(1), status: 'Programada', groupId: 2, startTime: '16:00', endTime: '18:00' }, 
     { id: 3, teacher: 'Dr. Andrew Tanenbaum', subject: 'Fundamentos de Hardware', coordinator: 'Coordinador User', date: getNextDateForDay(2), status: 'Programada', groupId: 1, startTime: '08:00', endTime: '10:00' },
     { id: 4, teacher: 'Dra. Ada Lovelace', subject: 'Estructuras de Datos', coordinator: 'Coordinador User', date: getNextDateForDay(3), status: 'Programada', groupId: 1, startTime: '09:00', endTime: '11:00' }, 
-    { id: 5, teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Laura García', date: new Date("2024-05-20"), status: 'Completada', groupId: 2, startTime: '18:00', endTime: '20:00' },
-    { id: 6, teacher: 'Docente User Faculty', subject: 'Matemáticas Discretas', coordinator: 'Coordinador User', date: new Date("2024-05-21"), status: 'Completada', groupId: 1, startTime: '10:00', endTime: '12:00'},
+    { id: 5, teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Laura García', date: new Date("2024-05-20"), status: 'Completada', groupId: 2, startTime: '18:00', endTime: '20:00', score: 95 },
+    { id: 6, teacher: 'Docente User Faculty', subject: 'Matemáticas Discretas', coordinator: 'Coordinador User', date: new Date("2024-05-21"), status: 'Completada', groupId: 1, startTime: '10:00', endTime: '12:00', score: 88},
+    { id: 7, teacher: 'John Doe Smith', subject: 'Termodinámica', coordinator: 'Carlos Martínez', date: new Date("2024-05-22"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 92},
 ];
 
 export interface Evaluation {
@@ -185,7 +187,7 @@ export interface Group {
 export const groups: Group[] = [
   { id: 1, name: 'COMPINCO2025A', career: 'Ciencias de la Computación', semester: 1, cycle: '2025-A', turno: 'Matutino', students: [4, 6] },
   { id: 2, name: 'ADMEM2025A', career: 'Administración de Empresas', semester: 2, cycle: '2025-A', turno: 'Vespertino', students: [] },
-  { id: 3, name: 'COMPINCO2025B', career: 'Ciencias de la Computación', semester: 1, cycle: '2025-B', turno: 'Matutino', students: [] },
+  { id: 3, name: 'INGMEC2026A', career: 'Ingeniería Mecánica', semester: 1, cycle: '2026-A', turno: 'Matutino', students: [] },
 ];
 
 export interface Schedule {
@@ -216,4 +218,5 @@ export const schedules: Schedule[] = [
     { id: 11, teacherId: 8, subjectId: 27, groupId: 1, dayOfWeek: 'Viernes', startTime: '09:00', endTime: '11:00' },
     { id: 12, teacherId: 6, subjectId: 13, groupId: 2, dayOfWeek: 'Lunes', startTime: '16:00', endTime: '18:00' },
     { id: 13, teacherId: 3, subjectId: 3, groupId: 2, dayOfWeek: 'Martes', startTime: '18:00', endTime: '20:00' },
+    { id: 14, teacherId: 11, subjectId: 4, groupId: 3, dayOfWeek: 'Martes', startTime: '10:00', endTime: '12:00' },
 ];
