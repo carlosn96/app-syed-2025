@@ -2,7 +2,7 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts"
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { Star } from "lucide-react"
 import React from "react"
 
@@ -10,7 +10,6 @@ import {
   users,
   supervisions,
   evaluations,
-  User,
 } from "@/lib/data"
 import {
   Card,
@@ -29,17 +28,9 @@ import {
 } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { ChartContainer } from "@/components/ui/chart"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
-const chartConfig = {
-  rendimiento: {
-    label: "Rendimiento",
-    color: "hsl(var(--chart-1))",
-  },
-}
 
 export default function TeacherProfilePage() {
   const params = useParams()
@@ -66,12 +57,13 @@ export default function TeacherProfilePage() {
     (e) => e.teacherName === teacherFullName
   )
   
-  const completedSupervisions = teacherSupervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
-  const averagePerformance = completedSupervisions.length > 0 
-    ? completedSupervisions.reduce((acc, curr) => acc + curr.score!, 0) / completedSupervisions.length
-    : 0;
-
-  const chartData = [{ name: "rendimiento", value: averagePerformance, fill: "var(--color-rendimiento)" }]
+  const performanceData = teacherSupervisions
+    .filter(s => s.status === 'Completada' && s.score !== undefined)
+    .sort((a, b) => a.date.getTime() - b.date.getTime())
+    .map(s => ({
+      date: format(s.date, "dd/MM/yy"),
+      Rendimiento: s.score,
+    }));
 
 
   return (
@@ -96,51 +88,33 @@ export default function TeacherProfilePage() {
         <div className="lg:col-span-3">
             <Card className="rounded-xl">
                 <CardHeader>
-                    <CardTitle>Rendimiento General</CardTitle>
-                    <CardDescription>Promedio de rendimiento basado en las supervisiones completadas.</CardDescription>
+                    <CardTitle>Progresión de Rendimiento</CardTitle>
+                    <CardDescription>Evolución del rendimiento del docente a través de las supervisiones completadas.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex items-center justify-center">
-                  <ChartContainer
-                      config={chartConfig}
-                      className="mx-auto aspect-square h-64 w-full"
-                    >
-                      <RadialBarChart
-                        data={chartData}
-                        startAngle={-90}
-                        endAngle={270}
-                        innerRadius="70%"
-                        outerRadius="100%"
-                        barSize={30}
-                      >
-                        <PolarGrid
-                          gridType="circle"
-                          radialLines={false}
-                          stroke="none"
-                          className="first:fill-muted last:fill-background"
-                          polarRadius={[100, 75]}
-                        />
-                         <RadialBar
-                          dataKey="value"
-                          background
-                          cornerRadius={15}
-                        />
-                        <PolarAngleAxis
-                          type="number"
-                          domain={[0, 100]}
-                          dataKey="value"
-                          tick={false}
-                        />
-                        <text
-                          x="50%"
-                          y="50%"
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          className="fill-foreground text-4xl font-bold"
+                <CardContent className="h-80 w-full pr-8">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                            data={performanceData}
+                            margin={{
+                                top: 10,
+                                right: 30,
+                                left: 0,
+                                bottom: 0,
+                            }}
                         >
-                          {chartData[0].value.toFixed(0)}%
-                        </text>
-                      </RadialBarChart>
-                    </ChartContainer>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
+                            <XAxis dataKey="date" stroke="hsl(var(--foreground))" />
+                            <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'hsl(var(--background) / 0.8)',
+                                    borderColor: 'hsl(var(--border))',
+                                    color: 'hsl(var(--foreground))',
+                                }}
+                            />
+                            <Area type="monotone" dataKey="Rendimiento" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" />
+                        </AreaChart>
+                    </ResponsiveContainer>
                 </CardContent>
             </Card>
         </div>
@@ -229,3 +203,5 @@ export default function TeacherProfilePage() {
     </div>
   )
 }
+
+    
