@@ -70,7 +70,13 @@ export default function TeacherProfilePage() {
     ? Math.round(completedSupervisions.reduce((acc, s) => acc + s.score!, 0) / completedSupervisions.length)
     : 0;
 
-  const radialChartData = [{ name: 'Rendimiento', value: averageScore, fill: 'hsl(var(--primary))' }];
+  const getScoreColor = (score: number) => {
+    if (score < 60) return 'hsl(var(--destructive))';
+    if (score < 70) return 'hsl(var(--chart-4))'; // Yellow
+    return 'hsl(var(--primary))';
+  };
+
+  const radialChartData = [{ name: 'Rendimiento', value: averageScore, fill: getScoreColor(averageScore) }];
 
   return (
     <div className="flex flex-col gap-8">
@@ -126,6 +132,7 @@ export default function TeacherProfilePage() {
                                     <span className="text-2xl font-bold text-white">{averageScore}%</span>
                                 </div>
                             </div>
+                             <p className="text-sm text-muted-foreground mt-2">Rendimiento Promedio</p>
                         </div>
                     </div>
                 </CardHeader>

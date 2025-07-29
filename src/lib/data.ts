@@ -154,8 +154,10 @@ export const supervisions: Supervision[] = [
     { id: 7, teacher: 'Docente User Faculty', subject: 'Ingeniería de Software', coordinator: 'Coordinador User', date: new Date("2024-05-20"), status: 'Completada', groupId: 1, startTime: '10:00', endTime: '12:00', score: 92},
     
     // Teacher: John Doe Smith
-    { id: 8, teacher: 'John Doe Smith', subject: 'Termodinámica', coordinator: 'Carlos Martínez', date: new Date("2024-04-10"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 90},
-    { id: 9, teacher: 'John Doe Smith', subject: 'Mecánica de Fluidos', coordinator: 'Carlos Martínez', date: new Date("2024-05-15"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 94},
+    { id: 8, teacher: 'John Doe Smith', subject: 'Termodinámica', coordinator: 'Carlos Martínez', date: new Date("2024-03-10"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 58},
+    { id: 9, teacher: 'John Doe Smith', subject: 'Mecánica de Fluidos', coordinator: 'Carlos Martínez', date: new Date("2024-04-15"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 62},
+    { id: 12, teacher: 'John Doe Smith', subject: 'Diseño Asistido por Computadora (CAD)', coordinator: 'Carlos Martínez', date: new Date("2024-05-18"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 68},
+
 
     // Teacher: Dra. Ada Lovelace
     { id: 10, teacher: 'Dra. Ada Lovelace', subject: 'Programación Orientada a Objetos', coordinator: 'Coordinador User', date: new Date("2024-05-01"), status: 'Completada', groupId: 1, startTime: '09:00', endTime: '11:00', score: 98},
@@ -233,6 +235,7 @@ export const schedules: Schedule[] = [
     { id: 13, teacherId: 3, subjectId: 3, groupId: 2, dayOfWeek: 'Martes', startTime: '18:00', endTime: '20:00' },
     { id: 14, teacherId: 11, subjectId: 4, groupId: 3, dayOfWeek: 'Martes', startTime: '10:00', endTime: '12:00' },
     { id: 15, teacherId: 11, subjectId: 21, groupId: 3, dayOfWeek: 'Jueves', startTime: '10:00', endTime: '12:00' },
+    { id: 16, teacherId: 11, subjectId: 22, groupId: 3, dayOfWeek: 'Viernes', startTime: '12:00', endTime: '14:00' },
 ];
 
 
