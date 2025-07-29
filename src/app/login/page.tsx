@@ -109,7 +109,7 @@ export default function LoginPage() {
               {error && <p className="text-sm text-destructive bg-destructive/20 p-2 rounded-md">{error}</p>}
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full bg-[#202d5d] text-white hover:bg-[#df1c1a] shadow-[0_0_15px_rgba(32,45,93,0.8)] hover:shadow-[0_0_25px_rgba(223,28,26,0.8)] transition-all duration-300">
+              <Button type="submit" className="w-full bg-[#202d5d] text-white hover:bg-[#df1c1a] shadow-[0_0_15px_rgba(255,255,255,0.8)] hover:shadow-[0_0_25px_rgba(255,255,255,0.8)] transition-all duration-300">
                 Iniciar Sesión
               </Button>
             </CardFooter>
@@ -118,6 +118,7 @@ export default function LoginPage() {
     </div>
   );
 }
+
 
 
 
