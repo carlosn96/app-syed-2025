@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog"
 import { CreateCareerForm } from "@/components/create-career-form"
 import { Input } from "@/components/ui/input"
+import { FloatingButton } from "@/components/ui/floating-button"
 
 export default function CareersPage() {
   const [activeTabs, setActiveTabs] = useState<Record<number, string>>({})
@@ -60,12 +61,9 @@ export default function CareersPage() {
                   onChange={(e) => setSearchTerm(e.target.value)}
               />
           </div>
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
               <DialogTrigger asChild>
-                  <Button className="w-full sm:w-auto">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Crear Carrera
-                  </Button>
+                  <FloatingButton text="Crear Carrera" />
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>

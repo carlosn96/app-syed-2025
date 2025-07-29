@@ -32,6 +32,7 @@ import {
 import { planteles as allPlanteles } from "@/lib/data"
 import { CreatePlantelForm } from "@/components/create-plantel-form"
 import { Input } from "@/components/ui/input"
+import { FloatingButton } from "@/components/ui/floating-button"
 
 export default function PlantelesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,10 +63,7 @@ export default function PlantelesPage() {
                     </div>
                     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                         <DialogTrigger asChild>
-                            <Button className="w-full sm:w-auto">
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                Crear Plantel
-                            </Button>
+                           <FloatingButton text="Crear Plantel" />
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>

@@ -33,6 +33,7 @@ import { groups as allGroups } from "@/lib/data"
 import { CreateGroupForm } from "@/components/create-group-form"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
+import { FloatingButton } from "@/components/ui/floating-button"
 
 export default function GroupsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,10 +65,7 @@ export default function GroupsPage() {
           </div>
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
               <DialogTrigger asChild>
-                  <Button className="w-full sm:w-auto">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Crear Grupo
-                  </Button>
+                  <FloatingButton text="Crear Grupo" />
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>

@@ -35,6 +35,7 @@ import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
+import { FloatingButton } from "@/components/ui/floating-button"
 
 export default function SupervisionPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -57,10 +58,7 @@ export default function SupervisionPage() {
         </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Agendar
-            </Button>
+            <FloatingButton text="Agendar" />
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>

@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dialog"
 import { CreateSubjectForm } from "@/components/create-subject-form"
 import { Input } from "@/components/ui/input"
+import { FloatingButton } from "@/components/ui/floating-button"
 
 export default function SubjectsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -63,10 +64,7 @@ export default function SubjectsPage() {
           </div>
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Crear Materia
-              </Button>
+              <FloatingButton text="Crear Materia" />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
