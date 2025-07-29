@@ -99,3 +99,14 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
 }
+
+@layer components {
+  .floating-button-text {
+    max-width: 0;
+    transition: max-width 0.3s ease-in-out, margin-left 0.3s ease-in-out;
+  }
+  .floating-button-container:hover .floating-button-text {
+    max-width: 100px; /* Adjust based on text length */
+    margin-left: 0.5rem;
+  }
+}

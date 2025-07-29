@@ -34,6 +34,7 @@ import { useAuth } from "@/context/auth-context"
 import { users as allUsersData, User, Role } from "@/lib/data"
 import { CreateUserForm } from "@/components/create-user-form"
 import { Input } from "@/components/ui/input"
+import { FloatingButton } from "@/components/ui/floating-button"
 
 type RoleFilter = Role | 'all';
 
@@ -63,7 +64,7 @@ export default function UsersPage() {
     }
 
     setFilteredUsers(usersToDisplay);
-  }, [filter, searchTerm]);
+  }, [filter, searchTerm, allUsers]);
 
   const roleDisplayMap: { [key in RoleFilter]: string } = {
     'all': 'Todos',
@@ -83,37 +84,34 @@ export default function UsersPage() {
           Gestión de Usuarios
         </h1>
         {!isAuthLoading && loggedInUser?.rol === 'administrator' && (
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+                <FloatingButton text="Crear Usuario" />
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+                    <DialogDescription>
+                    Completa el formulario para registrar una nueva cuenta.
+                    </DialogDescription>
+                </DialogHeader>
+                <CreateUserForm onSuccess={() => setIsModalOpen(false)} />
+            </DialogContent>
+           </Dialog>
+        )}
+      </div>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <div className="relative w-full sm:w-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                   type="search"
                   placeholder="Buscar usuarios..."
-                  className="pl-9 w-full sm:w-[250px]"
+                  className="pl-9 w-full sm:w-full"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-              <DialogTrigger asChild>
-                <Button className="w-full sm:w-auto">
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Crear Usuario
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Crear Nuevo Usuario</DialogTitle>
-                  <DialogDescription>
-                    Completa el formulario para registrar una nueva cuenta.
-                  </DialogDescription>
-                </DialogHeader>
-                <CreateUserForm onSuccess={() => setIsModalOpen(false)} />
-              </DialogContent>
-            </Dialog>
           </div>
-        )}
-      </div>
 
        {/* Mobile View - Card List */}
       <div className="grid grid-cols-1 gap-4 md:hidden">
