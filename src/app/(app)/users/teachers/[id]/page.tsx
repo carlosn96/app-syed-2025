@@ -2,7 +2,7 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, PolarGrid } from "recharts"
 import { Star } from "lucide-react"
 import React from "react"
 
@@ -57,14 +57,20 @@ export default function TeacherProfilePage() {
     (e) => e.teacherName === teacherFullName
   )
   
-  const performanceData = teacherSupervisions
-    .filter(s => s.status === 'Completada' && s.score !== undefined)
+  const completedSupervisions = teacherSupervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
+
+  const performanceData = completedSupervisions
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .map(s => ({
       date: format(s.date, "dd/MM/yy"),
       Rendimiento: s.score,
     }));
 
+  const averageScore = completedSupervisions.length > 0 
+    ? Math.round(completedSupervisions.reduce((acc, s) => acc + s.score!, 0) / completedSupervisions.length)
+    : 0;
+
+  const radialChartData = [{ name: 'Rendimiento', value: averageScore, fill: 'hsl(var(--primary))' }];
 
   return (
     <div className="flex flex-col gap-8">
@@ -88,8 +94,40 @@ export default function TeacherProfilePage() {
         <div className="lg:col-span-3">
             <Card className="rounded-xl">
                 <CardHeader>
-                    <CardTitle>Progresión de Rendimiento</CardTitle>
-                    <CardDescription>Evolución del rendimiento del docente a través de las supervisiones completadas.</CardDescription>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <CardTitle>Progresión de Rendimiento</CardTitle>
+                            <CardDescription>Evolución del rendimiento del docente a través de las supervisiones completadas.</CardDescription>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <div className="h-24 w-24 relative">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <RadialBarChart 
+                                        innerRadius="70%" 
+                                        outerRadius="100%" 
+                                        data={radialChartData} 
+                                        startAngle={90} 
+                                        endAngle={-270}
+                                    >
+                                        <PolarGrid 
+                                            gridType="circle" 
+                                            radialLines={false}
+                                            stroke="none"
+                                        />
+                                        <RadialBar 
+                                            background={{ fill: 'hsl(var(--muted))' }}
+                                            dataKey="value"
+                                            cornerRadius={10}
+                                        />
+                                    </RadialBarChart>
+                                </ResponsiveContainer>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-2xl font-bold text-white">{averageScore}%</span>
+                                </div>
+                            </div>
+                             <p className="text-xs font-semibold text-muted-foreground mt-1">Promedio</p>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent className="h-80 w-full pr-8">
                     <ResponsiveContainer width="100%" height="100%">
@@ -103,13 +141,14 @@ export default function TeacherProfilePage() {
                             }}
                         >
                             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
-                            <XAxis dataKey="date" stroke="hsl(var(--foreground))" />
-                            <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                            <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={12} tickLine={false} axisLine={false} />
                             <Tooltip
                                 contentStyle={{
                                     backgroundColor: 'hsl(var(--background) / 0.8)',
                                     borderColor: 'hsl(var(--border))',
                                     color: 'hsl(var(--foreground))',
+                                    borderRadius: 'var(--radius)'
                                 }}
                             />
                             <Area type="monotone" dataKey="Rendimiento" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" />
@@ -203,5 +242,3 @@ export default function TeacherProfilePage() {
     </div>
   )
 }
-
-    
