@@ -24,7 +24,7 @@ import { useAuth } from "@/context/auth-context"
 const allLinks = [
   { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
   { href: "/users", label: "Usuarios", icon: Users, roles: ['administrator', 'coordinator'] },
-  { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrator', 'coordinator'] },
+  { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrator'] },
   { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrator', 'coordinator', 'teacher', 'student'] },
   { href: "/subjects", label: "Materias", icon: Library, roles: ['administrator', 'coordinator', 'teacher'] },
   { href: "/groups", label: "Grupos", icon: Users, roles: ['administrator', 'coordinator'] },
