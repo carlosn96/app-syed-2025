@@ -125,14 +125,6 @@ export default function UsersPage() {
         <p><span className="font-semibold">Grupo:</span> {user.rol === 'student' ? user.grupo : 'N/A'}</p>
         <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
         <div className="flex gap-2 pt-2">
-           {user.rol === 'teacher' && (
-             <Button asChild size="sm" variant="outline" className="flex-1">
-                <Link href={`/users/teachers/${user.id}`}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    Ver Perfil
-                </Link>
-             </Button>
-           )}
           <Button size="sm" variant="warning" className="flex-1">
             <Pencil className="mr-2 h-4 w-4" />
             Editar
@@ -141,6 +133,14 @@ export default function UsersPage() {
             <Trash2 className="mr-2 h-4 w-4" />
             Eliminar
           </Button>
+           {user.rol === 'teacher' && (
+             <Button asChild size="sm" variant="outline" className="flex-1">
+                <Link href={`/users/teachers/${user.id}`}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Ver Perfil
+                </Link>
+             </Button>
+           )}
         </div>
       </CardContent>
     </Card>
@@ -159,14 +159,6 @@ export default function UsersPage() {
       <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
       <TableCell>
         <div className="flex gap-2">
-           {user.rol === 'teacher' && (
-            <Button asChild size="icon" variant="outline">
-                <Link href={`/users/teachers/${user.id}`}>
-                    <Eye className="h-4 w-4" />
-                    <span className="sr-only">Ver Perfil</span>
-                </Link>
-            </Button>
-           )}
           <Button size="icon" variant="warning">
             <Pencil className="h-4 w-4" />
             <span className="sr-only">Editar</span>
@@ -175,6 +167,14 @@ export default function UsersPage() {
             <Trash2 className="h-4 w-4" />
             <span className="sr-only">Eliminar</span>
           </Button>
+           {user.rol === 'teacher' && (
+            <Button asChild size="icon" variant="outline">
+                <Link href={`/users/teachers/${user.id}`}>
+                    <Eye className="h-4 w-4" />
+                    <span className="sr-only">Ver Perfil</span>
+                </Link>
+            </Button>
+           )}
         </div>
       </TableCell>
     </TableRow>
@@ -307,14 +307,14 @@ export default function UsersPage() {
                                 <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
                                 <TableCell>
                                     <div className="flex gap-2">
+                                        <Button size="icon" variant="warning"><Pencil className="h-4 w-4" /><span className="sr-only">Editar</span></Button>
+                                        <Button size="icon" variant="destructive"><Trash2 className="h-4 w-4" /><span className="sr-only">Eliminar</span></Button>
                                         <Button asChild size="icon" variant="outline">
                                             <Link href={`/users/teachers/${user.id}`}>
                                                 <Eye className="h-4 w-4" />
                                                 <span className="sr-only">Ver Perfil</span>
                                             </Link>
                                         </Button>
-                                        <Button size="icon" variant="warning"><Pencil className="h-4 w-4" /><span className="sr-only">Editar</span></Button>
-                                        <Button size="icon" variant="destructive"><Trash2 className="h-4 w-4" /><span className="sr-only">Eliminar</span></Button>
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -420,5 +420,7 @@ export default function UsersPage() {
     </div>
   )
 }
+
+    
 
     
