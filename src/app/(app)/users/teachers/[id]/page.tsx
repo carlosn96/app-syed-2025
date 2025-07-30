@@ -2,7 +2,7 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, PolarGrid } from "recharts"
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Dot } from "recharts"
 import { Star } from "lucide-react"
 import React from "react"
 
@@ -31,6 +31,31 @@ import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ProgressRing } from "@/components/ui/progress-ring"
+
+const getScoreColor = (score: number) => {
+  if (score < 60) return '#e53e3e'; // red-500
+  if (score < 80) return '#f59e0b'; // yellow-500
+  return '#22c55e'; // green-500
+};
+
+const CustomDot = (props: any) => {
+    const { cx, cy, payload } = props;
+    if (!payload) return null;
+
+    const color = getScoreColor(payload.Calificación);
+
+    return (
+        <Dot
+            cx={cx}
+            cy={cy}
+            r={5}
+            strokeWidth={2}
+            fill="#fff"
+            stroke={color}
+        />
+    );
+};
 
 export default function TeacherProfilePage() {
   const params = useParams()
@@ -70,14 +95,6 @@ export default function TeacherProfilePage() {
     ? Math.round(completedSupervisions.reduce((acc, s) => acc + s.score!, 0) / completedSupervisions.length)
     : 0;
 
-  const getScoreColor = (score: number) => {
-    if (score < 60) return 'hsl(var(--destructive))';
-    if (score < 70) return 'hsl(var(--chart-4))';
-    return 'hsl(var(--primary))';
-  };
-
-  const radialChartData = [{ name: 'Promedio', value: averageScore, fill: getScoreColor(averageScore) }];
-
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center gap-4">
@@ -103,35 +120,10 @@ export default function TeacherProfilePage() {
                     <div className="flex justify-between items-start">
                         <div>
                             <CardTitle>Progresión de Rendimiento</CardTitle>
-                            <CardDescription>Evolución del rendimiento del docente a través de las supervisiones completadas.</CardDescription>
+                            <CardDescription>Evolución del rendimiento a través de las supervisiones completadas.</CardDescription>
                         </div>
                         <div className="flex flex-col items-center">
-                            <div className="h-24 w-24 relative">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <RadialBarChart 
-                                        innerRadius="70%" 
-                                        outerRadius="100%" 
-                                        data={radialChartData} 
-                                        startAngle={90} 
-                                        endAngle={-270}
-                                        barSize={10}
-                                    >
-                                        <PolarGrid 
-                                            gridType="circle" 
-                                            radialLines={false}
-                                            stroke="none"
-                                        />
-                                        <RadialBar 
-                                            background={{ fill: 'hsl(var(--muted))' }}
-                                            dataKey="value"
-                                            cornerRadius={10}
-                                        />
-                                    </RadialBarChart>
-                                </ResponsiveContainer>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-2xl font-bold text-white">{averageScore}%</span>
-                                </div>
-                            </div>
+                            <ProgressRing value={averageScore} />
                         </div>
                     </div>
                 </CardHeader>
@@ -157,7 +149,13 @@ export default function TeacherProfilePage() {
                                     borderRadius: 'var(--radius)'
                                 }}
                             />
-                            <Area type="monotone" dataKey="Calificación" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" />
+                            <Area 
+                                type="monotone" 
+                                dataKey="Calificación" 
+                                stroke="hsl(var(--primary))" 
+                                fill="hsl(var(--primary) / 0.2)"
+                                dot={<CustomDot />}
+                            />
                         </AreaChart>
                     </ResponsiveContainer>
                 </CardContent>
