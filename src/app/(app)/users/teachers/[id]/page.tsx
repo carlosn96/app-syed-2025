@@ -149,7 +149,7 @@ export default function TeacherProfilePage() {
                                     borderRadius: 'var(--radius)'
                                 }}
                             />
-                            <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeDasharray="3 3" strokeWidth={2} />
+                            <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeWidth={2} />
                             <Area 
                                 type="monotone" 
                                 dataKey="Calificación" 
