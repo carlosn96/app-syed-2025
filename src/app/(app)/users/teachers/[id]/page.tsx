@@ -72,7 +72,7 @@ export default function TeacherProfilePage() {
 
   const getScoreColor = (score: number) => {
     if (score < 60) return 'hsl(var(--destructive))';
-    if (score < 70) return 'hsl(var(--chart-4))'; // Yellow
+    if (score < 70) return 'hsl(var(--chart-4))';
     return 'hsl(var(--primary))';
   };
 
