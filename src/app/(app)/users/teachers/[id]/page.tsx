@@ -32,6 +32,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ProgressRing } from "@/components/ui/progress-ring"
+import { FloatingBackButton } from "@/components/ui/floating-back-button"
 
 const getScoreColor = (score: number) => {
   if (score < 60) return 'hsl(var(--destructive))';
@@ -97,6 +98,7 @@ export default function TeacherProfilePage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <FloatingBackButton />
       <div className="flex items-center gap-4">
         <Avatar className="h-20 w-20">
             <AvatarImage src={`https://placehold.co/100x100.png?text=${teacher.nombre.charAt(0)}`} alt={teacherFullName} data-ai-hint="person avatar" />
