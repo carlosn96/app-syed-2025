@@ -2,7 +2,7 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Dot } from "recharts"
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Dot, ReferenceLine } from "recharts"
 import { Star } from "lucide-react"
 import React from "react"
 
@@ -34,9 +34,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ProgressRing } from "@/components/ui/progress-ring"
 
 const getScoreColor = (score: number) => {
-  if (score < 60) return '#e53e3e'; // red-500
-  if (score < 80) return '#f59e0b'; // yellow-500
-  return '#22c55e'; // green-500
+  if (score < 60) return 'hsl(var(--destructive))';
+  if (score < 80) return 'hsl(var(--warning))';
+  return 'hsl(var(--success))'; 
 };
 
 const CustomDot = (props: any) => {
@@ -149,6 +149,7 @@ export default function TeacherProfilePage() {
                                     borderRadius: 'var(--radius)'
                                 }}
                             />
+                            <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
                             <Area 
                                 type="monotone" 
                                 dataKey="Calificación" 
