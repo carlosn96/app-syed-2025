@@ -59,8 +59,8 @@ const CustomDot = (props: any) => {
 };
 
 export default function TeacherProfilePage() {
-  const params = useParams()
-  const teacherId = Number(params.id)
+  const { id } = useParams()
+  const teacherId = Number(id)
 
   const teacher = users.find(
     (user) => user.id === teacherId && user.rol === "teacher"
