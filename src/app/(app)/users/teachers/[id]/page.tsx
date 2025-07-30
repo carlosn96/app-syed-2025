@@ -60,7 +60,7 @@ const CustomDot = (props: any) => {
 
 
 export default function TeacherProfilePage() {
-  const params = React.use(useParams());
+  const params = useParams();
   const teacherId = Number(params.id)
 
   const teacher = users.find(
