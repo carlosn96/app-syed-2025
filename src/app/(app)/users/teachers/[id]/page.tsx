@@ -2,7 +2,7 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Dot, ReferenceLine } from "recharts"
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Dot } from "recharts"
 import { Star } from "lucide-react"
 import React from "react"
 
@@ -58,9 +58,10 @@ const CustomDot = (props: any) => {
     );
 };
 
+
 export default function TeacherProfilePage() {
-  const { id } = useParams()
-  const teacherId = Number(id)
+  const params = React.use(useParams());
+  const teacherId = Number(params.id)
 
   const teacher = users.find(
     (user) => user.id === teacherId && user.rol === "teacher"
