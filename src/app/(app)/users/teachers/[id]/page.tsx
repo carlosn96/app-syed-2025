@@ -63,7 +63,7 @@ export default function TeacherProfilePage() {
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .map(s => ({
       date: format(s.date, "dd/MM/yy"),
-      Rendimiento: s.score,
+      Calificación: s.score,
     }));
 
   const averageScore = completedSupervisions.length > 0 
@@ -76,7 +76,7 @@ export default function TeacherProfilePage() {
     return 'hsl(var(--primary))';
   };
 
-  const radialChartData = [{ name: 'Rendimiento', value: averageScore, fill: getScoreColor(averageScore) }];
+  const radialChartData = [{ name: 'Promedio', value: averageScore, fill: getScoreColor(averageScore) }];
 
   return (
     <div className="flex flex-col gap-8">
@@ -132,7 +132,6 @@ export default function TeacherProfilePage() {
                                     <span className="text-2xl font-bold text-white">{averageScore}%</span>
                                 </div>
                             </div>
-                             <p className="text-sm text-muted-foreground mt-2">Rendimiento Promedio</p>
                         </div>
                     </div>
                 </CardHeader>
@@ -158,7 +157,7 @@ export default function TeacherProfilePage() {
                                     borderRadius: 'var(--radius)'
                                 }}
                             />
-                            <Area type="monotone" dataKey="Rendimiento" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" />
+                            <Area type="monotone" dataKey="Calificación" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" />
                         </AreaChart>
                     </ResponsiveContainer>
                 </CardContent>
