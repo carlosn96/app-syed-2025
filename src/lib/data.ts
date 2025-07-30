@@ -157,6 +157,7 @@ export const supervisions: Supervision[] = [
     { id: 8, teacher: 'John Doe Smith', subject: 'Termodinámica', coordinator: 'Carlos Martínez', date: new Date("2024-03-10"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 58},
     { id: 9, teacher: 'John Doe Smith', subject: 'Mecánica de Fluidos', coordinator: 'Carlos Martínez', date: new Date("2024-04-15"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 62},
     { id: 12, teacher: 'John Doe Smith', subject: 'Diseño Asistido por Computadora (CAD)', coordinator: 'Carlos Martínez', date: new Date("2024-05-18"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 68},
+    { id: 13, teacher: 'John Doe Smith', subject: 'Termodinámica', coordinator: 'Carlos Martínez', date: new Date("2024-02-12"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 55},
 
 
     // Teacher: Dra. Ada Lovelace
