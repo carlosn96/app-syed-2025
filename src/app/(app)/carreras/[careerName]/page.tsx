@@ -16,7 +16,7 @@ import { FloatingBackButton } from "@/components/ui/floating-back-button"
 import { Button } from "@/components/ui/button"
 import { Book, Pencil, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { CreateCareerForm } from "@/components/create-career-form"
+import { CreateStudyPlanForm } from "@/components/create-study-plan-form"
 
 
 export default function CareerPlansPage() {
@@ -110,6 +110,8 @@ export default function CareerPlansPage() {
     return <div>Cargando...</div>;
   }
 
+  const firstModality = careerModalities[0];
+
   return (
     <div className="flex flex-col gap-8">
       <FloatingBackButton />
@@ -133,7 +135,12 @@ export default function CareerPlansPage() {
                         Completa el formulario para registrar una nueva modalidad para {careerName}.
                     </DialogDescription>
                 </DialogHeader>
-                <CreateCareerForm onSuccess={handleSuccess} careerName={careerName} />
+                 <CreateStudyPlanForm 
+                    onSuccess={handleSuccess} 
+                    careerName={careerName}
+                    campus={firstModality?.campus}
+                    coordinator={firstModality?.coordinator}
+                />
             </DialogContent>
         </Dialog>
       </div>
