@@ -11,7 +11,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -23,17 +22,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { careers, planteles, subjects, users } from "@/lib/data"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { careers, planteles, users } from "@/lib/data"
 
 const createCareerSchema = z.object({
   name: z.string().min(1, "El nombre de la carrera es requerido."),
-  modality: z.string().min(1, "La modalidad es requerida."),
   campus: z.string().min(1, "Por favor, seleccione un plantel."),
-  coordinator: z.string().min(1, "Por favor, seleccione un coordinador."),
-  semesters: z.coerce.number().min(1, "Debe haber al menos 1 semestre.").max(12, "No puede haber más de 12 semestres."),
-  subjectIds: z.array(z.number()).optional(),
+  coordinator: z.string().optional(),
 });
 
 type CreateCareerFormValues = z.infer<typeof createCareerSchema>;
@@ -48,56 +42,37 @@ interface CreateCareerFormProps {
 // This is a mock function, in a real app this would be an API call
 const addCareer = (data: CreateCareerFormValues) => {
     const newId = Math.max(...careers.map(c => c.id), 0) + 1;
+    // For simplicity, we add a default modality. This can be edited later.
     const newCareer = {
         id: newId,
         name: data.name,
-        modality: data.modality,
+        modality: "Nuevo Plan",
         campus: data.campus,
-        coordinator: data.coordinator,
-        semesters: data.semesters,
+        coordinator: data.coordinator || "No asignado",
+        semesters: 1, // Default value, can be edited later
     };
     careers.push(newCareer);
-
-    if (data.subjectIds) {
-        data.subjectIds.forEach(subjectId => {
-            const subject = subjects.find(s => s.id === subjectId);
-            if (subject) {
-                // In a real app, you would handle this relationship in a database.
-                // For now, we can log it or modify a copy of the subject.
-                console.log(`Asignando materia ${subject.name} a la carrera ${newCareer.name}`);
-            }
-        });
-    }
-
     console.log("Carrera creada:", newCareer);
-    console.log("Materias asignadas (IDs):", data.subjectIds);
 };
 
 export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProps) {
   const { toast } = useToast();
 
-  const sortedSubjects = [...subjects].sort((a, b) => a.semester - b.semester);
-
   const form = useForm<CreateCareerFormValues>({
     resolver: zodResolver(createCareerSchema),
     defaultValues: {
       name: careerName || "",
-      modality: "",
       campus: "",
       coordinator: "",
-      semesters: 8,
-      subjectIds: [],
     },
   });
-
-  const numberOfSemesters = form.watch("semesters");
 
   const onSubmit = (data: CreateCareerFormValues) => {
     try {
       addCareer(data);
       toast({
         title: "Operación Exitosa",
-        description: `El plan de estudios ${data.modality} para ${data.name} ha sido creado.`,
+        description: `La carrera ${data.name} ha sido creada. Ahora puedes crear sus planes de estudio.`,
       });
       form.reset();
       onSuccess?.();
@@ -123,19 +98,6 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
               <FormLabel>Nombre de la Carrera</FormLabel>
               <FormControl>
                 <Input placeholder="Ej. Ingeniería en Software" {...field} disabled={!!careerName} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="modality"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Modalidad / Plan de Estudio</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej. INCO, ICOM, LAE" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -170,7 +132,7 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
           name="coordinator"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Coordinador</FormLabel>
+              <FormLabel>Coordinador (Opcional)</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -178,6 +140,7 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
+                   <SelectItem value="">Sin asignar</SelectItem>
                   {coordinators.map((coordinator) => (
                     <SelectItem key={coordinator.id} value={`${coordinator.nombre} ${coordinator.apellido_paterno}`.trim()}>
                        {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
@@ -189,74 +152,6 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="semesters"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Número de Semestres</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-         <FormField
-          control={form.control}
-          name="subjectIds"
-          render={() => (
-            <FormItem>
-              <div className="mb-4">
-                <FormLabel className="text-base">Asignar Materias (Opcional)</FormLabel>
-                <FormDescription>
-                  Selecciona las materias existentes que formarán parte de este plan.
-                </FormDescription>
-              </div>
-               <ScrollArea className="h-40 w-full rounded-md border">
-                 <div className="p-4">
-                    {sortedSubjects
-                        .filter(subject => subject.semester <= numberOfSemesters)
-                        .map((subject) => (
-                        <FormField
-                        key={subject.id}
-                        control={form.control}
-                        name="subjectIds"
-                        render={({ field }) => {
-                            return (
-                            <FormItem
-                                key={subject.id}
-                                className="flex flex-row items-start space-x-3 space-y-0"
-                            >
-                                <FormControl>
-                                <Checkbox
-                                    checked={field.value?.includes(subject.id)}
-                                    onCheckedChange={(checked) => {
-                                    return checked
-                                        ? field.onChange([...(field.value ?? []), subject.id])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                            (value) => value !== subject.id
-                                            )
-                                        )
-                                    }}
-                                />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                   {subject.semester}° - {subject.name} ({subject.career})
-                                </FormLabel>
-                            </FormItem>
-                            )
-                        }}
-                        />
-                    ))}
-                 </div>
-              </ScrollArea>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <Button type="submit" className="w-full">{careerName ? 'Crear Plan de Estudio' : 'Crear Carrera'}</Button>
       </form>
     </Form>
