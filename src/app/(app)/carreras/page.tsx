@@ -193,8 +193,8 @@ export default function CareersPage() {
                 <Card className="flex flex-col rounded-xl p-0">
                     <AccordionTrigger asChild disabled={!hasSubjects}>
                         <div className="flex flex-1 items-center justify-between p-6">
-                           {header}
-                           {hasSubjects && <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />}
+                            {header}
+                            {hasSubjects && <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />}
                         </div>
                     </AccordionTrigger>
                     <AccordionContent>
