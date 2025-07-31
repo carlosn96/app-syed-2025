@@ -99,8 +99,8 @@ export default function PlantelesPage() {
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">Eliminar</span>
                         </Button>
-                         <Button asChild size="icon" variant="outline">
-                            <Link href="/carreras">
+                         <Button asChild size="icon" variant="success">
+                            <Link href={`/planteles/${plantel.id}/carreras`}>
                                 <BookOpenCheck className="h-4 w-4" />
                                 <span className="sr-only">Planes de estudio</span>
                             </Link>
@@ -152,8 +152,8 @@ export default function PlantelesPage() {
                                                 <Trash2 className="h-4 w-4" />
                                                 <span className="sr-only">Eliminar</span>
                                             </Button>
-                                            <Button asChild size="icon" variant="outline">
-                                                <Link href="/carreras">
+                                            <Button asChild size="icon" variant="success">
+                                                <Link href={`/planteles/${plantel.id}/carreras`}>
                                                     <BookOpenCheck className="h-4 w-4" />
                                                     <span className="sr-only">Planes de estudio</span>
                                                 </Link>
