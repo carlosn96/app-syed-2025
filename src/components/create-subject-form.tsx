@@ -20,7 +20,7 @@ import { useEffect } from "react"
 
 const createSubjectSchema = z.object({
   name: z.string().min(1, "El nombre de la materia es requerido."),
-  semester: z.coerce.number().min(1, "El semestre debe ser al menos 1.").max(12, "El semestre no puede ser mayor a 12."),
+  semester: z.coerce.number().min(1, "El grado debe ser al menos 1.").max(12, "El grado no puede ser mayor a 12."),
 });
 
 type CreateSubjectFormValues = z.infer<typeof createSubjectSchema>;
@@ -102,7 +102,7 @@ export function CreateSubjectForm({ onSuccess, careerName, semester }: CreateSub
           name="semester"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Semestre</FormLabel>
+              <FormLabel>Grado</FormLabel>
               <FormControl>
                 <Input type="number" {...field} disabled={semester !== null && semester !== undefined} />
               </FormControl>

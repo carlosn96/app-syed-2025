@@ -106,7 +106,7 @@ export default function GroupsPage() {
             <CardContent>
                 <Separator className="my-2"/>
                 <div className="grid grid-cols-2 gap-2 text-sm mt-4">
-                    <div className="font-semibold">Semestre:</div>
+                    <div className="font-semibold">Grado:</div>
                     <div>{group.semester}</div>
                     <div className="font-semibold">Ciclo:</div>
                     <div>{group.cycle}</div>
@@ -134,7 +134,7 @@ export default function GroupsPage() {
               <TableRow>
                 <TableHead>Grupo</TableHead>
                 <TableHead>Carrera</TableHead>
-                <TableHead>Semestre</TableHead>
+                <TableHead>Grado</TableHead>
                 <TableHead>Ciclo</TableHead>
                 <TableHead>Turno</TableHead>
                 <TableHead>Alumnos</TableHead>

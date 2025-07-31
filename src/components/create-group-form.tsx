@@ -32,7 +32,7 @@ const createGroupSchema = z.object({
   cycle: z.string().min(1, "Por favor, seleccione un ciclo."),
   turno: z.string().min(1, "Por favor, seleccione un turno."),
   career: z.string().min(1, "Por favor, seleccione una carrera."),
-  semester: z.coerce.number().min(1, "El semestre debe ser al menos 1.").max(12, "El semestre no puede ser mayor a 12."),
+  semester: z.coerce.number().min(1, "El grado debe ser al menos 1.").max(12, "El grado no puede ser mayor a 12."),
   studentIds: z.array(z.number()).optional(),
 });
 
@@ -201,7 +201,7 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
           name="semester"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Semestre</FormLabel>
+              <FormLabel>Grado</FormLabel>
               <FormControl>
                 <Input type="number" {...field} />
               </FormControl>

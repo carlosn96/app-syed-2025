@@ -102,7 +102,7 @@ export default function SubjectsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">Semestre: </span>
+                <span className="font-semibold text-foreground">Grado: </span>
                 {subject.semester}
               </div>
             </CardContent>
@@ -124,7 +124,7 @@ export default function SubjectsPage() {
               <TableRow>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Carrera</TableHead>
-                <TableHead>Semestre</TableHead>
+                <TableHead>Grado</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>

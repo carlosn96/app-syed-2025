@@ -319,7 +319,7 @@ export default function TeacherProfilePage() {
                             <TableRow>
                                 <TableHead>Materia</TableHead>
                                 <TableHead>Carrera</TableHead>
-                                <TableHead>Semestre</TableHead>
+                                <TableHead>Grado</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

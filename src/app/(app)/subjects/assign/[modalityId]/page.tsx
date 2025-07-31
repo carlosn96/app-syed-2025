@@ -93,7 +93,7 @@ export default function ManageModalitySubjectsPage() {
                     <DialogHeader>
                         <DialogTitle>Crear Nueva Materia</DialogTitle>
                          <DialogDescription>
-                            La materia se asignará automáticamente a {modality.name} ({modality.modality}) en el semestre {selectedSemester}.
+                            La materia se asignará automáticamente a {modality.name} ({modality.modality}) en el {getOrdinal(selectedSemester || 0)} Grado.
                         </DialogDescription>
                     </DialogHeader>
                     <CreateSubjectForm 
@@ -109,7 +109,7 @@ export default function ManageModalitySubjectsPage() {
                 <CardHeader>
                     <CardTitle>Materias del Plan</CardTitle>
                     <CardDescription>
-                        Lista de materias asignadas a esta modalidad, agrupadas por semestre.
+                        Lista de materias asignadas a esta modalidad, agrupadas por grado.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -118,7 +118,7 @@ export default function ManageModalitySubjectsPage() {
                             <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${semesters.length}, minmax(0, 1fr))`}}>
                                 {semesters.map(semester => (
                                      <TabsTrigger key={semester} value={`sem-${semester}`} className="text-xs">
-                                        {getOrdinal(semester)} Semestre
+                                        {getOrdinal(semester)} Grado
                                     </TabsTrigger>
                                 ))}
                             </TabsList>
@@ -161,9 +161,9 @@ export default function ManageModalitySubjectsPage() {
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
-                                                <h3 className="text-lg font-semibold text-white">Semestre Vacío</h3>
+                                                <h3 className="text-lg font-semibold text-white">Grado Vacío</h3>
                                                 <p className="text-muted-foreground mt-2">
-                                                    Aún no se han creado materias para este semestre. <br/>
+                                                    Aún no se han creado materias para este grado. <br/>
                                                     Usa el botón "Crear Nueva Materia" para empezar.
                                                 </p>
                                             </div>
