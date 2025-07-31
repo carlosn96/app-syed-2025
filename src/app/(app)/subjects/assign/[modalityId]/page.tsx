@@ -47,7 +47,7 @@ export default function ManageModalitySubjectsPage() {
     const subjectsForModality = useMemo(() => {
       if (!modality) return [];
       return allSubjects
-          .filter(s => s.career === modality.name) 
+          .filter(s => s.career === modality.name && s.modality === modality.modality) 
           .sort((a, b) => a.semester - b.semester);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [modality, _]);
@@ -98,6 +98,7 @@ export default function ManageModalitySubjectsPage() {
                     </DialogHeader>
                     <CreateSubjectForm 
                         careerName={modality.name} 
+                        modalityName={modality.modality}
                         semester={selectedSemester}
                         onSuccess={handleSuccess} 
                     />

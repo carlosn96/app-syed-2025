@@ -46,7 +46,7 @@ export default function CareerPlansPage() {
 
   const renderSubjectTabs = (career: Career, uniqueKey: string) => {
     const filteredSubjects = subjects.filter(
-      (subject) => subject.career === career.name && subject.semester <= career.semesters
+      (subject) => subject.career === career.name && subject.modality === career.modality && subject.semester <= career.semesters
     );
     const semesters = Array.from(
       new Set(filteredSubjects.map((s) => s.semester))

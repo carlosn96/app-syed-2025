@@ -28,23 +28,25 @@ type CreateSubjectFormValues = z.infer<typeof createSubjectSchema>;
 interface CreateSubjectFormProps {
   onSuccess?: () => void;
   careerName?: string; 
+  modalityName?: string;
   semester?: number | null;
 }
 
 // This is a mock function, in a real app this would be an API call
-const addSubject = (data: CreateSubjectFormValues, careerName?: string) => {
+const addSubject = (data: CreateSubjectFormValues, careerName?: string, modalityName?: string) => {
     const newId = Math.max(...subjects.map(s => s.id), 0) + 1;
     const newSubject = {
         id: newId,
         name: data.name,
         semester: data.semester,
-        career: careerName || "Sin Asignar"
+        career: careerName || "Sin Asignar",
+        modality: modalityName || "Sin Asignar"
     };
     subjects.push(newSubject);
     console.log("Materia creada:", newSubject);
 };
 
-export function CreateSubjectForm({ onSuccess, careerName, semester }: CreateSubjectFormProps) {
+export function CreateSubjectForm({ onSuccess, careerName, semester, modalityName }: CreateSubjectFormProps) {
   const { toast } = useToast();
 
   const form = useForm<CreateSubjectFormValues>({
@@ -63,7 +65,7 @@ export function CreateSubjectForm({ onSuccess, careerName, semester }: CreateSub
 
   const onSubmit = (data: CreateSubjectFormValues) => {
     try {
-      addSubject(data, careerName);
+      addSubject(data, careerName, modalityName);
       toast({
         title: "Materia Creada",
         description: `La materia ${data.name} ha sido creada con éxito.`,

@@ -1,5 +1,6 @@
 
 
+
 const academicData = {
     "Administración": {
       "Incorporada a la UdeG": {
@@ -754,6 +755,7 @@ export interface Subject {
   name: string;
   career: string;
   semester: number;
+  modality: string;
 }
 
 
@@ -796,6 +798,7 @@ const generateAcademicData = () => {
                         name: subjectName,
                         career: careerName,
                         semester: semesterNumber,
+                        modality: planName,
                     };
                     loadedSubjects.push(newSubject);
                 });
