@@ -1,7 +1,8 @@
 
 "use client"
 import { useState, useMemo } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
+import Link from "next/link"
 import {
   Card,
   CardContent,
@@ -132,9 +133,11 @@ export default function CareerPlansPage() {
                                     <Trash2 className="h-4 w-4" />
                                     <span className="sr-only">Eliminar</span>
                                 </Button>
-                                <Button size="icon" variant="default">
-                                    <Book className="h-4 w-4" />
-                                    <span className="sr-only">Gestionar Materias</span>
+                                <Button asChild size="icon" variant="default">
+                                    <Link href={`/subjects/assign/${modality.id}`}>
+                                        <Book className="h-4 w-4" />
+                                        <span className="sr-only">Gestionar Materias</span>
+                                    </Link>
                                 </Button>
                             </div>
                         </div>
