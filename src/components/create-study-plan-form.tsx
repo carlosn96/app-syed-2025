@@ -19,7 +19,7 @@ import { careers } from "@/lib/data"
 
 const createStudyPlanSchema = z.object({
   modality: z.string().min(1, "El nombre de la modalidad es requerido."),
-  semesters: z.coerce.number().min(1, "El número de semestres debe ser al menos 1.").max(12, "El número no puede ser mayor a 12."),
+  semesters: z.coerce.number().positive("El número de semestres debe ser positivo.").min(1, "El número de semestres debe ser al menos 1.").max(12, "El número no puede ser mayor a 12."),
 });
 
 type CreateStudyPlanFormValues = z.infer<typeof createStudyPlanSchema>;
