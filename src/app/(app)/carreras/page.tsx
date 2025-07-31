@@ -279,7 +279,7 @@ export default function CareersPage() {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-          Planes de Estudio
+          Carreras
         </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
