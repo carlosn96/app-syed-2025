@@ -192,10 +192,10 @@ export default function CareersPage() {
             <AccordionItem value={key} key={key} className="bg-white/10 rounded-xl border-none">
                 <Card className="flex flex-col rounded-xl p-0">
                     <AccordionTrigger asChild disabled={!hasSubjects}>
-                         <div className="flex flex-1 items-center justify-between p-6">
-                            {header}
-                            {hasSubjects && <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />}
-                         </div>
+                        <div className="flex flex-1 items-center justify-between p-6">
+                           {header}
+                           {hasSubjects && <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />}
+                        </div>
                     </AccordionTrigger>
                     <AccordionContent>
                         {renderSubjectTabs(selectedCareer, key)}
