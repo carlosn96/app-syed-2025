@@ -12,10 +12,12 @@ import {
   SidebarTrigger,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import { AcademicData } from "@/components/academic-data";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="login-background min-h-screen">
+      <AcademicData />
       <SidebarProvider>
         <Sidebar side="left" collapsible="icon">
           <SidebarHeader className="p-4 flex items-center justify-between">

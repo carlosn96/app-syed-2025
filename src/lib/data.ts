@@ -1,4 +1,12 @@
 
+let loadedCareers: Career[] = [];
+let loadedSubjects: Subject[] = [];
+
+export const setAcademicData = (careers: Career[], subjects: Subject[]) => {
+    loadedCareers = careers;
+    loadedSubjects = subjects;
+};
+
 export type Role = 'administrator' | 'coordinator' | 'teacher' | 'student';
 
 export interface User {
@@ -38,13 +46,7 @@ export interface Career {
   coordinator: string;
 }
 
-export const careers: Career[] = [
-  { id: 1, name: 'Ciencias de la Computación', modality: 'INCO', campus: 'Plantel Principal', semesters: 8, coordinator: 'Coordinador User' },
-  { id: 5, name: 'Ciencias de la Computación', modality: 'ICOM', campus: 'Plantel Principal', semesters: 9, coordinator: 'Coordinador User' },
-  { id: 2, name: 'Administración de Empresas', modality: 'LAE', campus: 'Plantel Principal', semesters: 8, coordinator: 'Laura García' },
-  { id: 3, name: 'Ingeniería Mecánica', modality: 'IM', campus: 'Plantel Norte', semesters: 10, coordinator: 'Carlos Martínez' },
-  { id: 4, name: 'Bellas Artes', modality: 'LBA', campus: 'Plantel Sur', semesters: 6, coordinator: 'Laura García' },
-];
+export const careers: Career[] = loadedCareers;
 
 export interface Subject {
   id: number;
@@ -53,50 +55,7 @@ export interface Subject {
   semester: number;
 }
 
-export const subjects: Subject[] = [
-  // Ciencias de la Computación
-  { id: 1, name: 'Introducción a la Programación', career: 'Ciencias de la Computación', semester: 1 },
-  { id: 23, name: 'Matemáticas Discretas', career: 'Ciencias de la Computación', semester: 1 },
-  { id: 24, name: 'Cálculo I', career: 'Ciencias de la Computación', semester: 1 },
-  { id: 25, name: 'Fundamentos de Hardware', career: 'Ciencias de la Computación', semester: 1 },
-  { id: 26, name: 'Lógica Computacional', career: 'Ciencias de la Computación', semester: 1 },
-  { id: 27, name: 'Comunicación Oral y Escrita', career: 'Ciencias de la Computación', semester: 1 },
-  
-  { id: 2, name: 'Estructuras de Datos', career: 'Ciencias de la Computación', semester: 2 },
-  { id: 28, name: 'Programación Orientada a Objetos', career: 'Ciencias de la Computación', semester: 2 },
-  { id: 29, name: 'Cálculo II', career: 'Ciencias de la Computación', semester: 2 },
-  { id: 30, name: 'Álgebra Lineal', career: 'Ciencias de la Computación', semester: 2 },
-  { id: 31, name: 'Ensamblador', career: 'Ciencias de la Computación', semester: 2 },
-  
-  { id: 11, name: 'Algoritmos Avanzados', career: 'Ciencias de la Computación', semester: 3 },
-  { id: 12, name: 'Bases de Datos', career: 'Ciencias de la Computación', semester: 4 },
-  { id: 14, name: 'Sistemas Operativos', career: 'Ciencias de la Computación', semester: 5 },
-  { id: 15, name: 'Redes de Computadoras', career: 'Ciencias de la Computación', semester: 5 },
-  { id: 16, name: 'Ingeniería de Software', career: 'Ciencias de la Computación', semester: 6 },
-  { id: 17, name: 'Inteligencia Artificial', career: 'Ciencias de la Computación', semester: 7 },
-
-  // Administración de Empresas
-  { id: 3, name: 'Principios de Marketing', career: 'Administración de Empresas', semester: 1 },
-  { id: 32, name: 'Fundamentos de Administración', career: 'Administración de Empresas', semester: 1 },
-  { id: 33, name: 'Matemáticas Financieras', career: 'Administración de Empresas', semester: 1 },
-  { id: 34, name: 'Derecho y Empresa', career: 'Administración de Empresas', semester: 1 },
-  { id: 35, name: 'Microeconomía', career: 'Administración de Empresas', semester: 1 },
-
-  { id: 13, name: 'Contabilidad Financiera', career: 'Administración de Empresas', semester: 2 },
-  { id: 36, name: 'Estadística para Negocios', career: 'Administración de Empresas', semester: 2 },
-  { id: 37, name: 'Macroeconomía', career: 'Administración de Empresas', semester: 2 },
-  { id: 38, name: 'Comportamiento Organizacional', career: 'Administración de Empresas', semester: 2 },
-  { id: 39, name: 'Informática para Negocios', career: 'Administración de Empresas', semester: 2 },
-
-  { id: 18, name: 'Gestión de Recursos Humanos', career: 'Administración de Empresas', semester: 3 },
-  { id: 19, name: 'Finanzas Corporativas', career: 'Administración de Empresas', semester: 4 },
-  { id: 20, name: 'Derecho Mercantil', career: 'Administración de Empresas', semester: 5 },
-
-  // Ingeniería Mecánica
-  { id: 4, name: 'Termodinámica', career: 'Ingeniería Mecánica', semester: 1 },
-  { id: 21, name: 'Mecánica de Fluidos', career: 'Ingeniería Mecánica', semester: 2 },
-  { id: 22, name: 'Diseño Asistido por Computadora (CAD)', career: 'Ingeniería Mecánica', semester: 3 },
-];
+export const subjects: Subject[] = loadedSubjects;
 
 export interface Teacher {
     id: number;
@@ -239,6 +198,3 @@ export const schedules: Schedule[] = [
     { id: 15, teacherId: 11, subjectId: 21, groupId: 3, dayOfWeek: 'Jueves', startTime: '10:00', endTime: '12:00' },
     { id: 16, teacherId: 11, subjectId: 22, groupId: 3, dayOfWeek: 'Viernes', startTime: '12:00', endTime: '14:00' },
 ];
-
-
-    

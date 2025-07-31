@@ -1,0 +1,709 @@
+{
+    "Administración": {
+      "Incorporada a la UdeG": {
+        "1er Semestre": [
+          "Administración I",
+          "Contabilidad General",
+          "Economía I",
+          "Expresión oral y escrita",
+          "Matemáticas I",
+          "Tecnologías de la información",
+          "Universidad Siglo XXI",
+          "Análisis de Problemas Globales del Siglo XXI"
+        ],
+        "2do Semestre": [
+          "Administración II",
+          "Conceptos jurídicos fundamentales",
+          "Economía II",
+          "Ética profesional",
+          "Matemáticas II",
+          "Contabilidad administrativa",
+          "Desarrollo sustentable"
+        ],
+        "3er Semestre": [
+          "Administración de recursos humanos",
+          "Estadísticas I",
+          "Diseño organizacional",
+          "Gestión y organización del sector público",
+          "Mercadotecnia",
+          "Contabilidad de costos",
+          "Derecho laboral"
+        ],
+        "4to Semestre": [
+          "Estadística II",
+          "Administración estratégica",
+          "Conceptos fiscales fundamentales",
+          "Dotación e inducción de recursos humanos",
+          "Investigación de mercados",
+          "Derecho fiscal",
+          "Desarrollo de emprendedores"
+        ],
+        "5to Semestre": [
+          "Capacitación y desarrollo de personal",
+          "Gestión de la calidad",
+          "Investigación de operaciones I",
+          "Promoción y publicidad",
+          "Auditoría administrativa",
+          "Liderazgo y habilidades directivas",
+          "Simulación y técnicas de negocios"
+        ],
+        "6to Semestre": [
+          "Metodología y práctica de la investigación",
+          "Administración financiera",
+          "Desarrollo organizacional",
+          "Administración de la producción y la tecnología",
+          "Administración de las PyMES",
+          "Gerencia y dirección estratégica",
+          "Alta dirección"
+        ],
+        "7mo Semestre": [
+          "Desarrollo e innovación tecnológica",
+          "Formulación y evaluación de proyectos",
+          "Promoción y evaluación de productividad",
+          "Administración de toma de decisiones",
+          "Responsabilidad social corporativa",
+          "Prospectiva y desarrollo de escenarios",
+          "Análisis de las organizaciones"
+        ],
+        "8vo Semestre": [
+          "Seminario de titulación en administración",
+          "Planeación estratégica organizacional",
+          "Facultamiento y desarrollo de talento"
+        ]
+      },
+      "Sabatina/Mixta": {
+        "1er Cuatrimestre": [
+          "Contabilidad I",
+          "Economía I",
+          "Administración I",
+          "Matemáticas I",
+          "Metodología de la investigación"
+        ],
+        "2do Cuatrimestre": [
+          "Administración II",
+          "Mercadotecnia",
+          "Economía II",
+          "Matemáticas II",
+          "Contabilidad II"
+        ],
+        "3er Cuatrimestre": [
+          "Derecho I",
+          "Estadística I",
+          "Derecho laboral",
+          "Herramientas digitales aplicadas a la administración",
+          "Contabilidad de costos"
+        ],
+        "4to Cuatrimestre": [
+          "Derecho II",
+          "Contabilidad administrativa",
+          "Estadística II",
+          "Investigación de mercados",
+          "Conducta del consumidor"
+        ],
+        "5to Cuatrimestre": [
+          "Derecho fiscal",
+          "Administración estatal y de servicios",
+          "Comportamiento organizacional",
+          "Administración estratégica",
+          "Planeación y dotación de recursos humanos"
+        ],
+        "6to Cuatrimestre": [
+          "Recursos humanos",
+          "Habilidades directivas",
+          "Diseño organizacional",
+          "Formación y desarrollo de recursos humanos",
+          "Servicio al cliente"
+        ],
+        "7mo Cuatrimestre": [
+          "Administración pública",
+          "Auditoría administrativa",
+          "Innovación y emprendimiento",
+          "Formulación y evaluación de proyectos de inversión",
+          "Seguridad e higiene en el trabajo"
+        ],
+        "8vo Cuatrimestre": [
+          "Mercadotecnia internacional",
+          "Administración de la seguridad social",
+          "Desarrollo organizacional",
+          "Calidad total",
+          "Administración de la fuerza de ventas"
+        ],
+        "9no Cuatrimestre": [
+          "Administración especiales",
+          "Análisis socioeconómico de México",
+          "Ética profesional y valores sociales",
+          "Administración de las compensaciones, sueldos y salarios",
+          "Seminario de tesis"
+        ]
+      },
+      "Incorporada a SICYT": {
+        "1er Cuatrimestre": [
+          "Contabilidad I",
+          "Economía I",
+          "Matemáticas I",
+          "Metodología de la investigación",
+          "Administración I"
+        ],
+        "2do Cuatrimestre": [
+          "Administración II",
+          "Derecho I",
+          "Economía II",
+          "Matemáticas II",
+          "Contabilidad II"
+        ],
+        "3er Cuatrimestre": [
+          "Administración de Recursos Humanos",
+          "Contabilidad de Costos",
+          "Derecho II",
+          "Estadística I",
+          "Mercadotecnia"
+        ],
+        "4to Cuatrimestre": [
+          "Derecho Fiscal",
+          "Derecho Laboral",
+          "Desarrollo de Emprendedores",
+          "Estadística II",
+          "Investigación de Mercados"
+        ],
+        "5to Cuatrimestre": [
+          "Administración Estatal y Municipal",
+          "Administración Hotelera",
+          "Contabilidad Administrativa",
+          "Planeación y Dotación de Recursos Humanos",
+          "Conducta del Consumidor"
+        ],
+        "6to Cuatrimestre": [
+          "Administración Estratégica",
+          "Diseño Organizacional",
+          "Auditoría Administrativa",
+          "Habilidades Directivas",
+          "Teoría General de Sistemas"
+        ],
+        "7mo Cuatrimestre": [
+          "Administración de la Seguridad Social",
+          "Diferencias Culturales",
+          "Formación y Desarrollo de Recursos Humanos",
+          "Mercadotecnia Internacional",
+          "Administración Pública"
+        ],
+        "8vo Cuatrimestre": [
+          "Administración de la Fuerza de Ventas",
+          "Administración de Servicios Municipales",
+          "Formulación y Evaluación de Proyectos de Inversión",
+          "Servicio al Cliente",
+          "Desarrollo Organizacional"
+        ],
+        "9no Cuatrimestre": [
+          "Administración de la Micro y Pequeña Empresa",
+          "Administración de las Competencias",
+          "Análisis Socioeconómico de México",
+          "Ética Profesional y Valores Sociales",
+          "Seminario de Tesis"
+        ]
+      }
+    },
+    "Arquitectura": {
+      "Incorporada a la UdeG": {
+        "1er Semestre": [
+          "Formación universitaria",
+          "Configuración del espacio tridimensional a partir de geometría descriptiva",
+          "Educación visual",
+          "Fundamentos de edificación",
+          "Matemáticas para arquitectura",
+          "Representación técnica arquitectónica",
+          "Taller: Desarrollo de grafías para la arquitectura",
+          "Proyecto 1: Contextualización arquitectónica"
+        ],
+        "2do Semestre": [
+          "Análisis e interpretación de las teorías de la arquitectura",
+          "Aplicación de la topografía para la arquitectura",
+          "Fundamentación y procesos de investigación",
+          "Fundamentos de estructuras",
+          "Fundamentos del diseño bidimensional",
+          "Perspectiva aplicada a la arquitectura y expresión gráfica arquitectónica",
+          "Procesos normativos para el proyecto arquitectónico y urbano",
+          "Representación digital",
+          "Proyecto 2: Análisis de proyectos de espacio arquitectónico"
+        ],
+        "3er Semestre": [
+          "Estructuras estáticamente determinadas",
+          "Fundamentos del diseño tridimensional",
+          "Investigación y contextualización de la arquitectura y el urbanismo desde sus inicios al fin del medioevo",
+          "Principios urbanos aplicables al proyecto arquitectónico y urbano",
+          "Procesos edificatorios tradicionales",
+          "Representación digital tridimensional",
+          "Taller de creatividad gráfica y volumétrica",
+          "Proyecto 3: Argumentación de propuestas espaciales volumétricas"
+        ],
+        "4to Semestre": [
+          "Análisis e interpretación de la realidad nacional",
+          "Diseño urbano y gestión de espacios abiertos y vecinales",
+          "Estructuras estáticamente indeterminadas",
+          "Investigación y contextualización de la arquitectura y el urbanismo del renacimiento a la ciudad industrial",
+          "Procesos regulatorios para el proyecto arquitectónico y urbano",
+          "Sistemas integrales hidrosanitarios y eléctricos",
+          "Taller de creatividad arquitectónica",
+          "Proyecto 4: Propuestas arquitectónicas funcionales y formales fundamentadas"
+        ],
+        "5to Semestre": [
+          "Formación integral",
+          "Diseño estructural en concreto",
+          "Investigación y contextualización de la arquitectura y el urbanismo de la ciudad industrial a la actualidad",
+          "Procesos edificatorios integrales contemporáneos",
+          "Procesos legales para el proyecto arquitectónico y urbano",
+          "Proyecto 5: Propuestas arquitectónicas con criterios constructivos"
+        ],
+        "6to Semestre": [
+          "Crítica de la arquitectura",
+          "Diseño estructural en acero y mampostería confinada",
+          "Diseño urbano y gestión a escala barrial y distrital",
+          "Investigación y análisis de la arquitectura mexicana precolombina",
+          "Procesos edificatorios sustentables",
+          "Proyecto 6: Propuestas arquitectónicas funcionales, formales y constructivas",
+          "Optativa abierta III"
+        ],
+        "7mo Semestre": [
+          "Seminario de investigación",
+          "Administración técnica de obra y gestión empresarial",
+          "Investigación y análisis de la arquitectura mexicana de la colonia a las instituciones",
+          "Sistemas integrales mecánicos y especiales",
+          "Taller de gestión y gerencia de proyectos arquitectónicos",
+          "Diseño de tenso de estructuras",
+          "Ecología urbana",
+          "Proyecto 7: Propuestas arquitectónicas y propuestas de proyecto ejecutivo"
+        ],
+        "8vo Semestre": [
+          "Control técnico de obra",
+          "Diseño urbano y gestión a escala de centros de población",
+          "Investigación y análisis de la arquitectura y el urbanismo mexicano de las instituciones a la actualidad",
+          "Diseño de elementos auxiliares prefabricados",
+          "Proceso del diseño bioclimático",
+          "Proyecto 8: Proyecto arquitectónico y ejecutivo"
+        ],
+        "9no Semestre": [
+          "Taller de costos y presupuestos",
+          "Taller integral de edificación conceptual",
+          "Taller integral de urbanismo conceptual",
+          "Análisis e interpretación de la arquitectura y el urbanismo en Jalisco",
+          "El hábitat en los procesos de metropolización",
+          "Proceso del diseño bioclimático y térmico de edificios",
+          "Proyecto 9: Proyecto arquitectónico integral conceptual"
+        ],
+        "10mo Semestre": [
+          "Taller integral de edificación",
+          "Taller integral de urbanismo",
+          "Análisis morfológico",
+          "Diseño de paisaje urbano y espacios abiertos",
+          "Proyecto bioclimático",
+          "Riesgo sísmico",
+          "Proyecto 10: Desarrollo de proyecto terminal"
+        ]
+      },
+      "Incorporada a SICYT": {
+        "1er Cuatrimestre": [
+          "Taller de comunicación",
+          "Introducción a la Representación Gráfica y el Diseño",
+          "Contextualización Arquitectónica",
+          "Teoría de la Arquitectura I",
+          "Física General",
+          "Álgebra",
+          "Estructura y propiedad de los materiales"
+        ],
+        "2do Cuatrimestre": [
+          "Herramientas Digitales",
+          "Fundamentos del dibujo y perspectiva",
+          "Propuestas de espacio Arquitectónico",
+          "Teoría de la Arquitectura II",
+          "Geometría y Trigonometría",
+          "Topografía",
+          "Estática"
+        ],
+        "3er Cuatrimestre": [
+          "Metodología de la investigación",
+          "Dibujo digital bidimensional",
+          "Propuestas espaciales volumétricas",
+          "Historia de la Arquitectura: de la antigüedad a la edad media",
+          "Estructuras Isostáticas",
+          "Configuración del espacio a través de la geometría descriptiva y proyectiva",
+          "Arquitectura del paisaje"
+        ],
+        "4to Cuatrimestre": [
+          "Desarrollo del pensamiento crítico",
+          "Dibujo digital tridimensional",
+          "Propuestas funcionales y formales fundamentadas",
+          "Historia de la arquitectura: desde el renacimiento a la ciudad industrial",
+          "Mecánica de suelos",
+          "Cálculo diferencial e integral",
+          "Arquitectura, ambiente y ciudad I"
+        ],
+        "5to Cuatrimestre": [
+          "Investigación aplicada",
+          "Representación digital",
+          "Propuestas con criterios constructivos",
+          "Historia de la Arquitectura: desde la ciudad industrial a la actualidad",
+          "Instalaciones I",
+          "Costos y precios unitarios",
+          "Arquitectura, ambiente y ciudad II"
+        ],
+        "6to Cuatrimestre": [
+          "Ética profesional",
+          "Urbanismo y sociología",
+          "Propuestas funcionales y formales y constructivas",
+          "Historia de la Arquitectura Mexicana precolombina",
+          "Instalaciones II",
+          "Normatividad y tramitología",
+          "Administración de la obra y gestión empresarial"
+        ],
+        "7mo Cuatrimestre": [
+          "Gestión de proyectos",
+          "Interiorismo",
+          "Proyecto ejecutivo",
+          "Arquitectura Mexicana: Desde la colonia al siglo XX",
+          "Análisis estructural",
+          "Cimentaciones",
+          "Programación y control de la obra"
+        ],
+        "8vo Cuatrimestre": [
+          "Habilidades de liderazgo",
+          "Procesos de construcción I",
+          "Proyecto arquitectónico ejecutivo",
+          "Arquitectura Mexicana de vanguardia",
+          "Estructural en concreto",
+          "Proyectos, estructuras y materiales prefabricados",
+          "Comodidad Higrotérmica"
+        ],
+        "9no Cuatrimestre": [
+          "Planteamiento urbano",
+          "Procesos de construcción II",
+          "Proyecto integral conceptual",
+          "Gestión y conservación del patrimonio cultural arquitectónico",
+          "Restauración e intervención del patrimonio arquitectónico",
+          "Estructuras de acero",
+          "Arquitectura sustentable"
+        ],
+        "10mo Cuatrimestre": [
+          "Taller de titulación",
+          "Procesos de construcción III: Tecnología de punta",
+          "Proyecto terminal",
+          "Diseño estructural",
+          "Diseño urbano: espacios abiertos, barrial y distrital",
+          "Valuación inmobiliaria",
+          "Metodología del diseño urbano"
+        ]
+      }
+    },
+    "Cirujano Dentista": {
+      "Incorporada a la UdeG": {
+        "1er Semestre": [
+          "Bioética y universidad",
+          "Bioquímica humana",
+          "Anatomía bucal",
+          "Anatomía de cabeza y cuello",
+          "Histología y embriología bucal",
+          "Materiales dentales I",
+          "Historia de la odontología"
+        ],
+        "2do Semestre": [
+          "Alimentación, nutrición y sociedad",
+          "Fundamentos de fisiología",
+          "Salud pública",
+          "Sexualidad humana",
+          "Bioquímica bucal",
+          "Materiales dentales II",
+          "Microbiología bucal",
+          "Patología general",
+          "Reanimación cardiopulmonar y terapia eléctrica"
+        ],
+        "3er Semestre": [
+          "Cariología",
+          "Farmacología odontológica",
+          "Imagenología odontológica",
+          "Manejo del paciente odontológico",
+          "Odontología preventiva",
+          "Patología bucal",
+          "Propedéutica y semiología I",
+          "Seguridad ocupacional en la práctica odontológica",
+          "Inmunología estomatológica"
+        ],
+        "4to Semestre": [
+          "Comunicación y tecnologías de la información",
+          "Anestesiología bucal",
+          "Endodoncia I",
+          "Exodoncia I",
+          "Oclusión",
+          "Periodoncia I",
+          "Prácticas clínicas propedéuticas I",
+          "Propedéutica y semiología II",
+          "Técnica de operatoria dental I",
+          "Técnicas quirúrgicas odontológicas",
+          "Fotografía clínica"
+        ],
+        "5to Semestre": [
+          "Metodología de la investigación",
+          "Clínica de operatoria dental I",
+          "Endodoncia II",
+          "Exodoncia II",
+          "Periodoncia II",
+          "Prácticas clínicas propedéuticas II",
+          "Técnica de operatoria dental II",
+          "Urgencias médico quirúrgicas en odontología",
+          "Epidemiología de la salud bucal",
+          "Medicina interna en odontología"
+        ],
+        "6to Semestre": [
+          "Clínica de operatoria dental II",
+          "Endodoncia III",
+          "Exodoncia III",
+          "Odontología sanitaria",
+          "Periodoncia III",
+          "Prácticas clínicas propedéuticas III",
+          "Prostodoncia parcial fija I",
+          "Prostodoncia total I",
+          "Estadística"
+        ],
+        "7mo Semestre": [
+          "Sociedad y salud",
+          "Cirugía bucal I",
+          "Odontología comunitaria",
+          "Odontopediatría I",
+          "Prácticas clínicas propedéuticas IV",
+          "Prostodoncia parcial fija II",
+          "Prostodoncia parcial removible I",
+          "Prostodoncia total II",
+          "Desarrollo de protocolo I",
+          "Disfunción de la articulación temporomandibular"
+        ],
+        "8vo Semestre": [
+          "Cirugía bucal II",
+          "Diseño y administración del consultorio dental",
+          "Odontopediatría II",
+          "Ortodoncia I",
+          "Prostodoncia parcial fija III",
+          "Prostodoncia parcial removible II",
+          "Desarrollo de protocolo II",
+          "Redacción de documentos científicos",
+          "Genética craneofacial",
+          "Seminario de casos clínicos"
+        ],
+        "9no Semestre": [
+          "Mantenimiento y conservación de la prótesis bucodental",
+          "Odontogeriatría",
+          "Ortodoncia II",
+          "Prácticas profesionales en clínica integral adulta",
+          "Prácticas profesionales en clínica integral niños",
+          "Seminario de investigación odontológica",
+          "Cirugía maxilofacial",
+          "Actualidades en salud"
+        ]
+      }
+    },
+    "Ciencias de la Educación": {
+      "Incorporada a SICYT, Sabatina": {
+        "1er Cuatrimestre": [
+          "Filosofía educativa I",
+          "Metodología de la investigación educativa I",
+          "Sociología de la Educación",
+          "Historia universal de la educación",
+          "Desarrollo de habilidades para el aprendizaje"
+        ],
+        "2do Cuatrimestre": [
+          "Filosofía educativa II",
+          "Estadística aplicada a la educación",
+          "Política educativa en México",
+          "Pedagogía I",
+          "Producción digital y recursos didácticos"
+        ],
+        "3er Cuatrimestre": [
+          "Epistemología de la educación",
+          "Didáctica general",
+          "Psicología evolutiva I",
+          "Pedagogía II",
+          "Innovación y tecnología aplicada a la educación"
+        ],
+        "4to Cuatrimestre": [
+          "Psicología de la educación",
+          "Metodología de la investigación educativa II",
+          "Psicología evolutiva II",
+          "Modelos de enseñanza y creatividad",
+          "Educación Socioemocional"
+        ],
+        "5to Cuatrimestre": [
+          "Teoría de la comunicación humana",
+          "Psicología del aprendizaje y la motivación",
+          "Planeación de la enseñanza",
+          "Observación de la práctica docente",
+          "Administración, capacitación y desarrollo"
+        ],
+        "6to Cuatrimestre": [
+          "Psicotécnica educativa",
+          "Diseño curricular",
+          "Metodología de la enseñanza y el aprendizaje",
+          "Gestión escolar",
+          "Diseño de programas de capacitación empresarial"
+        ],
+        "7mo Cuatrimestre": [
+          "Situaciones de riesgo en el educando",
+          "Pedagogía de la inclusión",
+          "Evaluación educativa",
+          "Sistematización de la práctica docente I",
+          "Práctica y evaluación de la capacitación empresarial"
+        ],
+        "8vo Cuatrimestre": [
+          "Orientación educativa familiar",
+          "Modelos de diseño instruccional",
+          "Gestión y calidad educativa",
+          "Sistematización de la práctica docente II",
+          "Didáctica de la enseñanza de segunda lengua I"
+        ],
+        "9no Cuatrimestre": [
+          "Ética, humanismo y educación",
+          "Formación y evaluación docente",
+          "Proyectos de investigación educativa",
+          "Evaluación de la práctica docente",
+          "Didáctica de la enseñanza de la segunda lengua II"
+        ]
+      },
+      "Incorporada a SICYT, Escolarizada": {
+        "1er Cuatrimestre": [
+          "Filosofía educativa I",
+          "Metodología de la investigación educativa I",
+          "Sociología de la Educación",
+          "Historia universal de la educación",
+          "Desarrollo de habilidades para el aprendizaje"
+        ],
+        "2do Cuatrimestre": [
+          "Filosofía educativa II",
+          "Estadística aplicada a la educación",
+          "Política educativa en México",
+          "Pedagogía I",
+          "Producción digital y recursos didácticos"
+        ],
+        "3er Cuatrimestre": [
+          "Epistemología de la educación",
+          "Didáctica general",
+          "Psicología evolutiva I",
+          "Pedagogía II",
+          "Innovación y tecnología aplicada a la educación"
+        ],
+        "4to Cuatrimestre": [
+          "Psicología de la educación",
+          "Metodología de la investigación educativa II",
+          "Psicología evolutiva II",
+          "Modelos de enseñanza y creatividad",
+          "Educación Socioemocional"
+        ],
+        "5to Cuatrimestre": [
+          "Teoría de la comunicación humana",
+          "Psicología del aprendizaje y la motivación",
+          "Planeación de la enseñanza",
+          "Observación de la práctica docente",
+          "Administración, capacitación y desarrollo"
+        ],
+        "6to Cuatrimestre": [
+          "Psicotécnica educativa",
+          "Diseño curricular",
+          "Metodología de la enseñanza y el aprendizaje",
+          "Gestión escolar",
+          "Diseño de programas de capacitación empresarial"
+        ],
+        "7mo Cuatrimestre": [
+          "Situaciones de riesgo en el educando",
+          "Pedagogía de la inclusión",
+          "Evaluación educativa",
+          "Sistematización de la práctica docente I",
+          "Práctica y evaluación de la capacitación empresarial"
+        ],
+        "8vo Cuatrimestre": [
+          "Orientación educativa familiar",
+          "Modelos de diseño instruccional",
+          "Gestión y calidad educativa",
+          "Sistematización de la práctica docente II",
+          "Didáctica de la enseñanza de segunda lengua I"
+        ],
+        "9no Cuatrimestre": [
+          "Ética, humanismo y educación",
+          "Formación y evaluación docente",
+          "Proyectos de investigación educativa",
+          "Evaluación de la práctica docente",
+          "Didáctica de la enseñanza de la segunda lengua II"
+        ]
+      }
+    },
+    "Ciencias de la Comunicación": {
+      "Incorporada a SICYT": {
+        "1er Cuatrimestre": [
+          "Cabina de audio I",
+          "Taller de Lectura y Redacción",
+          "Lingüística",
+          "Comunicación Gráfica I",
+          "Literatura",
+          "Historia de la Comunicación",
+          "Antecedentes del Periodismo Moderno"
+        ],
+        "2do Cuatrimestre": [
+          "Cabina de audio II",
+          "Desarrollo de habilidades del pensamiento",
+          "Filosofía de la Comunicación",
+          "Comunicación Gráfica II",
+          "Teorías de la comunicación I",
+          "Economía política",
+          "Taller de Expresión Oral"
+        ],
+        "3er Cuatrimestre": [
+          "Edición de video",
+          "Psicología de la Comunicación",
+          "Semiótica",
+          "Lenguaje y sociedad",
+          "Taller de investigación y redacción",
+          "Teorías de la comunicación II",
+          "Comunicación verbal y no verbal"
+        ],
+        "4to Cuatrimestre": [
+          "Narrativa",
+          "Sociología de la Comunicación",
+          "Legislación de los Medios de Comunicación",
+          "Principios de administración",
+          "Redes Digitales",
+          "Géneros Periodísticos Informativos",
+          "Crítica y comunicación"
+        ],
+        "5to Cuatrimestre": [
+          "Apreciación Cinematográfica",
+          "Fotografía I",
+          "Géneros periodísticos interpretativos",
+          "Estadísticas aplicadas a la comunicación",
+          "Taller de guionismo: cine, radio y tv.",
+          "Comunicación Organizacional"
+        ],
+        "6to Cuatrimestre": [
+          "Fotografía II",
+          "Géneros Periodísticos de Opinión",
+          "Comunicación estratégica",
+          "Ética y comunicación",
+          "Relaciones Públicas y Protocolo",
+          "Opinión pública y Propaganda"
+        ],
+        "7mo Cuatrimestre": [
+          "Metodología de la Investigación",
+          "Televisión I",
+          "Comunicación Política",
+          "Mercadotecnia",
+          "Periodismo",
+          "Multimedia",
+          "Oficinas de Comunicación"
+        ],
+        "8vo Cuatrimestre": [
+          "Conducción en radio y televisión I",
+          "Televisión II",
+          "Fundamentos de multimedia",
+          "Publicidad Métodos",
+          "Técnicas de Investigación",
+          "Producción Editorial",
+          "Conducción en radio y televisión I"
+        ],
+        "9no Cuatrimestre": [
+          "Producción multimedia"
+        ]
+      }
+    }
+  }

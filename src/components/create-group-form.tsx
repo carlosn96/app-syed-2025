@@ -40,6 +40,7 @@ type CreateGroupFormValues = z.infer<typeof createGroupSchema>;
 
 const availableCycles = ["2024-A", "2024-B", "2025-A", "2025-B"];
 const availableTurnos = ["Matutino", "Vespertino"];
+const uniqueCareerNames = [...new Set(careers.map(c => c.name))];
 
 const studentUsers = users.filter(u => u.rol === 'student');
 
@@ -185,9 +186,9 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {careers.map((career) => (
-                    <SelectItem key={career.id} value={career.name}>
-                      {career.name}
+                  {uniqueCareerNames.map((careerName) => (
+                    <SelectItem key={careerName} value={careerName}>
+                      {careerName}
                     </SelectItem>
                   ))}
                 </SelectContent>
