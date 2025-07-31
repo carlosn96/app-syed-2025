@@ -36,6 +36,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
+import { Pencil } from "lucide-react"
 
 export default function SupervisionPage() {
   const { user } = useAuth();
@@ -151,9 +152,17 @@ export default function SupervisionPage() {
                 <div className="grid grid-cols-1 gap-4 md:hidden">
                     {supervisions.map((supervision) => (
                     <Card key={supervision.id} className="w-full rounded-xl">
-                        <CardHeader>
-                        <CardTitle className="text-base">{supervision.teacher}</CardTitle>
-                        <CardDescription>{supervision.subject}</CardDescription>
+                        <CardHeader className="flex flex-row items-start justify-between">
+                            <div>
+                                <CardTitle className="text-base">{supervision.teacher}</CardTitle>
+                                <CardDescription>{supervision.subject}</CardDescription>
+                            </div>
+                            {user?.rol === 'coordinator' && supervision.status === 'Programada' && (
+                                <Button size="icon" variant="warning">
+                                    <Pencil className="h-4 w-4" />
+                                    <span className="sr-only">Editar</span>
+                                </Button>
+                            )}
                         </CardHeader>
                         <CardContent className="text-sm space-y-2">
                         {user?.rol !== 'coordinator' && (
@@ -183,6 +192,7 @@ export default function SupervisionPage() {
                                 <TableHead>Horario</TableHead>
                                 <TableHead>Grupo</TableHead>
                                 <TableHead>Estado</TableHead>
+                                {user?.rol === 'coordinator' && <TableHead>Acciones</TableHead>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -198,6 +208,16 @@ export default function SupervisionPage() {
                                             {supervision.status}
                                         </Badge>
                                     </TableCell>
+                                    {user?.rol === 'coordinator' && (
+                                      <TableCell className="py-2">
+                                        {supervision.status === 'Programada' && (
+                                          <Button size="icon" variant="warning">
+                                            <Pencil className="h-4 w-4" />
+                                            <span className="sr-only">Editar</span>
+                                          </Button>
+                                        )}
+                                      </TableCell>
+                                    )}
                                 </TableRow>
                             ))}
                         </TableBody>
