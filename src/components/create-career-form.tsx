@@ -27,7 +27,7 @@ import { careers, planteles, users } from "@/lib/data"
 const createCareerSchema = z.object({
   name: z.string().min(1, "El nombre de la carrera es requerido."),
   campus: z.string().min(1, "Por favor, seleccione un plantel."),
-  coordinator: z.string().optional(),
+  coordinator: z.string().optional().or(z.literal("unassigned")),
 });
 
 type CreateCareerFormValues = z.infer<typeof createCareerSchema>;
@@ -48,7 +48,7 @@ const addCareer = (data: CreateCareerFormValues) => {
         name: data.name,
         modality: "Nuevo Plan",
         campus: data.campus,
-        coordinator: data.coordinator || "No asignado",
+        coordinator: data.coordinator === 'unassigned' ? "No asignado" : data.coordinator || "No asignado",
         semesters: 1, // Default value, can be edited later
     };
     careers.push(newCareer);
@@ -63,13 +63,17 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
     defaultValues: {
       name: careerName || "",
       campus: "",
-      coordinator: "",
+      coordinator: "unassigned",
     },
   });
 
   const onSubmit = (data: CreateCareerFormValues) => {
     try {
-      addCareer(data);
+      const submissionData = { ...data };
+      if (submissionData.coordinator === 'unassigned') {
+          submissionData.coordinator = '';
+      }
+      addCareer(submissionData as CreateCareerFormValues);
       toast({
         title: "Operación Exitosa",
         description: `La carrera ${data.name} ha sido creada. Ahora puedes crear sus planes de estudio.`,
@@ -140,7 +144,7 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                   <SelectItem value="">Sin asignar</SelectItem>
+                   <SelectItem value="unassigned">Sin asignar</SelectItem>
                   {coordinators.map((coordinator) => (
                     <SelectItem key={coordinator.id} value={`${coordinator.nombre} ${coordinator.apellido_paterno}`.trim()}>
                        {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
