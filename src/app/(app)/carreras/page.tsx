@@ -191,10 +191,10 @@ export default function CareersPage() {
         return (
             <AccordionItem value={key} key={key} className="bg-white/10 rounded-xl border-none">
                 <Card className="flex flex-col rounded-xl p-0">
-                    <AccordionTrigger disabled={!hasSubjects}>
-                        <CardHeader className="flex-grow">
+                    <AccordionTrigger asChild disabled={!hasSubjects}>
+                        <div className="flex-grow p-6">
                            {header}
-                        </CardHeader>
+                        </div>
                     </AccordionTrigger>
                     <AccordionContent>
                         {renderSubjectTabs(selectedCareer, key)}
