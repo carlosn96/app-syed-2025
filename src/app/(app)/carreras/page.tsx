@@ -49,6 +49,7 @@ export default function CareersPage() {
 
   const filteredCareers = allCareers.filter(career => 
     career.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    career.modality.toLowerCase().includes(searchTerm.toLowerCase()) ||
     career.campus.toLowerCase().includes(searchTerm.toLowerCase()) ||
     career.coordinator.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -127,7 +128,7 @@ export default function CareersPage() {
                             <CardHeader className="flex-grow">
                                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left">
                                     <div>
-                                        <CardTitle>{career.name}</CardTitle>
+                                        <CardTitle>{career.name} <span className="text-lg font-normal text-muted-foreground">({career.modality})</span></CardTitle>
                                         <CardDescription>{career.campus}</CardDescription>
                                         <p className="text-xs text-muted-foreground pt-1">{career.coordinator}</p>
                                     </div>
@@ -161,7 +162,7 @@ export default function CareersPage() {
               <CardHeader>
                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div>
-                    <CardTitle>{career.name}</CardTitle>
+                    <CardTitle>{career.name} <span className="text-lg font-normal text-muted-foreground">({career.modality})</span></CardTitle>
                     <CardDescription>{career.campus}</CardDescription>
                      <p className="text-xs text-muted-foreground pt-1">{career.coordinator}</p>
                   </div>

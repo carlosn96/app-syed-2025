@@ -29,6 +29,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 const createCareerSchema = z.object({
   name: z.string().min(1, "El nombre de la carrera es requerido."),
+  modality: z.string().min(1, "La modalidad es requerida."),
   campus: z.string().min(1, "Por favor, seleccione un plantel."),
   coordinator: z.string().min(1, "Por favor, seleccione un coordinador."),
   semesters: z.coerce.number().min(1, "Debe haber al menos 1 semestre.").max(12, "No puede haber más de 12 semestres."),
@@ -45,6 +46,7 @@ const addCareer = (data: CreateCareerFormValues) => {
     const newCareer = {
         id: newId,
         name: data.name,
+        modality: data.modality,
         campus: data.campus,
         coordinator: data.coordinator,
         semesters: data.semesters,
@@ -75,6 +77,7 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
     resolver: zodResolver(createCareerSchema),
     defaultValues: {
       name: "",
+      modality: "",
       campus: "",
       coordinator: "",
       semesters: 8,
@@ -115,6 +118,19 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
               <FormLabel>Nombre de la Carrera</FormLabel>
               <FormControl>
                 <Input placeholder="Ej. Ingeniería en Software" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="modality"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Modalidad</FormLabel>
+              <FormControl>
+                <Input placeholder="Ej. INCO, ICOM" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

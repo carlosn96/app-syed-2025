@@ -32,16 +32,18 @@ export const planteles = [
 export interface Career {
   id: number;
   name: string;
+  modality: string;
   campus: string;
   semesters: number;
   coordinator: string;
 }
 
 export const careers: Career[] = [
-  { id: 1, name: 'Ciencias de la Computación', campus: 'Plantel Principal', semesters: 8, coordinator: 'Coordinador User' },
-  { id: 2, name: 'Administración de Empresas', campus: 'Plantel Principal', semesters: 8, coordinator: 'Laura García' },
-  { id: 3, name: 'Ingeniería Mecánica', campus: 'Plantel Norte', semesters: 10, coordinator: 'Carlos Martínez' },
-  { id: 4, name: 'Bellas Artes', campus: 'Plantel Sur', semesters: 6, coordinator: 'Laura García' },
+  { id: 1, name: 'Ciencias de la Computación', modality: 'INCO', campus: 'Plantel Principal', semesters: 8, coordinator: 'Coordinador User' },
+  { id: 5, name: 'Ciencias de la Computación', modality: 'ICOM', campus: 'Plantel Principal', semesters: 9, coordinator: 'Coordinador User' },
+  { id: 2, name: 'Administración de Empresas', modality: 'LAE', campus: 'Plantel Principal', semesters: 8, coordinator: 'Laura García' },
+  { id: 3, name: 'Ingeniería Mecánica', modality: 'IM', campus: 'Plantel Norte', semesters: 10, coordinator: 'Carlos Martínez' },
+  { id: 4, name: 'Bellas Artes', modality: 'LBA', campus: 'Plantel Sur', semesters: 6, coordinator: 'Laura García' },
 ];
 
 export interface Subject {
