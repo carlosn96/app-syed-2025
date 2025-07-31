@@ -32,21 +32,27 @@ const createSubjectSchema = z.object({
 
 type CreateSubjectFormValues = z.infer<typeof createSubjectSchema>;
 
+interface CreateSubjectFormProps {
+  onSuccess?: () => void;
+  careerName?: string; // Optional: To auto-assign the career
+}
+
 // This is a mock function, in a real app this would be an API call
-const addSubject = (data: CreateSubjectFormValues) => {
+const addSubject = (data: CreateSubjectFormValues, careerName?: string) => {
     const newId = Math.max(...subjects.map(s => s.id), 0) + 1;
     const newSubject = {
         id: newId,
-        ...data,
-        // The career will be assigned elsewhere.
-        // For mock purposes, we can leave it empty or assign a default.
-        career: "Sin Asignar"
+        name: data.name,
+        teacher: data.teacher,
+        semester: data.semester,
+        // If careerName is provided, assign it, otherwise default.
+        career: careerName || "Sin Asignar"
     };
     subjects.push(newSubject);
     console.log("Materia creada:", newSubject);
 };
 
-export function CreateSubjectForm({ onSuccess }: { onSuccess?: () => void }) {
+export function CreateSubjectForm({ onSuccess, careerName }: CreateSubjectFormProps) {
   const { toast } = useToast();
 
   const form = useForm<CreateSubjectFormValues>({
@@ -60,7 +66,7 @@ export function CreateSubjectForm({ onSuccess }: { onSuccess?: () => void }) {
 
   const onSubmit = (data: CreateSubjectFormValues) => {
     try {
-      addSubject(data);
+      addSubject(data, careerName);
       toast({
         title: "Materia Creada",
         description: `La materia ${data.name} ha sido creada con éxito.`,
