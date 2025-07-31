@@ -26,7 +26,6 @@ const allLinks = [
   { href: "/users", label: "Usuarios", icon: Users, roles: ['administrator', 'coordinator'], exact: false },
   { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrator'], exact: true },
   { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
-  { href: "/subjects", label: "Materias", icon: Library, roles: ['administrator', 'coordinator'], exact: true },
   { href: "/groups", label: "Grupos", icon: Users, roles: ['administrator', 'coordinator'], exact: true },
   { href: "/schedules", label: "Horarios", icon: CalendarClock, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
   { href: "/supervision", label: "Supervisión", icon: ShieldCheck, roles: ['administrator', 'coordinator'], exact: true },
