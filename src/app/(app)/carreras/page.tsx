@@ -1,7 +1,7 @@
 
 "use client"
 import { useState } from "react"
-import { Pencil, PlusCircle, Trash2, Search } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search, ChevronDown } from "lucide-react"
 
 import {
   Card,
@@ -24,8 +24,17 @@ import {
 import { CreateCareerForm } from "@/components/create-career-form"
 import { Input } from "@/components/ui/input"
 import { FloatingButton } from "@/components/ui/floating-button"
+import { useAuth } from "@/context/auth-context"
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion"
+
 
 export default function CareersPage() {
+  const { user } = useAuth();
   const [activeTabs, setActiveTabs] = useState<Record<number, string>>({})
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,6 +52,139 @@ export default function CareersPage() {
     career.campus.toLowerCase().includes(searchTerm.toLowerCase()) ||
     career.coordinator.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const renderSubjectTabs = (career: any) => {
+    const filteredSubjects = subjects.filter(
+        (subject) => subject.career === career.name
+    )
+    const semesters = Array.from(
+        new Set(filteredSubjects.map((s) => s.semester))
+    ).sort((a, b) => a - b)
+    const defaultTabValue =
+        semesters.length > 0 ? `sem-${semesters[0]}` : ""
+    
+    if (semesters.length === 0) {
+        return (
+            <div className="flex-grow flex items-center justify-center p-6">
+                <p className="text-sm text-muted-foreground">
+                    No hay materias asignadas para esta carrera aún.
+                </p>
+            </div>
+        );
+    }
+    
+    return (
+         <Tabs
+            defaultValue={defaultTabValue}
+            value={activeTabs[career.id] || defaultTabValue}
+            onValueChange={(value) => handleTabChange(career.id, value)}
+            className="flex flex-col flex-grow w-full p-6 pt-0"
+        >
+            <div className="flex-grow">
+            {semesters.map((semester) => (
+                <TabsContent key={semester} value={`sem-${semester}`}>
+                <ul className="space-y-3">
+                    {filteredSubjects
+                    .filter((s) => s.semester === semester)
+                    .map((subject) => (
+                        <li key={subject.id}>
+                        <p className="font-medium">{subject.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                            {subject.teacher}
+                        </p>
+                        </li>
+                    ))}
+                </ul>
+                </TabsContent>
+            ))}
+            </div>
+            <TabsList 
+                className="grid w-full mt-4" 
+                style={{ gridTemplateColumns: `repeat(${semesters.length}, minmax(0, 1fr))`}}
+            >
+            {semesters.map((semester) => (
+                <TabsTrigger 
+                    key={semester} 
+                    value={`sem-${semester}`}
+                    className="text-xs"
+                >
+                    {getOrdinal(semester)}
+                </TabsTrigger>
+            ))}
+            </TabsList>
+        </Tabs>
+    )
+  }
+
+  const renderAdminView = () => (
+    <Accordion type="single" collapsible className="w-full space-y-4">
+        {filteredCareers.map((career) => {
+             const hasSubjects = subjects.some(s => s.career === career.name);
+             return (
+                <AccordionItem value={`item-${career.id}`} key={career.id} className="bg-white/10 rounded-xl border-none">
+                    <Card className="flex flex-col rounded-xl p-0">
+                         <AccordionTrigger className="w-full" disabled={!hasSubjects}>
+                            <CardHeader className="flex-grow">
+                                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left">
+                                    <div>
+                                        <CardTitle>{career.name}</CardTitle>
+                                        <CardDescription>{career.campus}</CardDescription>
+                                        <p className="text-xs text-muted-foreground pt-1">{career.coordinator}</p>
+                                    </div>
+                                    <div className="flex gap-2 shrink-0">
+                                        <Button size="icon" variant="warning">
+                                            <Pencil className="h-4 w-4" />
+                                            <span className="sr-only">Editar</span>
+                                        </Button>
+                                        <Button size="icon" variant="destructive">
+                                            <Trash2 className="h-4 w-4" />
+                                            <span className="sr-only">Eliminar</span>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                         </AccordionTrigger>
+                        <AccordionContent>
+                           {renderSubjectTabs(career)}
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
+             )
+        })}
+    </Accordion>
+  );
+
+  const renderDefaultView = () => (
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        {filteredCareers.map((career) => (
+            <Card key={career.id} className="flex flex-col rounded-xl">
+              <CardHeader>
+                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div>
+                    <CardTitle>{career.name}</CardTitle>
+                    <CardDescription>{career.campus}</CardDescription>
+                     <p className="text-xs text-muted-foreground pt-1">{career.coordinator}</p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <Button size="icon" variant="warning">
+                      <Pencil className="h-4 w-4" />
+                      <span className="sr-only">Editar</span>
+                    </Button>
+                    <Button size="icon" variant="destructive">
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Eliminar</span>
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="flex flex-col flex-grow pb-2">
+                {renderSubjectTabs(career)}
+              </CardContent>
+            </Card>
+        ))}
+    </div>
+  );
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -77,91 +219,9 @@ export default function CareersPage() {
             />
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        {filteredCareers.map((career) => {
-          const filteredSubjects = subjects.filter(
-            (subject) => subject.career === career.name
-          )
-          const semesters = Array.from(
-            new Set(filteredSubjects.map((s) => s.semester))
-          ).sort((a, b) => a - b)
-          const defaultTabValue =
-            semesters.length > 0 ? `sem-${semesters[0]}` : ""
+      
+      {user?.rol === 'administrator' ? renderAdminView() : renderDefaultView()}
 
-          return (
-            <Card key={career.id} className="flex flex-col rounded-xl">
-              <CardHeader>
-                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                  <div>
-                    <CardTitle>{career.name}</CardTitle>
-                    <CardDescription>{career.campus}</CardDescription>
-                     <p className="text-xs text-muted-foreground pt-1">{career.coordinator}</p>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <Button size="icon" variant="warning">
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Editar</span>
-                    </Button>
-                    <Button size="icon" variant="destructive">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Eliminar</span>
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="flex flex-col flex-grow pb-2">
-                {semesters.length > 0 ? (
-                  <Tabs
-                    defaultValue={defaultTabValue}
-                    value={activeTabs[career.id] || defaultTabValue}
-                    onValueChange={(value) => handleTabChange(career.id, value)}
-                    className="flex flex-col flex-grow w-full"
-                  >
-                    <div className="flex-grow">
-                      {semesters.map((semester) => (
-                        <TabsContent key={semester} value={`sem-${semester}`}>
-                          <ul className="space-y-3">
-                            {filteredSubjects
-                              .filter((s) => s.semester === semester)
-                              .map((subject) => (
-                                <li key={subject.id}>
-                                  <p className="font-medium">{subject.name}</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {subject.teacher}
-                                  </p>
-                                </li>
-                              ))}
-                          </ul>
-                        </TabsContent>
-                      ))}
-                    </div>
-                    <TabsList 
-                      className="grid w-full mt-4" 
-                      style={{ gridTemplateColumns: `repeat(${semesters.length}, minmax(0, 1fr))`}}
-                    >
-                      {semesters.map((semester) => (
-                        <TabsTrigger 
-                          key={semester} 
-                          value={`sem-${semester}`}
-                          className="text-xs"
-                        >
-                          {getOrdinal(semester)}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                  </Tabs>
-                ) : (
-                  <div className="flex-grow flex items-center justify-center">
-                    <p className="text-sm text-muted-foreground">
-                      No hay materias asignadas para esta carrera aún.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
     </div>
   )
 }
