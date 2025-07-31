@@ -128,8 +128,8 @@ export default function SchedulesPage() {
                       <TableRow>
                         <TableHead className="w-[100px] md:w-[150px]">Hora</TableHead>
                         <TableHead>Materia</TableHead>
-                        <TableHead className="hidden sm:table-cell">Docente</TableHead>
-                        <TableHead className="hidden sm:table-cell">Grupo</TableHead>
+                        <TableHead>Docente</TableHead>
+                        <TableHead>Grupo</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -140,11 +140,9 @@ export default function SchedulesPage() {
                           </TableCell>
                           <TableCell className="font-semibold">
                             <div>{getEntityName("subject", schedule.subjectId)}</div>
-                            <div className="sm:hidden text-xs text-muted-foreground font-normal">{getEntityName("teacher", schedule.teacherId)}</div>
-                            <div className="sm:hidden text-xs text-muted-foreground font-normal">Grupo: {getEntityName("group", schedule.groupId)}</div>
                           </TableCell>
-                          <TableCell className="hidden sm:table-cell">{getEntityName("teacher", schedule.teacherId)}</TableCell>
-                          <TableCell className="hidden sm:table-cell">{getEntityName("group", schedule.groupId)}</TableCell>
+                          <TableCell>{getEntityName("teacher", schedule.teacherId)}</TableCell>
+                          <TableCell>{getEntityName("group", schedule.groupId)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

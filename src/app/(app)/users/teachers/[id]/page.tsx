@@ -11,6 +11,7 @@ import {
   supervisions,
   evaluations,
   subjects as allSubjects,
+  schedules,
 } from "@/lib/data"
 import {
   Card,
@@ -66,13 +67,17 @@ export default function TeacherProfilePage() {
   const [activeTab, setActiveTab] = useState<'supervisions' | 'evaluations' | 'subjects'>('supervisions');
 
   const teacherData = useMemo(() => {
-    const teacher = users.find(
+    const teacherUser = users.find(
+      (user) => user.id === teacherId && user.rol === "teacher"
+    );
+    
+    const teacherInfo = users.find(
       (user) => user.id === teacherId && user.rol === "teacher"
     );
 
-    if (!teacher) return null;
+    if (!teacherUser || !teacherInfo) return null;
 
-    const teacherFullName = `${teacher.nombre} ${teacher.apellido_paterno} ${teacher.apellido_materno}`.trim()
+    const teacherFullName = `${teacherUser.nombre} ${teacherUser.apellido_paterno} ${teacherUser.apellido_materno}`.trim()
 
     const teacherSupervisions = supervisions.filter(
       (s) => s.teacher === teacherFullName
@@ -80,9 +85,10 @@ export default function TeacherProfilePage() {
     const teacherEvaluations = evaluations.filter(
       (e) => e.teacherName === teacherFullName
     );
-    const teacherSubjects = allSubjects.filter(
-        (s) => s.teacher === teacherFullName
-    );
+    
+    const teacherSchedules = schedules.filter(s => s.teacherId === teacherInfo.id);
+    const subjectIds = [...new Set(teacherSchedules.map(s => s.subjectId))];
+    const teacherSubjects = allSubjects.filter(s => subjectIds.includes(s.id));
     
     const completedSupervisions = teacherSupervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
 
@@ -98,7 +104,7 @@ export default function TeacherProfilePage() {
       : 0;
 
     return {
-      teacher,
+      teacher: teacherUser,
       teacherFullName,
       teacherSupervisions,
       teacherEvaluations,
@@ -334,5 +340,3 @@ export default function TeacherProfilePage() {
     </div>
   )
 }
-
-    

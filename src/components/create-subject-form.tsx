@@ -14,20 +14,12 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { subjects, teachers } from "@/lib/data"
+import { subjects } from "@/lib/data"
 import { useEffect } from "react"
 
 const createSubjectSchema = z.object({
   name: z.string().min(1, "El nombre de la materia es requerido."),
-  teacher: z.string().min(1, "Por favor, seleccione un docente."),
   semester: z.coerce.number().min(1, "El semestre debe ser al menos 1.").max(12, "El semestre no puede ser mayor a 12."),
 });
 
@@ -45,7 +37,6 @@ const addSubject = (data: CreateSubjectFormValues, careerName?: string) => {
     const newSubject = {
         id: newId,
         name: data.name,
-        teacher: data.teacher,
         semester: data.semester,
         career: careerName || "Sin Asignar"
     };
@@ -60,7 +51,6 @@ export function CreateSubjectForm({ onSuccess, careerName, semester }: CreateSub
     resolver: zodResolver(createSubjectSchema),
     defaultValues: {
       name: "",
-      teacher: "",
       semester: semester ?? 1,
     },
   });
@@ -103,30 +93,6 @@ export function CreateSubjectForm({ onSuccess, careerName, semester }: CreateSub
               <FormControl>
                 <Input placeholder="Ej. Cálculo Diferencial" {...field} />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="teacher"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Docente</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un docente" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {teachers.map((teacher) => (
-                    <SelectItem key={teacher.id} value={teacher.name}>
-                      {teacher.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}

@@ -79,9 +79,6 @@ export default function CareerPlansPage() {
                   .map((subject) => (
                     <li key={subject.id}>
                       <p className="font-medium">{subject.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {subject.teacher}
-                      </p>
                     </li>
                   ))}
               </ul>

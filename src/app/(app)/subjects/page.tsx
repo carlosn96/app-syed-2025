@@ -40,8 +40,7 @@ export default function SubjectsPage() {
 
   const filteredSubjects = allSubjects.filter(subject => 
     subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    subject.career.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    subject.teacher.toLowerCase().includes(searchTerm.toLowerCase())
+    subject.career.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
 
@@ -103,8 +102,8 @@ export default function SubjectsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">Docente: </span>
-                {subject.teacher}
+                <span className="font-semibold text-foreground">Semestre: </span>
+                {subject.semester}
               </div>
             </CardContent>
           </Card>
@@ -125,7 +124,7 @@ export default function SubjectsPage() {
               <TableRow>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Carrera</TableHead>
-                <TableHead>Docente</TableHead>
+                <TableHead>Semestre</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
@@ -134,7 +133,7 @@ export default function SubjectsPage() {
                 <TableRow key={subject.id}>
                   <TableCell className="font-medium">{subject.name}</TableCell>
                   <TableCell>{subject.career}</TableCell>
-                  <TableCell>{subject.teacher}</TableCell>
+                  <TableCell>{subject.semester}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button size="icon" variant="warning">

@@ -137,7 +137,6 @@ export default function ManageModalitySubjectsPage() {
                                                     <TableHeader>
                                                         <TableRow>
                                                             <TableHead>Nombre</TableHead>
-                                                            <TableHead>Docente</TableHead>
                                                             <TableHead>Acciones</TableHead>
                                                         </TableRow>
                                                     </TableHeader>
@@ -145,7 +144,6 @@ export default function ManageModalitySubjectsPage() {
                                                         {semesterSubjects.map(subject => (
                                                             <TableRow key={subject.id}>
                                                                 <TableCell className="font-medium">{subject.name}</TableCell>
-                                                                <TableCell>{subject.teacher}</TableCell>
                                                                 <TableCell>
                                                                     <div className="flex gap-2">
                                                                         <Button size="icon" variant="warning">
