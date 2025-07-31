@@ -1,7 +1,8 @@
 
 "use client"
 import { useState, useMemo } from "react"
-import { Pencil, PlusCircle, Trash2, Search, ChevronDown } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search, ChevronDown, BookOpenCheck } from "lucide-react"
+import Link from "next/link"
 
 import {
   Card,
@@ -182,6 +183,12 @@ export default function CareersPage() {
                 <Button size="icon" variant="destructive" onClick={(e) => e.stopPropagation()}>
                     <Trash2 className="h-4 w-4" />
                     <span className="sr-only">Eliminar</span>
+                </Button>
+                <Button asChild size="icon" variant="success" onClick={(e) => e.stopPropagation()}>
+                    <Link href={`/carreras/${encodeURIComponent(group.name)}`}>
+                        <BookOpenCheck className="h-4 w-4" />
+                        <span className="sr-only">Planes de estudio</span>
+                    </Link>
                 </Button>
             </div>
         </div>
