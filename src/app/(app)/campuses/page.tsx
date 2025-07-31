@@ -1,7 +1,7 @@
 
 "use client"
-import { MoreHorizontal } from "lucide-react"
-import { useState } from "react"
+import { Pencil, Trash2, BookOpenCheck } from "lucide-react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -11,13 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Table,
   TableBody,
@@ -29,8 +22,6 @@ import {
 import { campuses } from "@/lib/data"
 
 export default function CampusesPage() {
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
@@ -51,7 +42,7 @@ export default function CampusesPage() {
                 <TableHead>Ubicación</TableHead>
                 <TableHead>Director</TableHead>
                 <TableHead>
-                  <span className="sr-only">Acciones</span>
+                  <span>Acciones</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -62,27 +53,21 @@ export default function CampusesPage() {
                   <TableCell>{campus.location}</TableCell>
                   <TableCell>{campus.director}</TableCell>
                   <TableCell>
-                    <div
-                      onMouseEnter={() => setOpenMenuId(campus.id)}
-                      onMouseLeave={() => setOpenMenuId(null)}
-                    >
-                      <DropdownMenu open={openMenuId === campus.id} onOpenChange={(isOpen) => isOpen ? setOpenMenuId(campus.id) : setOpenMenuId(null)}>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            aria-haspopup="true"
-                            size="icon"
-                            variant="ghost"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                          <DropdownMenuItem>Editar</DropdownMenuItem>
-                          <DropdownMenuItem>Eliminar</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <div className="flex gap-2">
+                      <Button size="icon" variant="warning">
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Editar</span>
+                      </Button>
+                      <Button size="icon" variant="destructive">
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Eliminar</span>
+                      </Button>
+                      <Button asChild size="icon" variant="success">
+                          <Link href={`/planteles/${campus.id}/carreras`}>
+                              <BookOpenCheck className="h-4 w-4" />
+                              <span className="sr-only">Planes de estudio</span>
+                          </Link>
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
