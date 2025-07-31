@@ -118,7 +118,7 @@ export default function ManageModalitySubjectsPage() {
                             <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${semesters.length}, minmax(0, 1fr))`}}>
                                 {semesters.map(semester => (
                                      <TabsTrigger key={semester} value={`sem-${semester}`} className="text-xs">
-                                        {getOrdinal(semester)} Grado
+                                        {getOrdinal(semester)}
                                     </TabsTrigger>
                                 ))}
                             </TabsList>

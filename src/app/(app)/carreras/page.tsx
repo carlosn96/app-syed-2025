@@ -135,7 +135,7 @@ export default function CareersPage() {
                     value={`sem-${semester}`}
                     className="text-xs"
                 >
-                    {getOrdinal(semester)} Grado
+                    {getOrdinal(semester)}
                 </TabsTrigger>
             ))}
             </TabsList>
