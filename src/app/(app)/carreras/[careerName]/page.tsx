@@ -15,16 +15,21 @@ import { careers as allCareers, subjects, Career } from "@/lib/data"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
 import { Button } from "@/components/ui/button"
 import { Book, Pencil, Trash2 } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { CreateCareerForm } from "@/components/create-career-form"
+
 
 export default function CareerPlansPage() {
   const params = useParams();
   const careerName = decodeURIComponent(params.careerName as string);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [_, setForceRender] = useState(0);
 
   const [activeTabs, setActiveTabs] = useState<Record<string, string>>({});
 
   const careerModalities = useMemo(() => {
     return allCareers.filter(c => c.name === careerName);
-  }, [careerName]);
+  }, [careerName, _]);
 
   const handleTabChange = (key: string, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [key]: value }));
@@ -33,6 +38,11 @@ export default function CareerPlansPage() {
   const getOrdinal = (n: number) => {
     return `${n}°`;
   };
+
+  const handleSuccess = () => {
+    setIsModalOpen(false);
+    setForceRender(Math.random());
+  }
 
   const renderSubjectTabs = (career: Career, uniqueKey: string) => {
     const filteredSubjects = subjects.filter(
@@ -96,24 +106,40 @@ export default function CareerPlansPage() {
     );
   };
 
-  if (careerModalities.length === 0) {
-    return <div>Carrera no encontrada.</div>;
+  if (careerModalities.length === 0 && !careerName) {
+    return <div>Cargando...</div>;
   }
 
   return (
     <div className="flex flex-col gap-8">
       <FloatingBackButton />
-      <div className="flex flex-col">
-        <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-          {`Planes de Estudio: ${careerName}`}
-        </h1>
-        <p className="text-muted-foreground">
-            Modalidades disponibles para esta carrera.
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col">
+          <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
+            {`Planes de Estudio: ${careerName}`}
+          </h1>
+          <p className="text-muted-foreground">
+              Modalidades disponibles para esta carrera.
+          </p>
+        </div>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+                <Button>Crear Plan de Estudio</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Crear Nuevo Plan de Estudio</DialogTitle>
+                    <DialogDescription>
+                        Completa el formulario para registrar una nueva modalidad para {careerName}.
+                    </DialogDescription>
+                </DialogHeader>
+                <CreateCareerForm onSuccess={handleSuccess} careerName={careerName} />
+            </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        {careerModalities.map(modality => {
+        {careerModalities.length > 0 ? careerModalities.map(modality => {
             const key = `${modality.name}-${modality.campus}-${modality.modality}`;
             return (
                 <Card key={key} className="flex flex-col rounded-xl">
@@ -147,7 +173,15 @@ export default function CareerPlansPage() {
                     </CardContent>
                 </Card>
             )
-        })}
+        }) : (
+             <div className="md:col-span-2 flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
+                <h3 className="text-lg font-semibold text-white">No hay planes de estudio</h3>
+                <p className="text-muted-foreground mt-2">
+                    Aún no se han creado planes de estudio para esta carrera. <br/>
+                    Usa el botón "Crear Plan de Estudio" para empezar.
+                </p>
+            </div>
+        )}
       </div>
     </div>
   );

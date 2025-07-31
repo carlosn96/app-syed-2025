@@ -40,6 +40,11 @@ type CreateCareerFormValues = z.infer<typeof createCareerSchema>;
 
 const coordinators = users.filter(u => u.rol === 'coordinator');
 
+interface CreateCareerFormProps {
+  onSuccess?: () => void;
+  careerName?: string;
+}
+
 // This is a mock function, in a real app this would be an API call
 const addCareer = (data: CreateCareerFormValues) => {
     const newId = Math.max(...careers.map(c => c.id), 0) + 1;
@@ -68,7 +73,7 @@ const addCareer = (data: CreateCareerFormValues) => {
     console.log("Materias asignadas (IDs):", data.subjectIds);
 };
 
-export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
+export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProps) {
   const { toast } = useToast();
 
   const sortedSubjects = [...subjects].sort((a, b) => a.semester - b.semester);
@@ -76,7 +81,7 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
   const form = useForm<CreateCareerFormValues>({
     resolver: zodResolver(createCareerSchema),
     defaultValues: {
-      name: "",
+      name: careerName || "",
       modality: "",
       campus: "",
       coordinator: "",
@@ -91,8 +96,8 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
     try {
       addCareer(data);
       toast({
-        title: "Carrera Creada",
-        description: `La carrera ${data.name} ha sido creada con éxito.`,
+        title: "Operación Exitosa",
+        description: `El plan de estudios ${data.modality} para ${data.name} ha sido creado.`,
       });
       form.reset();
       onSuccess?.();
@@ -100,7 +105,7 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
       if (error instanceof Error) {
         toast({
             variant: "destructive",
-            title: "Error al crear carrera",
+            title: "Error al crear",
             description: error.message,
         });
       }
@@ -117,7 +122,7 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
             <FormItem>
               <FormLabel>Nombre de la Carrera</FormLabel>
               <FormControl>
-                <Input placeholder="Ej. Ingeniería en Software" {...field} />
+                <Input placeholder="Ej. Ingeniería en Software" {...field} disabled={!!careerName} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -128,9 +133,9 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
           name="modality"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Modalidad</FormLabel>
+              <FormLabel>Modalidad / Plan de Estudio</FormLabel>
               <FormControl>
-                <Input placeholder="Ej. INCO, ICOM" {...field} />
+                <Input placeholder="Ej. INCO, ICOM, LAE" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -203,12 +208,12 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
           render={() => (
             <FormItem>
               <div className="mb-4">
-                <FormLabel className="text-base">Plan de Estudios</FormLabel>
+                <FormLabel className="text-base">Asignar Materias (Opcional)</FormLabel>
                 <FormDescription>
-                  Selecciona las materias que formarán parte de esta carrera.
+                  Selecciona las materias existentes que formarán parte de este plan.
                 </FormDescription>
               </div>
-               <ScrollArea className="h-64 w-full rounded-md border">
+               <ScrollArea className="h-40 w-full rounded-md border">
                  <div className="p-4">
                     {sortedSubjects
                         .filter(subject => subject.semester <= numberOfSemesters)
@@ -238,7 +243,7 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
                                 />
                                 </FormControl>
                                 <FormLabel className="font-normal">
-                                   {subject.semester}° - {subject.name}
+                                   {subject.semester}° - {subject.name} ({subject.career})
                                 </FormLabel>
                             </FormItem>
                             )
@@ -252,7 +257,7 @@ export function CreateCareerForm({ onSuccess }: { onSuccess?: () => void }) {
           )}
         />
 
-        <Button type="submit" className="w-full">Crear Carrera</Button>
+        <Button type="submit" className="w-full">{careerName ? 'Crear Plan de Estudio' : 'Crear Carrera'}</Button>
       </form>
     </Form>
   )
