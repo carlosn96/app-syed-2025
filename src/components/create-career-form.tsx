@@ -29,10 +29,10 @@ import { ScrollArea } from "./ui/scroll-area"
 
 const createCareerSchema = z.object({
   name: z.string().min(1, "El nombre de la carrera es requerido."),
+  coordinator: z.string().optional().or(z.literal("unassigned")),
   campuses: z.array(z.string()).refine(value => value.length > 0, {
     message: "Debes seleccionar al menos un plantel.",
   }),
-  coordinator: z.string().optional().or(z.literal("unassigned")),
 });
 
 type CreateCareerFormValues = z.infer<typeof createCareerSchema>;
@@ -146,7 +146,7 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
                   Selecciona los planteles donde se impartirá esta carrera.
                 </FormDescription>
               </div>
-              <ScrollArea className="h-32 w-full rounded-md border">
+              <ScrollArea className="h-32 w-full rounded-md border bg-black/10">
                 <div className="p-4 space-y-2">
                     {planteles.map((plantel) => (
                         <FormField
