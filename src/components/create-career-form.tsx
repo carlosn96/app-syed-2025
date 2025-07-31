@@ -11,6 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -23,10 +24,14 @@ import {
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { careers, planteles, users } from "@/lib/data"
+import { Checkbox } from "./ui/checkbox"
+import { ScrollArea } from "./ui/scroll-area"
 
 const createCareerSchema = z.object({
   name: z.string().min(1, "El nombre de la carrera es requerido."),
-  campus: z.string().min(1, "Por favor, seleccione un plantel."),
+  campuses: z.array(z.string()).refine(value => value.length > 0, {
+    message: "Debes seleccionar al menos un plantel.",
+  }),
   coordinator: z.string().optional().or(z.literal("unassigned")),
 });
 
@@ -41,18 +46,20 @@ interface CreateCareerFormProps {
 
 // This is a mock function, in a real app this would be an API call
 const addCareer = (data: CreateCareerFormValues) => {
-    const newId = Math.max(...careers.map(c => c.id), 0) + 1;
     // For simplicity, we add a default modality. This can be edited later.
-    const newCareer = {
-        id: newId,
-        name: data.name,
-        modality: "Nuevo Plan",
-        campus: data.campus,
-        coordinator: data.coordinator === 'unassigned' ? "No asignado" : data.coordinator || "No asignado",
-        semesters: 1, // Default value, can be edited later
-    };
-    careers.push(newCareer);
-    console.log("Carrera creada:", newCareer);
+    data.campuses.forEach(campus => {
+        const newId = Math.max(...careers.map(c => c.id), 0) + 1;
+        const newCareer = {
+            id: newId,
+            name: data.name,
+            modality: "Nuevo Plan",
+            campus: campus,
+            coordinator: data.coordinator === 'unassigned' ? "No asignado" : data.coordinator || "No asignado",
+            semesters: 1, // Default value, can be edited later
+        };
+        careers.push(newCareer);
+        console.log("Carrera creada:", newCareer);
+    })
 };
 
 export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProps) {
@@ -62,21 +69,17 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
     resolver: zodResolver(createCareerSchema),
     defaultValues: {
       name: careerName || "",
-      campus: "",
+      campuses: [],
       coordinator: "unassigned",
     },
   });
 
   const onSubmit = (data: CreateCareerFormValues) => {
     try {
-      const submissionData = { ...data };
-      if (submissionData.coordinator === 'unassigned') {
-          submissionData.coordinator = '';
-      }
-      addCareer(submissionData as CreateCareerFormValues);
+      addCareer(data);
       toast({
         title: "Operación Exitosa",
-        description: `La carrera ${data.name} ha sido creada. Ahora puedes crear sus planes de estudio.`,
+        description: `La carrera ${data.name} ha sido creada en los planteles seleccionados. Ahora puedes configurar sus planes de estudio.`,
       });
       form.reset();
       onSuccess?.();
@@ -109,24 +112,52 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
         />
         <FormField
           control={form.control}
-          name="campus"
-          render={({ field }) => (
+          name="campuses"
+          render={() => (
             <FormItem>
-              <FormLabel>Plantel</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un plantel" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {planteles.map((plantel) => (
-                    <SelectItem key={plantel.id} value={plantel.name}>
-                      {plantel.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="mb-4">
+                <FormLabel>Planteles</FormLabel>
+                <FormDescription>
+                  Selecciona los planteles donde se impartirá esta carrera.
+                </FormDescription>
+              </div>
+              <ScrollArea className="h-32 w-full rounded-md border">
+                <div className="p-4 space-y-2">
+                    {planteles.map((plantel) => (
+                        <FormField
+                        key={plantel.id}
+                        control={form.control}
+                        name="campuses"
+                        render={({ field }) => {
+                            return (
+                            <FormItem
+                                key={plantel.id}
+                                className="flex flex-row items-start space-x-3 space-y-0"
+                            >
+                                <FormControl>
+                                <Checkbox
+                                    checked={field.value?.includes(plantel.name)}
+                                    onCheckedChange={(checked) => {
+                                    return checked
+                                        ? field.onChange([...(field.value ?? []), plantel.name])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                            (value) => value !== plantel.name
+                                            )
+                                        )
+                                    }}
+                                />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                   {plantel.name}
+                                </FormLabel>
+                            </FormItem>
+                            )
+                        }}
+                        />
+                    ))}
+                </div>
+              </ScrollArea>
               <FormMessage />
             </FormItem>
           )}
