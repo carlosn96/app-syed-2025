@@ -112,6 +112,31 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
         />
         <FormField
           control={form.control}
+          name="coordinator"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Coordinador (Opcional)</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un coordinador" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                   <SelectItem value="unassigned">Sin asignar</SelectItem>
+                  {coordinators.map((coordinator) => (
+                    <SelectItem key={coordinator.id} value={`${coordinator.nombre} ${coordinator.apellido_paterno}`.trim()}>
+                       {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="campuses"
           render={() => (
             <FormItem>
@@ -158,31 +183,6 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
                     ))}
                 </div>
               </ScrollArea>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="coordinator"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Coordinador (Opcional)</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un coordinador" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                   <SelectItem value="unassigned">Sin asignar</SelectItem>
-                  {coordinators.map((coordinator) => (
-                    <SelectItem key={coordinator.id} value={`${coordinator.nombre} ${coordinator.apellido_paterno}`.trim()}>
-                       {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}
