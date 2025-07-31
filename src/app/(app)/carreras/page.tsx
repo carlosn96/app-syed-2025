@@ -157,22 +157,6 @@ export default function CareersPage() {
             <div>
                 <CardTitle>{selectedCareer.name}</CardTitle>
                 <CardDescription>{selectedCareer.campus}</CardDescription>
-                
-                {group.modalities.length > 1 && (
-                    <div className="flex gap-2 pt-2">
-                        {group.modalities.map(modality => (
-                            <Button
-                                key={modality.id}
-                                size="sm"
-                                variant={selectedCareer.id === modality.id ? "default" : "outline-filter"}
-                                onClick={(e) => { e.stopPropagation(); handleModalityChange(key, modality.id); }}
-                                className="h-7 rounded-md"
-                            >
-                                {modality.modality}
-                            </Button>
-                        ))}
-                    </div>
-                )}
                  <p className="text-xs text-muted-foreground pt-2">{selectedCareer.coordinator}</p>
             </div>
             <div className="flex gap-2 shrink-0">
@@ -205,6 +189,21 @@ export default function CareersPage() {
                         </div>
                     </AccordionTrigger>
                     <AccordionContent>
+                        {group.modalities.length > 1 && (
+                            <div className="flex gap-2 pt-2 px-6 pb-4">
+                                {group.modalities.map(modality => (
+                                    <Button
+                                        key={modality.id}
+                                        size="sm"
+                                        variant={selectedCareer.id === modality.id ? "default" : "outline-filter"}
+                                        onClick={(e) => { e.stopPropagation(); handleModalityChange(key, modality.id); }}
+                                        className="h-7 rounded-md"
+                                    >
+                                        {modality.modality}
+                                    </Button>
+                                ))}
+                            </div>
+                        )}
                         {renderSubjectTabs(selectedCareer, key)}
                     </AccordionContent>
                 </Card>
@@ -214,7 +213,47 @@ export default function CareersPage() {
 
     return (
          <Card key={key} className="flex flex-col rounded-xl">
-            <CardHeader>{header}</CardHeader>
+            <CardHeader>
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left w-full">
+                  <div>
+                      <CardTitle>{selectedCareer.name}</CardTitle>
+                      <CardDescription>{selectedCareer.campus}</CardDescription>
+                      
+                      {group.modalities.length > 1 && (
+                          <div className="flex gap-2 pt-2">
+                              {group.modalities.map(modality => (
+                                  <Button
+                                      key={modality.id}
+                                      size="sm"
+                                      variant={selectedCareer.id === modality.id ? "default" : "outline-filter"}
+                                      onClick={(e) => { e.stopPropagation(); handleModalityChange(key, modality.id); }}
+                                      className="h-7 rounded-md"
+                                  >
+                                      {modality.modality}
+                                  </Button>
+                              ))}
+                          </div>
+                      )}
+                      <p className="text-xs text-muted-foreground pt-2">{selectedCareer.coordinator}</p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                      <Button size="icon" variant="warning" onClick={(e) => e.stopPropagation()}>
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Editar</span>
+                      </Button>
+                      <Button size="icon" variant="destructive" onClick={(e) => e.stopPropagation()}>
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Eliminar</span>
+                      </Button>
+                      <Button asChild size="icon" variant="success" onClick={(e) => e.stopPropagation()}>
+                          <Link href={`/carreras/${encodeURIComponent(group.name)}`}>
+                              <BookOpenCheck className="h-4 w-4" />
+                              <span className="sr-only">Planes de estudio</span>
+                          </Link>
+                      </Button>
+                  </div>
+              </div>
+            </CardHeader>
             <CardContent className="flex flex-col flex-grow pb-2">
                 {renderSubjectTabs(selectedCareer, key)}
             </CardContent>
