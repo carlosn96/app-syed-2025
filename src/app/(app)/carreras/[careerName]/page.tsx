@@ -12,6 +12,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { careers as allCareers, subjects, Career } from "@/lib/data"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
+import { Button } from "@/components/ui/button"
+import { Book, Pencil, Trash2 } from "lucide-react"
 
 export default function CareerPlansPage() {
   const params = useParams();
@@ -115,9 +117,27 @@ export default function CareerPlansPage() {
             return (
                 <Card key={key} className="flex flex-col rounded-xl">
                     <CardHeader>
-                        <CardTitle>{modality.modality}</CardTitle>
-                        <CardDescription>{modality.campus}</CardDescription>
-                        <p className="text-xs text-muted-foreground pt-2">{modality.coordinator}</p>
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <CardTitle>{modality.modality}</CardTitle>
+                                <CardDescription>{modality.campus}</CardDescription>
+                                <p className="text-xs text-muted-foreground pt-2">{modality.coordinator}</p>
+                            </div>
+                            <div className="flex gap-2">
+                                <Button size="icon" variant="warning">
+                                    <Pencil className="h-4 w-4" />
+                                    <span className="sr-only">Editar</span>
+                                </Button>
+                                <Button size="icon" variant="destructive">
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Eliminar</span>
+                                </Button>
+                                <Button size="icon" variant="default">
+                                    <Book className="h-4 w-4" />
+                                    <span className="sr-only">Gestionar Materias</span>
+                                </Button>
+                            </div>
+                        </div>
                     </CardHeader>
                     <CardContent className="flex flex-col flex-grow pb-2">
                         {renderSubjectTabs(modality, key)}
