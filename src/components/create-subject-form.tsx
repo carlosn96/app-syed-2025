@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { subjects, teachers } from "@/lib/data"
+import { useEffect } from "react"
 
 const createSubjectSchema = z.object({
   name: z.string().min(1, "El nombre de la materia es requerido."),
@@ -34,7 +35,8 @@ type CreateSubjectFormValues = z.infer<typeof createSubjectSchema>;
 
 interface CreateSubjectFormProps {
   onSuccess?: () => void;
-  careerName?: string; // Optional: To auto-assign the career
+  careerName?: string; 
+  semester?: number | null;
 }
 
 // This is a mock function, in a real app this would be an API call
@@ -45,14 +47,13 @@ const addSubject = (data: CreateSubjectFormValues, careerName?: string) => {
         name: data.name,
         teacher: data.teacher,
         semester: data.semester,
-        // If careerName is provided, assign it, otherwise default.
         career: careerName || "Sin Asignar"
     };
     subjects.push(newSubject);
     console.log("Materia creada:", newSubject);
 };
 
-export function CreateSubjectForm({ onSuccess, careerName }: CreateSubjectFormProps) {
+export function CreateSubjectForm({ onSuccess, careerName, semester }: CreateSubjectFormProps) {
   const { toast } = useToast();
 
   const form = useForm<CreateSubjectFormValues>({
@@ -60,9 +61,15 @@ export function CreateSubjectForm({ onSuccess, careerName }: CreateSubjectFormPr
     defaultValues: {
       name: "",
       teacher: "",
-      semester: 1,
+      semester: semester ?? 1,
     },
   });
+
+  useEffect(() => {
+    if (semester !== null && semester !== undefined) {
+      form.setValue("semester", semester);
+    }
+  }, [semester, form]);
 
   const onSubmit = (data: CreateSubjectFormValues) => {
     try {
@@ -131,7 +138,7 @@ export function CreateSubjectForm({ onSuccess, careerName }: CreateSubjectFormPr
             <FormItem>
               <FormLabel>Semestre</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input type="number" {...field} disabled={semester !== null && semester !== undefined} />
               </FormControl>
               <FormMessage />
             </FormItem>

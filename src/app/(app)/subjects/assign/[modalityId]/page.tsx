@@ -31,13 +31,14 @@ import {
   DialogTrigger,
   DialogDescription
 } from "@/components/ui/dialog"
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function ManageModalitySubjectsPage() {
     const params = useParams()
     const modalityId = Number(params.modalityId)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [_, setForceRender] = useState(0); // State to force re-render
+    const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
+    const [_, setForceRender] = useState(0); 
 
     const modality = useMemo(() => {
         return careers.find(c => c.id === modalityId)
@@ -46,63 +47,64 @@ export default function ManageModalitySubjectsPage() {
     const subjectsForModality = useMemo(() => {
       if (!modality) return [];
       return allSubjects
-          .filter(s => s.career === modality.name) // This might need refinement if careers can have same name in different campuses
+          .filter(s => s.career === modality.name) 
           .sort((a, b) => a.semester - b.semester);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [modality, _]);
 
-    const groupedSubjects = useMemo(() => {
-        const groups: Record<number, Subject[]> = {};
-        subjectsForModality.forEach(subject => {
-            if (!groups[subject.semester]) {
-                groups[subject.semester] = [];
-            }
-            groups[subject.semester].push(subject);
-        });
-        return groups;
-    }, [subjectsForModality]);
+    const semesters = useMemo(() => {
+        if (!modality) return [];
+        return Array.from({ length: modality.semesters }, (_, i) => i + 1);
+    }, [modality]);
 
-
-    if (!modality) {
-        return <div>Modalidad no encontrada.</div>
-    }
+    const handleOpenModal = (semester: number) => {
+        setSelectedSemester(semester);
+        setIsModalOpen(true);
+    };
     
     const handleSuccess = () => {
         setIsModalOpen(false);
-        // Force a re-render to show the new subject in the list
+        setSelectedSemester(null);
         setForceRender(Math.random()); 
+    };
+    
+    if (!modality) {
+        return <div>Modalidad no encontrada.</div>
+    }
+
+    const getOrdinal = (n: number) => {
+        return `${n}°`;
     };
     
     return (
         <div className="flex flex-col gap-8">
             <FloatingBackButton />
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className='flex flex-col'>
-                    <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-                        Gestionar Plan de Estudio
-                    </h1>
-                    <p className="text-muted-foreground">
-                        {modality.name} - {modality.modality} ({modality.campus})
-                    </p>
-                </div>
-                <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                    <DialogTrigger asChild>
-                        <Button>Crear Nueva Materia</Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Crear Nueva Materia</DialogTitle>
-                             <DialogDescription>
-                                La materia se asignará automáticamente a {modality.name} ({modality.modality}).
-                            </DialogDescription>
-                        </DialogHeader>
-                        <CreateSubjectForm 
-                            careerName={modality.name} 
-                            onSuccess={handleSuccess} 
-                        />
-                    </DialogContent>
-                </Dialog>
+            <div className="flex flex-col">
+                <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
+                    Gestionar Plan de Estudio
+                </h1>
+                <p className="text-muted-foreground">
+                    {modality.name} - {modality.modality} ({modality.campus})
+                </p>
             </div>
             
+             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Crear Nueva Materia</DialogTitle>
+                         <DialogDescription>
+                            La materia se asignará automáticamente a {modality.name} ({modality.modality}) en el semestre {selectedSemester}.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <CreateSubjectForm 
+                        careerName={modality.name} 
+                        semester={selectedSemester}
+                        onSuccess={handleSuccess} 
+                    />
+                </DialogContent>
+             </Dialog>
+
+
             <Card className="rounded-xl">
                 <CardHeader>
                     <CardTitle>Materias del Plan</CardTitle>
@@ -111,49 +113,73 @@ export default function ManageModalitySubjectsPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {Object.keys(groupedSubjects).length > 0 ? (
-                        <div className="space-y-6">
-                            {Object.entries(groupedSubjects).map(([semester, subjects]) => (
-                                <div key={semester}>
-                                    <h3 className="text-lg font-semibold text-white mb-2">Semestre {semester}</h3>
-                                    <div className='rounded-xl overflow-hidden'>
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Nombre</TableHead>
-                                                    <TableHead>Docente</TableHead>
-                                                    <TableHead>Acciones</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {subjects.map(subject => (
-                                                    <TableRow key={subject.id}>
-                                                        <TableCell className="font-medium">{subject.name}</TableCell>
-                                                        <TableCell>{subject.teacher}</TableCell>
-                                                        <TableCell>
-                                                            <div className="flex gap-2">
-                                                                <Button size="icon" variant="warning">
-                                                                    <Pencil className="h-4 w-4" />
-                                                                </Button>
-                                                                <Button size="icon" variant="destructive">
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </Button>
-                                                            </div>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                    {semesters.length > 0 ? (
+                        <Tabs defaultValue={`sem-${semesters[0]}`} className="w-full">
+                            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${semesters.length}, minmax(0, 1fr))`}}>
+                                {semesters.map(semester => (
+                                     <TabsTrigger key={semester} value={`sem-${semester}`} className="text-xs">
+                                        {getOrdinal(semester)} Semestre
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                            {semesters.map(semester => {
+                                const semesterSubjects = subjectsForModality.filter(s => s.semester === semester);
+                                return (
+                                    <TabsContent key={semester} value={`sem-${semester}`}>
+                                        <div className="flex justify-end my-4">
+                                            <Button onClick={() => handleOpenModal(semester)}>
+                                                Crear Materia
+                                            </Button>
+                                        </div>
+                                        {semesterSubjects.length > 0 ? (
+                                            <div className='rounded-xl overflow-hidden'>
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>Nombre</TableHead>
+                                                            <TableHead>Docente</TableHead>
+                                                            <TableHead>Acciones</TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {semesterSubjects.map(subject => (
+                                                            <TableRow key={subject.id}>
+                                                                <TableCell className="font-medium">{subject.name}</TableCell>
+                                                                <TableCell>{subject.teacher}</TableCell>
+                                                                <TableCell>
+                                                                    <div className="flex gap-2">
+                                                                        <Button size="icon" variant="warning">
+                                                                            <Pencil className="h-4 w-4" />
+                                                                        </Button>
+                                                                        <Button size="icon" variant="destructive">
+                                                                            <Trash2 className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </div>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
+                                                <h3 className="text-lg font-semibold text-white">Semestre Vacío</h3>
+                                                <p className="text-muted-foreground mt-2">
+                                                    Aún no se han creado materias para este semestre. <br/>
+                                                    Usa el botón "Crear Nueva Materia" para empezar.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </TabsContent>
+                                )
+                            })}
+                        </Tabs>
                     ) : (
                         <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
                            <h3 className="text-lg font-semibold text-white">Plan de Estudios Vacío</h3>
                            <p className="text-muted-foreground mt-2">
                                 Aún no se han creado materias para esta modalidad. <br/>
-                                Usa el botón "Crear Nueva Materia" para empezar.
+                                El plan de estudios debe tener al menos 1 semestre.
                            </p>
                         </div>
                     )}
