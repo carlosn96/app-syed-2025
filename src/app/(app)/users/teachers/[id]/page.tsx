@@ -3,13 +3,14 @@
 
 import { useParams } from "next/navigation"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Dot } from "recharts"
-import { Star, ShieldCheck, BookUser } from "lucide-react"
+import { Star, ShieldCheck, BookUser, Library } from "lucide-react"
 import React, { useMemo, useState } from "react"
 
 import {
   users,
   supervisions,
   evaluations,
+  subjects as allSubjects,
 } from "@/lib/data"
 import {
   Card,
@@ -62,7 +63,7 @@ const CustomDot = (props: any) => {
 export default function TeacherProfilePage() {
   const params = useParams();
   const teacherId = Number(params.id);
-  const [activeTab, setActiveTab] = useState<'supervisions' | 'evaluations'>('supervisions');
+  const [activeTab, setActiveTab] = useState<'supervisions' | 'evaluations' | 'subjects'>('supervisions');
 
   const teacherData = useMemo(() => {
     const teacher = users.find(
@@ -78,6 +79,9 @@ export default function TeacherProfilePage() {
     );
     const teacherEvaluations = evaluations.filter(
       (e) => e.teacherName === teacherFullName
+    );
+    const teacherSubjects = allSubjects.filter(
+        (s) => s.teacher === teacherFullName
     );
     
     const completedSupervisions = teacherSupervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
@@ -98,6 +102,7 @@ export default function TeacherProfilePage() {
       teacherFullName,
       teacherSupervisions,
       teacherEvaluations,
+      teacherSubjects,
       performanceData,
       averageScore
     }
@@ -111,7 +116,7 @@ export default function TeacherProfilePage() {
     )
   }
 
-  const { teacher, teacherFullName, teacherSupervisions, teacherEvaluations, performanceData, averageScore } = teacherData;
+  const { teacher, teacherFullName, teacherSupervisions, teacherEvaluations, teacherSubjects, performanceData, averageScore } = teacherData;
 
   return (
     <div className="flex flex-col gap-8">
@@ -146,6 +151,13 @@ export default function TeacherProfilePage() {
             >
                 <BookUser className="h-4 w-4 mr-2" />
                 Evaluaciones
+            </Button>
+            <Button 
+                variant={activeTab === 'subjects' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('subjects')}
+            >
+                <Library className="h-4 w-4 mr-2" />
+                Materias
             </Button>
         </div>
       </div>
@@ -285,6 +297,42 @@ export default function TeacherProfilePage() {
             </Card>
         </div>
       )}
+      
+      {activeTab === 'subjects' && (
+        <div className="lg:col-span-3">
+            <Card className="rounded-xl">
+                <CardHeader>
+                    <CardTitle>Materias Impartidas</CardTitle>
+                    <CardDescription>
+                        Lista de materias que este docente imparte actualmente.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Materia</TableHead>
+                                <TableHead>Carrera</TableHead>
+                                <TableHead>Semestre</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {teacherSubjects.map((subject) => (
+                                <TableRow key={subject.id}>
+                                    <TableCell className="font-medium">{subject.name}</TableCell>
+                                    <TableCell>{subject.career}</TableCell>
+                                    <TableCell>{subject.semester}°</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </div>
+      )}
+
     </div>
   )
 }
+
+    
