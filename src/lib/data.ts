@@ -733,6 +733,7 @@ export const users: User[] = [
   { id: 7, nombre: 'Laura', apellido_paterno: 'García', apellido_materno: 'Perez', correo: 'laura.g@example.com', rol: 'coordinator', fecha_registro: '2023-01-15T10:00:00Z', ultimo_acceso: '2024-05-23T10:00:00Z' },
   { id: 8, nombre: 'Carlos', apellido_paterno: 'Martínez', apellido_materno: 'Rodriguez', correo: 'carlos.m@example.com', rol: 'coordinator', fecha_registro: '2023-01-18T12:00:00Z', ultimo_acceso: '2024-05-23T11:30:00Z' },
   { id: 14, nombre: 'Nuevo', apellido_paterno: 'Docente', apellido_materno: 'Test', correo: 'docente@example.com', rol: 'teacher', fecha_registro: '2024-01-01T00:00:00Z', ultimo_acceso: null },
+  { id: 15, nombre: 'Alumno', apellido_paterno: 'Prueba', apellido_materno: 'Usuario', correo: 'alumno@example.com', rol: 'student', grupo: 'COMPINCO2025A', fecha_registro: '2024-05-24T10:00:00Z', ultimo_acceso: null },
 ];
 
 export const planteles = [
