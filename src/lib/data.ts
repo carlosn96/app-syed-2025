@@ -879,7 +879,7 @@ export const supervisions: Supervision[] = [
 
     // Teacher: Prof. Philip Kotler
     { id: 11, teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Laura García', date: new Date("2024-05-20"), status: 'Completada', groupId: 2, startTime: '18:00', endTime: '20:00', score: 95 },
-];
+].sort((a, b) => b.date.getTime() - a.date.getTime());
 
 export interface Evaluation {
   id: number;

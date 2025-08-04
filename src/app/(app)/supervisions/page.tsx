@@ -37,11 +37,12 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
-import { Pencil, ClipboardEdit } from "lucide-react"
+import { Pencil } from "lucide-react"
 
 export default function SupervisionsPage() {
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [date, setDate] = useState<Date | undefined>(new Date())
 
   const supervisions = useMemo(() => {
     if (user?.rol === 'coordinator') {
@@ -50,6 +51,14 @@ export default function SupervisionsPage() {
     }
     return allSupervisions;
   }, [user]);
+
+  const upcomingSupervisions = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return supervisions
+        .filter(s => s.date >= today && s.status === 'Programada')
+        .slice(0, 5); // Take the next 5
+  }, [supervisions]);
 
 
   const getGroupName = (groupId: number) => {
@@ -81,10 +90,55 @@ export default function SupervisionsPage() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
-        <Card className="rounded-xl">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-1 space-y-8">
+            <Card className="rounded-xl">
+                 <CardContent className="p-0">
+                    <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={setDate}
+                        className="w-full"
+                        modifiers={{
+                            scheduled: supervisions.map(s => s.date)
+                        }}
+                        modifiersClassNames={{
+                            scheduled: 'bg-primary/20 text-primary-foreground rounded-full'
+                        }}
+                    />
+                </CardContent>
+            </Card>
+             <Card className="rounded-xl">
+                <CardHeader>
+                    <CardTitle>Próximas Agendas</CardTitle>
+                    <CardDescription>Las 5 citas más cercanas.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {upcomingSupervisions.length > 0 ? (
+                        <ul className="space-y-4">
+                            {upcomingSupervisions.map(s => (
+                                <li key={s.id} className="flex items-start gap-3">
+                                    <div className="flex flex-col items-center justify-center p-2 bg-primary/20 rounded-md">
+                                        <span className="text-xs font-bold text-primary uppercase">{format(s.date, 'MMM', { locale: es })}</span>
+                                        <span className="text-lg font-bold text-white">{format(s.date, 'dd')}</span>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-sm">{s.teacher}</p>
+                                        <p className="text-xs text-muted-foreground">{s.subject}</p>
+                                        <p className="text-xs text-primary/80 font-mono">{s.startTime} - {s.endTime}</p>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-sm text-muted-foreground text-center py-4">No hay citas próximas.</p>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
+        <Card className="lg:col-span-2 rounded-xl">
             <CardHeader>
-                <CardTitle>Citas de Supervisión</CardTitle>
+                <CardTitle>Historial de Agendas</CardTitle>
                 <CardDescription>Historial y próximas citas agendadas.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -100,18 +154,10 @@ export default function SupervisionsPage() {
                             {user?.rol === 'coordinator' && (
                                 <div className="flex gap-2">
                                   {supervision.status === 'Programada' && (
-                                    <>
-                                        <Button size="icon" variant="warning">
-                                            <Pencil className="h-4 w-4" />
-                                            <span className="sr-only">Editar</span>
-                                        </Button>
-                                        <Button asChild size="icon" variant="success">
-                                            <Link href={`/supervisions/evaluate/${supervision.id}`}>
-                                                <ClipboardEdit className="h-4 w-4" />
-                                                <span className="sr-only">Evaluar</span>
-                                            </Link>
-                                        </Button>
-                                    </>
+                                    <Button size="icon" variant="warning">
+                                        <Pencil className="h-4 w-4" />
+                                        <span className="sr-only">Editar</span>
+                                    </Button>
                                   )}
                                 </div>
                             )}
@@ -134,7 +180,7 @@ export default function SupervisionsPage() {
                 </div>
 
                 {/* Desktop View - Table */}
-                <ScrollArea className="hidden md:block h-auto max-h-[400px]">
+                <ScrollArea className="hidden md:block h-auto max-h-[600px]">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -150,29 +196,23 @@ export default function SupervisionsPage() {
                         <TableBody>
                             {supervisions.map((supervision) => (
                                 <TableRow key={supervision.id}>
-                                    <TableCell className="font-medium py-2">{supervision.teacher}</TableCell>
-                                    {user?.rol !== 'coordinator' && <TableCell className="font-medium py-2">{supervision.coordinator}</TableCell>}
-                                    <TableCell className="py-2">{format(supervision.date, "P", { locale: es })}</TableCell>
-                                    <TableCell className="py-2 text-primary font-mono">{supervision.startTime} - {supervision.endTime}</TableCell>
-                                    <TableCell className="py-2">{getGroupName(supervision.groupId)}</TableCell>
-                                    <TableCell className="py-2">
+                                    <TableCell className="font-medium py-3">{supervision.teacher}</TableCell>
+                                    {user?.rol !== 'coordinator' && <TableCell className="font-medium py-3">{supervision.coordinator}</TableCell>}
+                                    <TableCell className="py-3">{format(supervision.date, "P", { locale: es })}</TableCell>
+                                    <TableCell className="py-3 text-primary font-mono">{supervision.startTime} - {supervision.endTime}</TableCell>
+                                    <TableCell className="py-3">{getGroupName(supervision.groupId)}</TableCell>
+                                    <TableCell className="py-3">
                                         <Badge variant={supervision.status === 'Programada' ? 'warning' : 'success'}>
                                             {supervision.status}
                                         </Badge>
                                     </TableCell>
                                     {user?.rol === 'coordinator' && (
-                                      <TableCell className="py-2">
+                                      <TableCell className="py-3">
                                         {supervision.status === 'Programada' && (
                                             <div className="flex gap-2">
                                                 <Button size="icon" variant="warning">
                                                     <Pencil className="h-4 w-4" />
                                                     <span className="sr-only">Editar</span>
-                                                </Button>
-                                                 <Button asChild size="icon" variant="success">
-                                                    <Link href={`/supervisions/evaluate/${supervision.id}`}>
-                                                        <ClipboardEdit className="h-4 w-4" />
-                                                        <span className="sr-only">Evaluar</span>
-                                                    </Link>
                                                 </Button>
                                             </div>
                                         )}
