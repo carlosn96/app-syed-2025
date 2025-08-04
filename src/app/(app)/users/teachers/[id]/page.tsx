@@ -269,6 +269,21 @@ export default function TeacherProfilePage() {
                 </CardContent>
             </Card>
             </div>
+             <div className="lg:col-span-3">
+              <Card className="rounded-xl">
+                <CardHeader>
+                  <CardTitle>Nueva Sección</CardTitle>
+                  <CardDescription>
+                    Esta es una nueva sección que puedes completar.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-center h-40 border-2 border-dashed border-muted rounded-xl">
+                    <p className="text-muted-foreground">Contenido de la nueva sección aquí.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
         </div>
       )}
 
