@@ -26,6 +26,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { MessageSquarePlus, MessageSquareX } from 'lucide-react'
+import { ProgressRing } from '@/components/ui/progress-ring'
 
 type EvaluationFormValues = {
   [key: string]: {
@@ -363,7 +364,11 @@ export default function EvaluateSupervisionPage() {
                                 <Card>
                                     <CardContent className="space-y-8 pt-6">
                                         <div className="p-6 bg-black/20 rounded-lg">
-                                            <h3 className="text-xl font-headline font-semibold text-white mb-4">Resumen de Calificación</h3>
+                                            <div className='flex flex-col items-center justify-center'>
+                                                <h3 className="text-xl font-headline font-semibold text-white mb-4 text-center">Calificación Final Promedio</h3>
+                                                <ProgressRing value={calculatedScores.final} />
+                                            </div>
+                                            <Separator className="my-6"/>
                                             <div className="space-y-4">
                                                 {Object.entries(calculatedScores.individual).map(([key, value]) => (
                                                     <div key={key}>
@@ -374,11 +379,6 @@ export default function EvaluateSupervisionPage() {
                                                         <Progress value={value.score} />
                                                     </div>
                                                 ))}
-                                                <Separator className="my-4"/>
-                                                <div className="flex justify-between items-center text-lg font-bold">
-                                                    <span>Calificación Final Promedio</span>
-                                                    <span>{calculatedScores.final}%</span>
-                                                </div>
                                             </div>
                                         </div>
                                         <div className="p-6 bg-black/20 rounded-lg space-y-2">
@@ -425,5 +425,3 @@ export default function EvaluateSupervisionPage() {
         </div>
     )
 }
-
-    
