@@ -175,7 +175,7 @@ export default function SupervisionsPage() {
                             scheduled: Array.from(supervisionsByDate.keys()).map(d => new Date(d + 'T00:00:00'))
                         }}
                         modifiersClassNames={{
-                            scheduled: 'bg-primary/20 text-primary-foreground rounded-full'
+                            scheduled: 'bg-primary/20 text-primary-foreground border-2 border-transparent hover:border-primary'
                         }}
                     />
                 </CardContent>

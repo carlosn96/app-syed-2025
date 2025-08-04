@@ -46,11 +46,15 @@ function Calendar({
           "text-muted-foreground rounded-md w-full font-normal text-[0.8rem]",
         row: "flex w-full mt-2 flex-grow",
         cell: "w-full h-full text-center text-sm p-0 relative focus-within:relative focus-within:z-20 flex items-center justify-center",
-        day: "h-full w-full p-0 font-normal aria-selected:opacity-100 rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground",
+        day: cn(
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-full flex items-center justify-center transition-all duration-200",
+          "hover:bg-accent hover:text-accent-foreground"
+        ),
         day_range_end: "day-range-end",
         day_selected:
-          "bg-primary text-primary-foreground h-9 w-9 rounded-full focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground rounded-full",
+          "bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary focus:text-primary-foreground",
+        day_today:
+          "bg-accent text-accent-foreground hover:bg-accent hover:border-accent-foreground/50 border-2 border-transparent",
         day_outside:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
         day_disabled: "text-muted-foreground opacity-50",
