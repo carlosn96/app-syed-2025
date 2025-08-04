@@ -969,7 +969,7 @@ export interface SupervisionCriterion {
 export interface SupervisionRubric {
   id: number;
   title: string;
-  type: 'checkbox' | 'summary';
+  type: 'checkbox';
   category: 'Contable' | 'No Contable';
   criteria: SupervisionCriterion[];
 }
