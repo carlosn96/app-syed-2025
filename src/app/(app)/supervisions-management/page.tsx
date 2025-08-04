@@ -36,7 +36,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
-import { Pencil, ClipboardEdit } from "lucide-react"
+import { Pencil, ClipboardEdit, Eye } from "lucide-react"
 
 export default function SupervisionsManagementPage() {
   const { user } = useAuth();
@@ -86,7 +86,7 @@ export default function SupervisionsManagementPage() {
                             </div>
                             {user?.rol === 'coordinator' && (
                                 <div className="flex gap-2">
-                                  {supervision.status === 'Programada' && (
+                                  {supervision.status === 'Programada' ? (
                                     <>
                                         <Button asChild size="icon" variant="success">
                                             <Link href={`/supervision/evaluate/${supervision.id}`}>
@@ -95,6 +95,13 @@ export default function SupervisionsManagementPage() {
                                             </Link>
                                         </Button>
                                     </>
+                                  ) : (
+                                    <Button asChild size="icon" variant="outline">
+                                        <Link href={`/supervision/view/${supervision.id}`}>
+                                            <Eye className="h-4 w-4" />
+                                            <span className="sr-only">Ver Detalles</span>
+                                        </Link>
+                                    </Button>
                                   )}
                                 </div>
                             )}
@@ -158,12 +165,21 @@ export default function SupervisionsManagementPage() {
                                     </TableCell>
                                     {user?.rol === 'coordinator' && (
                                       <TableCell className="py-3">
-                                        {supervision.status === 'Programada' && (
+                                        {supervision.status === 'Programada' ? (
                                             <div className="flex gap-2">
                                                  <Button asChild size="icon" variant="success">
                                                     <Link href={`/supervision/evaluate/${supervision.id}`}>
                                                         <ClipboardEdit className="h-4 w-4" />
                                                         <span className="sr-only">Evaluar</span>
+                                                    </Link>
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex gap-2">
+                                                <Button asChild size="icon" variant="outline">
+                                                    <Link href={`/supervision/view/${supervision.id}`}>
+                                                        <Eye className="h-4 w-4" />
+                                                        <span className="sr-only">Ver Detalles</span>
                                                     </Link>
                                                 </Button>
                                             </div>

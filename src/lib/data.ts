@@ -1,4 +1,5 @@
 
+
 const academicData = {
     "Administración": {
       "Incorporada a la UdeG": {
@@ -830,6 +831,12 @@ export const teachers: Teacher[] = [
   { id: 11, name: 'John Doe Smith' },
 ];
 
+export type EvaluationResult = {
+  [key: string]: {
+    criteria: { [key: string]: "yes" | "no" },
+    observations: string
+  }
+}
 export interface Supervision {
     id: number;
     teacher: string;
@@ -841,6 +848,7 @@ export interface Supervision {
     startTime: string;
     endTime: string;
     score?: number;
+    evaluationData?: EvaluationResult;
 }
 
 // Function to get a future date based on a specific day of the week

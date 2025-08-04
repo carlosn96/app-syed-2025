@@ -4,5 +4,6 @@ export {
     ChevronDown,
     ClipboardCheck,
     ClipboardEdit,
-    ClipboardList
+    ClipboardList,
+    Eye
 } from "lucide-react";
