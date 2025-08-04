@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { schedules, teachers, groups as allGroups, subjects, Group } from "@/lib/data"
+import { schedules, teachers, groups as allGroups, subjects, Group, careers as allCareers } from "@/lib/data"
 import {
   Select,
   SelectContent,
@@ -34,6 +34,8 @@ const daysOfWeek = [
   "Jueves",
   "Viernes",
 ]
+
+const uniqueCareerNames = [...new Set(allCareers.map(c => c.name))];
 
 export default function SchedulesPage() {
   const { user } = useAuth()
@@ -66,6 +68,11 @@ export default function SchedulesPage() {
         filteredSchedules = schedules.filter(
           (s) => s.groupId === Number(selectedFilter)
         )
+      } else if (filterType === "career") {
+        const groupIdsInCareer = allGroups
+            .filter(g => g.career === selectedFilter)
+            .map(g => g.id);
+        filteredSchedules = schedules.filter(s => groupIdsInCareer.includes(s.groupId));
       }
     }
     return filteredSchedules
@@ -89,6 +96,52 @@ export default function SchedulesPage() {
     setSelectedFilter(null);
   }
 
+  const renderFilterSelect = () => {
+    switch(filterType) {
+        case 'teacher':
+            return (
+                <Select value={selectedFilter || ''} onValueChange={setSelectedFilter}>
+                    <SelectTrigger className="w-full md:w-[220px]">
+                        <SelectValue placeholder="Seleccionar docente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {teachers.map(teacher => (
+                            <SelectItem key={teacher.id} value={String(teacher.id)}>{teacher.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            );
+        case 'group':
+             return (
+                <Select value={selectedFilter || ''} onValueChange={setSelectedFilter}>
+                    <SelectTrigger className="w-full md:w-[220px]">
+                        <SelectValue placeholder="Seleccionar grupo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                         {availableGroups.map(group => (
+                            <SelectItem key={group.id} value={String(group.id)}>{group.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            );
+        case 'career':
+            return (
+                <Select value={selectedFilter || ''} onValueChange={setSelectedFilter}>
+                    <SelectTrigger className="w-full md:w-[220px]">
+                        <SelectValue placeholder="Seleccionar carrera" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {uniqueCareerNames.map(careerName => (
+                            <SelectItem key={careerName} value={careerName}>{careerName}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            )
+        default:
+            return null;
+    }
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -104,25 +157,11 @@ export default function SchedulesPage() {
                   <SelectContent>
                       <SelectItem value="teacher">Docente</SelectItem>
                       <SelectItem value="group">Grupo</SelectItem>
+                      <SelectItem value="career">Carrera</SelectItem>
                   </SelectContent>
               </Select>
             )}
-            <Select value={selectedFilter || ''} onValueChange={setSelectedFilter}>
-                <SelectTrigger className="w-full md:w-[220px]">
-                    <SelectValue placeholder={`Seleccionar ${filterType === 'teacher' ? 'docente' : 'grupo'}`} />
-                </SelectTrigger>
-                <SelectContent>
-                    {filterType === 'teacher' ? (
-                        teachers.map(teacher => (
-                            <SelectItem key={teacher.id} value={String(teacher.id)}>{teacher.name}</SelectItem>
-                        ))
-                    ) : (
-                        availableGroups.map(group => (
-                            <SelectItem key={group.id} value={String(group.id)}>{group.name}</SelectItem>
-                        ))
-                    )}
-                </SelectContent>
-            </Select>
+            {renderFilterSelect()}
             <Button variant="ghost" onClick={handleClearFilter} disabled={!selectedFilter}>Limpiar</Button>
         </div>
       </div>
