@@ -100,8 +100,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <Card className="lg:col-span-2 rounded-xl">
+      <div className="grid grid-cols-1 gap-8">
+        <Card className="rounded-xl">
           <CardHeader>
             <CardTitle className="font-headline">Resumen de Inscripción</CardTitle>
             <CardDescription>Evolución mensual de nuevos alumnos.</CardDescription>
@@ -132,73 +132,6 @@ export default function DashboardPage() {
                 />
               </BarChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        <Card className="rounded-xl">
-          <CardHeader>
-             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                <div>
-                    <CardTitle className="font-headline">Evaluaciones</CardTitle>
-                    <CardDescription>
-                    Comentarios recientes.
-                    </CardDescription>
-                </div>
-                <Button asChild size="sm" className="gap-1 shrink-0 bg-violet-600 hover:bg-violet-800 hover:underline">
-                    <Link href="/feedback">
-                    Ver Todo
-                    <ArrowUpRight className="h-4 w-4" />
-                    </Link>
-                </Button>
-              </div>
-          </CardHeader>
-          <CardContent>
-            <div className=" space-y-8">
-              <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                   <AvatarImage src="https://placehold.co/100x100.png" alt="Avatar" data-ai-hint="person avatar" />
-                  <AvatarFallback>OM</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">Olivia Martin</p>
-                  <p className="text-sm text-muted-foreground">
-                    "Curso fantástico, muy bien explicado."
-                  </p>
-                </div>
-                <div className="ml-auto font-medium flex items-center gap-1">
-                    5 <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                </div>
-              </div>
-              <div className="flex items-center">
-                <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                  <AvatarImage src="https://placehold.co/100x100.png" alt="Avatar" data-ai-hint="woman avatar" />
-                  <AvatarFallback>JL</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">Jackson Lee</p>
-                  <p className="text-sm text-muted-foreground">
-                    "El material fue desafiante pero gratificante."
-                  </p>
-                </div>
-                <div className="ml-auto font-medium flex items-center gap-1">
-                    4 <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                </div>
-              </div>
-              <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                   <AvatarImage src="https://placehold.co/100x100.png" alt="Avatar" data-ai-hint="man avatar" />
-                  <AvatarFallback>IN</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">Isabella Nguyen</p>
-                  <p className="text-sm text-muted-foreground">
-                    "Podría usar más ejemplos prácticos."
-                  </p>
-                </div>
-                <div className="ml-auto font-medium flex items-center gap-1">
-                    3 <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                </div>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
