@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo, useEffect } from "react"
 import {
   Card,
   CardContent,
@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { schedules, teachers, groups, subjects } from "@/lib/data"
+import { schedules, teachers, groups as allGroups, subjects, Group } from "@/lib/data"
 import {
   Select,
   SelectContent,
@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/auth-context"
 
 const daysOfWeek = [
   "Lunes",
@@ -35,8 +36,23 @@ const daysOfWeek = [
 ]
 
 export default function SchedulesPage() {
+  const { user } = useAuth()
   const [filterType, setFilterType] = useState("teacher")
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null)
+  const [availableGroups, setAvailableGroups] = useState<Group[]>(allGroups);
+
+  useEffect(() => {
+    if (user?.rol === 'teacher') {
+        setFilterType('group');
+        const teacherSchedules = schedules.filter(s => s.teacherId === user.id);
+        const groupIds = [...new Set(teacherSchedules.map(s => s.groupId))];
+        const teacherGroups = allGroups.filter(g => groupIds.includes(g.id));
+        setAvailableGroups(teacherGroups);
+    } else {
+        setAvailableGroups(allGroups);
+    }
+  }, [user]);
+
 
   const getSchedulesForDay = (day: string) => {
     let filteredSchedules = schedules
@@ -65,7 +81,7 @@ export default function SchedulesPage() {
       case "teacher":
         return teachers.find((t) => t.id === id)?.name || "N/A"
       case "group":
-        return groups.find((g) => g.id === id)?.name || "N/A"
+        return allGroups.find((g) => g.id === id)?.name || "N/A"
       case "subject":
         return subjects.find((s) => s.id === id)?.name || "N/A"
     }
@@ -82,15 +98,17 @@ export default function SchedulesPage() {
           Horarios de Clases
         </h1>
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
-            <Select value={filterType} onValueChange={(value) => { setFilterType(value); setSelectedFilter(null); }}>
-                <SelectTrigger className="w-full md:w-[150px]">
-                    <SelectValue placeholder="Filtrar por..." />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="teacher">Docente</SelectItem>
-                    <SelectItem value="group">Grupo</SelectItem>
-                </SelectContent>
-            </Select>
+            {user?.rol !== 'teacher' && (
+              <Select value={filterType} onValueChange={(value) => { setFilterType(value); setSelectedFilter(null); }}>
+                  <SelectTrigger className="w-full md:w-[150px]">
+                      <SelectValue placeholder="Filtrar por..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="teacher">Docente</SelectItem>
+                      <SelectItem value="group">Grupo</SelectItem>
+                  </SelectContent>
+              </Select>
+            )}
             <Select value={selectedFilter || ''} onValueChange={setSelectedFilter}>
                 <SelectTrigger className="w-full md:w-[220px]">
                     <SelectValue placeholder={`Seleccionar ${filterType === 'teacher' ? 'docente' : 'grupo'}`} />
@@ -101,7 +119,7 @@ export default function SchedulesPage() {
                             <SelectItem key={teacher.id} value={String(teacher.id)}>{teacher.name}</SelectItem>
                         ))
                     ) : (
-                        groups.map(group => (
+                        availableGroups.map(group => (
                             <SelectItem key={group.id} value={String(group.id)}>{group.name}</SelectItem>
                         ))
                     )}
@@ -128,7 +146,7 @@ export default function SchedulesPage() {
                       <TableRow>
                         <TableHead className="w-[100px] md:w-[150px]">Hora</TableHead>
                         <TableHead>Materia</TableHead>
-                        <TableHead>Docente</TableHead>
+                        {user?.rol !== 'teacher' && <TableHead>Docente</TableHead>}
                         <TableHead>Grupo</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -141,7 +159,7 @@ export default function SchedulesPage() {
                           <TableCell className="font-semibold">
                             <div>{getEntityName("subject", schedule.subjectId)}</div>
                           </TableCell>
-                          <TableCell>{getEntityName("teacher", schedule.teacherId)}</TableCell>
+                          {user?.rol !== 'teacher' && <TableCell>{getEntityName("teacher", schedule.teacherId)}</TableCell>}
                           <TableCell>{getEntityName("group", schedule.groupId)}</TableCell>
                         </TableRow>
                       ))}
