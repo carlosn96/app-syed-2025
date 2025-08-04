@@ -1,7 +1,8 @@
 
 "use client"
+
 import { useState, useMemo } from "react"
-import { Pencil, PlusCircle, Trash2, Search, ChevronDown, BookOpenCheck } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search, ChevronDown, BookOpenCheck, Filter } from "lucide-react"
 import Link from "next/link"
 
 import {
@@ -32,6 +33,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
+import { FilterPopover } from "@/components/ui/filter-popover"
 
 
 interface GroupedCareer {
@@ -47,14 +49,14 @@ export default function CareersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedModalities, setSelectedModalities] = useState<Record<string, number>>({});
-  const [selectedCampus, setSelectedCampus] = useState<string | null>(null);
+  const [selectedCampuses, setSelectedCampuses] = useState<string[]>([]);
 
   const groupedCareers = useMemo(() => {
     const groups: Record<string, GroupedCareer> = {};
     let careersToProcess = allCareers;
 
-    if (selectedCampus) {
-        careersToProcess = allCareers.filter(c => c.campus === selectedCampus);
+    if (selectedCampuses.length > 0) {
+        careersToProcess = allCareers.filter(c => selectedCampuses.includes(c.campus));
     }
     
     careersToProcess.forEach(career => {
@@ -69,7 +71,7 @@ export default function CareersPage() {
         groups[key].modalities.push(career);
     });
     return Object.values(groups);
-  }, [selectedCampus]);
+  }, [selectedCampuses]);
 
   const handleTabChange = (key: string, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [key]: value }))
@@ -89,6 +91,12 @@ export default function CareersPage() {
     group.modalities.some(m => m.modality.toLowerCase().includes(searchTerm.toLowerCase())) ||
     group.modalities.some(m => m.coordinator.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+  
+  const plantelOptions = useMemo(() => planteles.map(p => ({
+    value: p.name,
+    label: p.name
+  })), []);
+
 
   const renderSubjectTabs = (career: Career, uniqueKey: string) => {
     const filteredSubjects = subjects.filter(
@@ -312,23 +320,12 @@ export default function CareersPage() {
             />
         </div>
         <div className="flex gap-2 items-center">
-            <Button
-                variant={!selectedCampus ? 'default' : 'outline-filter'}
-                onClick={() => setSelectedCampus(null)}
-                size="sm"
-            >
-                Todos
-            </Button>
-            {planteles.map(plantel => (
-                <Button
-                    key={plantel.id}
-                    variant={selectedCampus === plantel.name ? 'default' : 'outline-filter'}
-                    onClick={() => setSelectedCampus(plantel.name)}
-                    size="sm"
-                >
-                    {plantel.name}
-                </Button>
-            ))}
+             <FilterPopover 
+                title="Filtrar por Plantel"
+                options={plantelOptions}
+                selectedValues={selectedCampuses}
+                onApply={setSelectedCampuses}
+            />
         </div>
       </div>
       
@@ -337,3 +334,5 @@ export default function CareersPage() {
     </div>
   )
 }
+
+    
