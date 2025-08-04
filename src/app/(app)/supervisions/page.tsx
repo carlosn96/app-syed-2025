@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef } from "react"
 import Link from 'next/link'
 import {
   Table,
@@ -29,7 +29,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CreateSupervisionForm } from "@/components/create-supervision-form"
-import { supervisions as allSupervisions, groups } from "@/lib/data"
+import { supervisions as allSupervisions, groups, Supervision } from "@/lib/data"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
@@ -37,12 +37,32 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
-import { Pencil, ClipboardEdit } from "lucide-react"
+import { Pencil } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { DayProps } from "react-day-picker"
 
 export default function SupervisionsPage() {
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [date, setDate] = useState<Date | undefined>(new Date())
+
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [selectedDaySupervisions, setSelectedDaySupervisions] = useState<Supervision[]>([]);
+  const dayRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+
+  const supervisionsByDate = useMemo(() => {
+    const map = new Map<string, Supervision[]>();
+    allSupervisions.forEach(s => {
+        const dateKey = format(s.date, "yyyy-MM-dd");
+        if (!map.has(dateKey)) {
+            map.set(dateKey, []);
+        }
+        map.get(dateKey)!.push(s);
+    });
+    return map;
+  }, []);
 
   const supervisions = useMemo(() => {
     if (user?.rol === 'coordinator') {
@@ -64,6 +84,57 @@ export default function SupervisionsPage() {
   const getGroupName = (groupId: number) => {
     return groups.find(g => g.id === groupId)?.name || "N/A";
   }
+
+  const handleDayClick = (day: Date, modifiers: any) => {
+    if (modifiers.scheduled) {
+        const dateKey = format(day, "yyyy-MM-dd");
+        const supervisionsForDay = supervisionsByDate.get(dateKey) || [];
+        setSelectedDay(day);
+        setSelectedDaySupervisions(supervisionsForDay);
+        setPopoverOpen(true);
+    } else {
+        setPopoverOpen(false);
+    }
+    setDate(day);
+  };
+
+  const DayWithPopover = (props: DayProps) => {
+    const dateKey = format(props.date, "yyyy-MM-dd");
+    const hasEvents = supervisionsByDate.has(dateKey);
+
+    return (
+        <Popover>
+            <PopoverTrigger asChild>
+                <button
+                    ref={el => (dayRefs.current[dateKey] = el)}
+                    className="relative w-full h-full flex items-center justify-center"
+                    onClick={() => hasEvents && handleDayClick(props.date, { scheduled: hasEvents })}
+                >
+                    {format(props.date, 'd')}
+                </button>
+            </PopoverTrigger>
+            {hasEvents && (
+                 <PopoverContent className="w-80 glass-card p-4">
+                    <div className="flex justify-between items-center mb-2">
+                        <h4 className="font-medium text-white">{format(props.date, "PPP", {locale: es})}</h4>
+                    </div>
+                    <ul className="space-y-3">
+                        {(supervisionsByDate.get(dateKey) || []).map(s => (
+                             <li key={s.id} className="flex items-start gap-3">
+                                <div>
+                                    <p className="font-semibold text-sm text-white">{s.teacher}</p>
+                                    <p className="text-xs text-muted-foreground">{s.subject}</p>
+                                    <p className="text-xs text-primary/80 font-mono">{s.startTime} - {s.endTime}</p>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </PopoverContent>
+            )}
+        </Popover>
+    );
+  };
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -92,15 +163,16 @@ export default function SupervisionsPage() {
 
        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-            <Card className="rounded-xl h-full">
+            <Card className="rounded-xl">
                  <CardContent className="p-0">
                     <Calendar
                         mode="single"
                         selected={date}
                         onSelect={setDate}
+                        onDayClick={handleDayClick}
                         className="w-full"
                         modifiers={{
-                            scheduled: supervisions.map(s => s.date)
+                            scheduled: Array.from(supervisionsByDate.keys()).map(d => new Date(d + 'T00:00:00'))
                         }}
                         modifiersClassNames={{
                             scheduled: 'bg-primary/20 text-primary-foreground rounded-full'
@@ -232,5 +304,3 @@ export default function SupervisionsPage() {
     </div>
   )
 }
-
-    
