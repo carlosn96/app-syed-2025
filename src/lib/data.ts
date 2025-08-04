@@ -1,6 +1,4 @@
 
-
-
 const academicData = {
     "Administración": {
       "Incorporada a la UdeG": {
@@ -955,4 +953,58 @@ export const schedules: Schedule[] = [
     { id: 16, teacherId: 11, subjectId: 22, groupId: 3, dayOfWeek: 'Viernes', startTime: '12:00', endTime: '14:00' },
 ];
 
+export interface SupervisionCriterion {
+  id: number;
+  text: string;
+}
+
+export interface SupervisionRubric {
+  id: number;
+  title: string;
+  criteria: SupervisionCriterion[];
+}
+
+export const supervisionRubrics: SupervisionRubric[] = [
+  {
+    id: 1,
+    title: "Planeación Didáctica",
+    criteria: [
+      { id: 101, text: "Presenta la planeación en tiempo y forma." },
+      { id: 102, text: "La planeación es congruente con el programa de estudios." },
+      { id: 103, text: "Incluye actividades de aprendizaje variadas." },
+      { id: 104, text: "Contempla recursos y materiales didácticos pertinentes." },
+      { id: 105, text: "Define instrumentos de evaluación claros y objetivos." },
+    ],
+  },
+  {
+    id: 2,
+    title: "Ambiente en el Aula",
+    criteria: [
+      { id: 201, text: "Fomenta un clima de respeto y confianza." },
+      { id: 202, text: "Promueve la participación activa de los estudiantes." },
+      { id: 203, text: "Mantiene el orden y la disciplina en el grupo." },
+      { id: 204, text: "Atiende las dudas e inquietudes de los alumnos." },
+    ],
+  },
+  {
+    id: 3,
+    title: "Dominio Disciplinar",
+    criteria: [
+      { id: 301, text: "Demuestra un conocimiento profundo de la materia." },
+      { id: 302, text: "Relaciona los contenidos con ejemplos prácticos y actuales." },
+      { id: 303, text: "Resuelve las preguntas de los estudiantes con precisión." },
+      { id: 304, text: "Utiliza la terminología técnica de forma correcta." },
+    ],
+  },
+  {
+    id: 4,
+    title: "Estrategias de Enseñanza-Aprendizaje",
+    criteria: [
+      { id: 401, text: "Utiliza diversas estrategias didácticas." },
+      { id: 402, text: "El material didáctico es de calidad y apoya el aprendizaje." },
+      { id: 403, text: "Emplea la tecnología como herramienta de enseñanza." },
+      { id: 404, text: "Las actividades promueven el pensamiento crítico." },
+    ],
+  },
+];
     

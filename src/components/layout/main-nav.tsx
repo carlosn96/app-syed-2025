@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Star,
   Users,
+  ClipboardCheck,
 } from "lucide-react"
 
 import {
@@ -29,6 +30,7 @@ const allLinks = [
   { href: "/groups", label: "Grupos", icon: Users, roles: ['administrator', 'coordinator'], exact: true },
   { href: "/schedules", label: "Horarios", icon: CalendarClock, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
   { href: "/supervision", label: "Agenda", icon: ShieldCheck, roles: ['administrator', 'coordinator'], exact: true },
+  { href: "/supervision-rubrics", label: "Rúbricas", icon: ClipboardCheck, roles: ['administrator'], exact: true },
   { href: "/feedback", label: "Retroalimentación", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
 ]
 
