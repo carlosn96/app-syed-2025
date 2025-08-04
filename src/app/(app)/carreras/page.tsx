@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { careers as allCareers, subjects, Career } from "@/lib/data"
+import { careers as allCareers, subjects, Career, planteles } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -47,10 +47,17 @@ export default function CareersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedModalities, setSelectedModalities] = useState<Record<string, number>>({});
+  const [selectedCampus, setSelectedCampus] = useState<string | null>(null);
 
   const groupedCareers = useMemo(() => {
     const groups: Record<string, GroupedCareer> = {};
-    allCareers.forEach(career => {
+    let careersToProcess = allCareers;
+
+    if (selectedCampus) {
+        careersToProcess = allCareers.filter(c => c.campus === selectedCampus);
+    }
+    
+    careersToProcess.forEach(career => {
         const key = `${career.name}-${career.campus}`;
         if (!groups[key]) {
             groups[key] = {
@@ -62,7 +69,7 @@ export default function CareersPage() {
         groups[key].modalities.push(career);
     });
     return Object.values(groups);
-  }, []);
+  }, [selectedCampus]);
 
   const handleTabChange = (key: string, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [key]: value }))
@@ -85,7 +92,7 @@ export default function CareersPage() {
 
   const renderSubjectTabs = (career: Career, uniqueKey: string) => {
     const filteredSubjects = subjects.filter(
-        (subject) => subject.career === career.name && subject.semester <= career.semesters
+        (subject) => subject.career === career.name && subject.modality === career.modality && subject.semester <= career.semesters
     )
     const semesters = Array.from(
         new Set(filteredSubjects.map((s) => s.semester))
@@ -147,7 +154,7 @@ export default function CareersPage() {
     const key = `${group.name}-${group.campus}`;
     const selectedModalityId = selectedModalities[key] || group.modalities[0].id;
     const selectedCareer = group.modalities.find(m => m.id === selectedModalityId)!;
-    const hasSubjects = subjects.some(s => s.career === selectedCareer.name && s.semester <= selectedCareer.semesters);
+    const hasSubjects = subjects.some(s => s.career === selectedCareer.name && s.modality === selectedCareer.modality && s.semester <= selectedCareer.semesters);
 
     const header = (
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left w-full">
@@ -293,16 +300,35 @@ export default function CareersPage() {
             </DialogContent>
         </Dialog>
       </div>
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-        <div className="relative w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+        <div className="relative w-full sm:w-auto flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
                 type="search"
                 placeholder="Buscar carreras..."
-                className="pl-9 w-full sm:w-full"
+                className="pl-9 w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
+        </div>
+        <div className="flex gap-2 items-center">
+            <Button
+                variant={!selectedCampus ? 'default' : 'outline-filter'}
+                onClick={() => setSelectedCampus(null)}
+                size="sm"
+            >
+                Todos
+            </Button>
+            {planteles.map(plantel => (
+                <Button
+                    key={plantel.id}
+                    variant={selectedCampus === plantel.name ? 'default' : 'outline-filter'}
+                    onClick={() => setSelectedCampus(plantel.name)}
+                    size="sm"
+                >
+                    {plantel.name}
+                </Button>
+            ))}
         </div>
       </div>
       
