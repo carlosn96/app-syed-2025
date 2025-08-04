@@ -34,6 +34,10 @@ const mockUsers: Record<string, { password: string; user: User }> = {
     password: 'coordinador',
     user: initialUsers.find(u => u.correo === 'coordinator@example.com')!
   },
+  'docente@example.com': {
+    password: 'docente',
+    user: initialUsers.find(u => u.correo === 'docente@example.com')!
+  }
 };
 
 // Populate mockUsers from the initialUsers data
