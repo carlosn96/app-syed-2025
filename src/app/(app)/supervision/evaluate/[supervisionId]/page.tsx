@@ -109,7 +109,7 @@ export default function EvaluateSupervisionPage() {
             const rubricData = data[`rubric_${rubric.id}`];
             if (rubricData) {
                 const criteriaKeys = Object.keys(rubricData.criteria);
-                totalCriteria += criteriaKeys.length;
+                totalCriteria += criteriaKeys.filter(key => rubricData.criteria[key] !== 'n/a').length;
                 metCriteria += criteriaKeys.filter(key => rubricData.criteria[key] === 'yes').length;
             }
         });
@@ -130,7 +130,7 @@ export default function EvaluateSupervisionPage() {
             description: `La evaluación para ${supervision.teacher} ha sido guardada con una calificación de ${score}%.`,
         });
 
-        router.push('/supervisions');
+        router.push('/supervisions-management');
     }
 
     const rubricErrors = errors[`rubric_${currentRubric.id}`] as any;
@@ -183,6 +183,10 @@ export default function EvaluateSupervisionPage() {
                                                             <div className="flex items-center space-x-2">
                                                                 <RadioGroupItem value="no" id={`${criterionKey}-no`} />
                                                                 <Label htmlFor={`${criterionKey}-no`}>No Cumple</Label>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <RadioGroupItem value="n/a" id={`${criterionKey}-na`} />
+                                                                <Label htmlFor={`${criterionKey}-na`}>N/A</Label>
                                                             </div>
                                                         </RadioGroup>
                                                     )}

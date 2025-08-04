@@ -55,6 +55,12 @@ export default function SupervisionsManagementPage() {
     return groups.find(g => g.id === groupId)?.name || "N/A";
   }
 
+  const getScoreColor = (score: number) => {
+    if (score < 60) return 'hsl(var(--destructive))';
+    if (score < 80) return 'hsl(var(--warning))';
+    return 'hsl(var(--success))'; 
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
@@ -82,12 +88,8 @@ export default function SupervisionsManagementPage() {
                                 <div className="flex gap-2">
                                   {supervision.status === 'Programada' && (
                                     <>
-                                        <Button size="icon" variant="warning">
-                                            <Pencil className="h-4 w-4" />
-                                            <span className="sr-only">Editar</span>
-                                        </Button>
                                         <Button asChild size="icon" variant="success">
-                                            <Link href={`/supervisions/evaluate/${supervision.id}`}>
+                                            <Link href={`/supervision/evaluate/${supervision.id}`}>
                                                 <ClipboardEdit className="h-4 w-4" />
                                                 <span className="sr-only">Evaluar</span>
                                             </Link>
@@ -109,7 +111,7 @@ export default function SupervisionsManagementPage() {
                                 {supervision.status}
                             </Badge>
                              {supervision.score !== undefined && (
-                                <p className="font-bold text-lg" style={{ color: supervisions.find(s => s.id === supervision.id)?.score && supervisions.find(s => s.id === supervision.id)!.score! < 60 ? 'hsl(var(--destructive))' : (supervisions.find(s => s.id === supervision.id)!.score! < 80 ? 'hsl(var(--warning))' : 'hsl(var(--success))') }}>
+                                <p className="font-bold text-lg" style={{ color: getScoreColor(supervision.score) }}>
                                     {supervision.score}%
                                 </p>
                             )}
@@ -149,7 +151,7 @@ export default function SupervisionsManagementPage() {
                                     </TableCell>
                                     <TableCell className="py-3 font-bold">
                                         {supervision.score !== undefined ? (
-                                            <span style={{ color: supervision.score < 60 ? 'hsl(var(--destructive))' : (supervision.score < 80 ? 'hsl(var(--warning))' : 'hsl(var(--success))') }}>
+                                            <span style={{ color: getScoreColor(supervision.score) }}>
                                                 {supervision.score}%
                                             </span>
                                         ) : 'N/A'}
@@ -159,7 +161,7 @@ export default function SupervisionsManagementPage() {
                                         {supervision.status === 'Programada' && (
                                             <div className="flex gap-2">
                                                  <Button asChild size="icon" variant="success">
-                                                    <Link href={`/supervisions/evaluate/${supervision.id}`}>
+                                                    <Link href={`/supervision/evaluate/${supervision.id}`}>
                                                         <ClipboardEdit className="h-4 w-4" />
                                                         <span className="sr-only">Evaluar</span>
                                                     </Link>
