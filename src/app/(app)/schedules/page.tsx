@@ -35,13 +35,16 @@ const daysOfWeek = [
   "Viernes",
 ]
 
-const uniqueCareerNames = [...new Set(allCareers.map(c => c.name))];
-
 export default function SchedulesPage() {
   const { user } = useAuth()
-  const [filterType, setFilterType] = useState("teacher")
+  const [filterType, setFilterType] = useState("group")
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null)
+
   const [availableGroups, setAvailableGroups] = useState<Group[]>(allGroups);
+  const [availableCareers, setAvailableCareers] = useState<string[]>([]);
+  
+  const uniqueCareerNames = useMemo(() => [...new Set(allCareers.map(c => c.name))], []);
+
 
   useEffect(() => {
     if (user?.rol === 'teacher') {
@@ -50,10 +53,15 @@ export default function SchedulesPage() {
         const groupIds = [...new Set(teacherSchedules.map(s => s.groupId))];
         const teacherGroups = allGroups.filter(g => groupIds.includes(g.id));
         setAvailableGroups(teacherGroups);
+        
+        const teacherCareerNames = [...new Set(teacherGroups.map(g => g.career))];
+        setAvailableCareers(teacherCareerNames);
+
     } else {
         setAvailableGroups(allGroups);
+        setAvailableCareers(uniqueCareerNames);
     }
-  }, [user]);
+  }, [user, uniqueCareerNames]);
 
 
   const getSchedulesForDay = (day: string) => {
@@ -131,7 +139,7 @@ export default function SchedulesPage() {
                         <SelectValue placeholder="Seleccionar carrera" />
                     </SelectTrigger>
                     <SelectContent>
-                        {uniqueCareerNames.map(careerName => (
+                        {availableCareers.map(careerName => (
                             <SelectItem key={careerName} value={careerName}>{careerName}</SelectItem>
                         ))}
                     </SelectContent>
@@ -149,7 +157,17 @@ export default function SchedulesPage() {
           Horarios de Clases
         </h1>
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
-            {user?.rol !== 'teacher' && (
+            {user?.rol === 'teacher' ? (
+                 <Select value={filterType} onValueChange={(value) => { setFilterType(value); setSelectedFilter(null); }}>
+                    <SelectTrigger className="w-full md:w-[150px]">
+                        <SelectValue placeholder="Filtrar por..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="group">Grupo</SelectItem>
+                        <SelectItem value="career">Carrera</SelectItem>
+                    </SelectContent>
+                </Select>
+            ) : (
               <Select value={filterType} onValueChange={(value) => { setFilterType(value); setSelectedFilter(null); }}>
                   <SelectTrigger className="w-full md:w-[150px]">
                       <SelectValue placeholder="Filtrar por..." />
