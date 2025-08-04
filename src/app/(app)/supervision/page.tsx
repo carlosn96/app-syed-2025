@@ -2,6 +2,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import Link from 'next/link'
 import {
   Table,
   TableBody,
@@ -36,7 +37,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
-import { Pencil } from "lucide-react"
+import { Pencil, ClipboardEdit } from "lucide-react"
 
 export default function SupervisionPage() {
   const { user } = useAuth();
@@ -157,11 +158,23 @@ export default function SupervisionPage() {
                                 <CardTitle className="text-base">{supervision.teacher}</CardTitle>
                                 <CardDescription>{supervision.subject}</CardDescription>
                             </div>
-                            {user?.rol === 'coordinator' && supervision.status === 'Programada' && (
-                                <Button size="icon" variant="warning">
-                                    <Pencil className="h-4 w-4" />
-                                    <span className="sr-only">Editar</span>
-                                </Button>
+                            {user?.rol === 'coordinator' && (
+                                <div className="flex gap-2">
+                                  {supervision.status === 'Programada' && (
+                                    <>
+                                        <Button size="icon" variant="warning">
+                                            <Pencil className="h-4 w-4" />
+                                            <span className="sr-only">Editar</span>
+                                        </Button>
+                                        <Button asChild size="icon" variant="success">
+                                            <Link href={`/supervision/evaluate/${supervision.id}`}>
+                                                <ClipboardEdit className="h-4 w-4" />
+                                                <span className="sr-only">Evaluar</span>
+                                            </Link>
+                                        </Button>
+                                    </>
+                                  )}
+                                </div>
                             )}
                         </CardHeader>
                         <CardContent className="text-sm space-y-2">
@@ -211,10 +224,18 @@ export default function SupervisionPage() {
                                     {user?.rol === 'coordinator' && (
                                       <TableCell className="py-2">
                                         {supervision.status === 'Programada' && (
-                                          <Button size="icon" variant="warning">
-                                            <Pencil className="h-4 w-4" />
-                                            <span className="sr-only">Editar</span>
-                                          </Button>
+                                            <div className="flex gap-2">
+                                                <Button size="icon" variant="warning">
+                                                    <Pencil className="h-4 w-4" />
+                                                    <span className="sr-only">Editar</span>
+                                                </Button>
+                                                 <Button asChild size="icon" variant="success">
+                                                    <Link href={`/supervision/evaluate/${supervision.id}`}>
+                                                        <ClipboardEdit className="h-4 w-4" />
+                                                        <span className="sr-only">Evaluar</span>
+                                                    </Link>
+                                                </Button>
+                                            </div>
                                         )}
                                       </TableCell>
                                     )}
