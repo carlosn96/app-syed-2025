@@ -961,49 +961,78 @@ export interface SupervisionCriterion {
 export interface SupervisionRubric {
   id: number;
   title: string;
+  type: 'Contable' | 'No Contable';
   criteria: SupervisionCriterion[];
 }
 
 export const supervisionRubrics: SupervisionRubric[] = [
   {
     id: 1,
-    title: "Planeación Didáctica",
+    title: "Inicio de Clase",
+    type: "Contable",
     criteria: [
-      { id: 101, text: "Presenta la planeación en tiempo y forma." },
-      { id: 102, text: "La planeación es congruente con el programa de estudios." },
-      { id: 103, text: "Incluye actividades de aprendizaje variadas." },
-      { id: 104, text: "Contempla recursos y materiales didácticos pertinentes." },
-      { id: 105, text: "Define instrumentos de evaluación claros y objetivos." },
+      { id: 101, text: "Puntualidad y presentación." },
+      { id: 102, text: "Introducción clara de los objetivos de la sesión." },
+      { id: 103, text: "Actividad de inicio para enganchar a los alumnos." },
     ],
   },
   {
     id: 2,
-    title: "Ambiente en el Aula",
+    title: "Desarrollo de clase",
+    type: "Contable",
     criteria: [
-      { id: 201, text: "Fomenta un clima de respeto y confianza." },
-      { id: 202, text: "Promueve la participación activa de los estudiantes." },
-      { id: 203, text: "Mantiene el orden y la disciplina en el grupo." },
-      { id: 204, text: "Atiende las dudas e inquietudes de los alumnos." },
+      { id: 201, text: "Claridad en la exposición de los temas." },
+      { id: 202, text: "Uso adecuado de materiales y recursos didácticos." },
+      { id: 203, text: "Fomento de la participación estudiantil." },
+      { id: 204, text: "Gestión efectiva del tiempo." },
     ],
   },
   {
     id: 3,
-    title: "Dominio Disciplinar",
+    title: "Cierre de clase",
+    type: "Contable",
     criteria: [
-      { id: 301, text: "Demuestra un conocimiento profundo de la materia." },
-      { id: 302, text: "Relaciona los contenidos con ejemplos prácticos y actuales." },
-      { id: 303, text: "Resuelve las preguntas de los estudiantes con precisión." },
-      { id: 304, text: "Utiliza la terminología técnica de forma correcta." },
+      { id: 301, text: "Síntesis de los puntos clave de la sesión." },
+      { id: 302, text: "Resolución de dudas finales." },
+      { id: 303, text: "Asignación y explicación de tareas o siguientes pasos." },
     ],
   },
   {
     id: 4,
-    title: "Estrategias de Enseñanza-Aprendizaje",
+    title: "Desempeño general",
+    type: "Contable",
     criteria: [
-      { id: 401, text: "Utiliza diversas estrategias didácticas." },
-      { id: 402, text: "El material didáctico es de calidad y apoya el aprendizaje." },
-      { id: 403, text: "Emplea la tecnología como herramienta de enseñanza." },
-      { id: 404, text: "Las actividades promueven el pensamiento crítico." },
+      { id: 401, text: "Dominio del contenido." },
+      { id: 402, text: "Clima de respeto y confianza en el aula." },
+      { id: 403, text: "Capacidad para motivar a los estudiantes." },
+    ],
+  },
+  {
+    id: 5,
+    title: "Método de enseñanza",
+    type: "No Contable",
+    criteria: [
+      { id: 501, text: "Variedad en las estrategias de enseñanza utilizadas." },
+      { id: 502, text: "Adecuación de los métodos al grupo." },
+    ],
+  },
+  {
+    id: 6,
+    title: "Tipo de aprendizaje",
+    type: "No Contable",
+    criteria: [
+      { id: 601, text: "Fomento del aprendizaje autónomo." },
+      { id: 602, text: "Promoción del trabajo colaborativo." },
+      { id: 603, text: "Estímulo del pensamiento crítico y reflexivo." },
+    ],
+  },
+  {
+    id: 7,
+    title: "Modo de manejo",
+    type: "No Contable",
+    criteria: [
+      { id: 701, text: "Manejo de la disciplina y resolución de conflictos." },
+      { id: 702, text: "Adaptabilidad y flexibilidad ante imprevistos." },
     ],
   },
 ];
