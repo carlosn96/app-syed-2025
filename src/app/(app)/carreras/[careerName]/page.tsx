@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Book, Pencil, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { CreateStudyPlanForm } from "@/components/create-study-plan-form"
+import { useAuth } from "@/context/auth-context"
 
 
 export default function CareerPlansPage() {
@@ -24,6 +25,7 @@ export default function CareerPlansPage() {
   const careerName = decodeURIComponent(params.careerName as string);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [_, setForceRender] = useState(0);
+  const { user } = useAuth();
 
   const [activeTabs, setActiveTabs] = useState<Record<string, string>>({});
 
@@ -121,25 +123,27 @@ export default function CareerPlansPage() {
               Modalidades disponibles para esta carrera.
           </p>
         </div>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger asChild>
-                <Button>Crear Plan de Estudio</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Crear Nuevo Plan de Estudio</DialogTitle>
-                    <DialogDescription>
-                        Completa el formulario para registrar una nueva modalidad para {careerName}.
-                    </DialogDescription>
-                </DialogHeader>
-                 <CreateStudyPlanForm 
-                    onSuccess={handleSuccess} 
-                    careerName={careerName}
-                    campus={firstModality?.campus}
-                    coordinator={firstModality?.coordinator}
-                />
-            </DialogContent>
-        </Dialog>
+        {user?.rol === 'administrator' && (
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogTrigger asChild>
+                    <Button>Crear Plan de Estudio</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Crear Nuevo Plan de Estudio</DialogTitle>
+                        <DialogDescription>
+                            Completa el formulario para registrar una nueva modalidad para {careerName}.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <CreateStudyPlanForm 
+                        onSuccess={handleSuccess} 
+                        careerName={careerName}
+                        campus={firstModality?.campus}
+                        coordinator={firstModality?.coordinator}
+                    />
+                </DialogContent>
+            </Dialog>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
@@ -182,7 +186,7 @@ export default function CareerPlansPage() {
                 <h3 className="text-lg font-semibold text-white">No hay planes de estudio</h3>
                 <p className="text-muted-foreground mt-2">
                     Aún no se han creado planes de estudio para esta carrera. <br/>
-                    Usa el botón "Crear Plan de Estudio" para empezar.
+                    {user?.rol === 'administrator' && `Usa el botón "Crear Plan de Estudio" para empezar.`}
                 </p>
             </div>
         )}

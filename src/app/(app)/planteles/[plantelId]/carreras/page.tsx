@@ -96,7 +96,7 @@ export default function PlantelCarrerasPage() {
 
   const renderSubjectTabs = (career: Career, uniqueKey: string) => {
     const filteredSubjects = subjects.filter(
-        (subject) => subject.career === career.name && subject.semester <= career.semesters
+        (subject) => subject.career === career.name && subject.modality === career.modality && subject.semester <= career.semesters
     )
     const semesters = Array.from(
         new Set(filteredSubjects.map((s) => s.semester))
@@ -158,7 +158,7 @@ export default function PlantelCarrerasPage() {
     const key = `${group.name}-${group.campus}`;
     const selectedModalityId = selectedModalities[key] || group.modalities[0].id;
     const selectedCareer = group.modalities.find(m => m.id === selectedModalityId)!;
-    const hasSubjects = subjects.some(s => s.career === selectedCareer.name && s.semester <= selectedCareer.semesters);
+    const hasSubjects = subjects.some(s => s.career === selectedCareer.name && s.modality === selectedCareer.modality && s.semester <= selectedCareer.semesters);
 
     const header = (
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left w-full">
@@ -285,20 +285,22 @@ export default function PlantelCarrerasPage() {
             </h1>
             <p className="text-muted-foreground">{plantel.name}</p>
         </div>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger asChild>
-                <FloatingButton text="Crear Carrera" />
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Crear Nueva Carrera</DialogTitle>
-                    <DialogDescription>
-                        Completa el formulario para registrar una nueva carrera.
-                    </DialogDescription>
-                </DialogHeader>
-                <CreateCareerForm onSuccess={() => setIsModalOpen(false)} />
-            </DialogContent>
-        </Dialog>
+        {user?.rol === 'administrator' && (
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogTrigger asChild>
+                    <FloatingButton text="Crear Carrera" />
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Crear Nueva Carrera</DialogTitle>
+                        <DialogDescription>
+                            Completa el formulario para registrar una nueva carrera.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <CreateCareerForm onSuccess={() => setIsModalOpen(false)} />
+                </DialogContent>
+            </Dialog>
+        )}
       </div>
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
         <div className="relative w-full sm:w-auto">

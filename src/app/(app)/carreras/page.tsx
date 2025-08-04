@@ -317,20 +317,22 @@ export default function CareersPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Carreras
         </h1>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger asChild>
-                <FloatingButton text="Crear Carrera" />
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Crear Nueva Carrera</DialogTitle>
-                    <DialogDescription>
-                        Completa el formulario para registrar una nueva carrera.
-                    </DialogDescription>
-                </DialogHeader>
-                <CreateCareerForm onSuccess={() => setIsModalOpen(false)} />
-            </DialogContent>
-        </Dialog>
+        {user?.rol === 'administrator' && (
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogTrigger asChild>
+                    <FloatingButton text="Crear Carrera" />
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Crear Nueva Carrera</DialogTitle>
+                        <DialogDescription>
+                            Completa el formulario para registrar una nueva carrera.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <CreateCareerForm onSuccess={() => setIsModalOpen(false)} />
+                </DialogContent>
+            </Dialog>
+        )}
       </div>
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
         <div className="relative w-full sm:w-auto flex-grow">
