@@ -318,7 +318,7 @@ export default function EvaluateSupervisionPage() {
                                       <TabsList>
                                           {rubricsByType[evaluationType].map((rubric) => (
                                               <TabsTrigger key={rubric.id} value={`rubric_${rubric.id}`}>
-                                                  {`Paso ${rubric.id}: ${rubric.title}`}
+                                                  {rubric.title}
                                               </TabsTrigger>
                                           ))}
                                       </TabsList>
