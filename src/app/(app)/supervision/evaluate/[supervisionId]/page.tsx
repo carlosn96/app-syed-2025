@@ -100,10 +100,10 @@ export default function EvaluateSupervisionPage() {
 
     const handleEvaluationTypeChange = (type: 'Contable' | 'No Contable' | 'Avance') => {
         setEvaluationType(type);
-        if (type === 'Contable') {
-            setActiveTab(`rubric_${(rubricsByType['Contable'][0] || {id: ''}).id}`);
-        } else if (type === 'No Contable') {
-             setActiveTab(`rubric_${(rubricsByType['No Contable'][0] || {id: ''}).id}`);
+        if (type === 'Contable' && rubricsByType['Contable'].length > 0) {
+            setActiveTab(`rubric_${rubricsByType['Contable'][0].id}`);
+        } else if (type === 'No Contable' && rubricsByType['No Contable'].length > 0) {
+             setActiveTab(`rubric_${rubricsByType['No Contable'][0].id}`);
         }
     };
 
@@ -332,7 +332,7 @@ export default function EvaluateSupervisionPage() {
                         </CardDescription>
                     </CardHeader>
                     
-                    <div className="px-6 pb-4">
+                    <CardContent className="p-6 pt-0">
                         <Tabs defaultValue={evaluationType} onValueChange={(val) => handleEvaluationTypeChange(val as any)} className="w-full">
                             <TabsList className="grid w-full grid-cols-3">
                                 <TabsTrigger value="Contable">Contables</TabsTrigger>
@@ -340,18 +340,14 @@ export default function EvaluateSupervisionPage() {
                                 <TabsTrigger value="Avance">Calificación y Avance</TabsTrigger>
                             </TabsList>
 
-                            <TabsContent value="Contable">
-                                <div className="mt-8">
-                                    {renderRubricCategory(rubricsByType['Contable'])}
-                                </div>
+                            <TabsContent value="Contable" className="mt-8">
+                                {renderRubricCategory(rubricsByType['Contable'])}
                             </TabsContent>
-                            <TabsContent value="No Contable">
-                                 <div className="mt-8">
-                                    {renderRubricCategory(rubricsByType['No Contable'])}
-                                </div>
+                            <TabsContent value="No Contable" className="mt-8">
+                                {renderRubricCategory(rubricsByType['No Contable'])}
                             </TabsContent>
-                            <TabsContent value="Avance">
-                                <CardContent className="space-y-8 pt-8">
+                            <TabsContent value="Avance" className="mt-8">
+                                <CardContent className="space-y-8 pt-0">
                                     <div className="p-6 bg-black/20 rounded-lg">
                                         <h3 className="text-xl font-headline font-semibold text-white mb-4">Resumen de Calificación</h3>
                                         <div className="space-y-4">
@@ -386,40 +382,32 @@ export default function EvaluateSupervisionPage() {
                                             )}
                                         />
                                     </div>
+                                     <Separator className='my-6' />
+                                    <div className="flex justify-end items-center">
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button type="button">Finalizar Supervisión</Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                <AlertDialogTitle>¿Confirmar finalización?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Una vez guardada, la calificación se calculará y el estado de la supervisión cambiará a "Completada". ¿Deseas continuar?
+                                                </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                <AlertDialogAction onClick={handleSubmit(onSubmit)}>Confirmar y Guardar</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
                                 </CardContent>
                             </TabsContent>
                         </Tabs>
-                    </div>
-                    
-                    <CardContent>
-                        <Separator className='my-6' />
-                        <div className="flex justify-end items-center">
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button type="button">Finalizar Supervisión</Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                    <AlertDialogTitle>¿Confirmar finalización?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        Una vez guardada, la calificación se calculará y el estado de la supervisión cambiará a "Completada". ¿Deseas continuar?
-                                    </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleSubmit(onSubmit)}>Confirmar y Guardar</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        </div>
                     </CardContent>
                 </Card>
             </form>
         </div>
     )
 }
-
-    
-
-    
-
