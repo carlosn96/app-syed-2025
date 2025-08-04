@@ -37,7 +37,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
-import { Pencil } from "lucide-react"
+import { Pencil, ClipboardEdit } from "lucide-react"
 
 export default function SupervisionsPage() {
   const { user } = useAuth();
@@ -91,7 +91,7 @@ export default function SupervisionsPage() {
       </div>
 
        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-2">
             <Card className="rounded-xl h-full">
                  <CardContent className="p-0">
                     <Calendar
@@ -109,7 +109,7 @@ export default function SupervisionsPage() {
                 </CardContent>
             </Card>
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-1">
              <Card className="rounded-xl h-full">
                 <CardHeader>
                     <CardTitle>Próximas Agendas</CardTitle>
@@ -232,3 +232,5 @@ export default function SupervisionsPage() {
     </div>
   )
 }
+
+    
