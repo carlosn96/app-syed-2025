@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
 
 type EvaluationFormValues = {
   [key: string]: {
@@ -84,18 +85,20 @@ export default function EvaluateSupervisionPage() {
 
     const validationSchema = useMemo(() => createValidationSchema(supervisionRubrics), []);
 
-    const [evaluationType, setEvaluationType] = useState<'Contable' | 'No Contable'>('Contable');
+    const [evaluationType, setEvaluationType] = useState<'Contable' | 'No Contable' | 'Avance'>('Contable');
     
     const rubricsByType = useMemo(() => ({
         'Contable': supervisionRubrics.filter(r => r.category === 'Contable'),
         'No Contable': supervisionRubrics.filter(r => r.category === 'No Contable')
     }), []);
 
-    const [activeTab, setActiveTab] = useState(`rubric_${rubricsByType[evaluationType][0].id}`);
+    const [activeTab, setActiveTab] = useState(`rubric_${rubricsByType['Contable'][0].id}`);
 
-    const handleEvaluationTypeChange = (type: 'Contable' | 'No Contable') => {
+    const handleEvaluationTypeChange = (type: 'Contable' | 'No Contable' | 'Avance') => {
         setEvaluationType(type);
-        setActiveTab(`rubric_${rubricsByType[type][0].id}`);
+        if (type !== 'Avance') {
+          setActiveTab(`rubric_${rubricsByType[type][0].id}`);
+        }
     };
     
 
@@ -121,40 +124,53 @@ export default function EvaluateSupervisionPage() {
     });
     
     const { control, handleSubmit, watch } = form;
+    const watchedForm = watch();
+
+    const calculatedScores = useMemo(() => {
+        const scores: { [key: string]: { score: number, title: string } } = {};
+        let totalAverage = 0;
+        let countableRubricsCount = 0;
+
+        rubricsByType['Contable'].forEach(rubric => {
+            const rubricKey = `rubric_${rubric.id}`;
+            const rubricData = watchedForm[rubricKey];
+            let totalCriteria = 0;
+            let metCriteria = 0;
+
+            if (rubricData?.criteria) {
+                const criteriaKeys = Object.keys(rubricData.criteria);
+                totalCriteria = criteriaKeys.filter(key => rubricData.criteria![key] !== undefined).length;
+                metCriteria = criteriaKeys.filter(key => rubricData.criteria![key] === 'yes').length;
+            }
+            
+            const score = totalCriteria > 0 ? Math.round((metCriteria / rubric.criteria.length) * 100) : 0;
+            scores[rubricKey] = { score, title: rubric.title };
+            totalAverage += score;
+            countableRubricsCount++;
+        });
+
+        const finalScore = countableRubricsCount > 0 ? Math.round(totalAverage / countableRubricsCount) : 0;
+        
+        return { individual: scores, final: finalScore };
+    }, [watchedForm, rubricsByType]);
 
     if (!supervision) {
         return <div>Supervisión no encontrada.</div>
     }
 
     const onSubmit = (data: EvaluationFormValues) => {
-        let totalCriteria = 0;
-        let metCriteria = 0;
-
-        supervisionRubrics.forEach(rubric => {
-            if (rubric.category === 'Contable' && rubric.type === 'radio') {
-                const rubricData = data[`rubric_${rubric.id}`];
-                if (rubricData && rubricData.criteria) {
-                    const criteriaKeys = Object.keys(rubricData.criteria);
-                    totalCriteria += criteriaKeys.filter(key => rubricData.criteria![key] !== undefined).length;
-                    metCriteria += criteriaKeys.filter(key => rubricData.criteria![key] === 'yes').length;
-                }
-            }
-        });
-
-        const score = totalCriteria > 0 ? Math.round((metCriteria / totalCriteria) * 100) : 0;
-        
         // Update supervision in mock data
         const supervisionIndex = supervisions.findIndex(s => s.id === supervisionId);
         if(supervisionIndex !== -1) {
             supervisions[supervisionIndex].status = 'Completada';
-            supervisions[supervisionIndex].score = score;
+            supervisions[supervisionIndex].score = calculatedScores.final;
         }
 
-        console.log("Evaluación completada. Datos:", data, "Calificación:", score);
+        console.log("Evaluación completada. Datos:", data, "Calificación:", calculatedScores.final);
         
         toast({
             title: "Supervisión Completada",
-            description: `La evaluación para ${supervision.teacher} ha sido guardada con una calificación de ${score}%.`,
+            description: `La evaluación para ${supervision.teacher} ha sido guardada con una calificación de ${calculatedScores.final}%.`,
         });
 
         router.push('/supervisions-management');
@@ -286,39 +302,64 @@ export default function EvaluateSupervisionPage() {
                     
                      <div className="px-6 pb-4">
                         <Tabs defaultValue={evaluationType} onValueChange={(val) => handleEvaluationTypeChange(val as any)} className="w-full">
-                            <TabsList className="grid w-full grid-cols-2">
+                            <TabsList className="grid w-full grid-cols-3">
                                 <TabsTrigger value="Contable">Rubros Contables</TabsTrigger>
                                 <TabsTrigger value="No Contable">Rubros No Contables</TabsTrigger>
+                                <TabsTrigger value="Avance">Calificación y Avance</TabsTrigger>
                             </TabsList>
                         </Tabs>
                     </div>
 
-                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                         <CardContent>
-                            <div className='mb-4'>
-                                <ScrollArea className="w-full whitespace-nowrap">
-                                    <TabsList>
-                                        {rubricsByType[evaluationType].map((rubric, index) => (
-                                            <TabsTrigger key={rubric.id} value={`rubric_${rubric.id}`}>
-                                                {`Paso ${rubric.id}: ${rubric.title}`}
-                                            </TabsTrigger>
-                                        ))}
-                                    </TabsList>
-                                    <ScrollBar orientation="horizontal" />
-                                </ScrollArea>
+                    {evaluationType !== 'Avance' ? (
+                      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                          <CardContent>
+                              <div className='mb-4'>
+                                  <ScrollArea className="w-full whitespace-nowrap">
+                                      <TabsList>
+                                          {rubricsByType[evaluationType].map((rubric) => (
+                                              <TabsTrigger key={rubric.id} value={`rubric_${rubric.id}`}>
+                                                  {`Paso ${rubric.id}: ${rubric.title}`}
+                                              </TabsTrigger>
+                                          ))}
+                                      </TabsList>
+                                      <ScrollBar orientation="horizontal" />
+                                  </ScrollArea>
+                              </div>
+                          </CardContent>
+
+                          {supervisionRubrics.map(rubric => (
+                            <TabsContent key={rubric.id} value={`rubric_${rubric.id}`} className="mt-0">
+                                  <CardContent className="space-y-8">
+                                      <div>
+                                          {renderRubricContent(rubric)}
+                                      </div>
+                                  </CardContent>
+                            </TabsContent>
+                          ))}
+                      </Tabs>
+                    ) : (
+                       <CardContent className="space-y-8">
+                            <div className="p-6 bg-black/20 rounded-lg">
+                                <h3 className="text-xl font-headline font-semibold text-white mb-4">Resumen de Calificación</h3>
+                                <div className="space-y-4">
+                                    {Object.entries(calculatedScores.individual).map(([key, value]) => (
+                                        <div key={key}>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-sm font-medium">{value.title}</span>
+                                                <span className="text-sm font-semibold">{value.score}%</span>
+                                            </div>
+                                            <Progress value={value.score} />
+                                        </div>
+                                    ))}
+                                    <Separator className="my-4"/>
+                                    <div className="flex justify-between items-center text-lg font-bold">
+                                        <span>Calificación Final Promedio</span>
+                                        <span>{calculatedScores.final}%</span>
+                                    </div>
+                                </div>
                             </div>
                         </CardContent>
-
-                        {supervisionRubrics.map(rubric => (
-                           <TabsContent key={rubric.id} value={`rubric_${rubric.id}`} className="mt-0">
-                                <CardContent className="space-y-8">
-                                    <div>
-                                        {renderRubricContent(rubric)}
-                                    </div>
-                                </CardContent>
-                           </TabsContent>
-                        ))}
-                    </Tabs>
+                    )}
                     
                     <CardContent>
                         <Separator className='my-6' />
