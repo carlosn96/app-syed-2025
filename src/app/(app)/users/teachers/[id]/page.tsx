@@ -269,19 +269,6 @@ export default function TeacherProfilePage() {
                 </CardContent>
             </Card>
             </div>
-             <div className="lg:col-span-3">
-              <Card className="rounded-xl">
-                <CardHeader>
-                  <CardTitle>Palpa</CardTitle>
-                  <CardDescription>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-center h-40 border-2 border-dashed border-muted rounded-xl">
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
         </div>
       )}
 
