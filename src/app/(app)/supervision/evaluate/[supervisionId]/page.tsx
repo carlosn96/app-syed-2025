@@ -30,7 +30,7 @@ import { Progress } from '@/components/ui/progress'
 
 type EvaluationFormValues = {
   [key: string]: {
-    criteria?: { [key: string]: "yes" | "no" },
+    criteria?: { [key: string]: boolean },
     checkboxes?: { [key: string]: boolean },
     other?: string,
     observations?: string,
@@ -42,23 +42,19 @@ const createValidationSchema = (rubrics: SupervisionRubric[]) => {
   const schemaObject: Record<string, z.ZodType<any, any>> = rubrics.reduce((acc, rubric) => {
     let rubricSchema: any = {};
 
-    if (rubric.type === 'radio') {
-      const criteriaSchema = rubric.criteria.reduce((critAcc, crit) => {
-        critAcc[crit.id] = z.enum(["yes", "no"]).optional();
-        return critAcc;
-      }, {} as Record<string, z.ZodType<any, any>>);
-      rubricSchema.criteria = z.object(criteriaSchema);
-    }
-
     if (rubric.type === 'checkbox') {
-        const checkboxSchema = rubric.criteria.reduce((critAcc, crit) => {
+        const criteriaSchema = rubric.criteria.reduce((critAcc, crit) => {
             critAcc[crit.id] = z.boolean().optional();
             return critAcc;
         }, {} as Record<string, z.ZodType<any, any>>);
-        rubricSchema.checkboxes = z.object(checkboxSchema);
-        
-        if (rubric.criteria.some(c => c.id.endsWith('_other'))) {
-            rubricSchema.other = z.string().optional();
+
+        if (rubric.category === 'Contable') {
+            rubricSchema.criteria = z.object(criteriaSchema);
+        } else {
+            rubricSchema.checkboxes = z.object(criteriaSchema);
+            if (rubric.criteria.some(c => c.id.endsWith('_other'))) {
+                rubricSchema.other = z.string().optional();
+            }
         }
     }
     
@@ -112,10 +108,9 @@ export default function EvaluateSupervisionPage() {
         defaultValues: {
             ...supervisionRubrics.reduce((acc, rubric) => {
                 const defaultRubric: any = {};
-                if (rubric.type === 'radio') {
-                    defaultRubric.criteria = rubric.criteria.reduce((cAcc, c) => ({ ...cAcc, [c.id]: undefined }), {});
-                }
-                if (rubric.type === 'checkbox') {
+                if (rubric.category === 'Contable') {
+                    defaultRubric.criteria = rubric.criteria.reduce((cAcc, c) => ({ ...cAcc, [c.id]: false }), {});
+                } else if (rubric.type === 'checkbox') {
                     defaultRubric.checkboxes = rubric.criteria.reduce((cAcc, c) => ({ ...cAcc, [c.id]: false }), {});
                     if (rubric.criteria.some(c => c.id.endsWith('_other'))) {
                       defaultRubric.other = '';
@@ -147,7 +142,7 @@ export default function EvaluateSupervisionPage() {
 
             if (rubricData?.criteria) {
                 totalCriteria = rubric.criteria.length;
-                metCriteria = Object.values(rubricData.criteria).filter(val => val === 'yes').length;
+                metCriteria = Object.values(rubricData.criteria).filter(val => val === true).length;
             }
             
             const score = totalCriteria > 0 ? Math.round((metCriteria / totalCriteria) * 100) : 0;
@@ -187,90 +182,93 @@ export default function EvaluateSupervisionPage() {
         const rubricKey = `rubric_${rubric.id}`;
 
         switch (rubric.type) {
-            case 'radio':
-                return (
-                    <div className="space-y-6">
-                        {rubric.criteria.map((criterion, index) => {
-                            const criterionKey = `${rubricKey}.criteria.${criterion.id}`;
-                            return (
-                                <div key={criterion.id}>
-                                    {index > 0 && <Separator className="mb-6" />}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-                                        <Label className="md:col-span-2 pt-1 font-normal text-base">{index + 1}. {criterion.text}</Label>
-                                        <Controller
-                                            name={criterionKey as any}
-                                            control={control}
-                                            render={({ field }) => (
-                                                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex gap-4 items-center">
-                                                    <div className="flex items-center space-x-2"><RadioGroupItem value="yes" id={`${criterionKey}-yes`} /><Label htmlFor={`${criterionKey}-yes`}>Cumple</Label></div>
-                                                    <div className="flex items-center space-x-2"><RadioGroupItem value="no" id={`${criterionKey}-no`} /><Label htmlFor={`${criterionKey}-no`}>No Cumple</Label></div>
-                                                </RadioGroup>
-                                            )}
-                                        />
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                );
             case 'checkbox':
-                 const isOtherChecked = watch(`${rubricKey}.checkboxes.${rubric.id}_other` as any);
-                return (
-                    <div className="space-y-4 columns-1 md:columns-2 lg:columns-3">
-                        {rubric.criteria.map((criterion) => {
-                           const isOtherField = criterion.id.endsWith('_other');
-                           const checkboxKey = `${rubricKey}.checkboxes.${criterion.id}`;
-                           const otherInputKey = `${rubricKey}.other`;
-
-                           if (isOtherField) {
+                 if (rubric.category === 'Contable') {
+                    return (
+                        <div className="space-y-6">
+                            {rubric.criteria.map((criterion, index) => {
+                                const criterionKey = `${rubricKey}.criteria.${criterion.id}`;
                                 return (
-                                    <div key={criterion.id} className="space-y-4 mt-4 break-inside-avoid">
-                                         <div className="flex items-center space-x-2">
+                                    <div key={criterion.id}>
+                                        {index > 0 && <Separator className="mb-6" />}
+                                        <div className="flex items-center space-x-4">
                                             <Controller
-                                                name={checkboxKey as any}
+                                                name={criterionKey as any}
                                                 control={control}
                                                 render={({ field }) => (
-                                                    <Checkbox
-                                                        id={checkboxKey}
+                                                     <Checkbox
+                                                        id={criterionKey}
                                                         checked={field.value}
                                                         onCheckedChange={field.onChange}
                                                     />
                                                 )}
                                             />
-                                            <Label htmlFor={checkboxKey} className="font-normal">{criterion.text}</Label>
+                                            <Label htmlFor={criterionKey} className="font-normal text-base">{index + 1}. {criterion.text}</Label>
                                         </div>
-                                        {isOtherChecked && (
-                                            <Controller
-                                                name={otherInputKey as any}
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <Input {...field} placeholder="Por favor, especifique..." className="ml-6" />
-                                                )}
-                                            />
-                                        )}
                                     </div>
                                 )
-                           }
-                           
-                           return (
-                                <div key={criterion.id} className="flex items-center space-x-2 break-inside-avoid">
-                                    <Controller
-                                        name={checkboxKey as any}
-                                        control={control}
-                                        render={({ field }) => (
-                                             <Checkbox
-                                                id={checkboxKey}
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        )}
-                                    />
-                                    <Label htmlFor={checkboxKey} className="font-normal">{criterion.text}</Label>
-                                </div>
-                           )
-                        })}
-                    </div>
-                );
+                            })}
+                        </div>
+                    );
+                 } else { // Non-countable checkboxes
+                    const isOtherChecked = watch(`${rubricKey}.checkboxes.${rubric.id}_other` as any);
+                    return (
+                        <div className="space-y-4 columns-1 md:columns-2 lg:columns-3">
+                            {rubric.criteria.map((criterion) => {
+                               const isOtherField = criterion.id.endsWith('_other');
+                               const checkboxKey = `${rubricKey}.checkboxes.${criterion.id}`;
+                               const otherInputKey = `${rubricKey}.other`;
+
+                               if (isOtherField) {
+                                    return (
+                                        <div key={criterion.id} className="space-y-4 mt-4 break-inside-avoid">
+                                             <div className="flex items-center space-x-2">
+                                                <Controller
+                                                    name={checkboxKey as any}
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <Checkbox
+                                                            id={checkboxKey}
+                                                            checked={field.value}
+                                                            onCheckedChange={field.onChange}
+                                                        />
+                                                    )}
+                                                />
+                                                <Label htmlFor={checkboxKey} className="font-normal">{criterion.text}</Label>
+                                            </div>
+                                            {isOtherChecked && (
+                                                <Controller
+                                                    name={otherInputKey as any}
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <Input {...field} placeholder="Por favor, especifique..." className="ml-6" />
+                                                    )}
+                                                />
+                                            )}
+                                        </div>
+                                    )
+                               }
+                               
+                               return (
+                                    <div key={criterion.id} className="flex items-center space-x-2 break-inside-avoid">
+                                        <Controller
+                                            name={checkboxKey as any}
+                                            control={control}
+                                            render={({ field }) => (
+                                                 <Checkbox
+                                                    id={checkboxKey}
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                />
+                                            )}
+                                        />
+                                        <Label htmlFor={checkboxKey} className="font-normal">{criterion.text}</Label>
+                                    </div>
+                               )
+                            })}
+                        </div>
+                    );
+                 }
             case 'summary':
                 const summaryKey = `${rubricKey}.observations`;
                  return (
@@ -295,7 +293,7 @@ export default function EvaluateSupervisionPage() {
         }
     }
 
-    const renderRubricCategory = (rubrics: SupervisionRubric[]) => {
+    const renderRubricCategory = (rubrics: SupervisionRubric[], category: 'Contable' | 'No Contable') => {
       if (rubrics.length === 0) return null;
 
       return (
@@ -341,68 +339,70 @@ export default function EvaluateSupervisionPage() {
                             </TabsList>
 
                             <TabsContent value="Contable" className="mt-8">
-                                {renderRubricCategory(rubricsByType['Contable'])}
+                                {renderRubricCategory(rubricsByType['Contable'], 'Contable')}
                             </TabsContent>
                             <TabsContent value="No Contable" className="mt-8">
-                                {renderRubricCategory(rubricsByType['No Contable'])}
+                                {renderRubricCategory(rubricsByType['No Contable'], 'No Contable')}
                             </TabsContent>
                             <TabsContent value="Estadistica" className="mt-8">
-                                <CardContent className="space-y-8 pt-0">
-                                    <div className="p-6 bg-black/20 rounded-lg">
-                                        <h3 className="text-xl font-headline font-semibold text-white mb-4">Resumen de Calificación</h3>
-                                        <div className="space-y-4">
-                                            {Object.entries(calculatedScores.individual).map(([key, value]) => (
-                                                <div key={key}>
-                                                    <div className="flex justify-between items-center mb-1">
-                                                        <span className="text-sm font-medium">{value.title}</span>
-                                                        <span className="text-sm font-semibold">{value.score}%</span>
+                                <Card>
+                                    <CardContent className="space-y-8 pt-6">
+                                        <div className="p-6 bg-black/20 rounded-lg">
+                                            <h3 className="text-xl font-headline font-semibold text-white mb-4">Resumen de Calificación</h3>
+                                            <div className="space-y-4">
+                                                {Object.entries(calculatedScores.individual).map(([key, value]) => (
+                                                    <div key={key}>
+                                                        <div className="flex justify-between items-center mb-1">
+                                                            <span className="text-sm font-medium">{value.title}</span>
+                                                            <span className="text-sm font-semibold">{value.score}%</span>
+                                                        </div>
+                                                        <Progress value={value.score} />
                                                     </div>
-                                                    <Progress value={value.score} />
+                                                ))}
+                                                <Separator className="my-4"/>
+                                                <div className="flex justify-between items-center text-lg font-bold">
+                                                    <span>Calificación Final Promedio</span>
+                                                    <span>{calculatedScores.final}%</span>
                                                 </div>
-                                            ))}
-                                            <Separator className="my-4"/>
-                                            <div className="flex justify-between items-center text-lg font-bold">
-                                                <span>Calificación Final Promedio</span>
-                                                <span>{calculatedScores.final}%</span>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="p-6 bg-black/20 rounded-lg space-y-2">
-                                         <Label htmlFor="finalComments" className="text-base font-semibold">Conclusiones y comentarios sobre la clase</Label>
-                                         <Controller
-                                            name="finalComments"
-                                            control={control}
-                                            render={({ field }) => (
-                                                 <Textarea
-                                                    id="finalComments"
-                                                    placeholder="Añade tus conclusiones y comentarios finales aquí..."
-                                                    rows={8}
-                                                    {...field}
-                                                />
-                                            )}
-                                        />
-                                    </div>
-                                     <Separator className='my-6' />
-                                    <div className="flex justify-end items-center">
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button type="button">Finalizar Supervisión</Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                <AlertDialogTitle>¿Confirmar finalización?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    Una vez guardada, la calificación se calculará y el estado de la supervisión cambiará a "Completada". ¿Deseas continuar?
-                                                </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                <AlertDialogAction onClick={handleSubmit(onSubmit)}>Confirmar y Guardar</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
-                                </CardContent>
+                                        <div className="p-6 bg-black/20 rounded-lg space-y-2">
+                                            <Label htmlFor="finalComments" className="text-base font-semibold">Conclusiones y comentarios sobre la clase</Label>
+                                            <Controller
+                                                name="finalComments"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Textarea
+                                                        id="finalComments"
+                                                        placeholder="Añade tus conclusiones y comentarios finales aquí..."
+                                                        rows={8}
+                                                        {...field}
+                                                    />
+                                                )}
+                                            />
+                                        </div>
+                                        <Separator className='my-6' />
+                                        <div className="flex justify-end items-center">
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button type="button">Finalizar Supervisión</Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                    <AlertDialogTitle>¿Confirmar finalización?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Una vez guardada, la calificación se calculará y el estado de la supervisión cambiará a "Completada". ¿Deseas continuar?
+                                                    </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={handleSubmit(onSubmit)}>Confirmar y Guardar</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             </TabsContent>
                         </Tabs>
                     </CardContent>

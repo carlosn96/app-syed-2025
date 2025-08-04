@@ -969,7 +969,7 @@ export interface SupervisionCriterion {
 export interface SupervisionRubric {
   id: number;
   title: string;
-  type: 'radio' | 'checkbox' | 'summary';
+  type: 'checkbox' | 'summary';
   category: 'Contable' | 'No Contable';
   criteria: SupervisionCriterion[];
 }
@@ -978,7 +978,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
   {
     id: 1,
     title: "Inicio de Clase",
-    type: "radio",
+    type: "checkbox",
     category: "Contable",
     criteria: [
       { id: "1_1", text: "Registro de asistencia" },
@@ -992,7 +992,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
   {
     id: 2,
     title: "Desarrollo de Clase",
-    type: "radio",
+    type: "checkbox",
     category: "Contable",
     criteria: [
         { id: "2_1", text: "Vigila el cumplimiento de la normatividad" },
@@ -1010,7 +1010,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
   {
     id: 3,
     title: "Cierre de Clase",
-    type: "radio",
+    type: "checkbox",
     category: "Contable",
     criteria: [
       { id: "3_1", text: "Evaluación del aprendizaje obtenido" },
@@ -1020,7 +1020,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
   {
     id: 4,
     title: "Desempeño General",
-    type: "radio",
+    type: "checkbox",
     category: "Contable",
     criteria: [
         { id: "4_1", text: "Puntualidad" },
@@ -1107,5 +1107,3 @@ export const supervisionRubrics: SupervisionRubric[] = [
     ],
   },
 ];
-
-    
