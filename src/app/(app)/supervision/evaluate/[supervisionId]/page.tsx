@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { useParams, useRouter } from 'next/navigation'
@@ -19,7 +18,6 @@ import { Button } from '@/components/ui/button'
 import { FloatingBackButton } from '@/components/ui/floating-back-button'
 import { Separator } from '@/components/ui/separator'
 import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
@@ -27,13 +25,13 @@ import { useToast } from '@/hooks/use-toast'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
+import { MessageSquarePlus, MessageSquareX } from 'lucide-react'
 
 type EvaluationFormValues = {
   [key: string]: {
-    criteria?: { [key: string]: boolean },
+    criteria?: { [key: string]: { checked: boolean; comment?: string } },
     checkboxes?: { [key: string]: boolean },
     other?: string,
-    observations?: string,
   },
   finalComments?: string;
 }
@@ -43,23 +41,26 @@ const createValidationSchema = (rubrics: SupervisionRubric[]) => {
     let rubricSchema: any = {};
 
     if (rubric.type === 'checkbox') {
-        const criteriaSchema = rubric.criteria.reduce((critAcc, crit) => {
-            critAcc[crit.id] = z.boolean().optional();
-            return critAcc;
-        }, {} as Record<string, z.ZodType<any, any>>);
-
         if (rubric.category === 'Contable') {
+            const criteriaSchema = rubric.criteria.reduce((critAcc, crit) => {
+                critAcc[crit.id] = z.object({
+                    checked: z.boolean().optional(),
+                    comment: z.string().optional(),
+                });
+                return critAcc;
+            }, {} as Record<string, z.ZodType<any, any>>);
             rubricSchema.criteria = z.object(criteriaSchema);
-        } else {
-            rubricSchema.checkboxes = z.object(criteriaSchema);
+        } else { // No Contable
+            const checkboxesSchema = rubric.criteria.reduce((critAcc, crit) => {
+                critAcc[crit.id] = z.boolean().optional();
+                return critAcc;
+            }, {} as Record<string, z.ZodType<any, any>>);
+
+            rubricSchema.checkboxes = z.object(checkboxesSchema);
             if (rubric.criteria.some(c => c.id.endsWith('_other'))) {
                 rubricSchema.other = z.string().optional();
             }
         }
-    }
-    
-    if (rubric.type === 'summary') {
-      rubricSchema.observations = z.string().optional();
     }
 
     acc[`rubric_${rubric.id}`] = z.object(rubricSchema);
@@ -77,6 +78,11 @@ export default function EvaluateSupervisionPage() {
     const router = useRouter()
     const { toast } = useToast()
     const supervisionId = Number(params.supervisionId)
+    const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
+
+    const toggleComment = (key: string) => {
+        setOpenComments(prev => ({ ...prev, [key]: !prev[key] }));
+    };
     
     const supervision = useMemo(() => {
         return supervisions.find(s => s.id === supervisionId)
@@ -91,15 +97,14 @@ export default function EvaluateSupervisionPage() {
         'No Contable': supervisionRubrics.filter(r => r.category === 'No Contable')
     }), []);
     
-    const [activeTab, setActiveTab] = useState(`rubric_${(rubricsByType['Contable'][0] || {id: ''}).id}`);
-
+    const [activeTabs, setActiveTabs] = useState<Record<string, string>>({});
 
     const handleEvaluationTypeChange = (type: 'Contable' | 'No Contable' | 'Estadistica') => {
         setEvaluationType(type);
-        if (type === 'Contable' && rubricsByType['Contable'].length > 0) {
-            setActiveTab(`rubric_${rubricsByType['Contable'][0].id}`);
-        } else if (type === 'No Contable' && rubricsByType['No Contable'].length > 0) {
-             setActiveTab(`rubric_${rubricsByType['No Contable'][0].id}`);
+        const categoryKey = type === 'Contable' ? 'Contable' : 'No Contable';
+        const rubricsForCategory = rubricsByType[categoryKey];
+        if (rubricsForCategory.length > 0) {
+            setActiveTabs(prev => ({ ...prev, [categoryKey]: `rubric_${rubricsForCategory[0].id}` }));
         }
     };
 
@@ -109,15 +114,12 @@ export default function EvaluateSupervisionPage() {
             ...supervisionRubrics.reduce((acc, rubric) => {
                 const defaultRubric: any = {};
                 if (rubric.category === 'Contable') {
-                    defaultRubric.criteria = rubric.criteria.reduce((cAcc, c) => ({ ...cAcc, [c.id]: false }), {});
+                    defaultRubric.criteria = rubric.criteria.reduce((cAcc, c) => ({ ...cAcc, [c.id]: { checked: false, comment: '' } }), {});
                 } else if (rubric.type === 'checkbox') {
                     defaultRubric.checkboxes = rubric.criteria.reduce((cAcc, c) => ({ ...cAcc, [c.id]: false }), {});
                     if (rubric.criteria.some(c => c.id.endsWith('_other'))) {
                       defaultRubric.other = '';
                     }
-                }
-                if (rubric.type === 'summary') {
-                    defaultRubric.observations = '';
                 }
                 acc[`rubric_${rubric.id}`] = defaultRubric;
                 return acc;
@@ -142,7 +144,7 @@ export default function EvaluateSupervisionPage() {
 
             if (rubricData?.criteria) {
                 totalCriteria = rubric.criteria.length;
-                metCriteria = Object.values(rubricData.criteria).filter(val => val === true).length;
+                metCriteria = Object.values(rubricData.criteria).filter(val => val.checked === true).length;
             }
             
             const score = totalCriteria > 0 ? Math.round((metCriteria / totalCriteria) * 100) : 0;
@@ -187,23 +189,49 @@ export default function EvaluateSupervisionPage() {
                     return (
                         <div className="space-y-6">
                             {rubric.criteria.map((criterion, index) => {
-                                const criterionKey = `${rubricKey}.criteria.${criterion.id}`;
+                                const criterionCheckedKey = `${rubricKey}.criteria.${criterion.id}.checked`;
+                                const criterionCommentKey = `${rubricKey}.criteria.${criterion.id}.comment`;
+                                const commentKey = `${rubricKey}_${criterion.id}`;
+                                const isCommentOpen = !!openComments[commentKey];
+
                                 return (
                                     <div key={criterion.id}>
                                         {index > 0 && <Separator className="mb-6" />}
-                                        <div className="flex items-center space-x-4">
+                                        <div className="flex items-start space-x-4">
                                             <Controller
-                                                name={criterionKey as any}
+                                                name={criterionCheckedKey as any}
                                                 control={control}
                                                 render={({ field }) => (
                                                      <Checkbox
-                                                        id={criterionKey}
+                                                        id={criterionCheckedKey}
                                                         checked={field.value}
                                                         onCheckedChange={field.onChange}
+                                                        className="mt-1"
                                                     />
                                                 )}
                                             />
-                                            <Label htmlFor={criterionKey} className="font-normal text-base">{index + 1}. {criterion.text}</Label>
+                                            <div className="flex-grow space-y-2">
+                                                <div className='flex items-center justify-between'>
+                                                  <Label htmlFor={criterionCheckedKey} className="font-normal text-base leading-snug">{index + 1}. {criterion.text}</Label>
+                                                  <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={() => toggleComment(commentKey)}>
+                                                      {isCommentOpen ? <MessageSquareX size={16} /> : <MessageSquarePlus size={16}/>}
+                                                      <span className='sr-only'>{isCommentOpen ? "Cerrar comentario" : "Añadir comentario"}</span>
+                                                  </Button>
+                                                </div>
+                                                 {isCommentOpen && (
+                                                    <Controller
+                                                        name={criterionCommentKey as any}
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                            <Input
+                                                                {...field}
+                                                                placeholder="Añadir comentario opcional..."
+                                                                className="h-8 text-sm"
+                                                            />
+                                                        )}
+                                                    />
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )
@@ -269,25 +297,6 @@ export default function EvaluateSupervisionPage() {
                         </div>
                     );
                  }
-            case 'summary':
-                const summaryKey = `${rubricKey}.observations`;
-                 return (
-                    <div className="space-y-2">
-                        <Label htmlFor={summaryKey} className="text-base font-semibold">{rubric.criteria[0].text}</Label>
-                         <Controller
-                            name={summaryKey as any}
-                            control={control}
-                            render={({ field }) => (
-                                 <Textarea
-                                    id={summaryKey}
-                                    placeholder="Añade tus conclusiones y comentarios finales aquí..."
-                                    rows={8}
-                                    {...field}
-                                />
-                            )}
-                        />
-                    </div>
-                 )
             default:
                 return null;
         }
@@ -295,9 +304,15 @@ export default function EvaluateSupervisionPage() {
 
     const renderRubricCategory = (rubrics: SupervisionRubric[], category: 'Contable' | 'No Contable') => {
       if (rubrics.length === 0) return null;
+      
+      const currentTab = activeTabs[category] || `rubric_${rubrics[0].id}`;
 
       return (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col items-center">
+          <Tabs 
+            value={currentTab} 
+            onValueChange={(value) => setActiveTabs(prev => ({ ...prev, [category]: value }))} 
+            className="w-full flex flex-col items-center"
+          >
               <TabsList className="grid w-full grid-flow-col auto-cols-fr mb-4 h-auto flex-wrap justify-center">
                   {rubrics.map(rubric => (
                       <TabsTrigger key={rubric.id} value={`rubric_${rubric.id}`} className="flex-grow whitespace-normal text-center h-full">
@@ -381,8 +396,7 @@ export default function EvaluateSupervisionPage() {
                                                 )}
                                             />
                                         </div>
-                                        <Separator className='my-6' />
-                                        <div className="flex justify-end items-center">
+                                         <div className="flex justify-end items-center">
                                             <AlertDialog>
                                                 <AlertDialogTrigger asChild>
                                                     <Button type="button">Finalizar Supervisión</Button>
@@ -411,3 +425,5 @@ export default function EvaluateSupervisionPage() {
         </div>
     )
 }
+
+    
