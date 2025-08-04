@@ -52,10 +52,27 @@ export default function CareersPage() {
   const [selectedModalities, setSelectedModalities] = useState<Record<string, number>>({});
   const [selectedCampuses, setSelectedCampuses] = useState<string[]>([]);
 
-  const groupedCareers = useMemo(() => {
-    const groups: Record<string, GroupedCareer> = {};
+  const filteredGroupedCareers = useMemo(() => {
+    let careersToProcess = allCareers;
 
-    allCareers.forEach(career => {
+    // Filter by selected campuses (UNION logic)
+    if (selectedCampuses.length > 0) {
+      careersToProcess = allCareers.filter(career => selectedCampuses.includes(career.campus));
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      careersToProcess = careersToProcess.filter(career => 
+        career.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        career.campus.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        career.modality.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        career.coordinator.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Group the filtered careers
+    const groups: Record<string, GroupedCareer> = {};
+    careersToProcess.forEach(career => {
         const key = career.name;
         if (!groups[key]) {
             groups[key] = {
@@ -70,8 +87,9 @@ export default function CareersPage() {
         groups[key].modalitiesByCampus[career.campus].push(career);
         groups[key].allModalities.push(career);
     });
+
     return Object.values(groups);
-  }, []);
+  }, [selectedCampuses, searchTerm]);
 
   const handleTabChange = (key: string, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [key]: value }))
@@ -85,42 +103,6 @@ export default function CareersPage() {
     return `${n}°`;
   }
 
-  const filteredGroupedCareers = useMemo(() => {
-    let finalCareers = groupedCareers;
-
-    // First, filter by selected campuses
-    if (selectedCampuses.length > 0) {
-        finalCareers = finalCareers
-            .map(group => {
-                const filteredModalitiesByCampus: Record<string, Career[]> = {};
-                for (const campus of selectedCampuses) {
-                    if (group.modalitiesByCampus[campus]) {
-                        filteredModalitiesByCampus[campus] = group.modalitiesByCampus[campus];
-                    }
-                }
-                const filteredAllModalities = Object.values(filteredModalitiesByCampus).flat();
-
-                return {
-                    ...group,
-                    modalitiesByCampus: filteredModalitiesByCampus,
-                    allModalities: filteredAllModalities,
-                };
-            })
-            .filter(group => group.allModalities.length > 0);
-    }
-    
-    // Then, filter by search term
-    if (searchTerm) {
-        finalCareers = finalCareers.filter(group => 
-            group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            Object.keys(group.modalitiesByCampus).some(campus => campus.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            group.allModalities.some(m => m.modality.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            group.allModalities.some(m => m.coordinator.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-    }
-
-    return finalCareers;
-  }, [groupedCareers, selectedCampuses, searchTerm]);
   
   const plantelOptions = useMemo(() => planteles.map(p => ({
     value: p.name,
@@ -194,7 +176,7 @@ export default function CareersPage() {
     const isFiltered = selectedCampuses.length > 0;
     
     // Determine the primary campus to display info from
-    const primaryCampus = isFiltered ? selectedCampuses[0] : campusesForGroup[0];
+    const primaryCampus = isFiltered ? (campusesForGroup.find(c => selectedCampuses.includes(c)) || campusesForGroup[0]) : campusesForGroup[0];
     const modalitiesForPrimaryCampus = group.modalitiesByCampus[primaryCampus] || [];
     
     if (modalitiesForPrimaryCampus.length === 0) return null; // Should not happen with new logic, but a good safeguard.
@@ -208,15 +190,11 @@ export default function CareersPage() {
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left w-full">
             <div>
                 <CardTitle>{group.name}</CardTitle>
-                 {isFiltered ? (
-                    <CardDescription>{primaryCampus}</CardDescription>
-                ) : (
-                    <div className="flex flex-wrap gap-2 pt-2">
-                        {campusesForGroup.map(campus => (
-                            <Badge key={campus} variant="info">{campus}</Badge>
-                        ))}
-                    </div>
-                )}
+                <div className="flex flex-wrap gap-2 pt-2">
+                    {campusesForGroup.map(campus => (
+                        <Badge key={campus} variant="info">{campus}</Badge>
+                    ))}
+                </div>
             </div>
             <div className="flex gap-2 shrink-0">
                 <Button size="icon" variant="warning" onClick={(e) => e.stopPropagation()}>
