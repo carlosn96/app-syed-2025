@@ -34,11 +34,12 @@ type EvaluationFormValues = {
     checkboxes?: { [key: string]: boolean },
     other?: string,
     observations?: string,
-  }
+  },
+  finalComments?: string;
 }
 
 const createValidationSchema = (rubrics: SupervisionRubric[]) => {
-  const schemaObject = rubrics.reduce((acc, rubric) => {
+  const schemaObject: Record<string, z.ZodType<any, any>> = rubrics.reduce((acc, rubric) => {
     let rubricSchema: any = {};
 
     if (rubric.type === 'radio') {
@@ -69,6 +70,8 @@ const createValidationSchema = (rubrics: SupervisionRubric[]) => {
     return acc;
   }, {} as Record<string, z.ZodType<any, any>>);
   
+  schemaObject.finalComments = z.string().optional();
+
   return z.object(schemaObject);
 };
 
@@ -91,30 +94,41 @@ export default function EvaluateSupervisionPage() {
         'Contable': supervisionRubrics.filter(r => r.category === 'Contable'),
         'No Contable': supervisionRubrics.filter(r => r.category === 'No Contable')
     }), []);
+    
+    const [activeTab, setActiveTab] = useState(`rubric_${(rubricsByType['Contable'][0] || {id: ''}).id}`);
+
 
     const handleEvaluationTypeChange = (type: 'Contable' | 'No Contable' | 'Avance') => {
         setEvaluationType(type);
+        if (type === 'Contable') {
+            setActiveTab(`rubric_${(rubricsByType['Contable'][0] || {id: ''}).id}`);
+        } else if (type === 'No Contable') {
+             setActiveTab(`rubric_${(rubricsByType['No Contable'][0] || {id: ''}).id}`);
+        }
     };
 
     const form = useForm<EvaluationFormValues>({
         resolver: zodResolver(validationSchema),
-        defaultValues: supervisionRubrics.reduce((acc, rubric) => {
-            const defaultRubric: any = {};
-            if (rubric.type === 'radio') {
-                defaultRubric.criteria = rubric.criteria.reduce((cAcc, c) => ({ ...cAcc, [c.id]: undefined }), {});
-            }
-            if (rubric.type === 'checkbox') {
-                defaultRubric.checkboxes = rubric.criteria.reduce((cAcc, c) => ({ ...cAcc, [c.id]: false }), {});
-                if (rubric.criteria.some(c => c.id.endsWith('_other'))) {
-                  defaultRubric.other = '';
+        defaultValues: {
+            ...supervisionRubrics.reduce((acc, rubric) => {
+                const defaultRubric: any = {};
+                if (rubric.type === 'radio') {
+                    defaultRubric.criteria = rubric.criteria.reduce((cAcc, c) => ({ ...cAcc, [c.id]: undefined }), {});
                 }
-            }
-            if (rubric.type === 'summary') {
-                defaultRubric.observations = '';
-            }
-            acc[`rubric_${rubric.id}`] = defaultRubric;
-            return acc;
-        }, {} as any),
+                if (rubric.type === 'checkbox') {
+                    defaultRubric.checkboxes = rubric.criteria.reduce((cAcc, c) => ({ ...cAcc, [c.id]: false }), {});
+                    if (rubric.criteria.some(c => c.id.endsWith('_other'))) {
+                      defaultRubric.other = '';
+                    }
+                }
+                if (rubric.type === 'summary') {
+                    defaultRubric.observations = '';
+                }
+                acc[`rubric_${rubric.id}`] = defaultRubric;
+                return acc;
+            }, {} as any),
+            finalComments: ''
+        }
     });
     
     const { control, handleSubmit, watch } = form;
@@ -284,10 +298,8 @@ export default function EvaluateSupervisionPage() {
     const renderRubricCategory = (rubrics: SupervisionRubric[]) => {
       if (rubrics.length === 0) return null;
 
-      const defaultTab = `rubric_${rubrics[0].id}`;
-
       return (
-          <Tabs defaultValue={defaultTab} className="w-full flex flex-col items-center">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col items-center">
               <TabsList className="grid w-full grid-flow-col auto-cols-fr mb-4 h-auto flex-wrap justify-center">
                   {rubrics.map(rubric => (
                       <TabsTrigger key={rubric.id} value={`rubric_${rubric.id}`} className="flex-grow whitespace-normal text-center h-full">
@@ -359,6 +371,21 @@ export default function EvaluateSupervisionPage() {
                                             </div>
                                         </div>
                                     </div>
+                                    <div className="p-6 bg-black/20 rounded-lg space-y-2">
+                                         <Label htmlFor="finalComments" className="text-base font-semibold">Conclusiones y comentarios sobre la clase</Label>
+                                         <Controller
+                                            name="finalComments"
+                                            control={control}
+                                            render={({ field }) => (
+                                                 <Textarea
+                                                    id="finalComments"
+                                                    placeholder="Añade tus conclusiones y comentarios finales aquí..."
+                                                    rows={8}
+                                                    {...field}
+                                                />
+                                            )}
+                                        />
+                                    </div>
                                 </CardContent>
                             </TabsContent>
                         </Tabs>
@@ -395,3 +422,4 @@ export default function EvaluateSupervisionPage() {
     
 
     
+
