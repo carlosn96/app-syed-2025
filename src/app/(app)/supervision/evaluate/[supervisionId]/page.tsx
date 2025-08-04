@@ -303,8 +303,8 @@ export default function EvaluateSupervisionPage() {
                      <div className="px-6 pb-4">
                         <Tabs defaultValue={evaluationType} onValueChange={(val) => handleEvaluationTypeChange(val as any)} className="w-full">
                             <TabsList className="grid w-full grid-cols-3">
-                                <TabsTrigger value="Contable">Rubros Contables</TabsTrigger>
-                                <TabsTrigger value="No Contable">Rubros No Contables</TabsTrigger>
+                                <TabsTrigger value="Contable">Contables</TabsTrigger>
+                                <TabsTrigger value="No Contable">No Contables</TabsTrigger>
                                 <TabsTrigger value="Avance">Calificación y Avance</TabsTrigger>
                             </TabsList>
                         </Tabs>
@@ -388,5 +388,3 @@ export default function EvaluateSupervisionPage() {
         </div>
     )
 }
-
-    
