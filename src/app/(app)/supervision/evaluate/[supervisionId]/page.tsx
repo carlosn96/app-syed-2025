@@ -94,7 +94,6 @@ export default function EvaluateSupervisionPage() {
     const handleEvaluationTypeChange = (type: 'Contable' | 'No Contable' | 'Avance') => {
         setEvaluationType(type);
     };
-    
 
     const form = useForm<EvaluationFormValues>({
         resolver: zodResolver(validationSchema),
@@ -280,6 +279,33 @@ export default function EvaluateSupervisionPage() {
                 return null;
         }
     }
+
+    const renderRubricCategory = (rubrics: SupervisionRubric[]) => {
+      if (rubrics.length === 0) return null;
+
+      const defaultTab = `rubric_${rubrics[0].id}`;
+
+      return (
+          <Tabs defaultValue={defaultTab} className="w-full flex flex-col items-center">
+              <TabsList className="grid w-full grid-flow-col auto-cols-fr mb-4 h-auto flex-wrap justify-center">
+                  {rubrics.map(rubric => (
+                      <TabsTrigger key={rubric.id} value={`rubric_${rubric.id}`} className="flex-grow whitespace-normal text-center h-full">
+                          {rubric.title}
+                      </TabsTrigger>
+                  ))}
+              </TabsList>
+              {rubrics.map(rubric => (
+                  <TabsContent key={rubric.id} value={`rubric_${rubric.id}`} className="w-full">
+                      <Card>
+                          <CardContent className="p-6">
+                              {renderRubricContent(rubric)}
+                          </CardContent>
+                      </Card>
+                  </TabsContent>
+              ))}
+          </Tabs>
+      );
+    }
     
     return (
         <div className="flex flex-col gap-8">
@@ -302,28 +328,14 @@ export default function EvaluateSupervisionPage() {
                             </TabsList>
 
                             <TabsContent value="Contable">
-                                {rubricsByType['Contable'].map(rubric => (
-                                    <div key={rubric.id} className="mt-8">
-                                        <h3 className="text-xl font-headline font-semibold text-white bg-blue-900/80 w-full text-center p-3 rounded-t-lg">{rubric.title}</h3>
-                                        <Card className="rounded-t-none">
-                                            <CardContent className="p-6">
-                                                {renderRubricContent(rubric)}
-                                            </CardContent>
-                                        </Card>
-                                    </div>
-                                ))}
+                                <div className="mt-8">
+                                    {renderRubricCategory(rubricsByType['Contable'])}
+                                </div>
                             </TabsContent>
                             <TabsContent value="No Contable">
-                                 {rubricsByType['No Contable'].map(rubric => (
-                                    <div key={rubric.id} className="mt-8">
-                                        <h3 className="text-xl font-headline font-semibold text-white bg-blue-900/80 w-full text-center p-3 rounded-t-lg">{rubric.title}</h3>
-                                        <Card className="rounded-t-none">
-                                            <CardContent className="p-6">
-                                                {renderRubricContent(rubric)}
-                                            </CardContent>
-                                        </Card>
-                                    </div>
-                                ))}
+                                 <div className="mt-8">
+                                    {renderRubricCategory(rubricsByType['No Contable'])}
+                                </div>
                             </TabsContent>
                             <TabsContent value="Avance">
                                 <CardContent className="space-y-8 pt-8">
@@ -378,5 +390,7 @@ export default function EvaluateSupervisionPage() {
         </div>
     )
 }
+
+    
 
     
