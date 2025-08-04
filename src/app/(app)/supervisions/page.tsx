@@ -39,7 +39,7 @@ import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
 import { Pencil } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { DayProps } from "react-day-picker"
+import { DayPicker, DayProps } from "react-day-picker"
 
 export default function SupervisionsPage() {
   const { user } = useAuth();
@@ -163,14 +163,14 @@ export default function SupervisionsPage() {
 
        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-            <Card className="rounded-xl">
-                 <CardContent className="p-0">
+            <Card className="rounded-xl flex flex-col h-full">
+                 <CardContent className="p-0 flex-grow">
                     <Calendar
                         mode="single"
                         selected={date}
                         onSelect={setDate}
                         onDayClick={handleDayClick}
-                        className="w-full"
+                        className="w-full h-full"
                         modifiers={{
                             scheduled: Array.from(supervisionsByDate.keys()).map(d => new Date(d + 'T00:00:00'))
                         }}
