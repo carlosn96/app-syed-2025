@@ -261,7 +261,7 @@ const academicData = {
           "Diseño urbano y gestión a escala barrial y distrital",
           "Investigación y análisis de la arquitectura mexicana precolombina",
           "Procesos edificatorios sustentables",
-          "Proyecto 6: Propuestas arquitectónicas funcionales, formales y constructivas",
+          "Proyecto 6: Propuestas arquitectónicas funcionales, formais y constructivas",
           "Optativa abierta III"
         ],
         "7mo Semestre": [
@@ -1109,3 +1109,28 @@ export const supervisionRubrics: SupervisionRubric[] = [
     ],
   },
 ];
+
+export interface EvaluationPeriod {
+  id: number;
+  name: string;
+  startDate: Date;
+  endDate: Date;
+  careers: string[];
+}
+
+export const evaluationPeriods: EvaluationPeriod[] = [
+    {
+        id: 1,
+        name: "Periodo de Evaluación 2024-B",
+        startDate: new Date("2024-06-01"),
+        endDate: new Date("2024-06-15"),
+        careers: ["Administración", "Ciencias de la Computación", "Ingeniería Mecánica"]
+    },
+    {
+        id: 2,
+        name: "Periodo de Evaluación 2024-A",
+        startDate: new Date("2024-02-01"),
+        endDate: new Date("2024-02-15"),
+        careers: ["Administración de Empresas", "Contaduría Pública"]
+    }
+].sort((a,b) => b.startDate.getTime() - a.startDate.getTime());
