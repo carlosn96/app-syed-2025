@@ -970,6 +970,7 @@ export interface SupervisionRubric {
   id: number;
   title: string;
   type: 'radio' | 'checkbox' | 'summary';
+  category: 'Contable' | 'No Contable';
   criteria: SupervisionCriterion[];
 }
 
@@ -978,6 +979,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
     id: 1,
     title: "Inicio de Clase",
     type: "radio",
+    category: "Contable",
     criteria: [
       { id: "1_1", text: "Registro de asistencia" },
       { id: "1_2", text: "Se realiza evaluación diagnóstica" },
@@ -991,6 +993,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
     id: 2,
     title: "Desarrollo de Clase",
     type: "radio",
+    category: "Contable",
     criteria: [
         { id: "2_1", text: "Vigila el cumplimiento de la normatividad" },
         { id: "2_2", text: "Dominio del tema" },
@@ -1008,6 +1011,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
     id: 3,
     title: "Cierre de Clase",
     type: "radio",
+    category: "Contable",
     criteria: [
       { id: "3_1", text: "Evaluación del aprendizaje obtenido" },
       { id: "3_2", text: "Claridad en la conclusión" },
@@ -1017,6 +1021,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
     id: 4,
     title: "Desempeño General",
     type: "radio",
+    category: "Contable",
     criteria: [
         { id: "4_1", text: "Puntualidad" },
         { id: "4_2", text: "Código de vestimenta" },
@@ -1038,6 +1043,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
     id: 5,
     title: "Métodos de Enseñanza",
     type: "checkbox",
+    category: "No Contable",
     criteria: [
       { id: "5_1", text: "Método expositivo" },
       { id: "5_2", text: "Aprendizaje basado en problemas" },
@@ -1051,6 +1057,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
     id: 6,
     title: "Tipo de Aprendizaje",
     type: "checkbox",
+    category: "No Contable",
     criteria: [
       { id: "6_1", text: "Memorístico" },
       { id: "6_2", text: "Significativo" },
@@ -1063,6 +1070,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
     id: 7,
     title: "Modo de Trabajo Aplicado",
     type: "checkbox",
+    category: "No Contable",
     criteria: [
       { id: "7_1", text: "Trabajo en equipo" },
       { id: "7_2", text: "Trabajo individual" },
@@ -1070,8 +1078,9 @@ export const supervisionRubrics: SupervisionRubric[] = [
   },
   {
     id: 8,
-    title: "Estrategias de Enseñanza Empleadas",
+    title: "Estrategias de Enseñanza",
     type: "checkbox",
+    category: "No Contable",
     criteria: [
         { id: "8_1", text: "Cómic" },
         { id: "8_2", text: "Collage" },
@@ -1101,8 +1110,11 @@ export const supervisionRubrics: SupervisionRubric[] = [
     id: 9,
     title: "Estadística General",
     type: "summary",
+    category: "No Contable",
     criteria: [
       { id: "9_1", text: "Conclusiones y comentarios sobre la clase" },
     ],
   },
 ];
+
+    

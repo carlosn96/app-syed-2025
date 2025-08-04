@@ -84,7 +84,20 @@ export default function EvaluateSupervisionPage() {
 
     const validationSchema = useMemo(() => createValidationSchema(supervisionRubrics), []);
 
-    const [activeTab, setActiveTab] = useState(`rubric_${supervisionRubrics[0].id}`);
+    const [evaluationType, setEvaluationType] = useState<'Contable' | 'No Contable'>('Contable');
+    
+    const rubricsByType = useMemo(() => ({
+        'Contable': supervisionRubrics.filter(r => r.category === 'Contable'),
+        'No Contable': supervisionRubrics.filter(r => r.category === 'No Contable')
+    }), []);
+
+    const [activeTab, setActiveTab] = useState(`rubric_${rubricsByType[evaluationType][0].id}`);
+
+    const handleEvaluationTypeChange = (type: 'Contable' | 'No Contable') => {
+        setEvaluationType(type);
+        setActiveTab(`rubric_${rubricsByType[type][0].id}`);
+    };
+    
 
     const form = useForm<EvaluationFormValues>({
         resolver: zodResolver(validationSchema),
@@ -118,7 +131,7 @@ export default function EvaluateSupervisionPage() {
         let metCriteria = 0;
 
         supervisionRubrics.forEach(rubric => {
-            if (rubric.type === 'radio') {
+            if (rubric.category === 'Contable' && rubric.type === 'radio') {
                 const rubricData = data[`rubric_${rubric.id}`];
                 if (rubricData && rubricData.criteria) {
                     const criteriaKeys = Object.keys(rubricData.criteria);
@@ -264,28 +277,40 @@ export default function EvaluateSupervisionPage() {
             <FloatingBackButton />
             <Card className="rounded-xl">
                 <form>
+                    <CardHeader>
+                        <CardTitle>Evaluación de Supervisión</CardTitle>
+                        <CardDescription>
+                            Docente: <span className='text-primary'>{supervision.teacher}</span> | Materia: <span className='text-primary'>{supervision.subject}</span>
+                        </CardDescription>
+                    </CardHeader>
+                    
+                     <div className="px-6 pb-4">
+                        <Tabs defaultValue={evaluationType} onValueChange={(val) => handleEvaluationTypeChange(val as any)} className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="Contable">Rubros Contables</TabsTrigger>
+                                <TabsTrigger value="No Contable">Rubros No Contables</TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+                    </div>
+
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                         <CardHeader>
+                         <CardContent>
                             <div className='mb-4'>
                                 <ScrollArea className="w-full whitespace-nowrap">
                                     <TabsList>
-                                        {supervisionRubrics.map((rubric, index) => (
+                                        {rubricsByType[evaluationType].map((rubric, index) => (
                                             <TabsTrigger key={rubric.id} value={`rubric_${rubric.id}`}>
-                                                {`Paso ${index + 1}: ${rubric.title}`}
+                                                {`Paso ${rubric.id}: ${rubric.title}`}
                                             </TabsTrigger>
                                         ))}
                                     </TabsList>
                                     <ScrollBar orientation="horizontal" />
                                 </ScrollArea>
                             </div>
-                            <CardTitle>Evaluación de Supervisión</CardTitle>
-                            <CardDescription>
-                                Docente: <span className='text-primary'>{supervision.teacher}</span> | Materia: <span className='text-primary'>{supervision.subject}</span>
-                            </CardDescription>
-                        </CardHeader>
+                        </CardContent>
 
                         {supervisionRubrics.map(rubric => (
-                           <TabsContent key={rubric.id} value={`rubric_${rubric.id}`}>
+                           <TabsContent key={rubric.id} value={`rubric_${rubric.id}`} className="mt-0">
                                 <CardContent className="space-y-8">
                                     <div>
                                         {renderRubricContent(rubric)}
@@ -296,7 +321,8 @@ export default function EvaluateSupervisionPage() {
                     </Tabs>
                     
                     <CardContent>
-                        <div className="flex justify-end items-center pt-4">
+                        <Separator className='my-6' />
+                        <div className="flex justify-end items-center">
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <Button type="button">Finalizar Supervisión</Button>
@@ -321,3 +347,5 @@ export default function EvaluateSupervisionPage() {
         </div>
     )
 }
+
+    
