@@ -28,7 +28,7 @@ const allLinks = [
   { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
   { href: "/groups", label: "Grupos", icon: Users, roles: ['administrator', 'coordinator'], exact: true },
   { href: "/schedules", label: "Horarios", icon: CalendarClock, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
-  { href: "/supervision", label: "Supervisión", icon: ShieldCheck, roles: ['administrator', 'coordinator'], exact: true },
+  { href: "/supervision", label: "Agenda", icon: ShieldCheck, roles: ['administrator', 'coordinator'], exact: true },
   { href: "/feedback", label: "Retroalimentación", icon: Star, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
 ]
 
