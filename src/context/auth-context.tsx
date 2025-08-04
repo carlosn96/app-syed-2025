@@ -37,6 +37,7 @@ initialUsers.forEach(user => {
     if (!mockUsers[user.correo]) {
         let password = 'password'; // Default password for sample users
         if (user.correo === 'coordinator@example.com') password = 'coordinador';
+        if (user.correo === 'teacher@example.com') password = 'docente';
         if (user.correo === 'docente@example.com') password = 'docente';
         
         mockUsers[user.correo] = {
