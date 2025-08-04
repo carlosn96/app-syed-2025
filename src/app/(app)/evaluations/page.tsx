@@ -27,7 +27,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CreateEvaluationPeriodForm } from "@/components/create-evaluation-period-form"
-import { evaluationPeriods, careers, EvaluationPeriod } from "@/lib/data"
+import { evaluationPeriods, schedules, users, teachers as allTeachers, subjects as allSubjects, EvaluationPeriod, User } from "@/lib/data"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
@@ -35,7 +35,8 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
-import { Pencil } from "lucide-react"
+import { Pencil, FilePenLine } from "lucide-react"
+import Link from "next/link"
 
 export default function EvaluationsPage() {
   const { user } = useAuth()
@@ -51,7 +52,6 @@ export default function EvaluationsPage() {
         if (!map.has(dateKey)) {
             map.set(dateKey, []);
         }
-        // Avoid adding duplicates if a period is already on the map for that day
         if (!map.get(dateKey)!.find(existing => existing.id === p.id)) {
             map.get(dateKey)!.push(p);
         }
@@ -78,13 +78,78 @@ export default function EvaluationsPage() {
     return { text: 'Activo', variant: 'success' as const };
   }
 
+  const studentTeachers = useMemo(() => {
+      if (user?.rol !== 'student' || !user.grupo) return [];
+      
+      const studentGroup = user.grupo;
+      const groupSchedules = schedules.filter(s => s.groupName === studentGroup);
+      const teacherIds = [...new Set(groupSchedules.map(s => s.teacherId))];
+      
+      return allTeachers.filter(t => teacherIds.includes(t.id));
+  }, [user]);
+
+  const activeEvaluationPeriod = useMemo(() => {
+      const today = new Date();
+      return evaluationPeriods.find(p => today >= p.startDate && today <= p.endDate);
+  }, []);
+
+
+  if (user?.rol === 'student') {
+    return (
+        <div className="flex flex-col gap-8">
+            <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
+              Evaluación Docente
+            </h1>
+            <Card className="rounded-xl">
+                <CardHeader>
+                    <CardTitle>Evalúa a tus Docentes</CardTitle>
+                    {activeEvaluationPeriod ? (
+                       <CardDescription>
+                            El periodo de evaluación <span className="text-primary font-semibold">{activeEvaluationPeriod.name}</span> está activo. Por favor, completa la evaluación para cada uno de tus docentes.
+                       </CardDescription>
+                    ) : (
+                         <CardDescription>
+                            Actualmente no hay ningún periodo de evaluación activo.
+                       </CardDescription>
+                    )}
+                </CardHeader>
+                <CardContent>
+                   {activeEvaluationPeriod ? (
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {studentTeachers.map(teacher => (
+                            <Card key={teacher.id} className="bg-black/10">
+                                <CardHeader>
+                                    <CardTitle className="text-base">{teacher.name}</CardTitle>
+                                </CardHeader>
+                                <CardFooter>
+                                    <Button asChild className="w-full">
+                                        <Link href={`/evaluations/${teacher.id}`}>
+                                            <FilePenLine className="mr-2 h-4 w-4" />
+                                            Evaluar
+                                        </Link>
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
+                   ) : (
+                    <div className="flex items-center justify-center h-40 border-2 border-dashed border-muted rounded-xl">
+                        <p className="text-muted-foreground">Vuelve más tarde para evaluar a tus docentes.</p>
+                    </div>
+                   )}
+                </CardContent>
+            </Card>
+        </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Agenda de Evaluaciones
         </h1>
-        {user?.rol !== 'student' && user?.rol !== 'teacher' && (
+        {user?.rol !== 'student' && (
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
               <FloatingButton text="Crear Periodo" />
@@ -171,7 +236,7 @@ export default function EvaluationsPage() {
                                 <TableHead>Fecha de Fin</TableHead>
                                 <TableHead>Carreras</TableHead>
                                 <TableHead>Estado</TableHead>
-                                {user?.rol !== 'student' && user?.rol !== 'teacher' && <TableHead>Acciones</TableHead>}
+                                <TableHead>Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -188,16 +253,14 @@ export default function EvaluationsPage() {
                                                 {status.text}
                                             </Badge>
                                         </TableCell>
-                                        {user?.rol !== 'student' && user?.rol !== 'teacher' && (
-                                          <TableCell className="py-3">
+                                        <TableCell className="py-3">
                                             <div className="flex gap-2">
                                                 <Button size="icon" variant="warning">
                                                     <Pencil className="h-4 w-4" />
                                                     <span className="sr-only">Editar</span>
                                                 </Button>
                                             </div>
-                                          </TableCell>
-                                        )}
+                                        </TableCell>
                                     </TableRow>
                                 )
                             })}
