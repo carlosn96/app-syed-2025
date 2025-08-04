@@ -2,7 +2,7 @@
 "use client"
 import { useState, useMemo } from "react"
 import { Pencil, PlusCircle, Trash2, Search, ChevronDown } from "lucide-react"
-import { useParams } from "next/navigation"
+import { useParams, Link } from "next/navigation"
 
 import {
   Card,

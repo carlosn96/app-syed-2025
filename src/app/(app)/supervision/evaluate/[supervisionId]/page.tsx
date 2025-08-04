@@ -130,7 +130,7 @@ export default function EvaluateSupervisionPage() {
             description: `La evaluación para ${supervision.teacher} ha sido guardada con una calificación de ${score}%.`,
         });
 
-        router.push('/supervision');
+        router.push('/supervisions');
     }
 
     const rubricErrors = errors[`rubric_${currentRubric.id}`] as any;

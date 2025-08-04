@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { campuses } from "@/lib/data"
+import { planteles } from "@/lib/data"
 
 export default function CampusesPage() {
   return (
@@ -47,7 +47,7 @@ export default function CampusesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {campuses.map((campus) => (
+              {planteles.map((campus) => (
                 <TableRow key={campus.id}>
                   <TableCell className="font-medium">{campus.name}</TableCell>
                   <TableCell>{campus.location}</TableCell>
@@ -63,7 +63,7 @@ export default function CampusesPage() {
                           <span className="sr-only">Eliminar</span>
                       </Button>
                       <Button asChild size="icon" variant="success">
-                          <Link href={`/planteles/${campus.id}/carreras`}>
+                          <Link href={`/campuses/${campus.id}/carreras`}>
                               <BookOpenCheck className="h-4 w-4" />
                               <span className="sr-only">Planes de estudio</span>
                           </Link>

@@ -39,10 +39,9 @@ import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
 import { Pencil, ClipboardEdit } from "lucide-react"
 
-export default function SupervisionPage() {
+export default function SupervisionsPage() {
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [date, setDate] = useState<Date | undefined>(new Date())
 
   const supervisions = useMemo(() => {
     if (user?.rol === 'coordinator') {
@@ -52,10 +51,6 @@ export default function SupervisionPage() {
     return allSupervisions;
   }, [user]);
 
-  const proximasSupervisiones = supervisions
-    .filter(s => s.status === 'Programada' && s.date >= new Date())
-    .sort((a, b) => a.date.getTime() - b.date.getTime())
-    .slice(0, 3);
 
   const getGroupName = (groupId: number) => {
     return groups.find(g => g.id === groupId)?.name || "N/A";
@@ -65,11 +60,11 @@ export default function SupervisionPage() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-          Agenda
+          Supervisiones
         </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
-            <FloatingButton text="Agendar" />
+            <FloatingButton text="Agendar Supervisión" />
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
@@ -87,62 +82,6 @@ export default function SupervisionPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2 h-full rounded-xl">
-                <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    className="w-full"
-                    locale={es}
-                    disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-                />
-            </Card>
-            <Card className="lg:col-span-1 rounded-xl">
-                <CardHeader>
-                <CardTitle>Supervisiones Próximas</CardTitle>
-                <CardDescription>Eventos de supervisión más cercanos.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-3">
-                {proximasSupervisiones.length > 0 ? (
-                    proximasSupervisiones.map((supervision) => (
-                    <div
-                        key={supervision.id}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50"
-                    >
-                        <div className="flex flex-col items-center justify-center bg-destructive text-destructive-foreground rounded-md h-10 w-10 text-xs shrink-0">
-                        <span className="capitalize">
-                            {format(supervision.date, "LLL", { locale: es })}
-                        </span>
-                        <span className="font-bold text-base">
-                            {supervision.date.getDate()}
-                        </span>
-                        </div>
-                        <div className="grid gap-0.5">
-                        <p className="text-sm font-medium leading-none">
-                            {supervision.teacher}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                            {supervision.subject}
-                        </p>
-                        {user?.rol !== 'coordinator' && (
-                          <p className="text-xs text-muted-foreground font-semibold">
-                            {supervision.coordinator}
-                          </p>
-                        )}
-                        <p className="text-xs text-primary font-mono">
-                            {supervision.startTime} - {supervision.endTime}
-                        </p>
-                        </div>
-                    </div>
-                    ))
-                ) : (
-                    <p className="text-sm text-muted-foreground text-center">No hay supervisiones próximas.</p>
-                )}
-                </CardContent>
-            </Card>
-        </div>
-
         <Card className="rounded-xl">
             <CardHeader>
                 <CardTitle>Lista de Supervisiones</CardTitle>
@@ -167,7 +106,7 @@ export default function SupervisionPage() {
                                             <span className="sr-only">Editar</span>
                                         </Button>
                                         <Button asChild size="icon" variant="success">
-                                            <Link href={`/supervision/evaluate/${supervision.id}`}>
+                                            <Link href={`/supervisions/evaluate/${supervision.id}`}>
                                                 <ClipboardEdit className="h-4 w-4" />
                                                 <span className="sr-only">Evaluar</span>
                                             </Link>
@@ -230,7 +169,7 @@ export default function SupervisionPage() {
                                                     <span className="sr-only">Editar</span>
                                                 </Button>
                                                  <Button asChild size="icon" variant="success">
-                                                    <Link href={`/supervision/evaluate/${supervision.id}`}>
+                                                    <Link href={`/supervisions/evaluate/${supervision.id}`}>
                                                         <ClipboardEdit className="h-4 w-4" />
                                                         <span className="sr-only">Evaluar</span>
                                                     </Link>
