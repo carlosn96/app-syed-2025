@@ -203,7 +203,7 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
     try {
       addSupervision(data);
       toast({
-        title: "Supervisión Agendada",
+        title: "Cita Agendada",
         description: `La supervisión para el ${format(data.date, "PPP", { locale: es })} ha sido agendada.`,
       });
       form.reset({ coordinatorId: defaultCoordinator, groupId: "", teacherId: "", subjectId: "" });
@@ -379,7 +379,7 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">Agendar Supervisión</Button>
+        <Button type="submit" className="w-full">Agendar Cita</Button>
       </form>
     </Form>
   )

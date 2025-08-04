@@ -3,5 +3,6 @@ export {
     PlusCircle,
     ChevronDown,
     ClipboardCheck,
-    ClipboardEdit
+    ClipboardEdit,
+    ClipboardList
 } from "lucide-react";

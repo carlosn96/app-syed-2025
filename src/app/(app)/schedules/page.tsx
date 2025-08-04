@@ -79,7 +79,7 @@ export default function SchedulesPage() {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-          Agenda de Clases
+          Horarios de Clases
         </h1>
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
             <Select value={filterType} onValueChange={(value) => { setFilterType(value); setSelectedFilter(null); }}>
