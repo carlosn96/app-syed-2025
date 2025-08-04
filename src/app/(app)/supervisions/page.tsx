@@ -90,9 +90,9 @@ export default function SupervisionsPage() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-1 space-y-8">
-            <Card className="rounded-xl">
+       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-1">
+            <Card className="rounded-xl h-full">
                  <CardContent className="p-0">
                     <Calendar
                         mode="single"
@@ -108,7 +108,9 @@ export default function SupervisionsPage() {
                     />
                 </CardContent>
             </Card>
-             <Card className="rounded-xl">
+        </div>
+        <div className="lg:col-span-2">
+             <Card className="rounded-xl h-full">
                 <CardHeader>
                     <CardTitle>Próximas Agendas</CardTitle>
                     <CardDescription>Las 5 citas más cercanas.</CardDescription>
@@ -136,7 +138,9 @@ export default function SupervisionsPage() {
                 </CardContent>
             </Card>
         </div>
-        <Card className="lg:col-span-2 rounded-xl">
+      </div>
+
+      <Card className="rounded-xl">
             <CardHeader>
                 <CardTitle>Historial de Agendas</CardTitle>
                 <CardDescription>Historial y próximas citas agendadas.</CardDescription>
@@ -225,7 +229,6 @@ export default function SupervisionsPage() {
                 </ScrollArea>
             </CardContent>
         </Card>
-      </div>
     </div>
   )
 }
