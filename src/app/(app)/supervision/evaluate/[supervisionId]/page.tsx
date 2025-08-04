@@ -88,7 +88,7 @@ export default function EvaluateSupervisionPage() {
 
     const validationSchema = useMemo(() => createValidationSchema(supervisionRubrics), []);
 
-    const [evaluationType, setEvaluationType] = useState<'Contable' | 'No Contable' | 'Avance'>('Contable');
+    const [evaluationType, setEvaluationType] = useState<'Contable' | 'No Contable' | 'Estadistica'>('Contable');
     
     const rubricsByType = useMemo(() => ({
         'Contable': supervisionRubrics.filter(r => r.category === 'Contable'),
@@ -98,7 +98,7 @@ export default function EvaluateSupervisionPage() {
     const [activeTab, setActiveTab] = useState(`rubric_${(rubricsByType['Contable'][0] || {id: ''}).id}`);
 
 
-    const handleEvaluationTypeChange = (type: 'Contable' | 'No Contable' | 'Avance') => {
+    const handleEvaluationTypeChange = (type: 'Contable' | 'No Contable' | 'Estadistica') => {
         setEvaluationType(type);
         if (type === 'Contable' && rubricsByType['Contable'].length > 0) {
             setActiveTab(`rubric_${rubricsByType['Contable'][0].id}`);
@@ -337,7 +337,7 @@ export default function EvaluateSupervisionPage() {
                             <TabsList className="grid w-full grid-cols-3">
                                 <TabsTrigger value="Contable">Contables</TabsTrigger>
                                 <TabsTrigger value="No Contable">No Contables</TabsTrigger>
-                                <TabsTrigger value="Avance">Calificación y Avance</TabsTrigger>
+                                <TabsTrigger value="Estadistica">Estadistica General</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="Contable" className="mt-8">
@@ -346,7 +346,7 @@ export default function EvaluateSupervisionPage() {
                             <TabsContent value="No Contable" className="mt-8">
                                 {renderRubricCategory(rubricsByType['No Contable'])}
                             </TabsContent>
-                            <TabsContent value="Avance" className="mt-8">
+                            <TabsContent value="Estadistica" className="mt-8">
                                 <CardContent className="space-y-8 pt-0">
                                     <div className="p-6 bg-black/20 rounded-lg">
                                         <h3 className="text-xl font-headline font-semibold text-white mb-4">Resumen de Calificación</h3>
