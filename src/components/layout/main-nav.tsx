@@ -28,7 +28,7 @@ const allLinks = [
   { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
   { href: "/users", label: "Usuarios", icon: Users, roles: ['administrator', 'coordinator'], exact: false },
   { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrator'], exact: true },
-  { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
+  { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrator', 'coordinator', 'teacher'], exact: true },
   { href: "/groups", label: "Grupos", icon: Users, roles: ['administrator', 'coordinator'], exact: true },
   { href: "/schedules", label: "Horarios", icon: CalendarClock, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
   { href: "/supervisions", label: "Agenda", icon: ClipboardList, roles: ['administrator', 'coordinator'], exact: true },
