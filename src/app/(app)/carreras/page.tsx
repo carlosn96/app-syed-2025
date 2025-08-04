@@ -34,12 +34,13 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion"
 import { FilterPopover } from "@/components/ui/filter-popover"
+import { Badge } from "@/components/ui/badge"
 
 
 interface GroupedCareer {
     name: string;
-    campus: string;
-    modalities: Career[];
+    modalitiesByCampus: Record<string, Career[]>;
+    allModalities: Career[];
 }
 
 
@@ -53,25 +54,24 @@ export default function CareersPage() {
 
   const groupedCareers = useMemo(() => {
     const groups: Record<string, GroupedCareer> = {};
-    let careersToProcess = allCareers;
 
-    if (selectedCampuses.length > 0) {
-        careersToProcess = allCareers.filter(c => selectedCampuses.includes(c.campus));
-    }
-    
-    careersToProcess.forEach(career => {
-        const key = `${career.name}-${career.campus}`;
+    allCareers.forEach(career => {
+        const key = career.name;
         if (!groups[key]) {
             groups[key] = {
                 name: career.name,
-                campus: career.campus,
-                modalities: [],
+                modalitiesByCampus: {},
+                allModalities: [],
             };
         }
-        groups[key].modalities.push(career);
+        if (!groups[key].modalitiesByCampus[career.campus]) {
+            groups[key].modalitiesByCampus[career.campus] = [];
+        }
+        groups[key].modalitiesByCampus[career.campus].push(career);
+        groups[key].allModalities.push(career);
     });
     return Object.values(groups);
-  }, [selectedCampuses]);
+  }, []);
 
   const handleTabChange = (key: string, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [key]: value }))
@@ -85,12 +85,42 @@ export default function CareersPage() {
     return `${n}°`;
   }
 
-  const filteredGroupedCareers = groupedCareers.filter(group => 
-    group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    group.campus.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    group.modalities.some(m => m.modality.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    group.modalities.some(m => m.coordinator.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredGroupedCareers = useMemo(() => {
+    let finalCareers = groupedCareers;
+
+    // First, filter by selected campuses
+    if (selectedCampuses.length > 0) {
+        finalCareers = finalCareers
+            .map(group => {
+                const filteredModalitiesByCampus: Record<string, Career[]> = {};
+                for (const campus of selectedCampuses) {
+                    if (group.modalitiesByCampus[campus]) {
+                        filteredModalitiesByCampus[campus] = group.modalitiesByCampus[campus];
+                    }
+                }
+                const filteredAllModalities = Object.values(filteredModalitiesByCampus).flat();
+
+                return {
+                    ...group,
+                    modalitiesByCampus: filteredModalitiesByCampus,
+                    allModalities: filteredAllModalities,
+                };
+            })
+            .filter(group => group.allModalities.length > 0);
+    }
+    
+    // Then, filter by search term
+    if (searchTerm) {
+        finalCareers = finalCareers.filter(group => 
+            group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            Object.keys(group.modalitiesByCampus).some(campus => campus.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            group.allModalities.some(m => m.modality.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            group.allModalities.some(m => m.coordinator.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+    }
+
+    return finalCareers;
+  }, [groupedCareers, selectedCampuses, searchTerm]);
   
   const plantelOptions = useMemo(() => planteles.map(p => ({
     value: p.name,
@@ -159,17 +189,34 @@ export default function CareersPage() {
   }
 
   const renderCareerContent = (group: GroupedCareer, isAccordion: boolean) => {
-    const key = `${group.name}-${group.campus}`;
-    const selectedModalityId = selectedModalities[key] || group.modalities[0].id;
-    const selectedCareer = group.modalities.find(m => m.id === selectedModalityId)!;
+    const campusesForGroup = Object.keys(group.modalitiesByCampus);
+    const hasMultipleCampuses = campusesForGroup.length > 1;
+    const isFiltered = selectedCampuses.length > 0;
+    
+    // Determine the primary campus to display info from
+    const primaryCampus = isFiltered ? selectedCampuses[0] : campusesForGroup[0];
+    const modalitiesForPrimaryCampus = group.modalitiesByCampus[primaryCampus] || [];
+    
+    if (modalitiesForPrimaryCampus.length === 0) return null; // Should not happen with new logic, but a good safeguard.
+
+    const key = group.name; // Use career name as the key
+    const selectedModalityId = selectedModalities[key] || modalitiesForPrimaryCampus[0].id;
+    const selectedCareer = group.allModalities.find(m => m.id === selectedModalityId)!;
     const hasSubjects = subjects.some(s => s.career === selectedCareer.name && s.modality === selectedCareer.modality && s.semester <= selectedCareer.semesters);
 
     const header = (
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left w-full">
             <div>
-                <CardTitle>{selectedCareer.name}</CardTitle>
-                <CardDescription>{selectedCareer.campus}</CardDescription>
-                 <p className="text-xs text-muted-foreground pt-2">{selectedCareer.coordinator}</p>
+                <CardTitle>{group.name}</CardTitle>
+                 {isFiltered ? (
+                    <CardDescription>{primaryCampus}</CardDescription>
+                ) : (
+                    <div className="flex flex-wrap gap-2 pt-2">
+                        {campusesForGroup.map(campus => (
+                            <Badge key={campus} variant="info">{campus}</Badge>
+                        ))}
+                    </div>
+                )}
             </div>
             <div className="flex gap-2 shrink-0">
                 <Button size="icon" variant="warning" onClick={(e) => e.stopPropagation()}>
@@ -201,13 +248,13 @@ export default function CareersPage() {
                         </div>
                     </AccordionTrigger>
                     <AccordionContent>
-                        {group.modalities.length > 1 && (
+                        {modalitiesForPrimaryCampus.length > 1 && (
                             <div className="flex gap-2 pt-2 px-6 pb-4">
-                                {group.modalities.map(modality => (
+                                {modalitiesForPrimaryCampus.map(modality => (
                                     <Button
                                         key={modality.id}
                                         size="sm"
-                                        variant={selectedCareer.id === modality.id ? "default" : "outline-filter"}
+                                        variant={selectedCareer.id === modality.id ? "default" : "info-outline"}
                                         onClick={(e) => { e.stopPropagation(); handleModalityChange(key, modality.id); }}
                                         className="h-7 rounded-md"
                                     >
@@ -216,6 +263,7 @@ export default function CareersPage() {
                                 ))}
                             </div>
                         )}
+                        <p className="text-xs text-muted-foreground px-6 pb-4">{selectedCareer.coordinator}</p>
                         {renderSubjectTabs(selectedCareer, key)}
                     </AccordionContent>
                 </Card>
@@ -226,47 +274,23 @@ export default function CareersPage() {
     return (
          <Card key={key} className="flex flex-col rounded-xl">
             <CardHeader>
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left w-full">
-                  <div>
-                      <CardTitle>{selectedCareer.name}</CardTitle>
-                      <CardDescription>{selectedCareer.campus}</CardDescription>
-                      
-                      {group.modalities.length > 1 && (
-                          <div className="flex gap-2 pt-2">
-                              {group.modalities.map(modality => (
-                                  <Button
-                                      key={modality.id}
-                                      size="sm"
-                                      variant={selectedCareer.id === modality.id ? "default" : "outline-filter"}
-                                      onClick={(e) => { e.stopPropagation(); handleModalityChange(key, modality.id); }}
-                                      className="h-7 rounded-md"
-                                  >
-                                      {modality.modality}
-                                  </Button>
-                              ))}
-                          </div>
-                      )}
-                      <p className="text-xs text-muted-foreground pt-2">{selectedCareer.coordinator}</p>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                      <Button size="icon" variant="warning" onClick={(e) => e.stopPropagation()}>
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Editar</span>
-                      </Button>
-                      <Button size="icon" variant="destructive" onClick={(e) => e.stopPropagation()}>
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Eliminar</span>
-                      </Button>
-                      <Button asChild size="icon" variant="success" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/carreras/${encodeURIComponent(group.name)}`}>
-                              <BookOpenCheck className="h-4 w-4" />
-                              <span className="sr-only">Planes de estudio</span>
-                          </Link>
-                      </Button>
-                  </div>
-              </div>
+                {header}
             </CardHeader>
             <CardContent className="flex flex-col flex-grow pb-2">
+                 <div className="flex gap-2 pt-2 px-6 pb-4">
+                    {modalitiesForPrimaryCampus.map(modality => (
+                        <Button
+                            key={modality.id}
+                            size="sm"
+                            variant={selectedCareer.id === modality.id ? "default" : "info-outline"}
+                            onClick={(e) => { e.stopPropagation(); handleModalityChange(key, modality.id); }}
+                            className="h-7 rounded-md"
+                        >
+                            {modality.modality}
+                        </Button>
+                    ))}
+                </div>
+                 <p className="text-xs text-muted-foreground px-6 pb-4">{selectedCareer.coordinator}</p>
                 {renderSubjectTabs(selectedCareer, key)}
             </CardContent>
         </Card>
