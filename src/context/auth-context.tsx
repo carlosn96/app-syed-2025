@@ -29,22 +29,18 @@ const mockUsers: Record<string, { password: string; user: User }> = {
   'admin@example.com': {
     password: 'admin',
     user: { id: 1, nombre: 'Usuario', apellido_paterno: 'Administrador', apellido_materno: '', correo: 'admin@example.com', rol: 'administrator', fecha_registro: '2023-01-01T00:00:00Z', ultimo_acceso: null }
-  },
-  'coordinator@example.com': {
-    password: 'coordinador',
-    user: initialUsers.find(u => u.correo === 'coordinator@example.com')!
-  },
-  'docente@example.com': {
-    password: 'docente',
-    user: initialUsers.find(u => u.correo === 'docente@example.com')!
   }
 };
 
 // Populate mockUsers from the initialUsers data
 initialUsers.forEach(user => {
     if (!mockUsers[user.correo]) {
+        let password = 'password'; // Default password for sample users
+        if (user.correo === 'coordinator@example.com') password = 'coordinador';
+        if (user.correo === 'docente@example.com') password = 'docente';
+        
         mockUsers[user.correo] = {
-            password: 'password', // Default password for sample users
+            password: password, 
             user: user
         };
     }
