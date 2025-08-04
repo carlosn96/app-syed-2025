@@ -962,14 +962,14 @@ export const schedules: Schedule[] = [
 ];
 
 export interface SupervisionCriterion {
-  id: number;
+  id: string;
   text: string;
 }
 
 export interface SupervisionRubric {
   id: number;
   title: string;
-  type: 'Contable' | 'No Contable';
+  type: 'radio' | 'checkbox' | 'summary';
   criteria: SupervisionCriterion[];
 }
 
@@ -977,71 +977,132 @@ export const supervisionRubrics: SupervisionRubric[] = [
   {
     id: 1,
     title: "Inicio de Clase",
-    type: "Contable",
+    type: "radio",
     criteria: [
-      { id: 101, text: "Puntualidad y presentación." },
-      { id: 102, text: "Introducción clara de los objetivos de la sesión." },
-      { id: 103, text: "Actividad de inicio para enganchar a los alumnos." },
+      { id: "1_1", text: "Registro de asistencia" },
+      { id: "1_2", text: "Se realiza evaluación diagnóstica" },
+      { id: "1_3", text: "Se indica el tema" },
+      { id: "1_4", text: "Se promueve el interés por el tema a tratar" },
+      { id: "1_5", text: "Exposición de objetivos" },
+      { id: "1_6", text: "Se retoman los contenidos de sesiones anteriores" },
     ],
   },
   {
     id: 2,
-    title: "Desarrollo de clase",
-    type: "Contable",
+    title: "Desarrollo de Clase",
+    type: "radio",
     criteria: [
-      { id: 201, text: "Claridad en la exposición de los temas." },
-      { id: 202, text: "Uso adecuado de materiales y recursos didácticos." },
-      { id: 203, text: "Fomento de la participación estudiantil." },
-      { id: 204, text: "Gestión efectiva del tiempo." },
+        { id: "2_1", text: "Vigila el cumplimiento de la normatividad" },
+        { id: "2_2", text: "Dominio del tema" },
+        { id: "2_3", text: "Atención y concentración del grupo" },
+        { id: "2_4", text: "Fomento de reflexión y argumentación" },
+        { id: "2_5", text: "Lenguaje entendible, se aclaran tecnicismos" },
+        { id: "2_6", text: "Promoción de actividades con la vida cotidiana" },
+        { id: "2_7", text: "Empleo de estrategias didácticas" },
+        { id: "2_8", text: "Claridad en las instrucciones" },
+        { id: "2_9", text: "Supervisión de los problemas planteados" },
+        { id: "2_10", text: "Genera ambiente propicio para enseñanza-aprendizaje" },
     ],
   },
   {
     id: 3,
-    title: "Cierre de clase",
-    type: "Contable",
+    title: "Cierre de Clase",
+    type: "radio",
     criteria: [
-      { id: 301, text: "Síntesis de los puntos clave de la sesión." },
-      { id: 302, text: "Resolución de dudas finales." },
-      { id: 303, text: "Asignación y explicación de tareas o siguientes pasos." },
+      { id: "3_1", text: "Evaluación del aprendizaje obtenido" },
+      { id: "3_2", text: "Claridad en la conclusión" },
     ],
   },
   {
     id: 4,
-    title: "Desempeño general",
-    type: "Contable",
+    title: "Desempeño General",
+    type: "radio",
     criteria: [
-      { id: 401, text: "Dominio del contenido." },
-      { id: 402, text: "Clima de respeto y confianza en el aula." },
-      { id: 403, text: "Capacidad para motivar a los estudiantes." },
+        { id: "4_1", text: "Puntualidad" },
+        { id: "4_2", text: "Código de vestimenta" },
+        { id: "4_3", text: "Entregó la planeación" },
+        { id: "4_4", text: "Cumple con avance temático" },
+        { id: "4_5", text: "Tema presentado está en planeación" },
+        { id: "4_6", text: "Avance programático actualizado" },
+        { id: "4_7", text: "Informó a alumnos sobre encuadre" },
+        { id: "4_8", text: "Promueve participación activa" },
+        { id: "4_9", text: "Fomenta respeto entre alumnos" },
+        { id: "4_10", text: "Promueve valores y mensajes positivos" },
+        { id: "4_11", text: "Transmite seguridad y confianza" },
+        { id: "4_12", text: "Retroalimenta y aclara dudas" },
+        { id: "4_13", text: "Mantiene disciplina y limpieza" },
+        { id: "4_14", text: "Buena administración del tiempo" },
     ],
   },
   {
     id: 5,
-    title: "Método de enseñanza",
-    type: "No Contable",
+    title: "Métodos de Enseñanza",
+    type: "checkbox",
     criteria: [
-      { id: 501, text: "Variedad en las estrategias de enseñanza utilizadas." },
-      { id: 502, text: "Adecuación de los métodos al grupo." },
+      { id: "5_1", text: "Método expositivo" },
+      { id: "5_2", text: "Aprendizaje basado en problemas" },
+      { id: "5_3", text: "Estudio de caso" },
+      { id: "5_4", text: "Aprendizaje colaborativo" },
+      { id: "5_5", text: "Aprendizaje orientado a proyectos" },
+      { id: "5_other", text: "Otro" },
     ],
   },
   {
     id: 6,
-    title: "Tipo de aprendizaje",
-    type: "No Contable",
+    title: "Tipo de Aprendizaje",
+    type: "checkbox",
     criteria: [
-      { id: 601, text: "Fomento del aprendizaje autónomo." },
-      { id: 602, text: "Promoción del trabajo colaborativo." },
-      { id: 603, text: "Estímulo del pensamiento crítico y reflexivo." },
+      { id: "6_1", text: "Memorístico" },
+      { id: "6_2", text: "Significativo" },
+      { id: "6_3", text: "Receptivo" },
+      { id: "6_4", text: "Por descubrimiento" },
+      { id: "6_other", text: "Otro" },
     ],
   },
   {
     id: 7,
-    title: "Modo de manejo",
-    type: "No Contable",
+    title: "Modo de Trabajo Aplicado",
+    type: "checkbox",
     criteria: [
-      { id: 701, text: "Manejo de la disciplina y resolución de conflictos." },
-      { id: 702, text: "Adaptabilidad y flexibilidad ante imprevistos." },
+      { id: "7_1", text: "Trabajo en equipo" },
+      { id: "7_2", text: "Trabajo individual" },
+    ],
+  },
+  {
+    id: 8,
+    title: "Estrategias de Enseñanza Empleadas",
+    type: "checkbox",
+    criteria: [
+        { id: "8_1", text: "Cómic" },
+        { id: "8_2", text: "Collage" },
+        { id: "8_3", text: "Debate" },
+        { id: "8_4", text: "Tríptico" },
+        { id: "8_5", text: "Ensayo" },
+        { id: "8_6", text: "Historieta" },
+        { id: "8_7", text: "Resumen" },
+        { id: "8_8", text: "Seminario" },
+        { id: "8_9", text: "Paráfrasis" },
+        { id: "8_10", text: "Investigación" },
+        { id: "8_11", text: "Mapa mental" },
+        { id: "8_12", text: "Mesa redonda" },
+        { id: "8_13", text: "Lluvia de ideas" },
+        { id: "8_14", text: "Análisis de caso" },
+        { id: "8_15", text: "Dinámica grupal" },
+        { id: "8_16", text: "Cuadro sinóptico" },
+        { id: "8_17", text: "Ficha descriptiva" },
+        { id: "8_18", text: "Mapa conceptual" },
+        { id: "8_19", text: "Pregunta generadora" },
+        { id: "8_20", text: "Cuadro de doble entrada" },
+        { id: "8_21", text: "Resolución de ejercicios y problemas" },
+        { id: "8_other", text: "Otro" },
+    ],
+  },
+  {
+    id: 9,
+    title: "Estadística General",
+    type: "summary",
+    criteria: [
+      { id: "9_1", text: "Conclusiones y comentarios sobre la clase" },
     ],
   },
 ];
-    
