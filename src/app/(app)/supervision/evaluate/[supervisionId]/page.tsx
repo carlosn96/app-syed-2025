@@ -26,7 +26,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 type EvaluationFormValues = {
   [key: string]: {
-    criteria: { [key: string]: "yes" | "no" | "n/a" },
+    criteria: { [key: string]: "yes" | "no" },
     observations: string
   }
 }
@@ -34,7 +34,7 @@ type EvaluationFormValues = {
 const createValidationSchema = (rubrics: SupervisionRubric[]) => {
   const schemaObject = rubrics.reduce((acc, rubric) => {
     const criteriaSchema = rubric.criteria.reduce((critAcc, crit) => {
-      critAcc[`criterion_${crit.id}`] = z.enum(["yes", "no", "n/a"], { required_error: "Debe seleccionar una opción." });
+      critAcc[`criterion_${crit.id}`] = z.enum(["yes", "no"], { required_error: "Debe seleccionar una opción." });
       return critAcc;
     }, {} as Record<string, z.ZodType<any, any>>);
 
@@ -67,7 +67,7 @@ export default function EvaluateSupervisionPage() {
         defaultValues: supervisionRubrics.reduce((acc, rubric) => {
             acc[`rubric_${rubric.id}`] = {
                 criteria: rubric.criteria.reduce((critAcc, crit) => {
-                    critAcc[`criterion_${crit.id}`] = 'n/a';
+                    critAcc[`criterion_${crit.id}`] = undefined;
                     return critAcc;
                 }, {} as any),
                 observations: ''
@@ -183,10 +183,6 @@ export default function EvaluateSupervisionPage() {
                                                             <div className="flex items-center space-x-2">
                                                                 <RadioGroupItem value="no" id={`${criterionKey}-no`} />
                                                                 <Label htmlFor={`${criterionKey}-no`}>No Cumple</Label>
-                                                            </div>
-                                                            <div className="flex items-center space-x-2">
-                                                                <RadioGroupItem value="n/a" id={`${criterionKey}-na`} />
-                                                                <Label htmlFor={`${criterionKey}-na`}>N/A</Label>
                                                             </div>
                                                         </RadioGroup>
                                                     )}
