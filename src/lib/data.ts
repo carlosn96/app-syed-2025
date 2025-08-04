@@ -1106,15 +1106,6 @@ export const supervisionRubrics: SupervisionRubric[] = [
         { id: "8_other", text: "Otro" },
     ],
   },
-  {
-    id: 9,
-    title: "Estadística General",
-    type: "summary",
-    category: "No Contable",
-    criteria: [
-      { id: "9_1", text: "Conclusiones y comentarios sobre la clase" },
-    ],
-  },
 ];
 
     
