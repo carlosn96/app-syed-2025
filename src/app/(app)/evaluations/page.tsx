@@ -149,7 +149,7 @@ export default function EvaluationsPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Agenda de Evaluaciones
         </h1>
-        {user?.rol !== 'student' && (
+        {user?.rol === 'coordinator' && (
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
               <FloatingButton text="Crear Periodo" />
