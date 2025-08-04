@@ -142,23 +142,25 @@ export default function SupervisionsPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Agenda
         </h1>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger asChild>
-            <FloatingButton text="Agendar Cita" />
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Agendar Nueva Cita de Supervisión</DialogTitle>
-              <DialogDescription>
-                Completa el formulario para agendar una nueva supervisión de
-                docente.
-              </DialogDescription>
-            </DialogHeader>
-            <CreateSupervisionForm 
-                onSuccess={() => setIsModalOpen(false)} 
-            />
-          </DialogContent>
-        </Dialog>
+        {user?.rol === 'coordinator' && (
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <FloatingButton text="Agendar Cita" />
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Agendar Nueva Cita de Supervisión</DialogTitle>
+                <DialogDescription>
+                  Completa el formulario para agendar una nueva supervisión de
+                  docente.
+                </DialogDescription>
+              </DialogHeader>
+              <CreateSupervisionForm 
+                  onSuccess={() => setIsModalOpen(false)} 
+              />
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -304,3 +306,5 @@ export default function SupervisionsPage() {
     </div>
   )
 }
+
+    
