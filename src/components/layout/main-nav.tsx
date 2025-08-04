@@ -33,7 +33,7 @@ const allLinks = [
   { href: "/schedules", label: "Horarios", icon: CalendarClock, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
   { href: "/supervisions", label: "Agenda", icon: ClipboardList, roles: ['administrator', 'coordinator'], exact: true },
   { href: "/supervisions-management", label: "Supervisiones", icon: ShieldCheck, roles: ['administrator', 'coordinator'], exact: true },
-  { href: "/supervision-rubrics", label: "Rúbricas", icon: ClipboardCheck, roles: ['administrator'], exact: true },
+  { href: "/supervision-rubrics", label: "Gestión de Rúbricas", icon: ClipboardCheck, roles: ['administrator'], exact: true },
   { href: "/evaluations", label: "Evaluaciones", icon: BookUser, roles: ['administrator', 'coordinator', 'student'], exact: false },
   { href: "/palpa", label: "Palpa", icon: HeartHandshake, roles: ['teacher'], exact: true },
 ]

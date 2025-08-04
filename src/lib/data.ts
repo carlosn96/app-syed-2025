@@ -1111,6 +1111,47 @@ export const supervisionRubrics: SupervisionRubric[] = [
   },
 ];
 
+export interface EvaluationCriterion {
+    id: string;
+    text: string;
+}
+
+export interface EvaluationRubric {
+    id: number;
+    category: string;
+    criteria: EvaluationCriterion[];
+}
+
+export const evaluationRubrics: EvaluationRubric[] = [
+    {
+        id: 1,
+        category: "Claridad y Pedagogía",
+        criteria: [
+            { id: "e1_1", text: "Explica los temas de forma clara y comprensible." },
+            { id: "e1_2", text: "Utiliza ejemplos relevantes para facilitar la comprensión." },
+            { id: "e1_3", text: "Organiza el contenido de la clase de manera lógica." },
+        ],
+    },
+    {
+        id: 2,
+        category: "Compromiso y Motivación",
+        criteria: [
+            { id: "e2_1", text: "Fomenta la participación activa de los estudiantes." },
+            { id: "e2_2", text: "Muestra entusiasmo por la materia que imparte." },
+            { id: "e2_3", text: "Está disponible para resolver dudas y ofrecer apoyo." },
+        ],
+    },
+    {
+        id: 3,
+        category: "Dominio del Tema",
+        criteria: [
+            { id: "e3_1", text: "Demuestra un profundo conocimiento de la materia." },
+            { id: "e3_2", text: "Responde a las preguntas de los estudiantes con seguridad y precisión." },
+            { id: "e3_3", text: "Actualiza los contenidos del curso con información relevante." },
+        ],
+    },
+];
+
 export interface EvaluationPeriod {
   id: number;
   name: string;
