@@ -196,7 +196,7 @@ export default function TeacherProfilePage() {
                             >
                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
                                 <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${'${value}'}%`} fontSize={12} tickLine={false} axisLine={false} />
                                 <Tooltip
                                     contentStyle={{
                                         backgroundColor: 'hsl(var(--background) / 0.8)',
@@ -260,7 +260,7 @@ export default function TeacherProfilePage() {
                             </Badge>
                         </TableCell>
                         <TableCell className="text-right font-mono">
-                            {supervision.score !== undefined ? `${supervision.score}%` : "N/A"}
+                            {supervision.score !== undefined ? `${'${supervision.score}'}%` : "N/A"}
                         </TableCell>
                         </TableRow>
                     ))}
@@ -272,14 +272,12 @@ export default function TeacherProfilePage() {
              <div className="lg:col-span-3">
               <Card className="rounded-xl">
                 <CardHeader>
-                  <CardTitle>Nueva Sección</CardTitle>
+                  <CardTitle>Palpa</CardTitle>
                   <CardDescription>
-                    Esta es una nueva sección que puedes completar.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-center h-40 border-2 border-dashed border-muted rounded-xl">
-                    <p className="text-muted-foreground">Contenido de la nueva sección aquí.</p>
                   </div>
                 </CardContent>
               </Card>
