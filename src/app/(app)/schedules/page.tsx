@@ -74,14 +74,12 @@ export default function SchedulesPage() {
   }
   
   const getEntityName = (
-    type: "teacher" | "group" | "subject",
+    type: "teacher" | "subject",
     id: number
   ) => {
     switch (type) {
       case "teacher":
         return teachers.find((t) => t.id === id)?.name || "N/A"
-      case "group":
-        return allGroups.find((g) => g.id === id)?.name || "N/A"
       case "subject":
         return subjects.find((s) => s.id === id)?.name || "N/A"
     }
@@ -147,22 +145,29 @@ export default function SchedulesPage() {
                         <TableHead className="w-[100px] md:w-[150px]">Hora</TableHead>
                         <TableHead>Materia</TableHead>
                         {user?.rol !== 'teacher' && <TableHead>Docente</TableHead>}
+                        <TableHead>Carrera</TableHead>
+                        <TableHead>Nivel</TableHead>
                         <TableHead>Grupo</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {dailySchedules.map((schedule) => (
-                        <TableRow key={schedule.id}>
-                          <TableCell className="font-medium text-primary text-xs sm:text-sm">
-                            {schedule.startTime} - {schedule.endTime}
-                          </TableCell>
-                          <TableCell className="font-semibold">
-                            <div>{getEntityName("subject", schedule.subjectId)}</div>
-                          </TableCell>
-                          {user?.rol !== 'teacher' && <TableCell>{getEntityName("teacher", schedule.teacherId)}</TableCell>}
-                          <TableCell>{getEntityName("group", schedule.groupId)}</TableCell>
-                        </TableRow>
-                      ))}
+                      {dailySchedules.map((schedule) => {
+                        const groupDetails = allGroups.find(g => g.id === schedule.groupId);
+                        return (
+                            <TableRow key={schedule.id}>
+                            <TableCell className="font-medium text-primary text-xs sm:text-sm">
+                                {schedule.startTime} - {schedule.endTime}
+                            </TableCell>
+                            <TableCell className="font-semibold">
+                                <div>{getEntityName("subject", schedule.subjectId)}</div>
+                            </TableCell>
+                            {user?.rol !== 'teacher' && <TableCell>{getEntityName("teacher", schedule.teacherId)}</TableCell>}
+                            <TableCell>{groupDetails?.career || 'N/A'}</TableCell>
+                            <TableCell>{groupDetails?.semester ? `${groupDetails.semester}°` : 'N/A'}</TableCell>
+                            <TableCell>{groupDetails?.name || 'N/A'}</TableCell>
+                            </TableRow>
+                        )
+                      })}
                     </TableBody>
                   </Table>
                 ) : (
