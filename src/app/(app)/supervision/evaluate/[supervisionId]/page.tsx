@@ -25,7 +25,6 @@ import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 
 type EvaluationFormValues = {
@@ -92,13 +91,8 @@ export default function EvaluateSupervisionPage() {
         'No Contable': supervisionRubrics.filter(r => r.category === 'No Contable')
     }), []);
 
-    const [activeTab, setActiveTab] = useState(`rubric_${rubricsByType['Contable'][0].id}`);
-
     const handleEvaluationTypeChange = (type: 'Contable' | 'No Contable' | 'Avance') => {
         setEvaluationType(type);
-        if (type !== 'Avance') {
-          setActiveTab(`rubric_${rubricsByType[type][0].id}`);
-        }
     };
     
 
@@ -138,12 +132,11 @@ export default function EvaluateSupervisionPage() {
             let metCriteria = 0;
 
             if (rubricData?.criteria) {
-                const criteriaKeys = Object.keys(rubricData.criteria);
-                totalCriteria = criteriaKeys.filter(key => rubricData.criteria![key] !== undefined).length;
-                metCriteria = criteriaKeys.filter(key => rubricData.criteria![key] === 'yes').length;
+                totalCriteria = rubric.criteria.length;
+                metCriteria = Object.values(rubricData.criteria).filter(val => val === 'yes').length;
             }
             
-            const score = totalCriteria > 0 ? Math.round((metCriteria / rubric.criteria.length) * 100) : 0;
+            const score = totalCriteria > 0 ? Math.round((metCriteria / totalCriteria) * 100) : 0;
             scores[rubricKey] = { score, title: rubric.title };
             totalAverage += score;
             countableRubricsCount++;
@@ -187,7 +180,7 @@ export default function EvaluateSupervisionPage() {
                             const criterionKey = `${rubricKey}.criteria.${criterion.id}`;
                             return (
                                 <div key={criterion.id}>
-                                    <Separator className="mb-6" />
+                                    {index > 0 && <Separator className="mb-6" />}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                                         <Label className="md:col-span-2 pt-1 font-normal text-base">{index + 1}. {criterion.text}</Label>
                                         <Controller
@@ -291,8 +284,8 @@ export default function EvaluateSupervisionPage() {
     return (
         <div className="flex flex-col gap-8">
             <FloatingBackButton />
-            <Card className="rounded-xl">
-                <form>
+             <form onSubmit={handleSubmit(onSubmit)}>
+                <Card className="rounded-xl">
                     <CardHeader>
                         <CardTitle>Evaluación de Supervisión</CardTitle>
                         <CardDescription>
@@ -300,66 +293,63 @@ export default function EvaluateSupervisionPage() {
                         </CardDescription>
                     </CardHeader>
                     
-                     <div className="px-6 pb-4">
+                    <div className="px-6 pb-4">
                         <Tabs defaultValue={evaluationType} onValueChange={(val) => handleEvaluationTypeChange(val as any)} className="w-full">
                             <TabsList className="grid w-full grid-cols-3">
                                 <TabsTrigger value="Contable">Contables</TabsTrigger>
                                 <TabsTrigger value="No Contable">No Contables</TabsTrigger>
                                 <TabsTrigger value="Avance">Calificación y Avance</TabsTrigger>
                             </TabsList>
+
+                            <TabsContent value="Contable">
+                                {rubricsByType['Contable'].map(rubric => (
+                                    <div key={rubric.id} className="mt-8">
+                                        <h3 className="text-xl font-headline font-semibold text-white bg-blue-900/80 w-full text-center p-3 rounded-t-lg">{rubric.title}</h3>
+                                        <Card className="rounded-t-none">
+                                            <CardContent className="p-6">
+                                                {renderRubricContent(rubric)}
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                ))}
+                            </TabsContent>
+                            <TabsContent value="No Contable">
+                                 {rubricsByType['No Contable'].map(rubric => (
+                                    <div key={rubric.id} className="mt-8">
+                                        <h3 className="text-xl font-headline font-semibold text-white bg-blue-900/80 w-full text-center p-3 rounded-t-lg">{rubric.title}</h3>
+                                        <Card className="rounded-t-none">
+                                            <CardContent className="p-6">
+                                                {renderRubricContent(rubric)}
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                ))}
+                            </TabsContent>
+                            <TabsContent value="Avance">
+                                <CardContent className="space-y-8 pt-8">
+                                    <div className="p-6 bg-black/20 rounded-lg">
+                                        <h3 className="text-xl font-headline font-semibold text-white mb-4">Resumen de Calificación</h3>
+                                        <div className="space-y-4">
+                                            {Object.entries(calculatedScores.individual).map(([key, value]) => (
+                                                <div key={key}>
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <span className="text-sm font-medium">{value.title}</span>
+                                                        <span className="text-sm font-semibold">{value.score}%</span>
+                                                    </div>
+                                                    <Progress value={value.score} />
+                                                </div>
+                                            ))}
+                                            <Separator className="my-4"/>
+                                            <div className="flex justify-between items-center text-lg font-bold">
+                                                <span>Calificación Final Promedio</span>
+                                                <span>{calculatedScores.final}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </TabsContent>
                         </Tabs>
                     </div>
-
-                    {evaluationType !== 'Avance' ? (
-                      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                          <CardContent>
-                              <div className='mb-4'>
-                                  <ScrollArea className="w-full whitespace-nowrap">
-                                      <TabsList>
-                                          {rubricsByType[evaluationType].map((rubric) => (
-                                              <TabsTrigger key={rubric.id} value={`rubric_${rubric.id}`}>
-                                                  {rubric.title}
-                                              </TabsTrigger>
-                                          ))}
-                                      </TabsList>
-                                      <ScrollBar orientation="horizontal" />
-                                  </ScrollArea>
-                              </div>
-                          </CardContent>
-
-                          {supervisionRubrics.map(rubric => (
-                            <TabsContent key={rubric.id} value={`rubric_${rubric.id}`} className="mt-0">
-                                  <CardContent className="space-y-8">
-                                      <div>
-                                          {renderRubricContent(rubric)}
-                                      </div>
-                                  </CardContent>
-                            </TabsContent>
-                          ))}
-                      </Tabs>
-                    ) : (
-                       <CardContent className="space-y-8">
-                            <div className="p-6 bg-black/20 rounded-lg">
-                                <h3 className="text-xl font-headline font-semibold text-white mb-4">Resumen de Calificación</h3>
-                                <div className="space-y-4">
-                                    {Object.entries(calculatedScores.individual).map(([key, value]) => (
-                                        <div key={key}>
-                                            <div className="flex justify-between items-center mb-1">
-                                                <span className="text-sm font-medium">{value.title}</span>
-                                                <span className="text-sm font-semibold">{value.score}%</span>
-                                            </div>
-                                            <Progress value={value.score} />
-                                        </div>
-                                    ))}
-                                    <Separator className="my-4"/>
-                                    <div className="flex justify-between items-center text-lg font-bold">
-                                        <span>Calificación Final Promedio</span>
-                                        <span>{calculatedScores.final}%</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    )}
                     
                     <CardContent>
                         <Separator className='my-6' />
@@ -383,8 +373,10 @@ export default function EvaluateSupervisionPage() {
                             </AlertDialog>
                         </div>
                     </CardContent>
-                </form>
-            </Card>
+                </Card>
+            </form>
         </div>
     )
 }
+
+    
