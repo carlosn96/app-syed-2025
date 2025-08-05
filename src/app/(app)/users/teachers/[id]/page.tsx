@@ -104,17 +104,15 @@ export default function TeacherProfilePage() {
         ? Math.round(teacherEvaluations.reduce((acc, e) => acc + e.overallRating, 0) / teacherEvaluations.length)
         : 0;
 
-    const evaluationPerformanceData = Object.values(teacherEvaluations.reduce((acc, e) => {
-        const dateKey = format(new Date(e.date), "dd/MM/yy");
-        if (!acc[dateKey]) {
-            acc[dateKey] = { date: dateKey, Calificación: 0, count: 0, sum: 0 };
-        }
-        acc[dateKey].sum += e.overallRating;
-        acc[dateKey].count++;
-        acc[dateKey].Calificación = Math.round(acc[dateKey].sum / acc[dateKey].count);
-        return acc;
-    }, {} as Record<string, { date: string; Calificación: number; count: number; sum: number }>))
-    .sort((a, b) => new Date(a.date.split('/').reverse().join('-')).getTime() - new Date(b.date.split('/').reverse().join('-')).getTime());
+    const sortedEvaluations = teacherEvaluations.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    let cumulativeSum = 0;
+    const evaluationPerformanceData = sortedEvaluations.map((e, index) => {
+        cumulativeSum += e.overallRating;
+        return {
+            date: format(new Date(e.date), "dd/MM/yy"),
+            Calificación: Math.round(cumulativeSum / (index + 1)),
+        };
+    });
 
     const evaluationsByGroup = teacherEvaluations.reduce((acc, evaluation) => {
         const student = users.find(u => u.correo === evaluation.student);
