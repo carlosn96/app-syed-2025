@@ -2,7 +2,7 @@
 
 const academicData = {
     "Administración": {
-      "Incorporada a la UdeG": {
+      "UdeG": {
         "1er Semestre": [
           "Administración I",
           "Contabilidad General",
@@ -138,7 +138,7 @@ const academicData = {
           "Seminario de tesis"
         ]
       },
-      "Incorporada a SICYT": {
+      "SICYT": {
         "1er Cuatrimestre": [
           "Contabilidad I",
           "Economía I",
@@ -205,7 +205,7 @@ const academicData = {
       }
     },
     "Arquitectura": {
-      "Incorporada a la UdeG": {
+      "UdeG": {
         "1er Semestre": [
           "Formación universitaria",
           "Configuración del espacio tridimensional a partir de geometría descriptiva",
@@ -301,7 +301,7 @@ const academicData = {
           "Proyecto 10: Desarrollo de proyecto terminal"
         ]
       },
-      "Incorporada a SICYT": {
+      "SICYT": {
         "1er Cuatrimestre": [
           "Taller de comunicación",
           "Introducción a la Representación Gráfica y el Diseño",
@@ -395,7 +395,7 @@ const academicData = {
       }
     },
     "Cirujano Dentista": {
-      "Incorporada a la UdeG": {
+      "UdeG": {
         "1er Semestre": [
           "Bioética y universidad",
           "Bioquímica humana",
@@ -500,7 +500,7 @@ const academicData = {
       }
     },
     "Ciencias de la Educación": {
-      "Incorporada a SICYT, Sabatina": {
+      "SICYT, Sabatina": {
         "1er Cuatrimestre": [
           "Filosofía educativa I",
           "Metodología de la investigación educativa I",
@@ -565,7 +565,7 @@ const academicData = {
           "Didáctica de la enseñanza de la segunda lengua II"
         ]
       },
-      "Incorporada a SICYT, Escolarizada": {
+      "SICYT, Escolarizada": {
         "1er Cuatrimestre": [
           "Filosofía educativa I",
           "Metodología de la investigación educativa I",
@@ -632,7 +632,7 @@ const academicData = {
       }
     },
     "Ciencias de la Comunicación": {
-      "Incorporada a SICYT": {
+      "SICYT": {
         "1er Cuatrimestre": [
           "Cabina de audio I",
           "Taller de Lectura y Redacción",
@@ -926,7 +926,7 @@ export interface Group {
 }
 
 export const groups: Group[] = [
-  { id: 1, name: 'COMPINCO2025A', career: 'Ciencias de la Computación', semester: 1, cycle: '2025-A', turno: 'Matutino', students: [4, 6] },
+  { id: 1, name: 'COMPINCO2025A', career: 'Ciencias de la Computación', semester: 1, cycle: '2025-A', turno: 'Matutino', students: [4, 6, 15] },
   { id: 2, name: 'ADMEM2025A', career: 'Administración de Empresas', semester: 2, cycle: '2025-A', turno: 'Vespertino', students: [] },
   { id: 3, name: 'INGMEC2026A', career: 'Ingeniería Mecánica', semester: 1, cycle: '2026-A', turno: 'Matutino', students: [] },
 ];
