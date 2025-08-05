@@ -90,9 +90,9 @@ export default function TeacherProfilePage() {
     const completedSupervisions = teacherSupervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
 
     const supervisionPerformanceData = completedSupervisions
-      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .sort((a, b) => (a.date?.getTime() || 0) - (b.date?.getTime() || 0))
       .map(s => ({
-        date: format(s.date, "dd/MM/yy"),
+        date: s.date ? format(s.date, "dd/MM/yy") : 'N/A',
         Calificación: s.score,
       }));
 
@@ -213,37 +213,43 @@ export default function TeacherProfilePage() {
                         </div>
                     </CardHeader>
                     <CardContent className="h-80 w-full pr-8">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart
-                                data={supervisionPerformanceData}
-                                margin={{
-                                    top: 10,
-                                    right: 30,
-                                    left: 0,
-                                    bottom: 0,
-                                }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
-                                <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={12} tickLine={false} axisLine={false} />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: 'hsl(var(--background) / 0.8)',
-                                        borderColor: 'hsl(var(--border))',
-                                        color: 'hsl(var(--foreground))',
-                                        borderRadius: 'var(--radius)'
+                        {supervisionPerformanceData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart
+                                    data={supervisionPerformanceData}
+                                    margin={{
+                                        top: 10,
+                                        right: 30,
+                                        left: 0,
+                                        bottom: 0,
                                     }}
-                                />
-                                <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeWidth={2} />
-                                <Area 
-                                    type="monotone" 
-                                    dataKey="Calificación" 
-                                    stroke="hsl(var(--primary))" 
-                                    fill="hsl(var(--primary) / 0.2)"
-                                    dot={<CustomDot />}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
+                                    <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={12} tickLine={false} axisLine={false} />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'hsl(var(--background) / 0.8)',
+                                            borderColor: 'hsl(var(--border))',
+                                            color: 'hsl(var(--foreground))',
+                                            borderRadius: 'var(--radius)'
+                                        }}
+                                    />
+                                    <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeWidth={2} />
+                                    <Area 
+                                        type="monotone" 
+                                        dataKey="Calificación" 
+                                        stroke="hsl(var(--primary))" 
+                                        fill="hsl(var(--primary) / 0.2)"
+                                        dot={<CustomDot />}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                             <div className="flex items-center justify-center h-full border-2 border-dashed border-muted rounded-xl">
+                                <p className="text-muted-foreground">Aún no hay datos de rendimiento.</p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>
@@ -260,7 +266,7 @@ export default function TeacherProfilePage() {
                 <Table>
                     <TableHeader>
                     <TableRow>
-                        <TableHead>Materia</TableHead>
+                        <TableHead>Carrera</TableHead>
                         <TableHead>Coordinador</TableHead>
                         <TableHead>Fecha</TableHead>
                         <TableHead>Estado</TableHead>
@@ -268,14 +274,14 @@ export default function TeacherProfilePage() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {teacherSupervisions.map((supervision) => (
+                    {teacherSupervisions.length > 0 ? teacherSupervisions.map((supervision) => (
                         <TableRow key={supervision.id}>
                         <TableCell className="font-medium">
-                            {supervision.subject}
+                            {supervision.career}
                         </TableCell>
                         <TableCell>{supervision.coordinator}</TableCell>
                         <TableCell>
-                            {format(supervision.date, "P", { locale: es })}
+                            {supervision.date ? format(supervision.date, "P", { locale: es }) : 'N/A'}
                         </TableCell>
                         <TableCell>
                             <Badge
@@ -292,7 +298,11 @@ export default function TeacherProfilePage() {
                             {supervision.score !== undefined ? `${supervision.score}%` : "N/A"}
                         </TableCell>
                         </TableRow>
-                    ))}
+                    )) : (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center h-24">No hay supervisiones registradas.</TableCell>
+                        </TableRow>
+                    )}
                     </TableBody>
                 </Table>
                 </CardContent>
