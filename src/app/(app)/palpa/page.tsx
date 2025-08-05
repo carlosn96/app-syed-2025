@@ -39,6 +39,8 @@ import { ProgressRing } from "@/components/ui/progress-ring"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/context/auth-context"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const getScoreColor = (score: number) => {
   if (score < 60) return 'hsl(var(--destructive))';
@@ -74,6 +76,7 @@ interface GroupEvaluationData {
 export default function PalpaPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'supervisions' | 'evaluations' | 'subjects'>('supervisions');
+  const isMobile = useIsMobile()
 
   const teacherData = useMemo(() => {
     if (!user || user.rol !== "teacher") return null;
@@ -179,6 +182,45 @@ export default function PalpaPage() {
   const { teacher, teacherFullName, teacherSupervisions, teacherSubjects, supervisionPerformanceData, averageSupervisionScore, groupPerformance } = teacherData;
   const nameInitial = teacher.nombre.charAt(0).toUpperCase();
 
+  const renderNav = () => {
+    const navOptions = [
+      { value: 'supervisions', label: 'Supervisiones', icon: ShieldCheck },
+      { value: 'evaluations', label: 'Evaluaciones', icon: BookUser },
+      { value: 'subjects', label: 'Materias', icon: Library },
+    ];
+
+    if (isMobile) {
+      return (
+        <Select onValueChange={(value) => setActiveTab(value as any)} defaultValue={activeTab}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Seleccionar sección" />
+          </SelectTrigger>
+          <SelectContent>
+            {navOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-2">
+        {navOptions.map(opt => {
+          const Icon = opt.icon;
+          return (
+            <Button
+              key={opt.value}
+              variant={activeTab === opt.value ? 'default' : 'outline'}
+              onClick={() => setActiveTab(opt.value as any)}
+            >
+              <Icon className="h-4 w-4 mr-2" />
+              {opt.label}
+            </Button>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
@@ -197,29 +239,7 @@ export default function PalpaPage() {
                 </p>
             </div>
         </div>
-        <div className="flex items-center gap-2">
-            <Button 
-                variant={activeTab === 'supervisions' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('supervisions')}
-            >
-                <ShieldCheck className="h-4 w-4 mr-2" />
-                Supervisiones
-            </Button>
-            <Button 
-                variant={activeTab === 'evaluations' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('evaluations')}
-            >
-                <BookUser className="h-4 w-4 mr-2" />
-                Evaluaciones
-            </Button>
-            <Button 
-                variant={activeTab === 'subjects' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('subjects')}
-            >
-                <Library className="h-4 w-4 mr-2" />
-                Materias
-            </Button>
-        </div>
+        {renderNav()}
       </div>
 
       {activeTab === 'supervisions' && (
