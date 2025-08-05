@@ -12,6 +12,7 @@ import {
   evaluations,
   subjects as allSubjects,
   schedules,
+  groups as allGroups,
 } from "@/lib/data"
 import {
   Card,
@@ -115,6 +116,25 @@ export default function TeacherProfilePage() {
     }, {} as Record<string, { date: string; Calificación: number; count: number; sum: number }>))
     .sort((a, b) => new Date(a.date.split('/').reverse().join('-')).getTime() - new Date(b.date.split('/').reverse().join('-')).getTime());
 
+    const evaluationsByGroup = teacherEvaluations.reduce((acc, evaluation) => {
+        const student = users.find(u => u.correo === evaluation.student);
+        const groupName = student?.grupo || 'Grupo Desconocido';
+        if (!acc[groupName]) {
+            acc[groupName] = {
+                evaluations: [],
+                averageRating: 0,
+            };
+        }
+        acc[groupName].evaluations.push(evaluation);
+        return acc;
+    }, {} as Record<string, { evaluations: typeof teacherEvaluations; averageRating: number }>);
+
+    for (const groupName in evaluationsByGroup) {
+        const groupData = evaluationsByGroup[groupName];
+        const totalRating = groupData.evaluations.reduce((sum, e) => sum + e.overallRating, 0);
+        groupData.averageRating = Math.round(totalRating / groupData.evaluations.length);
+    }
+
     return {
       teacher: teacherUser,
       teacherFullName,
@@ -125,6 +145,7 @@ export default function TeacherProfilePage() {
       averageSupervisionScore,
       averageEvaluationScore,
       evaluationPerformanceData,
+      evaluationsByGroup,
     }
   }, [teacherId]);
 
@@ -136,7 +157,7 @@ export default function TeacherProfilePage() {
     )
   }
 
-  const { teacher, teacherFullName, teacherSupervisions, teacherEvaluations, teacherSubjects, supervisionPerformanceData, averageSupervisionScore, averageEvaluationScore, evaluationPerformanceData } = teacherData;
+  const { teacher, teacherFullName, teacherSupervisions, teacherEvaluations, teacherSubjects, supervisionPerformanceData, averageSupervisionScore, averageEvaluationScore, evaluationPerformanceData, evaluationsByGroup } = teacherData;
 
   return (
     <div className="flex flex-col gap-8">
@@ -340,30 +361,51 @@ export default function TeacherProfilePage() {
                         )}
                     </CardContent>
             </Card>
-            <Card className="rounded-xl">
-                <CardHeader>
-                    <CardTitle>Comentarios de Alumnos</CardTitle>
-                    <CardDescription>
-                        Comentarios consolidados del grupo.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                    {teacherEvaluations.length > 0 ? teacherEvaluations.map((evaluation, index) => (
-                        <React.Fragment key={evaluation.id}>
-                        <div className="grid gap-2">
-                             <p className="text-sm text-muted-foreground italic">
-                            "{evaluation.feedback}"
-                            </p>
-                        </div>
-                        {index < teacherEvaluations.length - 1 && <Separator />}
-                        </React.Fragment>
-                    )) : (
+            {Object.keys(evaluationsByGroup).length > 0 ? (
+                Object.entries(evaluationsByGroup).map(([groupName, groupData]) => (
+                    <Card key={groupName} className="rounded-xl">
+                        <CardHeader>
+                             <div className="flex justify-between items-start">
+                                <div>
+                                    <CardTitle>Comentarios del Grupo: {groupName}</CardTitle>
+                                    <CardDescription>
+                                        Comentarios consolidados de los alumnos de este grupo.
+                                    </CardDescription>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm text-muted-foreground">Calificación Promedio</p>
+                                    <p className={`text-2xl font-bold rounded-md px-2 py-1`}>
+                                        <span style={{color: getScoreColor(groupData.averageRating)}}>
+                                            {groupData.averageRating}%
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="grid gap-6">
+                            {groupData.evaluations.map((evaluation, index) => (
+                                <React.Fragment key={evaluation.id}>
+                                    <div className="grid gap-2">
+                                        <p className="text-sm text-muted-foreground italic">"{evaluation.feedback}"</p>
+                                    </div>
+                                    {index < groupData.evaluations.length - 1 && <Separator />}
+                                </React.Fragment>
+                            ))}
+                        </CardContent>
+                    </Card>
+                ))
+            ) : (
+                <Card className="rounded-xl">
+                    <CardHeader>
+                        <CardTitle>Comentarios de Alumnos</CardTitle>
+                    </CardHeader>
+                    <CardContent>
                          <div className="flex items-center justify-center h-24 border-2 border-dashed border-muted rounded-xl">
                             <p className="text-muted-foreground">No hay evaluaciones de alumnos todavía.</p>
                         </div>
-                    )}
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            )}
         </div>
       )}
       
