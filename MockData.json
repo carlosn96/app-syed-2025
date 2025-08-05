@@ -1,6 +1,6 @@
 {
     "Administración": {
-      "Incorporada a la UdeG": {
+      "UdeG": {
         "1er Semestre": [
           "Administración I",
           "Contabilidad General",
@@ -136,7 +136,7 @@
           "Seminario de tesis"
         ]
       },
-      "Incorporada a SICYT": {
+      "SICYT": {
         "1er Cuatrimestre": [
           "Contabilidad I",
           "Economía I",
@@ -203,7 +203,7 @@
       }
     },
     "Arquitectura": {
-      "Incorporada a la UdeG": {
+      "UdeG": {
         "1er Semestre": [
           "Formación universitaria",
           "Configuración del espacio tridimensional a partir de geometría descriptiva",
@@ -299,7 +299,7 @@
           "Proyecto 10: Desarrollo de proyecto terminal"
         ]
       },
-      "Incorporada a SICYT": {
+      "SICYT": {
         "1er Cuatrimestre": [
           "Taller de comunicación",
           "Introducción a la Representación Gráfica y el Diseño",
@@ -393,7 +393,7 @@
       }
     },
     "Cirujano Dentista": {
-      "Incorporada a la UdeG": {
+      "UdeG": {
         "1er Semestre": [
           "Bioética y universidad",
           "Bioquímica humana",
@@ -498,7 +498,7 @@
       }
     },
     "Ciencias de la Educación": {
-      "Incorporada a SICYT, Sabatina": {
+      "SICYT, Sabatina": {
         "1er Cuatrimestre": [
           "Filosofía educativa I",
           "Metodología de la investigación educativa I",
@@ -563,7 +563,7 @@
           "Didáctica de la enseñanza de la segunda lengua II"
         ]
       },
-      "Incorporada a SICYT, Escolarizada": {
+      "SICYT, Escolarizada": {
         "1er Cuatrimestre": [
           "Filosofía educativa I",
           "Metodología de la investigación educativa I",
@@ -630,7 +630,7 @@
       }
     },
     "Ciencias de la Comunicación": {
-      "Incorporada a SICYT": {
+      "SICYT": {
         "1er Cuatrimestre": [
           "Cabina de audio I",
           "Taller de Lectura y Redacción",
@@ -707,3 +707,4 @@
       }
     }
   }
+    
