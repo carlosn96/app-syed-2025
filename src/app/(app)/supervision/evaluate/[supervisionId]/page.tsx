@@ -34,6 +34,7 @@ type EvaluationFormValues = {
     checkboxes?: { [key: string]: boolean },
     other?: string,
   },
+  classTopic?: string;
   finalComments?: string;
 }
 
@@ -68,6 +69,7 @@ const createValidationSchema = (rubrics: SupervisionRubric[]) => {
     return acc;
   }, {} as Record<string, z.ZodType<any, any>>);
   
+  schemaObject.classTopic = z.string().optional();
   schemaObject.finalComments = z.string().optional();
 
   return z.object(schemaObject);
@@ -125,6 +127,7 @@ export default function EvaluateSupervisionPage() {
                 acc[`rubric_${rubric.id}`] = defaultRubric;
                 return acc;
             }, {} as any),
+            classTopic: '',
             finalComments: ''
         }
     });
@@ -380,6 +383,20 @@ export default function EvaluateSupervisionPage() {
                                                     </div>
                                                 ))}
                                             </div>
+                                        </div>
+                                        <div className="p-6 bg-black/20 rounded-lg space-y-2">
+                                            <Label htmlFor="classTopic" className="text-base font-semibold">Tema de la Clase Evaluada</Label>
+                                            <Controller
+                                                name="classTopic"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Input
+                                                        id="classTopic"
+                                                        placeholder="Ej. Introducción a la Programación Orientada a Objetos"
+                                                        {...field}
+                                                    />
+                                                )}
+                                            />
                                         </div>
                                         <div className="p-6 bg-black/20 rounded-lg space-y-2">
                                             <Label htmlFor="finalComments" className="text-base font-semibold">Conclusiones y comentarios sobre la clase</Label>
