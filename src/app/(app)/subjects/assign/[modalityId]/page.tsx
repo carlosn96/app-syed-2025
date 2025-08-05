@@ -32,10 +32,12 @@ import {
   DialogDescription
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useAuth } from '@/context/auth-context'
 
 export default function ManageModalitySubjectsPage() {
     const params = useParams()
     const modalityId = Number(params.modalityId)
+    const { user } = useAuth()
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
     const [_, setForceRender] = useState(0); 
@@ -127,34 +129,40 @@ export default function ManageModalitySubjectsPage() {
                                 const semesterSubjects = subjectsForModality.filter(s => s.semester === semester);
                                 return (
                                     <TabsContent key={semester} value={`sem-${semester}`}>
-                                        <div className="flex justify-end my-4">
-                                            <Button onClick={() => handleOpenModal(semester)}>
-                                                Crear Materia
-                                            </Button>
-                                        </div>
+                                        {user?.rol === 'administrator' && (
+                                            <div className="flex justify-end my-4">
+                                                <Button onClick={() => handleOpenModal(semester)}>
+                                                    Crear Materia
+                                                </Button>
+                                            </div>
+                                        )}
                                         {semesterSubjects.length > 0 ? (
                                             <div className='rounded-xl overflow-hidden'>
                                                 <Table>
                                                     <TableHeader>
                                                         <TableRow>
                                                             <TableHead>Nombre</TableHead>
-                                                            <TableHead>Acciones</TableHead>
+                                                            {user?.rol === 'administrator' && (
+                                                                <TableHead>Acciones</TableHead>
+                                                            )}
                                                         </TableRow>
                                                     </TableHeader>
                                                     <TableBody>
                                                         {semesterSubjects.map(subject => (
                                                             <TableRow key={subject.id}>
                                                                 <TableCell className="font-medium">{subject.name}</TableCell>
-                                                                <TableCell>
-                                                                    <div className="flex gap-2">
-                                                                        <Button size="icon" variant="warning">
-                                                                            <Pencil className="h-4 w-4" />
-                                                                        </Button>
-                                                                        <Button size="icon" variant="destructive">
-                                                                            <Trash2 className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </div>
-                                                                </TableCell>
+                                                                {user?.rol === 'administrator' && (
+                                                                    <TableCell>
+                                                                        <div className="flex gap-2">
+                                                                            <Button size="icon" variant="warning">
+                                                                                <Pencil className="h-4 w-4" />
+                                                                            </Button>
+                                                                            <Button size="icon" variant="destructive">
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </div>
+                                                                    </TableCell>
+                                                                )}
                                                             </TableRow>
                                                         ))}
                                                     </TableBody>
@@ -165,7 +173,7 @@ export default function ManageModalitySubjectsPage() {
                                                 <h3 className="text-lg font-semibold text-white">Grado Vacío</h3>
                                                 <p className="text-muted-foreground mt-2">
                                                     Aún no se han creado materias para este grado. <br/>
-                                                    Usa el botón "Crear Nueva Materia" para empezar.
+                                                    {user?.rol === 'administrator' && `Usa el botón "Crear Nueva Materia" para empezar.`}
                                                 </p>
                                             </div>
                                         )}
@@ -188,3 +196,5 @@ export default function ManageModalitySubjectsPage() {
         </div>
     )
 }
+
+    

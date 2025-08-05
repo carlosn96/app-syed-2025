@@ -158,22 +158,24 @@ export default function CareerPlansPage() {
                                 <CardDescription>{modality.campus}</CardDescription>
                                 <p className="text-xs text-muted-foreground pt-2">{modality.coordinator}</p>
                             </div>
-                            <div className="flex gap-2">
-                                <Button size="icon" variant="warning">
-                                    <Pencil className="h-4 w-4" />
-                                    <span className="sr-only">Editar</span>
-                                </Button>
-                                <Button size="icon" variant="destructive">
-                                    <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Eliminar</span>
-                                </Button>
-                                <Button asChild size="icon" variant="default">
-                                    <Link href={`/subjects/assign/${modality.id}`}>
-                                        <Book className="h-4 w-4" />
-                                        <span className="sr-only">Gestionar Materias</span>
-                                    </Link>
-                                </Button>
-                            </div>
+                            {user?.rol === 'administrator' && (
+                              <div className="flex gap-2">
+                                  <Button size="icon" variant="warning">
+                                      <Pencil className="h-4 w-4" />
+                                      <span className="sr-only">Editar</span>
+                                  </Button>
+                                  <Button size="icon" variant="destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                      <span className="sr-only">Eliminar</span>
+                                  </Button>
+                                  <Button asChild size="icon" variant="default">
+                                      <Link href={`/subjects/assign/${modality.id}`}>
+                                          <Book className="h-4 w-4" />
+                                          <span className="sr-only">Gestionar Materias</span>
+                                      </Link>
+                                  </Button>
+                              </div>
+                            )}
                         </div>
                     </CardHeader>
                     <CardContent className="flex flex-col flex-grow pb-2">
@@ -194,3 +196,5 @@ export default function CareerPlansPage() {
     </div>
   );
 }
+
+    

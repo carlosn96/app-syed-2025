@@ -197,14 +197,18 @@ export default function CareersPage() {
                 </div>
             </div>
             <div className="flex gap-2 shrink-0">
-                <Button size="icon" variant="warning" onClick={(e) => e.stopPropagation()}>
-                    <Pencil className="h-4 w-4" />
-                    <span className="sr-only">Editar</span>
-                </Button>
-                <Button size="icon" variant="destructive" onClick={(e) => e.stopPropagation()}>
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Eliminar</span>
-                </Button>
+                {user?.rol === 'administrator' && (
+                  <>
+                    <Button size="icon" variant="warning" onClick={(e) => e.stopPropagation()}>
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Editar</span>
+                    </Button>
+                    <Button size="icon" variant="destructive" onClick={(e) => e.stopPropagation()}>
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Eliminar</span>
+                    </Button>
+                  </>
+                )}
                 <Button asChild size="icon" variant="success" onClick={(e) => e.stopPropagation()}>
                     <Link href={`/carreras/${encodeURIComponent(group.name)}`}>
                         <BookOpenCheck className="h-4 w-4" />
@@ -338,5 +342,7 @@ export default function CareersPage() {
     </div>
   )
 }
+
+    
 
     
