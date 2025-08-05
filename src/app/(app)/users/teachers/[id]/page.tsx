@@ -13,6 +13,7 @@ import {
   subjects as allSubjects,
   schedules,
   groups as allGroups,
+  Evaluation,
 } from "@/lib/data"
 import {
   Card,
@@ -62,6 +63,14 @@ const CustomDot = (props: any) => {
     );
 };
 
+interface GroupEvaluationData {
+  groupName: string;
+  careerName: string;
+  latestAverageRating: number;
+  performanceData: { date: string; Calificación: number }[];
+}
+
+
 export default function TeacherProfilePage() {
   const params = useParams();
   const teacherId = Number(params.id);
@@ -104,30 +113,45 @@ export default function TeacherProfilePage() {
         ? Math.round(teacherEvaluations.reduce((acc, e) => acc + e.overallRating, 0) / teacherEvaluations.length)
         : 0;
 
-    const sortedEvaluations = teacherEvaluations.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    let cumulativeSum = 0;
-    const evaluationPerformanceData = sortedEvaluations.map((e, index) => {
-        cumulativeSum += e.overallRating;
-        return {
-            date: format(new Date(e.date), "dd/MM/yy"),
-            Calificación: Math.round(cumulativeSum / (index + 1)),
-        };
-    });
-
     const evaluationsByGroup = teacherEvaluations.reduce((acc, evaluation) => {
         const groupName = evaluation.groupName || 'Grupo Desconocido';
         if (!acc[groupName]) {
-            acc[groupName] = { evaluations: [], averageRating: 0 };
+            acc[groupName] = [];
         }
-        acc[groupName].evaluations.push(evaluation);
+        acc[groupName].push(evaluation);
         return acc;
-    }, {} as Record<string, { evaluations: typeof teacherEvaluations, averageRating: number }>);
+    }, {} as Record<string, Evaluation[]>);
 
-    Object.keys(evaluationsByGroup).forEach(groupName => {
-        const group = evaluationsByGroup[groupName];
-        const totalRating = group.evaluations.reduce((sum, e) => sum + e.overallRating, 0);
-        group.averageRating = Math.round(totalRating / group.evaluations.length);
+
+    const groupPerformance: GroupEvaluationData[] = Object.entries(evaluationsByGroup).map(([groupName, groupEvaluations]) => {
+        const groupDetails = allGroups.find(g => g.name === groupName);
+        
+        const evaluationsByBatch = groupEvaluations.reduce((acc, ev) => {
+            const batchId = ev.evaluationBatchId || new Date(ev.date).toISOString().split('T')[0];
+            if (!acc[batchId]) {
+                acc[batchId] = { date: new Date(ev.date), ratings: [] };
+            }
+            acc[batchId].ratings.push(ev.overallRating);
+            return acc;
+        }, {} as Record<string, { date: Date, ratings: number[] }>);
+
+        const performanceData = Object.values(evaluationsByBatch)
+            .sort((a, b) => a.date.getTime() - b.date.getTime())
+            .map(batch => ({
+                date: format(batch.date, "dd/MM/yy"),
+                Calificación: Math.round(batch.ratings.reduce((sum, r) => sum + r, 0) / batch.ratings.length),
+            }));
+
+        const latestAverageRating = performanceData.length > 0 ? performanceData[performanceData.length - 1].Calificación : 0;
+        
+        return {
+            groupName,
+            careerName: groupDetails?.career || 'Carrera Desconocida',
+            latestAverageRating,
+            performanceData
+        };
     });
+
 
     return {
       teacher: teacherUser,
@@ -138,8 +162,7 @@ export default function TeacherProfilePage() {
       supervisionPerformanceData,
       averageSupervisionScore,
       averageEvaluationScore,
-      evaluationPerformanceData,
-      evaluationsByGroup,
+      groupPerformance,
     }
   }, [teacherId]);
 
@@ -151,7 +174,7 @@ export default function TeacherProfilePage() {
     )
   }
 
-  const { teacher, teacherFullName, teacherSupervisions, teacherSubjects, supervisionPerformanceData, averageSupervisionScore, averageEvaluationScore, evaluationPerformanceData, evaluationsByGroup } = teacherData;
+  const { teacher, teacherFullName, teacherSupervisions, teacherSubjects, supervisionPerformanceData, averageSupervisionScore, averageEvaluationScore, groupPerformance } = teacherData;
 
   return (
     <div className="flex flex-col gap-8">
@@ -313,95 +336,54 @@ export default function TeacherProfilePage() {
 
       {activeTab === 'evaluations' && (
         <div className="lg:col-span-3 grid grid-cols-1 gap-8">
-            <Card className="rounded-xl">
-                    <CardHeader>
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <CardTitle>Progresión de Evaluaciones</CardTitle>
-                                <CardDescription>Evolución del rendimiento según las evaluaciones de los alumnos.</CardDescription>
-                            </div>
-                            <div className="flex flex-col items-center">
-                                <ProgressRing value={averageEvaluationScore} />
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="h-80 w-full pr-8">
-                        {evaluationPerformanceData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart
-                                    data={evaluationPerformanceData}
-                                    margin={{
-                                        top: 10,
-                                        right: 30,
-                                        left: 0,
-                                        bottom: 0,
-                                    }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
-                                    <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={12} tickLine={false} axisLine={false} />
-                                    <Tooltip
-                                        contentStyle={{
-                                            backgroundColor: 'hsl(var(--background) / 0.8)',
-                                            borderColor: 'hsl(var(--border))',
-                                            color: 'hsl(var(--foreground))',
-                                            borderRadius: 'var(--radius)'
-                                        }}
-                                    />
-                                    <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeWidth={2} />
-                                    <Area 
-                                        type="monotone" 
-                                        dataKey="Calificación" 
-                                        stroke="hsl(var(--primary))" 
-                                        fill="hsl(var(--primary) / 0.2)"
-                                        dot={<CustomDot />}
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className="flex items-center justify-center h-full border-2 border-dashed border-muted rounded-xl">
-                                <p className="text-muted-foreground">Aún no hay datos de evaluaciones.</p>
-                            </div>
-                        )}
-                    </CardContent>
-            </Card>
-            {Object.keys(evaluationsByGroup).length > 0 ? (
-                Object.entries(evaluationsByGroup).map(([groupName, groupData]) => (
-                    <Card key={groupName} className="rounded-xl">
+            {groupPerformance.length > 0 ? (
+                groupPerformance.map(groupData => (
+                    <Card key={groupData.groupName} className="rounded-xl">
                         <CardHeader>
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <CardTitle>Historial de Evaluación: {groupName}</CardTitle>
-                                    <CardDescription>
-                                        Comentarios consolidados del grupo.
-                                    </CardDescription>
+                                    <CardTitle>Rendimiento: {groupData.groupName}</CardTitle>
+                                    <CardDescription>{groupData.careerName}</CardDescription>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-sm text-muted-foreground">Calificación Promedio</p>
-                                    <p className={`text-2xl font-bold rounded-md px-2 py-1`}>
-                                        <span style={{color: getScoreColor(groupData.averageRating)}}>
-                                            {groupData.averageRating}%
-                                        </span>
-                                    </p>
+                                <div className="flex flex-col items-center">
+                                    <ProgressRing value={groupData.latestAverageRating} />
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="grid gap-6">
-                            {groupData.evaluations.map((evaluation, index) => (
-                                <React.Fragment key={evaluation.id}>
-                                    <div className="grid gap-2">
-                                        <p className="text-sm text-muted-foreground italic">"{evaluation.feedback}"</p>
-                                    </div>
-                                    {index < groupData.evaluations.length - 1 && <Separator />}
-                                </React.Fragment>
-                            ))}
+                        <CardContent className="h-80 w-full pr-8">
+                             {groupData.performanceData.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart
+                                        data={groupData.performanceData}
+                                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                                    >
+                                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
+                                        <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                                        <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={12} tickLine={false} axisLine={false} />
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: 'hsl(var(--background) / 0.8)',
+                                                borderColor: 'hsl(var(--border))',
+                                                color: 'hsl(var(--foreground))',
+                                                borderRadius: 'var(--radius)'
+                                            }}
+                                        />
+                                        <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeWidth={2} />
+                                        <Area type="monotone" dataKey="Calificación" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" dot={<CustomDot />} />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className="flex items-center justify-center h-full border-2 border-dashed border-muted rounded-xl">
+                                    <p className="text-muted-foreground">Aún no hay datos de evaluaciones para este grupo.</p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 ))
             ) : (
-                <Card className="rounded-xl">
+                 <Card className="rounded-xl">
                     <CardHeader>
-                        <CardTitle>Comentarios de Alumnos</CardTitle>
+                        <CardTitle>Rendimiento de Evaluaciones</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center justify-center h-24 border-2 border-dashed border-muted rounded-xl">

@@ -5,6 +5,7 @@
 
 
 
+
 const academicData = {
     "Administración": {
       "UdeG": {
@@ -909,6 +910,7 @@ export interface Evaluation {
   feedback: string;
   date: string;
   overallRating: number;
+  evaluationBatchId?: string; // Used to group evaluations from the same "session"
   ratings: {
     clarity: EvaluationRating;
     engagement: EvaluationRating;
@@ -919,10 +921,17 @@ export interface Evaluation {
 
 
 export const evaluations: Evaluation[] = [
-  { id: 1, student: 'Alumno Anónimo', teacherName: 'Docente User Faculty', groupName: "COMPINCO2025A", feedback: '¡Clase genial, muy participativa!', date: '2024-05-10', overallRating: 100, ratings: { clarity: 'excelente', engagement: 'excelente', punctuality: 'excelente', knowledge: 'excelente' } },
-  { id: 2, student: 'Alumno Anónimo', teacherName: 'Docente User Faculty', groupName: "COMPINCO2025A", feedback: 'El profesor tiene mucho conocimiento pero el ritmo es un poco rápido.', date: '2024-05-11', overallRating: 80, ratings: { clarity: 'regular', engagement: 'bueno', punctuality: 'excelente', knowledge: 'excelente' } },
-  { id: 3, student: 'Alumno Anónimo', teacherName: 'John Doe Smith', groupName: "INGMEC2026A", feedback: 'Aprendí mucho. Los ejemplos prácticos fueron muy útiles.', date: '2024-05-12', overallRating: 90, ratings: { clarity: 'excelente', engagement: 'excelente', punctuality: 'bueno', knowledge: 'excelente' } },
-  { id: 4, student: 'Alumno Anónimo', teacherName: 'Docente User Faculty', groupName: "COMPINCO2025A", feedback: 'Necesita mejorar la puntualidad, pero las explicaciones son excelentes.', date: '2024-05-15', overallRating: 85, ratings: { clarity: 'excelente', engagement: 'bueno', punctuality: 'regular', knowledge: 'excelente' } },
+  // Teacher: Docente User Faculty, Group: COMPINCO2025A, Batch 1
+  { id: 1, student: 'Alumno Anónimo', teacherName: 'Docente User Faculty', groupName: "COMPINCO2025A", evaluationBatchId: "batch-1-compinco-faculty", feedback: '¡Clase genial, muy participativa!', date: '2024-04-10', overallRating: 100, ratings: { clarity: 'excelente', engagement: 'excelente', punctuality: 'excelente', knowledge: 'excelente' } },
+  { id: 2, student: 'Alumno Anónimo', teacherName: 'Docente User Faculty', groupName: "COMPINCO2025A", evaluationBatchId: "batch-1-compinco-faculty", feedback: 'El profesor tiene mucho conocimiento pero el ritmo es un poco rápido.', date: '2024-04-11', overallRating: 80, ratings: { clarity: 'bueno', engagement: 'bueno', punctuality: 'excelente', knowledge: 'excelente' } },
+  
+  // Teacher: Docente User Faculty, Group: COMPINCO2025A, Batch 2
+  { id: 4, student: 'Alumno Anónimo', teacherName: 'Docente User Faculty', groupName: "COMPINCO2025A", evaluationBatchId: "batch-2-compinco-faculty", feedback: 'Necesita mejorar la puntualidad, pero las explicaciones son excelentes.', date: '2024-05-15', overallRating: 90, ratings: { clarity: 'excelente', engagement: 'bueno', punctuality: 'bueno', knowledge: 'excelente' } },
+  
+  // Teacher: John Doe Smith, Group: INGMEC2026A
+  { id: 3, student: 'Alumno Anónimo', teacherName: 'John Doe Smith', groupName: "INGMEC2026A", evaluationBatchId: "batch-1-ingmec-doe", feedback: 'Aprendí mucho. Los ejemplos prácticos fueron muy útiles.', date: '2024-05-12', overallRating: 90, ratings: { clarity: 'excelente', engagement: 'excelente', punctuality: 'bueno', knowledge: 'excelente' } },
+  { id: 5, student: 'Alumno Anónimo', teacherName: 'John Doe Smith', groupName: "INGMEC2026A", evaluationBatchId: "batch-1-ingmec-doe", feedback: 'A veces se desvía del tema, pero en general bien.', date: '2024-05-12', overallRating: 70, ratings: { clarity: 'bueno', engagement: 'regular', punctuality: 'excelente', knowledge: 'bueno' } },
+
 ];
 
 export interface Group {
@@ -1202,6 +1211,7 @@ export const evaluationPeriods: EvaluationPeriod[] = [
     if (!a.startDate || !b.startDate) return 0;
     return b.startDate.getTime() - a.startDate.getTime()
 });
+
 
 
 
