@@ -1161,6 +1161,11 @@ export interface EvaluationPeriod {
   careers: string[];
 }
 
+const today = new Date();
+const oneWeekFromNow = new Date();
+oneWeekFromNow.setDate(today.getDate() + 7);
+
+
 export const evaluationPeriods: EvaluationPeriod[] = [
     {
         id: 1,
@@ -1175,5 +1180,15 @@ export const evaluationPeriods: EvaluationPeriod[] = [
         startDate: new Date("2024-02-01"),
         endDate: new Date("2024-02-15"),
         careers: ["Administración de Empresas", "Contaduría Pública"]
+    },
+    {
+        id: 3,
+        name: "Periodo Activo de Prueba",
+        startDate: today,
+        endDate: oneWeekFromNow,
+        careers: ["Ciencias de la Computación"]
     }
-].sort((a,b) => b.startDate.getTime() - a.startDate.getTime());
+].sort((a,b) => {
+    if (!a.startDate || !b.startDate) return 0;
+    return b.startDate.getTime() - a.startDate.getTime()
+});
