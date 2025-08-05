@@ -28,8 +28,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { CreateSupervisionForm } from "@/components/create-supervision-form"
-import { supervisions as allSupervisions, groups, Supervision } from "@/lib/data"
+import { CreateSupervisionForm } from "@/app/(app)/create-supervision-form"
+import { supervisions as allSupervisions, Supervision } from "@/lib/data"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
@@ -55,6 +55,7 @@ export default function SupervisionsPage() {
   const supervisionsByDate = useMemo(() => {
     const map = new Map<string, Supervision[]>();
     allSupervisions.forEach(s => {
+        if (!s.date) return;
         const dateKey = format(s.date, "yyyy-MM-dd");
         if (!map.has(dateKey)) {
             map.set(dateKey, []);
@@ -76,14 +77,10 @@ export default function SupervisionsPage() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return supervisions
-        .filter(s => s.date >= today && s.status === 'Programada')
+        .filter(s => s.date && s.date >= today && s.status === 'Programada')
         .slice(0, 5); // Take the next 5
   }, [supervisions]);
 
-
-  const getGroupName = (groupId: number) => {
-    return groups.find(g => g.id === groupId)?.name || "N/A";
-  }
 
   const handleDayClick = (day: Date, modifiers: any) => {
     if (modifiers.scheduled) {
@@ -123,7 +120,7 @@ export default function SupervisionsPage() {
                              <li key={s.id} className="flex items-start gap-3">
                                 <div>
                                     <p className="font-semibold text-sm text-white">{s.teacher}</p>
-                                    <p className="text-xs text-muted-foreground">{s.subject}</p>
+                                    <p className="text-xs text-muted-foreground">{s.career}</p>
                                     <p className="text-xs text-primary/80 font-mono">{s.startTime} - {s.endTime}</p>
                                 </div>
                             </li>
@@ -195,12 +192,12 @@ export default function SupervisionsPage() {
                             {upcomingSupervisions.map(s => (
                                 <li key={s.id} className="flex items-start gap-3">
                                     <div className="flex flex-col items-center justify-center p-2 bg-primary/20 rounded-md">
-                                        <span className="text-xs font-bold text-primary uppercase">{format(s.date, 'MMM', { locale: es })}</span>
-                                        <span className="text-lg font-bold text-white">{format(s.date, 'dd')}</span>
+                                        <span className="text-xs font-bold text-primary uppercase">{s.date ? format(s.date, 'MMM', { locale: es }) : ''}</span>
+                                        <span className="text-lg font-bold text-white">{s.date ? format(s.date, 'dd') : ''}</span>
                                     </div>
                                     <div>
                                         <p className="font-semibold text-sm">{s.teacher}</p>
-                                        <p className="text-xs text-muted-foreground">{s.subject}</p>
+                                        <p className="text-xs text-muted-foreground">{s.career}</p>
                                         <p className="text-xs text-primary/80 font-mono">{s.startTime} - {s.endTime}</p>
                                     </div>
                                 </li>
@@ -227,7 +224,7 @@ export default function SupervisionsPage() {
                         <CardHeader className="flex flex-row items-start justify-between">
                             <div>
                                 <CardTitle className="text-base">{supervision.teacher}</CardTitle>
-                                <CardDescription>{supervision.subject}</CardDescription>
+                                <CardDescription>{supervision.career}</CardDescription>
                             </div>
                             {user?.rol === 'coordinator' && (
                                 <div className="flex gap-2">
@@ -244,9 +241,8 @@ export default function SupervisionsPage() {
                         {user?.rol !== 'coordinator' && (
                             <p><span className="font-semibold">Coordinador:</span> {supervision.coordinator}</p>
                         )}
-                        <p><span className="font-semibold">Fecha:</span> {format(supervision.date, "P", { locale: es })}</p>
+                        <p><span className="font-semibold">Fecha:</span> {supervision.date ? format(supervision.date, "P", { locale: es }) : 'N/A'}</p>
                         <p><span className="font-semibold">Horario:</span> <span className="text-primary font-mono">{supervision.startTime} - {supervision.endTime}</span></p>
-                        <p><span className="font-semibold">Grupo:</span> {getGroupName(supervision.groupId)}</p>
                         <div className="flex items-center justify-between pt-2">
                             <Badge variant={supervision.status === 'Programada' ? 'warning' : 'success'}>
                                 {supervision.status}
@@ -264,9 +260,9 @@ export default function SupervisionsPage() {
                             <TableRow>
                                 <TableHead>Docente</TableHead>
                                 {user?.rol !== 'coordinator' && <TableHead>Coordinador</TableHead>}
+                                <TableHead>Carrera</TableHead>
                                 <TableHead>Fecha</TableHead>
                                 <TableHead>Horario</TableHead>
-                                <TableHead>Grupo</TableHead>
                                 <TableHead>Estado</TableHead>
                                 {user?.rol === 'coordinator' && <TableHead>Acciones</TableHead>}
                             </TableRow>
@@ -276,9 +272,9 @@ export default function SupervisionsPage() {
                                 <TableRow key={supervision.id}>
                                     <TableCell className="font-medium py-3">{supervision.teacher}</TableCell>
                                     {user?.rol !== 'coordinator' && <TableCell className="font-medium py-3">{supervision.coordinator}</TableCell>}
-                                    <TableCell className="py-3">{format(supervision.date, "P", { locale: es })}</TableCell>
+                                    <TableCell className="py-3">{supervision.career}</TableCell>
+                                    <TableCell className="py-3">{supervision.date ? format(supervision.date, "P", { locale: es }) : 'N/A'}</TableCell>
                                     <TableCell className="py-3 text-primary font-mono">{supervision.startTime} - {supervision.endTime}</TableCell>
-                                    <TableCell className="py-3">{getGroupName(supervision.groupId)}</TableCell>
                                     <TableCell className="py-3">
                                         <Badge variant={supervision.status === 'Programada' ? 'warning' : 'success'}>
                                             {supervision.status}
@@ -306,5 +302,3 @@ export default function SupervisionsPage() {
     </div>
   )
 }
-
-    

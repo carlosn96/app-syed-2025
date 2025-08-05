@@ -4,6 +4,7 @@
 
 
 
+
 const academicData = {
     "Administración": {
       "UdeG": {
@@ -847,11 +848,10 @@ export type EvaluationResult = {
 export interface Supervision {
     id: number;
     teacher: string;
-    subject: string;
+    career: string;
     coordinator: string;
-    date: Date;
+    date: Date | null;
     status: 'Programada' | 'Completada';
-    groupId: number;
     startTime: string;
     endTime: string;
     score?: number;
@@ -871,29 +871,29 @@ const getNextDateForDay = (dayOfWeek: number) => { // 0=Sun, 1=Mon, ...
 
 
 export const supervisions: Supervision[] = [
-    { id: 1, teacher: 'Docente User Faculty', subject: 'Introducción a la Programación', coordinator: 'Coordinador User', date: getNextDateForDay(1), status: 'Programada', groupId: 1, startTime: '07:00', endTime: '09:00' }, 
-    { id: 2, teacher: 'C.P. Luca Pacioli', subject: 'Contabilidad Financiera', coordinator: 'Laura García', date: getNextDateForDay(1), status: 'Programada', groupId: 2, startTime: '16:00', endTime: '18:00' }, 
-    { id: 3, teacher: 'Dr. Andrew Tanenbaum', subject: 'Fundamentos de Hardware', coordinator: 'Coordinador User', date: getNextDateForDay(2), status: 'Programada', groupId: 1, startTime: '08:00', endTime: '10:00' },
-    { id: 4, teacher: 'Dra. Ada Lovelace', subject: 'Estructuras de Datos', coordinator: 'Coordinador User', date: getNextDateForDay(3), status: 'Programada', groupId: 1, startTime: '09:00', endTime: '11:00' }, 
+    { id: 1, teacher: 'Docente User Faculty', career: 'Ciencias de la Computación', coordinator: 'Coordinador User', date: getNextDateForDay(1), status: 'Programada', startTime: '07:00', endTime: '09:00' }, 
+    { id: 2, teacher: 'C.P. Luca Pacioli', career: 'Administración', coordinator: 'Laura García', date: getNextDateForDay(1), status: 'Programada', startTime: '16:00', endTime: '18:00' }, 
+    { id: 3, teacher: 'Dr. Andrew Tanenbaum', career: 'Ciencias de la Computación', coordinator: 'Coordinador User', date: getNextDateForDay(2), status: 'Programada', startTime: '08:00', endTime: '10:00' },
+    { id: 4, teacher: 'Dra. Ada Lovelace', career: 'Ciencias de la Computación', coordinator: 'Coordinador User', date: getNextDateForDay(3), status: 'Programada', startTime: '09:00', endTime: '11:00' }, 
     
     // -- Completed Supervisions with scores --
     // Teacher: Docente User Faculty
-    { id: 5, teacher: 'Docente User Faculty', subject: 'Matemáticas Discretas', coordinator: 'Coordinador User', date: new Date("2024-03-15"), status: 'Completada', groupId: 1, startTime: '10:00', endTime: '12:00', score: 85},
-    { id: 6, teacher: 'Docente User Faculty', subject: 'Lógica Computacional', coordinator: 'Coordinador User', date: new Date("2024-04-22"), status: 'Completada', groupId: 1, startTime: '10:00', endTime: '12:00', score: 88},
-    { id: 7, teacher: 'Docente User Faculty', subject: 'Ingeniería de Software', coordinator: 'Coordinador User', date: new Date("2024-05-20"), status: 'Completada', groupId: 1, startTime: '10:00', endTime: '12:00', score: 92},
+    { id: 5, teacher: 'Docente User Faculty', career: 'Ciencias de la Computación', coordinator: 'Coordinador User', date: new Date("2024-03-15"), status: 'Completada', startTime: '10:00', endTime: '12:00', score: 85},
+    { id: 6, teacher: 'Docente User Faculty', career: 'Ciencias de la Computación', coordinator: 'Coordinador User', date: new Date("2024-04-22"), status: 'Completada', startTime: '10:00', endTime: '12:00', score: 88},
+    { id: 7, teacher: 'Docente User Faculty', career: 'Ciencias de la Computación', coordinator: 'Coordinador User', date: new Date("2024-05-20"), status: 'Completada', startTime: '10:00', endTime: '12:00', score: 92},
     
     // Teacher: John Doe Smith
-    { id: 8, teacher: 'John Doe Smith', subject: 'Termodinámica', coordinator: 'Carlos Martínez', date: new Date("2024-03-10"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 58},
-    { id: 9, teacher: 'John Doe Smith', subject: 'Mecánica de Fluidos', coordinator: 'Carlos Martínez', date: new Date("2024-04-15"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 62},
-    { id: 12, teacher: 'John Doe Smith', subject: 'Diseño Asistido por Computadora (CAD)', coordinator: 'Carlos Martínez', date: new Date("2024-05-18"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 68},
-    { id: 13, teacher: 'John Doe Smith', subject: 'Termodinámica', coordinator: 'Carlos Martínez', date: new Date("2024-02-12"), status: 'Completada', groupId: 3, startTime: '10:00', endTime: '12:00', score: 55},
+    { id: 8, teacher: 'John Doe Smith', career: 'Arquitectura', coordinator: 'Carlos Martínez', date: new Date("2024-03-10"), status: 'Completada', startTime: '10:00', endTime: '12:00', score: 58},
+    { id: 9, teacher: 'John Doe Smith', career: 'Arquitectura', coordinator: 'Carlos Martínez', date: new Date("2024-04-15"), status: 'Completada', startTime: '10:00', endTime: '12:00', score: 62},
+    { id: 12, teacher: 'John Doe Smith', career: 'Arquitectura', coordinator: 'Carlos Martínez', date: new Date("2024-05-18"), status: 'Completada', startTime: '10:00', endTime: '12:00', score: 68},
+    { id: 13, teacher: 'John Doe Smith', career: 'Arquitectura', coordinator: 'Carlos Martínez', date: new Date("2024-02-12"), status: 'Completada', startTime: '10:00', endTime: '12:00', score: 55},
 
 
     // Teacher: Dra. Ada Lovelace
-    { id: 10, teacher: 'Dra. Ada Lovelace', subject: 'Programación Orientada a Objetos', coordinator: 'Coordinador User', date: new Date("2024-05-01"), status: 'Completada', groupId: 1, startTime: '09:00', endTime: '11:00', score: 98},
+    { id: 10, teacher: 'Dra. Ada Lovelace', career: 'Ciencias de la Computación', coordinator: 'Coordinador User', date: new Date("2024-05-01"), status: 'Completada', startTime: '09:00', endTime: '11:00', score: 98},
 
     // Teacher: Prof. Philip Kotler
-    { id: 11, teacher: 'Prof. Philip Kotler', subject: 'Principios de Marketing', coordinator: 'Laura García', date: new Date("2024-05-20"), status: 'Completada', groupId: 2, startTime: '18:00', endTime: '20:00', score: 95 },
+    { id: 11, teacher: 'Prof. Philip Kotler', career: 'Administración', coordinator: 'Laura García', date: new Date("2024-05-20"), status: 'Completada', startTime: '18:00', endTime: '20:00', score: 95 },
 ].sort((a, b) => {
     if (!a.date || !b.date) return 0;
     return b.date.getTime() - a.date.getTime()
@@ -1166,8 +1166,8 @@ export const evaluationRubrics: EvaluationRubric[] = [
 export interface EvaluationPeriod {
   id: number;
   name: string;
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
   careers: string[];
 }
 
@@ -1202,6 +1202,7 @@ export const evaluationPeriods: EvaluationPeriod[] = [
     if (!a.startDate || !b.startDate) return 0;
     return b.startDate.getTime() - a.startDate.getTime()
 });
+
 
 
 

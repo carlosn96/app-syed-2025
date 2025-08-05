@@ -86,9 +86,9 @@ export default function PalpaPage() {
     const completedSupervisions = teacherSupervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
 
     const supervisionPerformanceData = completedSupervisions
-      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .sort((a, b) => (a.date?.getTime() || 0) - (b.date?.getTime() || 0))
       .map(s => ({
-        date: format(s.date, "dd/MM/yy"),
+        date: s.date ? format(s.date, "dd/MM/yy") : 'N/A',
         Calificación: s.score,
       }));
 
@@ -270,7 +270,7 @@ export default function PalpaPage() {
                 <Table>
                     <TableHeader>
                     <TableRow>
-                        <TableHead>Materia</TableHead>
+                        <TableHead>Carrera</TableHead>
                         <TableHead>Coordinador</TableHead>
                         <TableHead>Fecha</TableHead>
                         <TableHead>Estado</TableHead>
@@ -281,11 +281,11 @@ export default function PalpaPage() {
                     {teacherSupervisions.length > 0 ? teacherSupervisions.map((supervision) => (
                         <TableRow key={supervision.id}>
                         <TableCell className="font-medium">
-                            {supervision.subject}
+                            {supervision.career}
                         </TableCell>
                         <TableCell>{supervision.coordinator}</TableCell>
                         <TableCell>
-                            {format(supervision.date, "P", { locale: es })}
+                            {supervision.date ? format(supervision.date, "P", { locale: es }) : 'N/A'}
                         </TableCell>
                         <TableCell>
                             <Badge

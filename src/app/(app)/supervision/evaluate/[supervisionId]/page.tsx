@@ -342,7 +342,7 @@ export default function EvaluateSupervisionPage() {
                     <CardHeader>
                         <CardTitle>Evaluación de Supervisión</CardTitle>
                         <CardDescription>
-                            Docente: <span className='text-primary'>{supervision.teacher}</span> | Materia: <span className='text-primary'>{supervision.subject}</span>
+                            Docente: <span className='text-primary'>{supervision.teacher}</span> | Carrera: <span className='text-primary'>{supervision.career}</span>
                         </CardDescription>
                     </CardHeader>
                     

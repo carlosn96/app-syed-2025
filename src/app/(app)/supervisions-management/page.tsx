@@ -28,7 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { CreateSupervisionForm } from "@/components/create-supervision-form"
+import { CreateSupervisionForm } from "@/app/(app)/create-supervision-form"
 import { supervisions as allSupervisions, groups } from "@/lib/data"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -49,11 +49,6 @@ export default function SupervisionsManagementPage() {
     }
     return allSupervisions;
   }, [user]);
-
-
-  const getGroupName = (groupId: number) => {
-    return groups.find(g => g.id === groupId)?.name || "N/A";
-  }
 
   const getScoreColor = (score: number) => {
     if (score < 60) return 'hsl(var(--destructive))';
@@ -82,7 +77,7 @@ export default function SupervisionsManagementPage() {
                         <CardHeader className="flex flex-row items-start justify-between">
                             <div>
                                 <CardTitle className="text-base">{supervision.teacher}</CardTitle>
-                                <CardDescription>{supervision.subject}</CardDescription>
+                                <CardDescription>{supervision.career}</CardDescription>
                             </div>
                             {user?.rol === 'coordinator' && (
                                 <div className="flex gap-2">
@@ -110,9 +105,8 @@ export default function SupervisionsManagementPage() {
                         {user?.rol !== 'coordinator' && (
                             <p><span className="font-semibold">Coordinador:</span> {supervision.coordinator}</p>
                         )}
-                        <p><span className="font-semibold">Fecha:</span> {format(supervision.date, "P", { locale: es })}</p>
+                        <p><span className="font-semibold">Fecha:</span> {supervision.date ? format(supervision.date, "P", { locale: es }) : 'N/A'}</p>
                         <p><span className="font-semibold">Horario:</span> <span className="text-primary font-mono">{supervision.startTime} - {supervision.endTime}</span></p>
-                        <p><span className="font-semibold">Grupo:</span> {getGroupName(supervision.groupId)}</p>
                         <div className="flex items-center justify-between pt-2">
                             <Badge variant={supervision.status === 'Programada' ? 'warning' : 'success'}>
                                 {supervision.status}
@@ -135,9 +129,9 @@ export default function SupervisionsManagementPage() {
                             <TableRow>
                                 <TableHead>Docente</TableHead>
                                 {user?.rol !== 'coordinator' && <TableHead>Coordinador</TableHead>}
+                                <TableHead>Carrera</TableHead>
                                 <TableHead>Fecha</TableHead>
                                 <TableHead>Horario</TableHead>
-                                <TableHead>Grupo</TableHead>
                                 <TableHead>Estado</TableHead>
                                 <TableHead>Calificación</TableHead>
                                 {user?.rol === 'coordinator' && <TableHead>Acciones</TableHead>}
@@ -148,9 +142,9 @@ export default function SupervisionsManagementPage() {
                                 <TableRow key={supervision.id}>
                                     <TableCell className="font-medium py-3">{supervision.teacher}</TableCell>
                                     {user?.rol !== 'coordinator' && <TableCell className="font-medium py-3">{supervision.coordinator}</TableCell>}
-                                    <TableCell className="py-3">{format(supervision.date, "P", { locale: es })}</TableCell>
+                                    <TableCell className="py-3">{supervision.career}</TableCell>
+                                    <TableCell className="py-3">{supervision.date ? format(supervision.date, "P", { locale: es }) : 'N/A'}</TableCell>
                                     <TableCell className="py-3 text-primary font-mono">{supervision.startTime} - {supervision.endTime}</TableCell>
-                                    <TableCell className="py-3">{getGroupName(supervision.groupId)}</TableCell>
                                     <TableCell className="py-3">
                                         <Badge variant={supervision.status === 'Programada' ? 'warning' : 'success'}>
                                             {supervision.status}
