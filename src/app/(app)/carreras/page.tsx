@@ -207,14 +207,14 @@ export default function CareersPage() {
                         <Trash2 className="h-4 w-4" />
                         <span className="sr-only">Eliminar</span>
                     </Button>
+                    <Button asChild size="icon" variant="success" onClick={(e) => e.stopPropagation()}>
+                        <Link href={`/carreras/${encodeURIComponent(group.name)}`}>
+                            <BookOpenCheck className="h-4 w-4" />
+                            <span className="sr-only">Planes de estudio</span>
+                        </Link>
+                    </Button>
                   </>
                 )}
-                <Button asChild size="icon" variant="success" onClick={(e) => e.stopPropagation()}>
-                    <Link href={`/carreras/${encodeURIComponent(group.name)}`}>
-                        <BookOpenCheck className="h-4 w-4" />
-                        <span className="sr-only">Planes de estudio</span>
-                    </Link>
-                </Button>
             </div>
         </div>
     );
