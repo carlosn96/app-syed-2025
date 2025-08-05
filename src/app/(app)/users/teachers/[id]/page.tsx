@@ -88,7 +88,7 @@ export default function TeacherProfilePage() {
     
     const completedSupervisions = teacherSupervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
 
-    const performanceData = completedSupervisions
+    const supervisionPerformanceData = completedSupervisions
       .sort((a, b) => a.date.getTime() - b.date.getTime())
       .map(s => ({
         date: format(s.date, "dd/MM/yy"),
@@ -103,15 +103,28 @@ export default function TeacherProfilePage() {
         ? Math.round(teacherEvaluations.reduce((acc, e) => acc + e.overallRating, 0) / teacherEvaluations.length)
         : 0;
 
+    const evaluationPerformanceData = Object.values(teacherEvaluations.reduce((acc, e) => {
+        const dateKey = format(new Date(e.date), "dd/MM/yy");
+        if (!acc[dateKey]) {
+            acc[dateKey] = { date: dateKey, Calificación: 0, count: 0, sum: 0 };
+        }
+        acc[dateKey].sum += e.overallRating;
+        acc[dateKey].count++;
+        acc[dateKey].Calificación = Math.round(acc[dateKey].sum / acc[dateKey].count);
+        return acc;
+    }, {} as Record<string, { date: string; Calificación: number; count: number; sum: number }>))
+    .sort((a, b) => new Date(a.date.split('/').reverse().join('-')).getTime() - new Date(b.date.split('/').reverse().join('-')).getTime());
+
     return {
       teacher: teacherUser,
       teacherFullName,
       teacherSupervisions,
       teacherEvaluations,
       teacherSubjects,
-      performanceData,
+      supervisionPerformanceData,
       averageSupervisionScore,
-      averageEvaluationScore
+      averageEvaluationScore,
+      evaluationPerformanceData,
     }
   }, [teacherId]);
 
@@ -123,7 +136,7 @@ export default function TeacherProfilePage() {
     )
   }
 
-  const { teacher, teacherFullName, teacherSupervisions, teacherEvaluations, teacherSubjects, performanceData, averageSupervisionScore, averageEvaluationScore } = teacherData;
+  const { teacher, teacherFullName, teacherSupervisions, teacherEvaluations, teacherSubjects, supervisionPerformanceData, averageSupervisionScore, averageEvaluationScore, evaluationPerformanceData } = teacherData;
 
   return (
     <div className="flex flex-col gap-8">
@@ -187,7 +200,7 @@ export default function TeacherProfilePage() {
                     <CardContent className="h-80 w-full pr-8">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
-                                data={performanceData}
+                                data={supervisionPerformanceData}
                                 margin={{
                                     top: 10,
                                     right: 30,
@@ -274,26 +287,67 @@ export default function TeacherProfilePage() {
       )}
 
       {activeTab === 'evaluations' && (
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 grid grid-cols-1 gap-8">
+            <Card className="rounded-xl">
+                    <CardHeader>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <CardTitle>Progresión de Evaluaciones</CardTitle>
+                                <CardDescription>Evolución del rendimiento según las evaluaciones de los alumnos.</CardDescription>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <ProgressRing value={averageEvaluationScore} />
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="h-80 w-full pr-8">
+                        {evaluationPerformanceData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart
+                                    data={evaluationPerformanceData}
+                                    margin={{
+                                        top: 10,
+                                        right: 30,
+                                        left: 0,
+                                        bottom: 0,
+                                    }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
+                                    <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={12} tickLine={false} axisLine={false} />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'hsl(var(--background) / 0.8)',
+                                            borderColor: 'hsl(var(--border))',
+                                            color: 'hsl(var(--foreground))',
+                                            borderRadius: 'var(--radius)'
+                                        }}
+                                    />
+                                    <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeWidth={2} />
+                                    <Area 
+                                        type="monotone" 
+                                        dataKey="Calificación" 
+                                        stroke="hsl(var(--primary))" 
+                                        fill="hsl(var(--primary) / 0.2)"
+                                        dot={<CustomDot />}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="flex items-center justify-center h-full border-2 border-dashed border-muted rounded-xl">
+                                <p className="text-muted-foreground">Aún no hay datos de evaluaciones.</p>
+                            </div>
+                        )}
+                    </CardContent>
+            </Card>
             <Card className="rounded-xl">
                 <CardHeader>
-                     <div className="flex justify-between items-start">
-                        <div>
-                            <CardTitle>Evaluación de Alumnos</CardTitle>
-                            <CardDescription>
-                                Calificación promedio y comentarios consolidados del grupo.
-                            </CardDescription>
-                        </div>
-                         <div className="flex flex-col items-center">
-                           <p className="text-sm text-muted-foreground">Promedio General</p>
-                           <p className={`text-3xl font-bold`} style={{color: getScoreColor(averageEvaluationScore)}}>
-                                {averageEvaluationScore}%
-                            </p>
-                        </div>
-                    </div>
+                    <CardTitle>Comentarios de Alumnos</CardTitle>
+                    <CardDescription>
+                        Comentarios consolidados del grupo.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-6">
-                    <h4 className="font-semibold text-white">Comentarios Recibidos</h4>
                     {teacherEvaluations.length > 0 ? teacherEvaluations.map((evaluation, index) => (
                         <React.Fragment key={evaluation.id}>
                         <div className="grid gap-2">
