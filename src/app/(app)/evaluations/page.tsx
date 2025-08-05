@@ -71,16 +71,18 @@ export default function EvaluationsPage() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return evaluationPeriods
-        .filter(p => p.endDate >= today)
-        .sort((a,b) => a.startDate.getTime() - b.startDate.getTime())
+        .filter(p => new Date(p.endDate) >= today)
+        .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
         .slice(0, 5);
   }, []);
 
   const getStatus = (period: EvaluationPeriod) => {
     const today = new Date();
     today.setHours(0,0,0,0);
-    if (today < period.startDate) return { text: 'Programado', variant: 'warning' as const };
-    if (today > period.endDate) return { text: 'Finalizado', variant: 'destructive' as const };
+    const startDate = new Date(period.startDate);
+    const endDate = new Date(period.endDate);
+    if (today < startDate) return { text: 'Programado', variant: 'warning' as const };
+    if (today > endDate) return { text: 'Finalizado', variant: 'destructive' as const };
     return { text: 'Activo', variant: 'success' as const };
   }
 
@@ -96,7 +98,7 @@ export default function EvaluationsPage() {
 
   const activeEvaluationPeriod = useMemo(() => {
       const today = new Date();
-      return evaluationPeriods.find(p => today >= p.startDate && today <= p.endDate);
+      return evaluationPeriods.find(p => today >= new Date(p.startDate) && today <= new Date(p.endDate));
   }, []);
 
 
@@ -206,14 +208,14 @@ export default function EvaluationsPage() {
                             {upcomingPeriods.map(p => (
                                 <li key={p.id} className="flex items-start gap-3">
                                     <div className="flex flex-col items-center justify-center p-2 bg-primary/20 rounded-md">
-                                        <span className="text-xs font-bold text-primary uppercase">{format(p.startDate, 'MMM', { locale: es })}</span>
-                                        <span className="text-lg font-bold text-white">{format(p.startDate, 'dd')}</span>
+                                        <span className="text-xs font-bold text-primary uppercase">{format(new Date(p.startDate), 'MMM', { locale: es })}</span>
+                                        <span className="text-lg font-bold text-white">{format(new Date(p.startDate), 'dd')}</span>
                                     </div>
                                     <div>
                                         <p className="font-semibold text-sm">{p.name}</p>
                                         <p className="text-xs text-muted-foreground">{p.careers.length} carreras</p>
                                         <p className="text-xs text-primary/80 font-mono">
-                                            {format(p.startDate, 'P')} - {format(p.endDate, 'P')}
+                                            {format(new Date(p.startDate), 'P')} - {format(new Date(p.endDate), 'P')}
                                         </p>
                                     </div>
                                 </li>
@@ -251,8 +253,8 @@ export default function EvaluationsPage() {
                                 return (
                                     <TableRow key={period.id}>
                                         <TableCell className="font-medium py-3">{period.name}</TableCell>
-                                        <TableCell className="py-3">{format(period.startDate, "P", { locale: es })}</TableCell>
-                                        <TableCell className="py-3">{format(period.endDate, "P", { locale: es })}</TableCell>
+                                        <TableCell className="py-3">{format(new Date(period.startDate), "P", { locale: es })}</TableCell>
+                                        <TableCell className="py-3">{format(new Date(period.endDate), "P", { locale: es })}</TableCell>
                                         <TableCell className="py-3">{period.careers.join(', ')}</TableCell>
                                         <TableCell className="py-3">
                                             <Badge variant={status.variant}>
