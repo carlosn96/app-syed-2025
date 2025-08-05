@@ -19,21 +19,40 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { FloatingBackButton } from '@/components/ui/floating-back-button';
 import { useToast } from '@/hooks/use-toast';
 import { Star } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+
+
+const evaluationOptions = [
+  { value: 'excelente', label: 'Excelente' },
+  { value: 'bueno', label: 'Bueno' },
+  { value: 'regular', label: 'Regular' },
+  { value: 'necesita_mejorar', label: 'Necesita Mejorar' },
+  { value: 'deficiente', label: 'Deficiente' },
+] as const;
 
 const evaluationSchema = z.object({
-  clarity: z.array(z.number()).default([5]),
-  engagement: z.array(z.number()).default([5]),
-  punctuality: z.array(z.number()).default([5]),
-  knowledge: z.array(z.number()).default([5]),
+  clarity: z.enum(['excelente', 'bueno', 'regular', 'necesita_mejorar', 'deficiente'], { required_error: 'Debes seleccionar una opción.' }),
+  engagement: z.enum(['excelente', 'bueno', 'regular', 'necesita_mejorar', 'deficiente'], { required_error: 'Debes seleccionar una opción.' }),
+  punctuality: z.enum(['excelente', 'bueno', 'regular', 'necesita_mejorar', 'deficiente'], { required_error: 'Debes seleccionar una opción.' }),
+  knowledge: z.enum(['excelente', 'bueno', 'regular', 'necesita_mejorar', 'deficiente'], { required_error: 'Debes seleccionar una opción.' }),
   feedback: z.string().min(10, { message: 'Por favor, proporciona retroalimentación de al menos 10 caracteres.' }),
 });
 
 type EvaluationFormValues = z.infer<typeof evaluationSchema>;
+
+const ratingMap: Record<EvaluationFormValues[keyof Omit<EvaluationFormValues, 'feedback'>], number> = {
+  excelente: 5,
+  bueno: 4,
+  regular: 3,
+  necesita_mejorar: 2,
+  deficiente: 1,
+};
+
 
 export default function StudentEvaluationPage() {
   const params = useParams();
@@ -48,25 +67,28 @@ export default function StudentEvaluationPage() {
     resolver: zodResolver(evaluationSchema),
   });
   
-  const { control, handleSubmit, watch } = form;
-  const watchedValues = watch();
+  const { control, handleSubmit } = form;
 
   const onSubmit = (data: EvaluationFormValues) => {
     if (!user || !teacher) return;
     
+    const clarityScore = ratingMap[data.clarity];
+    const engagementScore = ratingMap[data.engagement];
+    const punctualityScore = ratingMap[data.punctuality];
+    const knowledgeScore = ratingMap[data.knowledge];
+
     const newEvaluation = {
         id: Math.max(...evaluations.map(e => e.id), 0) + 1,
         student: `${user.nombre} ${user.apellido_paterno}`,
         teacherName: teacher.name,
         feedback: data.feedback,
         date: new Date().toISOString(),
-        overallRating: Math.round((data.clarity[0] + data.engagement[0] + data.punctuality[0] + data.knowledge[0]) / 4),
+        overallRating: Math.round((clarityScore + engagementScore + punctualityScore + knowledgeScore) / 4),
         ratings: {
-            clarity: data.clarity[0],
-            engagement: data.engagement[0],
-            punctuality: data.punctuality[0],
-            knowledge: data.knowledge[0],
-            feedback: 0
+            clarity: data.clarity,
+            engagement: data.engagement,
+            punctuality: data.punctuality,
+            knowledge: data.knowledge,
         }
     };
 
@@ -90,7 +112,7 @@ export default function StudentEvaluationPage() {
     { name: 'engagement', label: 'Compromiso y Motivación' },
     { name: 'punctuality', label: 'Puntualidad y Organización' },
     { name: 'knowledge', label: 'Dominio del Tema' },
-  ];
+  ] as const;
 
   return (
     <div className="flex flex-col gap-8">
@@ -100,49 +122,58 @@ export default function StudentEvaluationPage() {
           <CardHeader>
             <CardTitle>Evaluación para {teacher.name}</CardTitle>
             <CardDescription>
-              Tus respuestas son anónimas. Califica de 1 a 10.
+              Tus respuestas son anónimas. Selecciona la opción que mejor describa el desempeño del docente.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-8">
-            {ratingCategories.map(category => (
+            {ratingCategories.map((category, index) => (
                 <div key={category.name}>
                     <Controller
-                        name={category.name as keyof EvaluationFormValues}
+                        name={category.name}
                         control={control}
-                        render={({ field }) => (
+                        render={({ field, fieldState }) => (
                             <FormItem>
-                                <div className="flex justify-between items-center mb-2">
-                                    <Label htmlFor={category.name}>{category.label}</Label>
-                                    <span className="font-bold text-lg text-primary w-12 text-center">
-                                      {field.value?.[0] || 5}
-                                    </span>
-                                </div>
+                                <Label className="text-base">{category.label}</Label>
                                 <FormControl>
-                                    <Slider
-                                        id={category.name}
-                                        min={1}
-                                        max={10}
-                                        step={1}
-                                        value={field.value}
+                                    <RadioGroup
                                         onValueChange={field.onChange}
-                                    />
+                                        defaultValue={field.value}
+                                        className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-2"
+                                    >
+                                        {evaluationOptions.map(option => (
+                                            <FormItem key={option.value} className="flex items-center space-x-3 space-y-0">
+                                                <FormControl>
+                                                    <RadioGroupItem value={option.value} id={`${category.name}-${option.value}`} />
+                                                </FormControl>
+                                                <Label htmlFor={`${category.name}-${option.value}`} className="font-normal">
+                                                    {option.label}
+                                                </Label>
+                                            </FormItem>
+                                        ))}
+                                    </RadioGroup>
                                 </FormControl>
+                                 {fieldState.error && <p className="text-sm text-destructive mt-2">{fieldState.error.message}</p>}
                             </FormItem>
                         )}
                     />
+                    {index < ratingCategories.length -1 && <Separator className="mt-8" />}
                 </div>
             ))}
+             <Separator className="mt-8"/>
              <div>
                 <Controller
                     name="feedback"
                     control={control}
                     render={({ field, fieldState }) => (
                         <FormItem>
-                             <Label htmlFor="feedback">Comentarios Adicionales</Label>
+                             <Label htmlFor="feedback" className="text-base">Comentarios Adicionales</Label>
+                             <CardDescription>Proporciona retroalimentación constructiva sobre el desempeño del docente.</CardDescription>
                              <FormControl>
                                 <Textarea
                                     id="feedback"
                                     placeholder="Escribe tus comentarios aquí..."
+                                    className="mt-2"
+                                    rows={5}
                                     {...field}
                                 />
                              </FormControl>
