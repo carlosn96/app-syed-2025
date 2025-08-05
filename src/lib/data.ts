@@ -2,6 +2,7 @@
 
 
 
+
 const academicData = {
     "Administración": {
       "UdeG": {
@@ -916,10 +917,10 @@ export interface Evaluation {
 
 
 export const evaluations: Evaluation[] = [
-  { id: 1, student: 'Jane Smith', teacherName: 'Docente User Faculty', feedback: '¡Clase genial, muy participativa!', date: '2024-05-10', overallRating: 5, ratings: { clarity: 'excelente', engagement: 'excelente', punctuality: 'excelente', knowledge: 'excelente' } },
-  { id: 2, student: 'Alumno User Student', teacherName: 'Docente User Faculty', feedback: 'El profesor tiene mucho conocimiento pero el ritmo es un poco rápido.', date: '2024-05-11', overallRating: 4, ratings: { clarity: 'regular', engagement: 'bueno', punctuality: 'excelente', knowledge: 'excelente' } },
-  { id: 3, student: 'John Appleseed', teacherName: 'John Doe Smith', feedback: 'Aprendí mucho. Los ejemplos prácticos fueron muy útiles.', date: '2024-05-12', overallRating: 5, ratings: { clarity: 'excelente', engagement: 'excelente', punctuality: 'bueno', knowledge: 'excelente' } },
-  { id: 4, student: 'Emily White', teacherName: 'Docente User Faculty', feedback: 'Necesita mejorar la puntualidad, pero las explicaciones son excelentes.', date: '2024-05-15', overallRating: 4, ratings: { clarity: 'excelente', engagement: 'bueno', punctuality: 'regular', knowledge: 'excelente' } },
+  { id: 1, student: 'Alumno Anónimo', teacherName: 'Docente User Faculty', feedback: '¡Clase genial, muy participativa!', date: '2024-05-10', overallRating: 100, ratings: { clarity: 'excelente', engagement: 'excelente', punctuality: 'excelente', knowledge: 'excelente' } },
+  { id: 2, student: 'Alumno Anónimo', teacherName: 'Docente User Faculty', feedback: 'El profesor tiene mucho conocimiento pero el ritmo es un poco rápido.', date: '2024-05-11', overallRating: 80, ratings: { clarity: 'regular', engagement: 'bueno', punctuality: 'excelente', knowledge: 'excelente' } },
+  { id: 3, student: 'Alumno Anónimo', teacherName: 'John Doe Smith', feedback: 'Aprendí mucho. Los ejemplos prácticos fueron muy útiles.', date: '2024-05-12', overallRating: 90, ratings: { clarity: 'excelente', engagement: 'excelente', punctuality: 'bueno', knowledge: 'excelente' } },
+  { id: 4, student: 'Alumno Anónimo', teacherName: 'Docente User Faculty', feedback: 'Necesita mejorar la puntualidad, pero las explicaciones son excelentes.', date: '2024-05-15', overallRating: 85, ratings: { clarity: 'excelente', engagement: 'bueno', punctuality: 'regular', knowledge: 'excelente' } },
 ];
 
 export interface Group {
@@ -1199,4 +1200,5 @@ export const evaluationPeriods: EvaluationPeriod[] = [
     if (!a.startDate || !b.startDate) return 0;
     return b.startDate.getTime() - a.startDate.getTime()
 });
+
 

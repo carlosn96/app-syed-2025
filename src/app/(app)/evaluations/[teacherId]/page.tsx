@@ -46,11 +46,11 @@ const evaluationSchema = z.object({
 type EvaluationFormValues = z.infer<typeof evaluationSchema>;
 
 const ratingMap: Record<EvaluationFormValues[keyof Omit<EvaluationFormValues, 'feedback'>], number> = {
-  excelente: 5,
-  bueno: 4,
-  regular: 3,
-  necesita_mejorar: 2,
-  deficiente: 1,
+  excelente: 100,
+  bueno: 80,
+  regular: 60,
+  necesita_mejorar: 40,
+  deficiente: 20,
 };
 
 
@@ -79,7 +79,7 @@ export default function StudentEvaluationPage() {
 
     const newEvaluation = {
         id: Math.max(...evaluations.map(e => e.id), 0) + 1,
-        student: `${user.nombre} ${user.apellido_paterno}`,
+        student: "Alumno Anónimo",
         teacherName: teacher.name,
         feedback: data.feedback,
         date: new Date().toISOString(),

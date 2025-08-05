@@ -298,8 +298,7 @@ export default function PalpaPage() {
                         <div className="flex items-center gap-2">
                         <p className="font-semibold">{evaluation.student}</p>
                         <div className="flex items-center gap-1 ml-auto">
-                            <span className="text-sm">{evaluation.overallRating}</span>
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm font-bold">{evaluation.overallRating}%</span>
                         </div>
                         </div>
                         <p className="text-sm text-muted-foreground">
