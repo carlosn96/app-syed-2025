@@ -81,6 +81,7 @@ export default function StudentEvaluationPage() {
         id: Math.max(...evaluations.map(e => e.id), 0) + 1,
         student: "Alumno Anónimo",
         teacherName: teacher.name,
+        groupName: user.grupo || "Desconocido",
         feedback: data.feedback,
         date: new Date().toISOString(),
         overallRating: Math.round((clarityScore + engagementScore + punctualityScore + knowledgeScore) / 4),
