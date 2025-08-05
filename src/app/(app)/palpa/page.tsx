@@ -110,23 +110,14 @@ export default function PalpaPage() {
         };
     });
 
-    const evaluationsByGroup = teacherEvaluations.reduce((acc, evaluation) => {
-        const student = users.find(u => u.correo === evaluation.student);
-        const groupName = student?.grupo || 'Grupo Desconocido';
-        if (!acc[groupName]) {
-            acc[groupName] = {
-                evaluations: [],
-                averageRating: 0,
-            };
-        }
-        acc[groupName].evaluations.push(evaluation);
-        return acc;
-    }, {} as Record<string, { evaluations: typeof teacherEvaluations; averageRating: number }>);
+    const anonymousGroup = teacherEvaluations.reduce((acc, evaluation) => {
+      acc.evaluations.push(evaluation);
+      return acc;
+    }, { evaluations: [] as typeof teacherEvaluations, averageRating: 0 });
 
-    for (const groupName in evaluationsByGroup) {
-        const groupData = evaluationsByGroup[groupName];
-        const totalRating = groupData.evaluations.reduce((sum, e) => sum + e.overallRating, 0);
-        groupData.averageRating = Math.round(totalRating / groupData.evaluations.length);
+    if (anonymousGroup.evaluations.length > 0) {
+        const totalRating = anonymousGroup.evaluations.reduce((sum, e) => sum + e.overallRating, 0);
+        anonymousGroup.averageRating = Math.round(totalRating / anonymousGroup.evaluations.length);
     }
 
     return {
@@ -139,7 +130,7 @@ export default function PalpaPage() {
       averageSupervisionScore,
       averageEvaluationScore,
       evaluationPerformanceData,
-      evaluationsByGroup,
+      anonymousGroup,
     }
   }, [user]);
 
@@ -159,7 +150,7 @@ export default function PalpaPage() {
     )
   }
 
-  const { teacher, teacherFullName, teacherSupervisions, teacherEvaluations, teacherSubjects, supervisionPerformanceData, averageSupervisionScore, averageEvaluationScore, evaluationPerformanceData, evaluationsByGroup } = teacherData;
+  const { teacher, teacherFullName, teacherSupervisions, teacherEvaluations, teacherSubjects, supervisionPerformanceData, averageSupervisionScore, averageEvaluationScore, evaluationPerformanceData, anonymousGroup } = teacherData;
   const nameInitial = teacher.nombre.charAt(0).toUpperCase();
 
   return (
@@ -373,46 +364,44 @@ export default function PalpaPage() {
                         )}
                     </CardContent>
             </Card>
-            {Object.keys(evaluationsByGroup).length > 0 ? (
-                Object.entries(evaluationsByGroup).map(([groupName, groupData]) => (
-                    <Card key={groupName} className="rounded-xl">
-                        <CardHeader>
-                             <div className="flex justify-between items-start">
-                                <div>
-                                    <CardTitle>Comentarios del Grupo: {groupName}</CardTitle>
-                                    <CardDescription>
-                                        Comentarios consolidados de los alumnos de este grupo.
-                                    </CardDescription>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-sm text-muted-foreground">Calificación Promedio</p>
-                                    <p className={`text-2xl font-bold rounded-md px-2 py-1`}>
-                                        <span style={{color: getScoreColor(groupData.averageRating)}}>
-                                            {groupData.averageRating}%
-                                        </span>
-                                    </p>
-                                </div>
+            {anonymousGroup.evaluations.length > 0 ? (
+                <Card className="rounded-xl">
+                    <CardHeader>
+                            <div className="flex justify-between items-start">
+                            <div>
+                                <CardTitle>Comentarios de Alumnos</CardTitle>
+                                <CardDescription>
+                                    Comentarios consolidados del grupo.
+                                </CardDescription>
                             </div>
-                        </CardHeader>
-                        <CardContent className="grid gap-6">
-                            {groupData.evaluations.map((evaluation, index) => (
-                                <React.Fragment key={evaluation.id}>
-                                    <div className="grid gap-2">
-                                        <p className="text-sm text-muted-foreground italic">"{evaluation.feedback}"</p>
-                                    </div>
-                                    {index < groupData.evaluations.length - 1 && <Separator />}
-                                </React.Fragment>
-                            ))}
-                        </CardContent>
-                    </Card>
-                ))
+                            <div className="text-right">
+                                <p className="text-sm text-muted-foreground">Calificación Promedio</p>
+                                <p className={`text-2xl font-bold rounded-md px-2 py-1`}>
+                                    <span style={{color: getScoreColor(anonymousGroup.averageRating)}}>
+                                        {anonymousGroup.averageRating}%
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="grid gap-6">
+                        {anonymousGroup.evaluations.map((evaluation, index) => (
+                            <React.Fragment key={evaluation.id}>
+                                <div className="grid gap-2">
+                                    <p className="text-sm text-muted-foreground italic">"{evaluation.feedback}"</p>
+                                </div>
+                                {index < anonymousGroup.evaluations.length - 1 && <Separator />}
+                            </React.Fragment>
+                        ))}
+                    </CardContent>
+                </Card>
             ) : (
                 <Card className="rounded-xl">
                     <CardHeader>
                         <CardTitle>Comentarios de Alumnos</CardTitle>
                     </CardHeader>
                     <CardContent>
-                         <div className="flex items-center justify-center h-24 border-2 border-dashed border-muted rounded-xl">
+                            <div className="flex items-center justify-center h-24 border-2 border-dashed border-muted rounded-xl">
                             <p className="text-muted-foreground">No hay evaluaciones de alumnos todavía.</p>
                         </div>
                     </CardContent>
