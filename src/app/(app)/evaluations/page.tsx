@@ -28,7 +28,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CreateEvaluationPeriodForm } from "@/components/create-evaluation-period-form"
-import { evaluationPeriods, schedules, users, teachers as allTeachers, subjects as allSubjects, EvaluationPeriod, User } from "@/lib/data"
+import { evaluationPeriods, schedules, teachers as allTeachers, EvaluationPeriod } from "@/lib/data"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
@@ -48,7 +48,10 @@ export default function EvaluationsPage() {
     const map = new Map<string, EvaluationPeriod[]>()
     evaluationPeriods.forEach(p => {
       let day = new Date(p.startDate);
-      while (day <= p.endDate) {
+      // Ensure we don't loop infinitely if endDate is far in the future
+      let endDate = new Date(p.endDate);
+      let limit = 0;
+      while (day <= endDate && limit < 365) {
         const dateKey = format(day, "yyyy-MM-dd");
         if (!map.has(dateKey)) {
             map.set(dateKey, []);
@@ -57,10 +60,12 @@ export default function EvaluationsPage() {
             map.get(dateKey)!.push(p);
         }
         day.setDate(day.getDate() + 1);
+        limit++;
       }
     });
     return map;
   }, []);
+
 
   const upcomingPeriods = useMemo(() => {
     const today = new Date();
