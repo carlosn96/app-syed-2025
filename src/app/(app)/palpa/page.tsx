@@ -91,9 +91,13 @@ export default function PalpaPage() {
         Calificación: s.score,
       }));
 
-    const averageScore = completedSupervisions.length > 0 
+    const averageSupervisionScore = completedSupervisions.length > 0 
       ? Math.round(completedSupervisions.reduce((acc, s) => acc + s.score!, 0) / completedSupervisions.length)
       : 0;
+
+    const averageEvaluationScore = teacherEvaluations.length > 0
+        ? Math.round(teacherEvaluations.reduce((acc, e) => acc + e.overallRating, 0) / teacherEvaluations.length)
+        : 0;
 
     return {
       teacher: user,
@@ -102,7 +106,8 @@ export default function PalpaPage() {
       teacherEvaluations,
       teacherSubjects,
       performanceData,
-      averageScore
+      averageSupervisionScore,
+      averageEvaluationScore
     }
   }, [user]);
 
@@ -122,7 +127,7 @@ export default function PalpaPage() {
     )
   }
 
-  const { teacher, teacherFullName, teacherSupervisions, teacherEvaluations, teacherSubjects, performanceData, averageScore } = teacherData;
+  const { teacher, teacherFullName, teacherSupervisions, teacherEvaluations, teacherSubjects, performanceData, averageSupervisionScore, averageEvaluationScore } = teacherData;
   const nameInitial = teacher.nombre.charAt(0).toUpperCase();
 
   return (
@@ -179,7 +184,7 @@ export default function PalpaPage() {
                                 <CardDescription>Evolución del rendimiento a través de las supervisiones completadas.</CardDescription>
                             </div>
                             <div className="flex flex-col items-center">
-                                <ProgressRing value={averageScore} />
+                                <ProgressRing value={averageSupervisionScore} />
                             </div>
                         </div>
                     </CardHeader>
@@ -286,22 +291,27 @@ export default function PalpaPage() {
         <div className="lg:col-span-3">
             <Card className="rounded-xl">
                 <CardHeader>
-                <CardTitle>Comentarios de Alumnos</CardTitle>
-                <CardDescription>
-                    Retroalimentación cualitativa directamente de los alumnos.
-                </CardDescription>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <CardTitle>Evaluación de Alumnos</CardTitle>
+                            <CardDescription>
+                                Calificación promedio y comentarios consolidados del grupo.
+                            </CardDescription>
+                        </div>
+                         <div className="flex flex-col items-center">
+                           <p className="text-sm text-muted-foreground">Promedio General</p>
+                           <p className={`text-3xl font-bold`} style={{color: getScoreColor(averageEvaluationScore)}}>
+                                {averageEvaluationScore}%
+                            </p>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent className="grid gap-6">
+                <h4 className="font-semibold text-white">Comentarios Recibidos</h4>
                 {teacherEvaluations.length > 0 ? teacherEvaluations.map((evaluation, index) => (
                     <React.Fragment key={evaluation.id}>
                     <div className="grid gap-2">
-                        <div className="flex items-center gap-2">
-                        <p className="font-semibold">{evaluation.student}</p>
-                        <div className="flex items-center gap-1 ml-auto">
-                            <span className="text-sm font-bold">{evaluation.overallRating}%</span>
-                        </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground italic">
                         "{evaluation.feedback}"
                         </p>
                     </div>
@@ -356,5 +366,3 @@ export default function PalpaPage() {
     </div>
   )
 }
-
-    
