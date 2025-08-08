@@ -1,9 +1,8 @@
 
 "use client"
 
-import { useParams } from "next/navigation"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Dot } from "recharts"
-import { Star, ShieldCheck, BookUser, Library } from "lucide-react"
+import { ShieldCheck, BookUser, Library } from "lucide-react"
 import React, { useMemo, useState } from "react"
 
 import {
@@ -30,13 +29,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ProgressRing } from "@/components/ui/progress-ring"
-import { FloatingBackButton } from "@/components/ui/floating-back-button"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/context/auth-context"
 import { useIsMobile } from "@/hooks/use-mobile"
