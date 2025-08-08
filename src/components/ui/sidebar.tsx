@@ -198,6 +198,7 @@ const Sidebar = React.forwardRef<
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
            <SheetContent
             side="left"
+            title="Navegación Principal"
             className="w-[280px] p-0 text-sidebar-foreground sidebar-glass flex flex-col"
           >
             {children}
