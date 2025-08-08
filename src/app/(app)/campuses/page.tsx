@@ -51,32 +51,15 @@ export default function CampusesPage() {
         </Dialog>
       </div>
 
-      <Card className="rounded-xl">
-        <CardHeader>
-          <CardTitle>Planteles</CardTitle>
-          <CardDescription>
-            Administra todos los planteles en el sistema.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Ubicación</TableHead>
-                <TableHead>Director</TableHead>
-                <TableHead>
-                  <span>Acciones</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {planteles.map((campus) => (
-                <TableRow key={campus.id}>
-                  <TableCell className="font-medium">{campus.name}</TableCell>
-                  <TableCell>{campus.location}</TableCell>
-                  <TableCell>{campus.director}</TableCell>
-                  <TableCell>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {planteles.map((campus) => (
+            <Card key={campus.id} className="rounded-xl">
+                <CardHeader className="flex-row items-start justify-between">
+                    <div className="flex-grow">
+                        <CardTitle>{campus.name}</CardTitle>
+                        <CardDescription>{campus.location}</CardDescription>
+                        <p className="text-xs text-muted-foreground pt-2">{campus.director}</p>
+                    </div>
                     <div className="flex gap-2">
                       <Button size="icon" variant="warning">
                           <Pencil className="h-4 w-4" />
@@ -86,25 +69,19 @@ export default function CampusesPage() {
                           <Trash2 className="h-4 w-4" />
                           <span className="sr-only">Eliminar</span>
                       </Button>
-                      <Button asChild size="icon" variant="success">
-                          <Link href={`/campuses/${campus.id}/carreras`}>
-                              <BookOpenCheck className="h-4 w-4" />
-                              <span className="sr-only">Planes de estudio</span>
-                          </Link>
-                      </Button>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-        <CardFooter>
-          <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-3</strong> de <strong>3</strong> planteles
-          </div>
-        </CardFooter>
-      </Card>
+                </CardHeader>
+                <CardFooter>
+                  <Button asChild size="sm" variant="success" className="w-full">
+                      <Link href={`/campuses/${campus.id}/carreras`}>
+                          <BookOpenCheck className="h-4 w-4" />
+                          <span>Planes de estudio</span>
+                      </Link>
+                  </Button>
+                </CardFooter>
+            </Card>
+          ))}
+      </div>
     </div>
   )
 }

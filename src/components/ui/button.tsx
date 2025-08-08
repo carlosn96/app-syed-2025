@@ -27,7 +27,9 @@ const buttonVariants = cva(
         success:
           "bg-[hsl(var(--success))] text-white hover:bg-[hsl(var(--success))]/90",
         info:
-            "border-transparent bg-blue-500/80 text-white"
+          "border-transparent bg-blue-500/80 text-white",
+        "info-outline":
+          "border border-blue-500/80 bg-transparent text-blue-400 hover:bg-blue-500/20 hover:text-blue-300"
       },
       size: {
         default: "h-10 px-4 py-2",
