@@ -186,17 +186,6 @@ const Sidebar = React.forwardRef<
             className="w-[var(--sidebar-width-mobile)] p-0 text-sidebar-foreground sidebar-glass flex flex-col border-r-0"
             style={{ '--sidebar-width-mobile': SIDEBAR_WIDTH_MOBILE } as React.CSSProperties}
           >
-              <SheetHeader className="p-4 border-b border-white/10">
-                 <SheetTitle>
-                    <Image 
-                      src="/UNELOGO.png" 
-                      alt="UNE Logo" 
-                      width={112} 
-                      height={40} 
-                      className="w-28 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]"
-                    />
-                 </SheetTitle>
-              </SheetHeader>
               <div className="flex-grow overflow-y-auto">
                  {children}
               </div>
@@ -473,5 +462,3 @@ export {
   SidebarTrigger,
   useSidebar,
 }
-
-    
