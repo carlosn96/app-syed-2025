@@ -71,7 +71,7 @@ const SidebarProvider = React.forwardRef<
     ref
   ) => {
     const isMobile = useIsMobile('md')
-    const isTablet = useIsMobile('xl') && !isMobile;
+    const isTablet = useIsMobile('lg') && !isMobile;
     const [openMobile, setOpenMobile] = React.useState(false)
 
     // This is the internal state of the sidebar.
@@ -88,15 +88,17 @@ const SidebarProvider = React.forwardRef<
         }
 
         // This sets the cookie to keep the sidebar state.
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        if (!isTablet) {
+          document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        }
       },
-      [setOpenProp, open]
+      [setOpenProp, open, isTablet]
     )
     
     React.useEffect(() => {
         if(isTablet) {
             setOpen(false);
-        } else if (!isMobile && !isTablet) {
+        } else if (!isMobile) {
             const cookieValue = document.cookie.split('; ').find(row => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`));
             const storedState = cookieValue ? cookieValue.split('=')[1] === 'true' : defaultOpen;
             setOpen(storedState);
@@ -191,7 +193,7 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, openMobile, setOpenMobile, state, isTablet } = useSidebar()
+    const { isMobile, openMobile, setOpenMobile, state } = useSidebar()
     const { pageNav } = usePageNavigation();
 
     if (isMobile) {
@@ -253,22 +255,21 @@ const Sidebar = React.forwardRef<
     return (
        <div
         ref={ref}
-        data-state={isTablet ? 'collapsed' : state}
+        data-state={state}
         className={cn(
             "group peer hidden md:block",
-            "xl:w-[var(--sidebar-width)]",
-            "md:w-[var(--sidebar-width-icon)]",
-            "xl:data-[state=expanded]:w-[var(--sidebar-width)]"
+            "lg:w-[var(--sidebar-width-icon)]",
+            "data-[state=expanded]:lg:w-[var(--sidebar-width)]",
+            className
         )}
       >
         <div
           data-sidebar="sidebar"
           className={cn(
             "fixed inset-y-0 z-20 flex h-svh flex-col text-sidebar-foreground glass-card",
-            "xl:w-[var(--sidebar-width)] transition-[width] duration-300 ease-in-out",
-            "md:w-[var(--sidebar-width-icon)]",
+            "lg:w-[var(--sidebar-width-icon)] transition-[width] duration-300 ease-in-out",
             "left-0 border-r",
-            "xl:group-data-[state=expanded]:w-[var(--sidebar-width)]",
+            "group-data-[state=expanded]:lg:w-[var(--sidebar-width)]",
              className
           )}
           {...props}
@@ -312,12 +313,12 @@ const SidebarHeader = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-  const { state, isTablet } = useSidebar()
+  const { state } = useSidebar()
   return (
     <div
       ref={ref}
       data-sidebar="header"
-      data-state={isTablet ? 'collapsed' : state}
+      data-state={state}
       className={cn("flex flex-col gap-2 p-2 data-[state=collapsed]:items-center", className)}
       {...props}
     />
@@ -329,12 +330,12 @@ const SidebarFooter = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-    const { state, isTablet } = useSidebar();
+    const { state } = useSidebar();
     return (
         <div
             ref={ref}
             data-sidebar="footer"
-            data-state={isTablet ? 'collapsed' : state}
+            data-state={state}
             className={cn("flex flex-col gap-2 p-2 mt-auto data-[state=collapsed]:items-center", className)}
             {...props}
         />
@@ -361,12 +362,12 @@ const SidebarContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-    const { state, isTablet } = useSidebar();
+    const { state } = useSidebar();
   return (
     <div
       ref={ref}
       data-sidebar="content"
-      data-state={isTablet ? 'collapsed' : state}
+      data-state={state}
       className={cn(
         "flex min-h-0 flex-1 flex-col gap-2 overflow-auto data-[state=collapsed]:overflow-hidden",
         className
@@ -447,7 +448,7 @@ const SidebarMenuButton = React.forwardRef<
     ref
   ) => {
     const Comp = asChild ? Slot : "button"
-    const { isMobile, isTablet, state } = useSidebar()
+    const { isMobile, state } = useSidebar()
 
     const button = (
       <Comp
@@ -476,7 +477,7 @@ const SidebarMenuButton = React.forwardRef<
         <TooltipContent
           side="right"
           align="center"
-          hidden={(isTablet ? false : state !== "collapsed") || isMobile}
+          hidden={state !== "collapsed" || isMobile}
           {...tooltip}
         />
       </Tooltip>

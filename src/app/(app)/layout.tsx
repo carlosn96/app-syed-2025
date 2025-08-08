@@ -19,19 +19,18 @@ import { cn } from "@/lib/utils";
 
 
 function AppMain({ children }: { children: React.ReactNode }) {
-    const { state, isTablet } = useSidebar();
+    const { state } = useSidebar();
     return (
         <main
             className={cn(
                 "transition-[margin-left] duration-300 ease-in-out",
-                "xl:ml-[var(--sidebar-width)]",
-                "md:data-[state=expanded]:ml-[var(--sidebar-width)]",
-                "md:data-[state=collapsed]:ml-[var(--sidebar-width-icon)]"
+                "lg:ml-[var(--sidebar-width-icon)]",
+                "lg:data-[state=expanded]:ml-[var(--sidebar-width)]"
             )}
-            data-state={isTablet ? 'collapsed' : state}
+            data-state={state}
             >
             <MobileHeader />
-             <div className="mx-auto max-w-7xl w-full p-4 md:p-6 xl:p-8">
+            <div className="mx-auto max-w-7xl w-full p-4 sm:p-6 lg:p-8">
                 {children}
             </div>
         </main>
