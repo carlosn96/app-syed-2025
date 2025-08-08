@@ -273,7 +273,7 @@ const SidebarHeader = React.forwardRef<
       ref={ref}
       data-sidebar="header"
       data-state={state}
-      className={cn("relative flex h-[80px] items-center z-10", state === 'expanded' ? 'px-4' : 'justify-center', isMobile && 'px-4 justify-start', className)}
+      className={cn("relative flex h-24 items-center z-10", state === 'expanded' ? 'px-4' : 'justify-center', isMobile && 'px-4 justify-start', className)}
       {...props}
     >
         {props.children}
