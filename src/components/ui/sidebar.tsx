@@ -11,7 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetOverlay } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle, SheetOverlay } from "@/components/ui/sheet"
 import {
   Tooltip,
   TooltipContent,
@@ -248,7 +248,7 @@ const SidebarTrigger = React.forwardRef<
       ref={ref}
       variant="ghost"
       size="icon"
-      className={cn("h-10 w-10 rounded-full text-white/80 absolute -right-5 top-14 bg-background/50 hover:bg-background/80 hover:text-white backdrop-blur-sm border-white/10 border", className)}
+      className={cn("h-12 w-12 rounded-full text-white bg-black/30 backdrop-blur-sm absolute -right-6 top-1/2 -translate-y-1/2", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
