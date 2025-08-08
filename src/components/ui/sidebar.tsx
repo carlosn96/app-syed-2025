@@ -93,13 +93,15 @@ const SidebarProvider = React.forwardRef<
     )
     
     React.useEffect(() => {
-        if (!isMobile) {
+        if (isTablet) {
+            setOpen(false)
+        } else if (!isMobile) {
             const cookieValue = document.cookie.split('; ').find(row => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`));
             const storedState = cookieValue ? cookieValue.split('=')[1] === 'true' : defaultOpen;
             setOpen(storedState);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isMobile]);
+    }, [isMobile, isTablet]);
 
     const pathname = usePathname();
     React.useEffect(() => {
@@ -186,6 +188,9 @@ const Sidebar = React.forwardRef<
             className="w-[var(--sidebar-width-mobile)] p-0 text-sidebar-foreground sidebar-glass flex flex-col border-r-0"
             style={{ '--sidebar-width-mobile': SIDEBAR_WIDTH_MOBILE } as React.CSSProperties}
           >
+              <SheetHeader className="p-4 border-b border-sidebar-border h-[80px]">
+                  <SheetTitle className="sr-only">Navegación Principal</SheetTitle>
+              </SheetHeader>
               <div className="flex-grow overflow-y-auto">
                  {children}
               </div>
@@ -275,7 +280,7 @@ const SidebarHeader = React.forwardRef<
       ref={ref}
       data-sidebar="header"
       data-state={state}
-      className={cn("relative flex h-[80px] items-center border-b border-sidebar-border shadow-inner-lg z-10", state === 'expanded' ? 'px-4' : 'justify-center', className)}
+      className={cn("relative flex h-[80px] items-center border-b border-sidebar-border z-10", state === 'expanded' ? 'px-4' : 'justify-center', className)}
       {...props}
     >
         {props.children}
