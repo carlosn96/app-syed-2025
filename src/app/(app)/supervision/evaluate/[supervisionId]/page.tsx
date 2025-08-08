@@ -27,7 +27,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { MessageSquarePlus, MessageSquareX } from 'lucide-react'
 import { ProgressRing } from '@/components/ui/progress-ring'
-import { usePageNavigation } from '@/context/page-navigation-context'
 
 type EvaluationFormValues = {
   [key: string]: {
@@ -80,12 +79,9 @@ const createValidationSchema = (rubrics: SupervisionRubric[]) => {
 export default function EvaluateSupervisionPage() {
     const params = useParams()
     const router = useRouter()
-    const searchParams = useSearchParams()
     const { toast } = useToast()
     const supervisionId = Number(params.supervisionId)
     const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
-
-    const { setPageNav } = usePageNavigation();
 
     const toggleComment = (key: string) => {
         setOpenComments(prev => ({ ...prev, [key]: !prev[key] }));
@@ -103,12 +99,6 @@ export default function EvaluateSupervisionPage() {
         'Contable': supervisionRubrics.filter(r => r.category === 'Contable'),
         'No Contable': supervisionRubrics.filter(r => r.category === 'No Contable')
     }), []);
-
-    const allTabs = useMemo(() => [
-        ...rubricsByType['Contable'].map(r => ({ id: `rubric_${r.id}`, label: r.title, group: 'Contable' })),
-        ...rubricsByType['No Contable'].map(r => ({ id: `rubric_${r.id}`, label: r.title, group: 'No Contable' })),
-        { id: 'Estadistica', label: 'Estadística General', group: 'Estadistica' }
-    ], [rubricsByType]);
     
     const [activeTabs, setActiveTabs] = useState<Record<string, string>>(() => {
         const initialTabs: Record<string, string> = {};
@@ -116,47 +106,6 @@ export default function EvaluateSupervisionPage() {
         if (rubricsByType['No Contable'].length > 0) initialTabs['No Contable'] = `rubric_${rubricsByType['No Contable'][0].id}`;
         return initialTabs;
     });
-
-    const handleEvaluationTypeChange = (type: 'Contable' | 'No Contable' | 'Estadistica') => {
-        setEvaluationType(type);
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('tab', type);
-        router.replace(newUrl.toString(), { scroll: false });
-    };
-
-    const handleSubTabChange = (category: 'Contable' | 'No Contable', value: string) => {
-        setActiveTabs(prev => ({ ...prev, [category]: value }));
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('subtab', value);
-        router.replace(newUrl.toString(), { scroll: false });
-    }
-
-    useEffect(() => {
-        const tab = searchParams.get('tab') as any;
-        if (tab && ['Contable', 'No Contable', 'Estadistica'].includes(tab)) {
-            setEvaluationType(tab);
-        }
-        const subtab = searchParams.get('subtab');
-        if (subtab) {
-             const category = allTabs.find(t => t.id === subtab)?.group as 'Contable' | 'No Contable';
-             if (category) {
-                setActiveTabs(prev => ({...prev, [category]: subtab}));
-             }
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchParams]);
-
-    useEffect(() => {
-        const pageNavItems = [
-            { id: 'Contable', label: 'Contables', onSelect: () => handleEvaluationTypeChange('Contable'), isActive: evaluationType === 'Contable' },
-            { id: 'No Contable', label: 'No Contables', onSelect: () => handleEvaluationTypeChange('No Contable'), isActive: evaluationType === 'No Contable' },
-            { id: 'Estadistica', label: 'Estadística General', onSelect: () => handleEvaluationTypeChange('Estadistica'), isActive: evaluationType === 'Estadistica' },
-        ];
-        setPageNav(pageNavItems);
-        return () => setPageNav([]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [evaluationType, setPageNav]);
-
 
     const form = useForm<EvaluationFormValues>({
         resolver: zodResolver(validationSchema),
@@ -361,7 +310,7 @@ export default function EvaluateSupervisionPage() {
       return (
           <Tabs 
             value={currentTab} 
-            onValueChange={(value) => handleSubTabChange(category, value)}
+            onValueChange={(value) => setActiveTabs(prev => ({ ...prev, [category]: value }))}
             className="w-full flex flex-col items-center"
           >
               <TabsList className="grid w-full grid-flow-col auto-cols-fr mb-4 h-auto flex-wrap justify-center">
@@ -397,7 +346,7 @@ export default function EvaluateSupervisionPage() {
                     </CardHeader>
                     
                     <CardContent className="p-6 pt-0">
-                        <Tabs value={evaluationType} onValueChange={(val) => handleEvaluationTypeChange(val as any)} className="w-full">
+                        <Tabs value={evaluationType} onValueChange={(val) => setEvaluationType(val as any)} className="w-full">
                             <TabsList className="grid w-full grid-cols-1 md:grid-cols-3">
                                 <TabsTrigger value="Contable">Contables</TabsTrigger>
                                 <TabsTrigger value="No Contable">No Contables</TabsTrigger>
