@@ -206,41 +206,9 @@ export default function UsersPage() {
             ))}
         </div>
       </div>
-      {/* Mobile View - Card List */}
-      <div className="grid grid-cols-1 md:hidden gap-4">
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredUsers.map(renderUserCard)}
       </div>
-      
-      {/* Desktop View - Table */}
-      <Card className="hidden md:block rounded-xl">
-        <CardHeader>
-            <CardTitle>Usuarios</CardTitle>
-            <CardDescription>
-                Administra todas las cuentas de usuario en el sistema.
-            </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Grupo</TableHead>
-                <TableHead>Fecha de Registro</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.map(renderUserTableRow)}
-            </TableBody>
-          </Table>
-        </CardContent>
-        <CardFooter>
-          <div className="text-xs text-muted-foreground">
-            Mostrando <strong>{filteredUsers.length}</strong> de <strong>{allUsersData.filter(u => u.rol !== 'administrator').length}</strong> usuarios
-          </div>
-        </CardFooter>
-      </Card>
     </>
   );
 
@@ -261,54 +229,9 @@ export default function UsersPage() {
                 onChange={(e) => setTeacherSearch(e.target.value)}
             />
         </div>
-         {/* Mobile View */}
-        <div className="grid grid-cols-1 md:hidden gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTeachers.map(renderUserCard)}
         </div>
-        {/* Desktop View */}
-        <Card className="hidden md:block rounded-xl">
-            <CardHeader>
-                <CardTitle>Docentes</CardTitle>
-                <CardDescription>Lista de todos los docentes en el sistema.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Nombre</TableHead>
-                            <TableHead>Fecha de Registro</TableHead>
-                            <TableHead>Acciones</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredTeachers.map(user => (
-                            <TableRow key={user.id}>
-                                <TableCell>
-                                    <div className="font-medium">{`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`}</div>
-                                    <div className="text-sm text-muted-foreground">{user.correo}</div>
-                                </TableCell>
-                                <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
-                                <TableCell>
-                                    <div className="flex gap-2">
-                                        <Button size="icon" variant="warning"><Pencil className="h-4 w-4" /><span className="sr-only">Editar</span></Button>
-                                        <Button size="icon" variant="destructive"><Trash2 className="h-4 w-4" /><span className="sr-only">Eliminar</span></Button>
-                                        <Button asChild size="icon" variant="outline">
-                                            <Link href={`/users/teachers/${user.id}`}>
-                                                <Eye className="h-4 w-4" />
-                                                <span className="sr-only">Ver Perfil</span>
-                                            </Link>
-                                        </Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-             <CardFooter>
-                <div className="text-xs text-muted-foreground">Mostrando <strong>{filteredTeachers.length}</strong> de <strong>{teachers.length}</strong> docentes</div>
-            </CardFooter>
-        </Card>
       </TabsContent>
       <TabsContent value="students">
         <div className="relative w-full sm:max-w-xs my-4">
@@ -321,50 +244,9 @@ export default function UsersPage() {
                 onChange={(e) => setStudentSearch(e.target.value)}
             />
         </div>
-         {/* Mobile View */}
-        <div className="grid grid-cols-1 md:hidden gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStudents.map(renderUserCard)}
         </div>
-         {/* Desktop View */}
-        <Card className="hidden md:block rounded-xl">
-            <CardHeader>
-                <CardTitle>Alumnos</CardTitle>
-                <CardDescription>Lista de todos los alumnos en el sistema.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Nombre</TableHead>
-                            <TableHead>Grupo</TableHead>
-                            <TableHead>Fecha de Registro</TableHead>
-                            <TableHead>Acciones</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                         {filteredStudents.map(user => (
-                            <TableRow key={user.id}>
-                                <TableCell>
-                                    <div className="font-medium">{`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`}</div>
-                                    <div className="text-sm text-muted-foreground">{user.correo}</div>
-                                </TableCell>
-                                <TableCell>{user.grupo}</TableCell>
-                                <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
-                                <TableCell>
-                                    <div className="flex gap-2">
-                                        <Button size="icon" variant="warning"><Pencil className="h-4 w-4" /><span className="sr-only">Editar</span></Button>
-                                        <Button size="icon" variant="destructive"><Trash2 className="h-4 w-4" /><span className="sr-only">Eliminar</span></Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-             <CardFooter>
-                <div className="text-xs text-muted-foreground">Mostrando <strong>{filteredStudents.length}</strong> de <strong>{students.length}</strong> alumnos</div>
-            </CardFooter>
-        </Card>
       </TabsContent>
     </Tabs>
   );

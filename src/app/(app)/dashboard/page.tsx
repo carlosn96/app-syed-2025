@@ -48,7 +48,7 @@ export default function DashboardPage() {
       <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
         Panel de Control
       </h1>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="rounded-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">

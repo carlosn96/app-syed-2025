@@ -78,85 +78,36 @@ export default function PlantelesPage() {
                 />
             </div>
 
-            {/* Mobile View - Card List */}
-            <div className="grid grid-cols-1 gap-4 md:hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredPlanteles.map((plantel) => (
-                <Card key={plantel.id} className="rounded-xl">
-                    <CardHeader>
-                    <div className="flex items-start justify-between">
-                        <div>
-                        <CardTitle>{plantel.name}</CardTitle>
-                        <CardDescription>{plantel.location}</CardDescription>
-                        </div>
-                        <div className="flex gap-2">
-                        <Button size="icon" variant="warning">
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Editar</span>
-                        </Button>
-                        <Button size="icon" variant="destructive">
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Eliminar</span>
-                        </Button>
-                        </div>
-                    </div>
-                    </CardHeader>
-                    <CardContent>
-                    <div className="text-sm text-muted-foreground">
-                        <span className="font-semibold text-foreground">Director: </span>
-                        {plantel.director}
-                    </div>
-                    </CardContent>
-                </Card>
+                    <Card key={plantel.id} className="rounded-xl">
+                        <CardHeader>
+                            <div className="flex items-start justify-between">
+                                <div>
+                                <CardTitle>{plantel.name}</CardTitle>
+                                <CardDescription>{plantel.location}</CardDescription>
+                                </div>
+                                <div className="flex gap-2">
+                                <Button size="icon" variant="warning">
+                                    <Pencil className="h-4 w-4" />
+                                    <span className="sr-only">Editar</span>
+                                </Button>
+                                <Button size="icon" variant="destructive">
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Eliminar</span>
+                                </Button>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-sm text-muted-foreground">
+                                <span className="font-semibold text-foreground">Director: </span>
+                                {plantel.director}
+                            </div>
+                        </CardContent>
+                    </Card>
                 ))}
             </div>
-
-            {/* Desktop View - Table */}
-            <Card className="hidden md:block rounded-xl">
-                <CardHeader>
-                    <CardTitle>Planteles</CardTitle>
-                    <CardDescription>
-                        Administra todos los planteles en el sistema.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Nombre</TableHead>
-                                <TableHead>Ubicación</TableHead>
-                                <TableHead>Director</TableHead>
-                                <TableHead>Acciones</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredPlanteles.map((plantel) => (
-                                <TableRow key={plantel.id}>
-                                    <TableCell className="font-medium">{plantel.name}</TableCell>
-                                    <TableCell>{plantel.location}</TableCell>
-                                    <TableCell>{plantel.director}</TableCell>
-                                    <TableCell>
-                                        <div className="flex gap-2">
-                                            <Button size="icon" variant="warning">
-                                                <Pencil className="h-4 w-4" />
-                                                <span className="sr-only">Editar</span>
-                                            </Button>
-                                            <Button size="icon" variant="destructive">
-                                                <Trash2 className="h-4 w-4" />
-                                                <span className="sr-only">Eliminar</span>
-                                            </Button>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-                <CardFooter>
-                    <div className="text-xs text-muted-foreground">
-                        Mostrando <strong>1-{filteredPlanteles.length}</strong> de <strong>{allPlanteles.length}</strong> planteles
-                    </div>
-                </CardFooter>
-            </Card>
         </div>
     )
 }
