@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { FloatingBackButton } from '@/components/ui/floating-back-button'
 import { Separator } from '@/components/ui/separator'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -47,7 +46,6 @@ export default function ViewSupervisionPage() {
     if (supervision.status !== 'Completada' || !evaluationData) {
         return (
              <div className="flex flex-col gap-8">
-                <FloatingBackButton />
                  <Card className="rounded-xl">
                     <CardHeader>
                         <CardTitle>Evaluación No Disponible</CardTitle>
@@ -70,7 +68,6 @@ export default function ViewSupervisionPage() {
 
     return (
         <div className="flex flex-col gap-8">
-            <FloatingBackButton />
             <Card className="rounded-xl">
                  <CardHeader>
                     <div className="flex justify-between items-start">

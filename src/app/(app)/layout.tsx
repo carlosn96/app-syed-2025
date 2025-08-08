@@ -14,21 +14,20 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { PageNavigationProvider } from "@/context/page-navigation-context";
-import { MobileHeader } from "@/components/layout/mobile-header";
 import { cn } from "@/lib/utils";
 
 
 function AppMain({ children }: { children: React.ReactNode }) {
-    const { state, isMobile } = useSidebar();
+    const { state, isMobile, isTablet } = useSidebar();
+    const isCollapsed = state === 'collapsed' || isTablet;
 
     return (
         <main
             className={cn(
-                "transition-[padding-left] duration-300 ease-in-out",
-                 !isMobile && (state === 'expanded' ? "pl-[280px]" : "pl-[80px]")
+                "transition-all duration-300 ease-in-out",
+                 !isMobile && (isCollapsed ? "pl-[80px]" : "pl-[280px]")
             )}
         >
-            <MobileHeader />
             <div className="mx-auto max-w-7xl w-full p-4 sm:p-6 lg:p-8">
                 {children}
             </div>
@@ -38,7 +37,7 @@ function AppMain({ children }: { children: React.ReactNode }) {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="login-background min-h-screen">
+    <div className="min-h-screen login-background">
       <PageNavigationProvider>
         <SidebarProvider>
           <Sidebar>

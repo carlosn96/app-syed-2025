@@ -11,7 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetTitle, SheetOverlay } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import {
   Tooltip,
   TooltipContent,
@@ -179,10 +179,9 @@ const Sidebar = React.forwardRef<
     if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-           <SheetOverlay className="bg-black/40 backdrop-blur-sm" />
           <SheetContent
             side="left"
-            className="w-[var(--sidebar-width-mobile)] p-0 text-sidebar-foreground sidebar-glass flex flex-col border-r-0"
+            className="w-[var(--sidebar-width-mobile)] p-0 text-sidebar-foreground sidebar-glass flex flex-col"
             style={{ '--sidebar-width-mobile': SIDEBAR_WIDTH_MOBILE } as React.CSSProperties}
             title="Navegación Principal"
           >
@@ -197,8 +196,8 @@ const Sidebar = React.forwardRef<
         ref={ref}
         data-state={state}
         className={cn(
-            "group peer hidden md:block fixed inset-y-0 left-0 z-20 text-sidebar-foreground sidebar-glass sidebar-transition border-r border-white/10 w-[280px]",
-            state === 'collapsed' && "-translate-x-[calc(100%-80px)]",
+            "group peer hidden md:flex fixed inset-y-0 left-0 z-20 text-sidebar-foreground sidebar-glass flex-col transition-all duration-300 ease-in-out",
+            state === 'expanded' ? "w-[280px]" : "w-[80px]",
             className
         )}
         {...props}

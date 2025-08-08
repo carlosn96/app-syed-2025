@@ -33,7 +33,6 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
-import { FloatingBackButton } from "@/components/ui/floating-back-button"
 
 
 interface GroupedCareer {
@@ -278,7 +277,6 @@ export default function PlantelCarrerasPage() {
   
   return (
     <div className="flex flex-col gap-8">
-      <FloatingBackButton />
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex flex-col">
             <h1 className="font-headline text-3xl font-bold tracking-tight text-white">

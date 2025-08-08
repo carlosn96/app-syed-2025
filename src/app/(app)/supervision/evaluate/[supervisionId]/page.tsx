@@ -15,7 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from '@/components/ui/button'
-import { FloatingBackButton } from '@/components/ui/floating-back-button'
 import { Separator } from '@/components/ui/separator'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -335,7 +334,6 @@ export default function EvaluateSupervisionPage() {
     
     return (
         <div className="flex flex-col gap-8">
-            <FloatingBackButton />
              <form onSubmit={handleSubmit(onSubmit)}>
                 <Card className="rounded-xl">
                     <CardHeader>

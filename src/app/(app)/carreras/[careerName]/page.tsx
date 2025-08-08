@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { careers as allCareers, subjects, Career } from "@/lib/data"
-import { FloatingBackButton } from "@/components/ui/floating-back-button"
 import { Button } from "@/components/ui/button"
 import { Book, Pencil, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -113,7 +112,6 @@ export default function CareerPlansPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <FloatingBackButton />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col">
           <h1 className="font-headline text-3xl font-bold tracking-tight text-white">

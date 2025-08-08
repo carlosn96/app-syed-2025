@@ -12,7 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from '@/components/ui/button'
-import { FloatingBackButton } from '@/components/ui/floating-back-button'
 import { CreateSubjectForm } from '@/components/create-subject-form'
 import {
   Table,
@@ -80,7 +79,6 @@ export default function ManageModalitySubjectsPage() {
     
     return (
         <div className="flex flex-col gap-8">
-            <FloatingBackButton />
             <div className="flex flex-col">
                 <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
                     Gestionar Plan de Estudio
