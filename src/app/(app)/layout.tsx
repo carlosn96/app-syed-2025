@@ -19,16 +19,17 @@ import { cn } from "@/lib/utils";
 
 
 function AppMain({ children }: { children: React.ReactNode }) {
-    const { state } = useSidebar();
+    const { state, isMobile, isTablet } = useSidebar();
+
     return (
         <main
             className={cn(
-                "transition-[margin-left] duration-300 ease-in-out",
-                "lg:ml-[var(--sidebar-width-icon)]",
-                "lg:data-[state=expanded]:ml-[var(--sidebar-width)]"
+                "transition-[padding-left] duration-300 ease-in-out",
+                 !isMobile && !isTablet && "pl-[280px]",
+                 isTablet && "pl-[80px]",
+                 isTablet && state === "expanded" && "pl-[280px]"
             )}
-            data-state={state}
-            >
+        >
             <MobileHeader />
             <div className="mx-auto max-w-7xl w-full p-4 sm:p-6 lg:p-8">
                 {children}
@@ -43,8 +44,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <PageNavigationProvider>
         <SidebarProvider>
           <Sidebar>
-            <SidebarHeader className="p-4 hidden md:flex items-center justify-between">
-              <div className="flex items-center justify-center w-full">
+            <SidebarHeader>
+              <div className="flex items-center justify-center w-full p-4">
                 <Image
                   src="/UNELOGO.png"
                   alt="UNE Logo"

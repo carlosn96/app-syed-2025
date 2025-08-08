@@ -21,7 +21,7 @@ const buttonVariants = cva(
            "border border-input bg-transparent hover:bg-white/10 hover:text-muted-foreground",
         secondary:
           "bg-secondary/50 text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         warning:
           "bg-yellow-500 text-white hover:bg-yellow-600",
         success:

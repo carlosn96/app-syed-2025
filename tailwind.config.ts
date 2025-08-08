@@ -79,6 +79,7 @@ export default {
         lg: `var(--radius)`,
         md: `calc(var(--radius) - 2px)`,
         sm: 'calc(var(--radius) - 4px)',
+        full: '9999px',
       },
       keyframes: {
         'accordion-down': {
@@ -102,6 +103,9 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
+      boxShadow: {
+        'inner-lg': 'inset 2px 0 4px 0 rgb(0 0 0 / 0.05);',
+      }
     },
   },
   plugins: [require('tailwindcss-animate')],

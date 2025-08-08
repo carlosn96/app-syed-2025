@@ -58,6 +58,7 @@ export function MainNav() {
               isActive={isActive}
               tooltip={link.label}
               onClick={() => setOpenMobile(false)}
+              size="lg"
             >
               <Link href={link.href}>
                 <Icon />
