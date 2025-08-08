@@ -37,36 +37,42 @@ function AppMain({ children }: { children: React.ReactNode }) {
     )
 }
 
+function SidebarLayout() {
+  return (
+    <Sidebar>
+        <SidebarBody>
+            <SidebarHeader>
+                <div className="flex items-center justify-center w-full p-4">
+                    <Image
+                    src="/UNELOGO.png"
+                    alt="UNE Logo"
+                    width={112}
+                    height={40}
+                    className="w-28 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]"
+                    />
+                </div>
+            </SidebarHeader>
+            <SidebarContent>
+                <div className="flex-1 overflow-y-auto">
+                    <MainNav />
+                </div>
+            </SidebarContent>
+            <SidebarFooter>
+                <UserNav />
+            </SidebarFooter>
+        </SidebarBody>
+    </Sidebar>
+  )
+}
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen login-background">
       <PageNavigationProvider>
         <SidebarProvider>
-            <Sidebar>
-                <SidebarBody>
-                    <SidebarHeader>
-                        <div className="flex items-center justify-center w-full p-4">
-                            <Image
-                            src="/UNELOGO.png"
-                            alt="UNE Logo"
-                            width={112}
-                            height={40}
-                            className="w-28 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]"
-                            />
-                        </div>
-                    </SidebarHeader>
-                    <SidebarContent>
-                        <div className="flex-1 overflow-y-auto">
-                            <MainNav />
-                        </div>
-                    </SidebarContent>
-                    <SidebarFooter>
-                        <UserNav />
-                    </SidebarFooter>
-                </SidebarBody>
-            </Sidebar>
-          <AppMain>{children}</AppMain>
-          <SidebarTrigger />
+            <SidebarLayout />
+            <AppMain>{children}</AppMain>
+            <SidebarTrigger />
         </SidebarProvider>
       </PageNavigationProvider>
     </div>

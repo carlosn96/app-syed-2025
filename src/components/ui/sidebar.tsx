@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 1 week
@@ -229,26 +230,10 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar, isMobile, state } = useSidebar();
-  const Icon = state === 'expanded' ? PanelLeft : PanelRight;
+  const { toggleSidebar, isMobile } = useSidebar()
 
-  if (isMobile) {
-     return (
-        <Button
-          ref={ref}
-          variant="ghost"
-          size="icon"
-          className={cn("fixed top-4 left-4 h-12 w-12 rounded-full text-white bg-black/30 backdrop-blur-sm z-50", className)}
-          onClick={(event) => {
-            onClick?.(event)
-            toggleSidebar()
-          }}
-          aria-label="Abrir menú"
-          {...props}
-        >
-          <PanelLeft className="size-5"/>
-        </Button>
-     )
+  if (!isMobile) {
+    return null
   }
 
   return (
@@ -256,15 +241,18 @@ const SidebarTrigger = React.forwardRef<
       ref={ref}
       variant="ghost"
       size="icon"
-      className={cn("h-12 w-12 rounded-full text-white bg-black/30 backdrop-blur-sm absolute -right-6 top-1/2 -translate-y-1/2 z-50", className)}
+      className={cn(
+        "fixed top-4 left-4 z-50 h-12 w-12 rounded-full bg-black/30 text-white backdrop-blur-sm",
+        className
+      )}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
       }}
-      aria-label={state === 'expanded' ? 'Colapsar menú' : 'Expandir menú'}
+      aria-label="Abrir menú"
       {...props}
     >
-      <Icon className="size-5"/>
+      <PanelLeft className="size-5" />
     </Button>
   )
 })
@@ -283,10 +271,7 @@ const SidebarHeader = React.forwardRef<
       data-state={state}
       className={cn("relative flex h-24 shrink-0 items-center z-10", state === 'expanded' ? 'px-4' : 'justify-center', isMobile && 'px-4 justify-start', className)}
       {...props}
-    >
-        {props.children}
-        <SidebarTrigger />
-    </div>
+    />
   )
 })
 SidebarHeader.displayName = "SidebarHeader"
