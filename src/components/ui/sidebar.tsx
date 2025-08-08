@@ -4,7 +4,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft, PanelRight } from "lucide-react"
+import { PanelLeft, PanelRight, X } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -222,7 +222,7 @@ const SidebarTrigger = React.forwardRef<
           ref={ref}
           variant="ghost"
           size="icon"
-          className={cn("fixed top-1/2 -translate-y-1/2 left-4 h-12 w-12 rounded-full text-white bg-black/30 backdrop-blur-sm z-50", className)}
+          className={cn("fixed top-4 left-4 h-12 w-12 rounded-full text-white bg-black/30 backdrop-blur-sm z-50", className)}
           onClick={(event) => {
             onClick?.(event)
             toggleSidebar()
@@ -286,7 +286,7 @@ const SidebarFooter = React.forwardRef<
             data-sidebar="footer"
             data-state={state}
             className={cn(
-                "flex flex-col gap-2 p-4 mt-auto border-t border-sidebar-border z-10 bg-sidebar-background/50", 
+                "flex p-4 mt-auto border-t border-sidebar-border z-10 bg-sidebar-background/50", 
                 state === 'collapsed' && "items-center",
                  isMobile && 'items-start',
                 className

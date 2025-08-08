@@ -21,7 +21,6 @@ import {
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import { FloatingBackButton } from '@/components/ui/floating-back-button';
 import { useToast } from '@/hooks/use-toast';
 import { Star } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
@@ -117,7 +116,6 @@ export default function StudentEvaluationPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <FloatingBackButton />
       <Card className="rounded-xl">
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardHeader>

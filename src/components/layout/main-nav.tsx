@@ -9,7 +9,6 @@ import {
   CalendarClock,
   LayoutDashboard,
   ShieldCheck,
-  Star,
   Users,
   ClipboardCheck,
   ClipboardList,

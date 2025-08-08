@@ -36,7 +36,6 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ProgressRing } from "@/components/ui/progress-ring"
-import { FloatingBackButton } from "@/components/ui/floating-back-button"
 import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -220,7 +219,6 @@ export default function TeacherProfilePage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <FloatingBackButton />
       <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20">
