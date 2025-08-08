@@ -46,27 +46,29 @@ export function MainNav() {
   const links = allLinks.filter(link => user && link.roles.includes(user.rol));
 
   return (
-    <SidebarMenu>
-      {links.map((link) => {
-        const Icon = link.icon
-        const isActive = link.exact ? pathname === link.href : pathname.startsWith(link.href)
-        return (
-          <SidebarMenuItem key={link.href}>
-            <SidebarMenuButton
-              asChild
-              isActive={isActive}
-              tooltip={link.label}
-              onClick={() => setOpenMobile(false)}
-              size="lg"
-            >
-              <Link href={link.href}>
-                <Icon />
-                <span>{link.label}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        )
-      })}
-    </SidebarMenu>
+    <div className="flex-1 overflow-y-auto">
+        <SidebarMenu>
+        {links.map((link) => {
+            const Icon = link.icon
+            const isActive = link.exact ? pathname === link.href : pathname.startsWith(link.href)
+            return (
+            <SidebarMenuItem key={link.href}>
+                <SidebarMenuButton
+                asChild
+                isActive={isActive}
+                tooltip={link.label}
+                onClick={() => setOpenMobile(false)}
+                size="lg"
+                >
+                <Link href={link.href}>
+                    <Icon />
+                    <span>{link.label}</span>
+                </Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+            )
+        })}
+        </SidebarMenu>
+    </div>
   )
 }

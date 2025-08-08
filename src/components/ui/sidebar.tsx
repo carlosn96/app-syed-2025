@@ -164,6 +164,24 @@ const SidebarProvider = React.forwardRef<
 )
 SidebarProvider.displayName = "SidebarProvider"
 
+
+const SidebarBody = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<"div">
+>(({ className, children, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      className={cn("flex h-full flex-col", className)}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+})
+SidebarBody.displayName = "SidebarBody"
+
+
 const Sidebar = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
@@ -177,17 +195,19 @@ const Sidebar = React.forwardRef<
     ref
   ) => {
     const { isMobile, openMobile, setOpenMobile, state } = useSidebar()
+    const isCollapsed = state === 'collapsed';
+
+    const sidebarContent = <SidebarBody>{children}</SidebarBody>;
 
     if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-          <SheetContent
+           <SheetContent
             side="left"
             className="w-[var(--sidebar-width-mobile)] p-0 text-sidebar-foreground sidebar-glass flex flex-col"
             style={{ '--sidebar-width-mobile': SIDEBAR_WIDTH_MOBILE } as React.CSSProperties}
-            title="Navegación Principal"
           >
-            {children}
+            {sidebarContent}
           </SheetContent>
         </Sheet>
       )
@@ -199,12 +219,12 @@ const Sidebar = React.forwardRef<
         data-state={state}
         className={cn(
             "group peer hidden md:flex flex-col fixed inset-y-0 left-0 z-20 text-sidebar-foreground sidebar-glass transition-all duration-300 ease-in-out",
-            state === 'expanded' ? "w-[280px]" : "w-[80px]",
+            isCollapsed ? "w-[80px]" : "w-[280px]",
             className
         )}
         {...props}
       >
-        {children}
+        {sidebarContent}
       </div>
     )
   }
@@ -242,7 +262,7 @@ const SidebarTrigger = React.forwardRef<
       ref={ref}
       variant="ghost"
       size="icon"
-      className={cn("h-12 w-12 rounded-full text-white bg-black/30 backdrop-blur-sm absolute -right-6 top-1/2 -translate-y-1/2", className)}
+      className={cn("h-12 w-12 rounded-full text-white bg-black/30 backdrop-blur-sm absolute -right-6 top-1/2 -translate-y-1/2 z-50", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
@@ -267,7 +287,7 @@ const SidebarHeader = React.forwardRef<
       ref={ref}
       data-sidebar="header"
       data-state={state}
-      className={cn("relative flex h-24 items-center z-10", state === 'expanded' ? 'px-4' : 'justify-center', isMobile && 'px-4 justify-start', className)}
+      className={cn("relative flex h-24 shrink-0 items-center z-10", state === 'expanded' ? 'px-4' : 'justify-center', isMobile && 'px-4 justify-start', className)}
       {...props}
     >
         {props.children}
@@ -288,7 +308,7 @@ const SidebarFooter = React.forwardRef<
             data-sidebar="footer"
             data-state={state}
             className={cn(
-                "flex p-4 mt-auto border-t border-sidebar-border z-10 bg-sidebar-background/50", 
+                "flex p-4 shrink-0 border-t border-sidebar-border z-10 bg-sidebar-background/50", 
                 state === 'collapsed' && "items-center justify-center",
                  isMobile && 'items-start',
                 className
@@ -325,7 +345,7 @@ const SidebarContent = React.forwardRef<
       data-sidebar="content"
       data-state={state}
       className={cn(
-        "flex-1 overflow-auto",
+        "flex-1 overflow-hidden",
         className
       )}
       {...props}
