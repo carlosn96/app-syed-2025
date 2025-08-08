@@ -28,7 +28,7 @@ function AppMain({ children }: { children: React.ReactNode }) {
                  !isMobile && (isCollapsed ? "pl-[80px]" : "pl-[280px]")
             )}
         >
-            <div className="mx-auto max-w-7xl w-full p-4 sm:p-6 lg:p-8">
+            <div className="w-full p-4 sm:p-6 lg:p-8">
                 {children}
             </div>
         </main>

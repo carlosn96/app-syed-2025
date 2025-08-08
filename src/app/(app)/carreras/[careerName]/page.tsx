@@ -144,7 +144,7 @@ export default function CareerPlansPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {careerModalities.length > 0 ? careerModalities.map(modality => {
             const key = `${modality.name}-${modality.campus}-${modality.modality}`;
             return (
