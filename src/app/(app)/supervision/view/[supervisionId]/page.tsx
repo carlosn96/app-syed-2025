@@ -57,7 +57,7 @@ export default function ViewSupervisionPage() {
                     </CardHeader>
                     <CardContent>
                          <p>Docente: <span className='text-primary'>{supervision.teacher}</span></p>
-                         <p>Materia: <span className='text-primary'>{supervision.subject}</span></p>
+                         <p>Carrera: <span className='text-primary'>{supervision.career}</span></p>
                          <div className="flex items-center gap-2">
                             <span>Estado:</span>
                             <Badge variant={supervision.status === 'Programada' ? 'warning' : 'success'}>{supervision.status}</Badge>
@@ -77,7 +77,7 @@ export default function ViewSupervisionPage() {
                         <div>
                             <CardTitle>Detalle de Supervisión</CardTitle>
                             <CardDescription>
-                                Docente: <span className='text-primary'>{supervision.teacher}</span> | Materia: <span className='text-primary'>{supervision.subject}</span>
+                                Docente: <span className='text-primary'>{supervision.teacher}</span> | Carrera: <span className='text-primary'>{supervision.career}</span>
                             </CardDescription>
                         </div>
                         <div className="text-right">
