@@ -16,6 +16,8 @@ export function useIsMobile(breakpoint: Breakpoint = 'md') {
   const bpWidth = BREAKPOINTS[breakpoint];
 
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const mql = window.matchMedia(`(max-width: ${bpWidth - 1}px)`)
     const onChange = () => {
       setIsMobile(window.innerWidth < bpWidth)

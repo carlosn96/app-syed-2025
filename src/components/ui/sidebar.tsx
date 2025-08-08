@@ -71,7 +71,7 @@ const SidebarProvider = React.forwardRef<
     ref
   ) => {
     const isMobile = useIsMobile('md')
-    const isTablet = useIsMobile('lg') && !isMobile;
+    const isTablet = useIsMobile('xl') && !isMobile;
     const [openMobile, setOpenMobile] = React.useState(false)
 
     // This is the internal state of the sidebar.
@@ -100,7 +100,7 @@ const SidebarProvider = React.forwardRef<
             setOpen(true);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isTablet, isMobile])
+    }, [isTablet, isMobile]);
 
     const pathname = usePathname();
     React.useEffect(() => {
@@ -254,7 +254,7 @@ const Sidebar = React.forwardRef<
         data-state={state}
         className={cn(
             "group peer hidden md:block",
-            "lg:w-[var(--sidebar-width)]",
+            "xl:w-[var(--sidebar-width)]",
             "md:w-[var(--sidebar-width-icon)]",
             "md:data-[state=expanded]:w-[var(--sidebar-width)]"
         )}
@@ -290,7 +290,7 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-8 w-8 text-white", className)}
+      className={cn("h-10 w-10 rounded-full text-white", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()

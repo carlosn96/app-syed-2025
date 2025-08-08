@@ -31,7 +31,7 @@ function AppMain({ children }: { children: React.ReactNode }) {
             data-state={state}
             >
             <MobileHeader />
-             <div className="w-full max-w-screen-xl mx-auto p-4 md:p-6 lg:p-8">
+             <div className="w-full p-4 md:p-6 xl:p-8">
                 {children}
             </div>
         </main>
