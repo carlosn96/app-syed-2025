@@ -21,10 +21,11 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/context/auth-context"
 
-const allLinks = [
+export const allLinks = [
   { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrator', 'coordinator', 'teacher', 'student'], exact: true },
   { href: "/users", label: "Usuarios", icon: Users, roles: ['administrator', 'coordinator'], exact: false },
   { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrator'], exact: true },
@@ -41,6 +42,7 @@ const allLinks = [
 export function MainNav() {
   const pathname = usePathname()
   const { user } = useAuth()
+  const { setOpenMobile } = useSidebar();
 
   const links = allLinks.filter(link => user && link.roles.includes(user.rol));
 
@@ -55,6 +57,7 @@ export function MainNav() {
               asChild
               isActive={isActive}
               tooltip={link.label}
+              onClick={() => setOpenMobile(false)}
             >
               <Link href={link.href}>
                 <Icon />
