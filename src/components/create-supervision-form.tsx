@@ -26,20 +26,22 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { supervisions, subjects, users, careers, teachers as allTeachers, Subject, User, groups, schedules, Group, Teacher, Schedule } from "@/lib/data"
+import { supervisions, subjects, users, careers, teachers as allTeachers, Subject, User, groups, schedules, Group, Teacher, Schedule, Career } from "@/lib/data"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useAuth } from "@/context/auth-context"
+import { Input } from "./ui/input"
 
 const createSupervisionSchema = z.object({
   coordinatorId: z.string().min(1, "Por favor, seleccione un coordinador."),
-  groupId: z.string().min(1, "Por favor, seleccione un grupo."),
   teacherId: z.string().min(1, "Por favor, seleccione un docente."),
-  subjectId: z.string().min(1, "Por favor, seleccione una materia."),
+  careerName: z.string().min(1, "La carrera es requerida."),
   date: z.date({
     required_error: "Se requiere una fecha para la supervisión.",
   }),
+  startTime: z.string().min(1, "La hora de inicio es requerida."),
+  endTime: z.string().min(1, "La hora de fin es requerida."),
 });
 
 type CreateSupervisionFormValues = z.infer<typeof createSupervisionSchema>;
@@ -47,29 +49,21 @@ type CreateSupervisionFormValues = z.infer<typeof createSupervisionSchema>;
 const addSupervision = (data: CreateSupervisionFormValues) => {
     const newId = Math.max(...supervisions.map(s => s.id), 0) + 1;
     const teacherName = allTeachers.find(t => t.id === parseInt(data.teacherId))?.name || "N/A";
-    const subjectName = subjects.find(s => s.id === parseInt(data.subjectId))?.name || "N/A";
     const coordinator = users.find(u => u.id === parseInt(data.coordinatorId));
     const coordinatorName = coordinator ? `${coordinator.nombre} ${coordinator.apellido_paterno}`.trim() : "N/A";
-    
-    const scheduleEntry = schedules.find(s => 
-        s.groupId === parseInt(data.groupId) &&
-        s.teacherId === parseInt(data.teacherId) &&
-        s.subjectId === parseInt(data.subjectId)
-    );
 
     const newSupervision = {
         id: newId,
         teacher: teacherName,
-        subject: subjectName,
+        career: data.careerName,
         coordinator: coordinatorName,
         date: data.date,
         status: "Programada",
-        groupId: parseInt(data.groupId),
-        startTime: scheduleEntry?.startTime || "00:00",
-        endTime: scheduleEntry?.endTime || "00:00",
+        startTime: data.startTime,
+        endTime: data.endTime,
     };
     supervisions.push(newSupervision);
-    supervisions.sort((a,b) => a.date.getTime() - b.date.getTime());
+    supervisions.sort((a,b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0));
     console.log("Supervisión creada:", newSupervision);
 };
 
@@ -77,67 +71,51 @@ interface CreateSupervisionFormProps {
   onSuccess?: () => void;
 }
 
-const dayMapping: { [key: string]: number } = {
-  'Lunes': 1,
-  'Martes': 2,
-  'Miércoles': 3,
-  'Jueves': 4,
-  'Viernes': 5,
+const getAvailableOptions = (coordinatorId?: string) => {
+    let availableTeachers: Teacher[] = [];
+    const teacherCareers: Record<string, string> = {};
+
+    const coordinatorUser = users.find(u => u.id === Number(coordinatorId));
+    if (coordinatorUser) {
+        const coordinatorName = `${coordinatorUser.nombre} ${coordinatorUser.apellido_paterno}`.trim();
+        const coordinatedCareers = careers.filter(c => c.coordinator === coordinatorName).map(c => c.name);
+        
+        const teacherIdsInCoordinatedCareers = new Set<number>();
+        
+        allGroups.forEach(group => {
+            if (coordinatedCareers.includes(group.career)) {
+                schedules.filter(s => s.groupId === group.id).forEach(schedule => {
+                    teacherIdsInCoordinatedCareers.add(schedule.teacherId);
+                });
+            }
+        });
+
+        availableTeachers = allTeachers.filter(t => teacherIdsInCoordinatedCareers.has(t.id));
+
+        availableTeachers.forEach(teacher => {
+            const teacherSchedules = schedules.filter(s => s.teacherId === teacher.id);
+            const teacherGroupIds = [...new Set(teacherSchedules.map(s => s.groupId))];
+            const teacherGroups = allGroups.filter(g => teacherGroupIds.includes(g.id));
+            const teacherCareerName = teacherGroups.length > 0 ? teacherGroups[0].career : "N/A";
+            teacherCareers[teacher.id] = teacherCareerName;
+        });
+    }
+
+    return { availableTeachers, teacherCareers };
 };
 
-// Helper to get available options based on schedules
-const getAvailableOptions = (coordinatorId?: string, groupId?: string, teacherId?: string, subjectId?: string) => {
-  let availableGroups: Group[] = [];
-  let availableTeachers: Teacher[] = [];
-  let availableSubjects: Subject[] = [];
-  let scheduledDay: number | null = null;
-
-  const coordinatorUser = users.find(u => u.id === Number(coordinatorId));
-  if (coordinatorUser) {
-    const coordinatorName = `${coordinatorUser.nombre} ${coordinatorUser.apellido_paterno}`.trim();
-    const coordinatedCareers = careers.filter(c => c.coordinator === coordinatorName).map(c => c.name);
-    availableGroups = groups.filter(g => coordinatedCareers.includes(g.career));
-  }
-
-  if (groupId) {
-      const scheduledTeachers = schedules
-          .filter(s => s.groupId === Number(groupId))
-          .map(s => s.teacherId);
-      const uniqueTeacherIds = [...new Set(scheduledTeachers)];
-      availableTeachers = allTeachers.filter(t => uniqueTeacherIds.includes(t.id));
-  }
-
-  if (groupId && teacherId) {
-      const scheduledSubjects = schedules
-          .filter(s => s.groupId === Number(groupId) && s.teacherId === Number(teacherId))
-          .map(s => s.subjectId);
-      const uniqueSubjectIds = [...new Set(scheduledSubjects)];
-      availableSubjects = subjects.filter(s => uniqueSubjectIds.includes(s.id));
-  }
-
-  if (groupId && teacherId && subjectId) {
-      const schedule = schedules.find(s => 
-          s.groupId === Number(groupId) && 
-          s.teacherId === Number(teacherId) && 
-          s.subjectId === Number(subjectId)
-      );
-      if (schedule) {
-          scheduledDay = dayMapping[schedule.dayOfWeek];
-      }
-  }
-
-  return { availableGroups, availableTeachers, availableSubjects, scheduledDay };
-};
+const timeOptions = Array.from({ length: 15 }, (_, i) => {
+    const hour = 7 + i;
+    return `${String(hour).padStart(2, '0')}:00`;
+});
 
 
 export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   
-  const [availableGroups, setAvailableGroups] = useState<Group[]>([]);
   const [availableTeachers, setAvailableTeachers] = useState<Teacher[]>([]);
-  const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
-  const [scheduledDay, setScheduledDay] = useState<number | null>(null);
+  const [teacherCareers, setTeacherCareers] = useState<Record<string, string>>({});
   
   const coordinators = useMemo(() => users.filter(u => u.rol === 'coordinator'), []);
   const defaultCoordinator = user?.rol === 'coordinator' ? String(user.id) : "";
@@ -146,57 +124,34 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
     resolver: zodResolver(createSupervisionSchema),
     defaultValues: {
       coordinatorId: defaultCoordinator,
-      groupId: "",
       teacherId: "",
-      subjectId: "",
+      careerName: "",
       date: undefined,
+      startTime: "",
+      endTime: "",
     }
   });
 
   const selectedCoordinatorId = form.watch("coordinatorId");
-  const selectedGroupId = form.watch("groupId");
   const selectedTeacherId = form.watch("teacherId");
-  const selectedSubjectId = form.watch("subjectId");
   
   useEffect(() => {
-    form.resetField("groupId", { defaultValue: "" });
     form.resetField("teacherId", { defaultValue: "" });
-    form.resetField("subjectId", { defaultValue: "" });
+    form.resetField("careerName", { defaultValue: "" });
     form.resetField("date");
     
-    const { availableGroups } = getAvailableOptions(selectedCoordinatorId);
-    setAvailableGroups(availableGroups);
-    setAvailableTeachers([]);
-    setAvailableSubjects([]);
-    setScheduledDay(null);
+    const { availableTeachers, teacherCareers } = getAvailableOptions(selectedCoordinatorId);
+    setAvailableTeachers(availableTeachers);
+    setTeacherCareers(teacherCareers);
   }, [selectedCoordinatorId, form]);
 
   useEffect(() => {
-    form.resetField("teacherId", { defaultValue: "" });
-    form.resetField("subjectId", { defaultValue: "" });
-    form.resetField("date");
-    
-    const { availableTeachers } = getAvailableOptions(selectedCoordinatorId, selectedGroupId);
-    setAvailableTeachers(availableTeachers);
-    setAvailableSubjects([]);
-    setScheduledDay(null);
-  }, [selectedCoordinatorId, selectedGroupId, form]);
-
-  useEffect(() => {
-    form.resetField("subjectId", { defaultValue: "" });
-    form.resetField("date");
-
-    const { availableSubjects } = getAvailableOptions(selectedCoordinatorId, selectedGroupId, selectedTeacherId);
-    setAvailableSubjects(availableSubjects);
-    setScheduledDay(null);
-  }, [selectedCoordinatorId, selectedGroupId, selectedTeacherId, form]);
-
-  useEffect(() => {
-    form.resetField("date");
-
-    const { scheduledDay } = getAvailableOptions(selectedCoordinatorId, selectedGroupId, selectedTeacherId, selectedSubjectId);
-    setScheduledDay(scheduledDay);
-  }, [selectedCoordinatorId, selectedGroupId, selectedTeacherId, selectedSubjectId, form]);
+    if (selectedTeacherId && teacherCareers[selectedTeacherId]) {
+      form.setValue("careerName", teacherCareers[selectedTeacherId]);
+    } else {
+      form.resetField("careerName");
+    }
+  }, [selectedTeacherId, teacherCareers, form]);
 
 
   const onSubmit = (data: CreateSupervisionFormValues) => {
@@ -206,7 +161,7 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
         title: "Cita Agendada",
         description: `La supervisión para el ${format(data.date, "PPP", { locale: es })} ha sido agendada.`,
       });
-      form.reset({ coordinatorId: defaultCoordinator, groupId: "", teacherId: "", subjectId: "" });
+      form.reset({ coordinatorId: defaultCoordinator, teacherId: "", careerName: "", date: undefined, startTime: "", endTime: "" });
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
@@ -250,34 +205,6 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
         )}
         <FormField
           control={form.control}
-          name="groupId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Grupo</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                value={field.value}
-                disabled={!selectedCoordinatorId || availableGroups.length === 0}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un grupo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {availableGroups.map((group) => (
-                    <SelectItem key={group.id} value={String(group.id)}>
-                      {group.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
           name="teacherId"
           render={({ field }) => (
             <FormItem>
@@ -285,7 +212,7 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
               <Select 
                 onValueChange={field.onChange} 
                 value={field.value}
-                disabled={!selectedGroupId || availableTeachers.length === 0}
+                disabled={!selectedCoordinatorId || availableTeachers.length === 0}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -305,32 +232,17 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
           )}
         />
         <FormField
-          control={form.control}
-          name="subjectId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Materia</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                value={field.value}
-                disabled={!selectedTeacherId || availableSubjects.length === 0}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione una materia" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {availableSubjects.map((subject) => (
-                    <SelectItem key={subject.id} value={String(subject.id)}>
-                      {subject.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+            control={form.control}
+            name="careerName"
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Carrera</FormLabel>
+                    <FormControl>
+                        <Input {...field} disabled />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}
         />
         <FormField
           control={form.control}
@@ -347,7 +259,7 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
-                      disabled={!selectedSubjectId || scheduledDay === null}
+                      disabled={!selectedTeacherId}
                     >
                       {field.value ? (
                         format(field.value, "PPP", { locale: es})
@@ -366,9 +278,7 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
                     disabled={(date) => {
                         const today = new Date();
                         today.setHours(0,0,0,0);
-                        if (date < today) return true;
-                        if (scheduledDay !== null && date.getDay() !== scheduledDay) return true;
-                        return false;
+                        return date < today;
                     }}
                     initialFocus
                     locale={es}
@@ -379,6 +289,49 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
             </FormItem>
           )}
         />
+        <div className="grid grid-cols-2 gap-4">
+            <FormField
+            control={form.control}
+            name="startTime"
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Hora de Inicio</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!form.getValues('date')}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Inicio" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {timeOptions.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+            )}
+            />
+            <FormField
+            control={form.control}
+            name="endTime"
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Hora de Fin</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!form.getValues('startTime')}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Fin" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                             {timeOptions.filter(t => t > form.getValues('startTime')).map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+            )}
+            />
+        </div>
+
         <Button type="submit" className="w-full">Agendar Cita</Button>
       </form>
     </Form>

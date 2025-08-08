@@ -28,7 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { CreateSupervisionForm } from "@/app/(app)/create-supervision-form"
+import { CreateSupervisionForm } from "@/components/create-supervision-form"
 import { supervisions as allSupervisions, Supervision } from "@/lib/data"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"

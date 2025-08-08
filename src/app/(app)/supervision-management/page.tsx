@@ -29,17 +29,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CreateSupervisionForm } from "@/components/create-supervision-form"
-import { supervisions as allSupervisions } from "@/lib/data"
+import { supervisions as allSupervisions, groups } from "@/lib/data"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { Calendar } from "@/components/ui/calendar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
-import { Pencil, ClipboardEdit } from "lucide-react"
+import { Pencil, ClipboardEdit, Eye } from "lucide-react"
 
-export default function SupervisionsPage() {
+export default function SupervisionsManagementPage() {
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -51,36 +50,24 @@ export default function SupervisionsPage() {
     return allSupervisions;
   }, [user]);
 
+  const getScoreColor = (score: number) => {
+    if (score < 60) return 'hsl(var(--destructive))';
+    if (score < 80) return 'hsl(var(--warning))';
+    return 'hsl(var(--success))'; 
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Supervisiones
         </h1>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger asChild>
-            <FloatingButton text="Agendar Supervisión" />
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Agendar Nueva Supervisión</DialogTitle>
-              <DialogDescription>
-                Completa el formulario para agendar una nueva supervisión de
-                docente.
-              </DialogDescription>
-            </DialogHeader>
-            <CreateSupervisionForm 
-                onSuccess={() => setIsModalOpen(false)} 
-            />
-          </DialogContent>
-        </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
-        <Card className="rounded-xl">
+      <Card className="rounded-xl">
             <CardHeader>
                 <CardTitle>Lista de Supervisiones</CardTitle>
-                <CardDescription>Historial y próximas supervisiones.</CardDescription>
+                <CardDescription>Aquí puedes ver el historial y evaluar las supervisiones programadas.</CardDescription>
             </CardHeader>
             <CardContent>
                  {/* Mobile View - Card List */}
@@ -94,19 +81,22 @@ export default function SupervisionsPage() {
                             </div>
                             {user?.rol === 'coordinator' && (
                                 <div className="flex gap-2">
-                                  {supervision.status === 'Programada' && (
+                                  {supervision.status === 'Programada' ? (
                                     <>
-                                        <Button size="icon" variant="warning">
-                                            <Pencil className="h-4 w-4" />
-                                            <span className="sr-only">Editar</span>
-                                        </Button>
                                         <Button asChild size="icon" variant="success">
-                                            <Link href={`/supervisions/evaluate/${supervision.id}`}>
+                                            <Link href={`/supervision/evaluate/${supervision.id}`}>
                                                 <ClipboardEdit className="h-4 w-4" />
                                                 <span className="sr-only">Evaluar</span>
                                             </Link>
                                         </Button>
                                     </>
+                                  ) : (
+                                    <Button asChild size="icon" variant="outline">
+                                        <Link href={`/supervision/view/${supervision.id}`}>
+                                            <Eye className="h-4 w-4" />
+                                            <span className="sr-only">Ver Detalles</span>
+                                        </Link>
+                                    </Button>
                                   )}
                                 </div>
                             )}
@@ -121,6 +111,11 @@ export default function SupervisionsPage() {
                             <Badge variant={supervision.status === 'Programada' ? 'warning' : 'success'}>
                                 {supervision.status}
                             </Badge>
+                             {supervision.score !== undefined && (
+                                <p className="font-bold text-lg" style={{ color: getScoreColor(supervision.score) }}>
+                                    {supervision.score}%
+                                </p>
+                            )}
                         </div>
                         </CardContent>
                     </Card>
@@ -128,7 +123,7 @@ export default function SupervisionsPage() {
                 </div>
 
                 {/* Desktop View - Table */}
-                <ScrollArea className="hidden md:block h-auto max-h-[400px]">
+                <ScrollArea className="hidden md:block h-auto max-h-[600px]">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -138,34 +133,47 @@ export default function SupervisionsPage() {
                                 <TableHead>Fecha</TableHead>
                                 <TableHead>Horario</TableHead>
                                 <TableHead>Estado</TableHead>
+                                <TableHead>Calificación</TableHead>
                                 {user?.rol === 'coordinator' && <TableHead>Acciones</TableHead>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {supervisions.map((supervision) => (
                                 <TableRow key={supervision.id}>
-                                    <TableCell className="font-medium py-2">{supervision.teacher}</TableCell>
-                                    {user?.rol !== 'coordinator' && <TableCell className="font-medium py-2">{supervision.coordinator}</TableCell>}
-                                    <TableCell className="py-2">{supervision.career}</TableCell>
-                                    <TableCell className="py-2">{supervision.date ? format(supervision.date, "P", { locale: es }) : 'N/A'}</TableCell>
-                                    <TableCell className="py-2 text-primary font-mono">{supervision.startTime} - {supervision.endTime}</TableCell>
-                                    <TableCell className="py-2">
+                                    <TableCell className="font-medium py-3">{supervision.teacher}</TableCell>
+                                    {user?.rol !== 'coordinator' && <TableCell className="font-medium py-3">{supervision.coordinator}</TableCell>}
+                                    <TableCell className="py-3">{supervision.career}</TableCell>
+                                    <TableCell className="py-3">{supervision.date ? format(supervision.date, "P", { locale: es }) : 'N/A'}</TableCell>
+                                    <TableCell className="py-3 text-primary font-mono">{supervision.startTime} - {supervision.endTime}</TableCell>
+                                    <TableCell className="py-3">
                                         <Badge variant={supervision.status === 'Programada' ? 'warning' : 'success'}>
                                             {supervision.status}
                                         </Badge>
                                     </TableCell>
+                                    <TableCell className="py-3 font-bold">
+                                        {supervision.score !== undefined ? (
+                                            <span style={{ color: getScoreColor(supervision.score) }}>
+                                                {supervision.score}%
+                                            </span>
+                                        ) : 'N/A'}
+                                    </TableCell>
                                     {user?.rol === 'coordinator' && (
-                                      <TableCell className="py-2">
-                                        {supervision.status === 'Programada' && (
+                                      <TableCell className="py-3">
+                                        {supervision.status === 'Programada' ? (
                                             <div className="flex gap-2">
-                                                <Button size="icon" variant="warning">
-                                                    <Pencil className="h-4 w-4" />
-                                                    <span className="sr-only">Editar</span>
-                                                </Button>
                                                  <Button asChild size="icon" variant="success">
-                                                    <Link href={`/supervisions/evaluate/${supervision.id}`}>
+                                                    <Link href={`/supervision/evaluate/${supervision.id}`}>
                                                         <ClipboardEdit className="h-4 w-4" />
                                                         <span className="sr-only">Evaluar</span>
+                                                    </Link>
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex gap-2">
+                                                <Button asChild size="icon" variant="outline">
+                                                    <Link href={`/supervision/view/${supervision.id}`}>
+                                                        <Eye className="h-4 w-4" />
+                                                        <span className="sr-only">Ver Detalles</span>
                                                     </Link>
                                                 </Button>
                                             </div>
@@ -179,7 +187,6 @@ export default function SupervisionsPage() {
                 </ScrollArea>
             </CardContent>
         </Card>
-      </div>
     </div>
   )
 }
