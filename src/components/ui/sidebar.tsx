@@ -197,8 +197,9 @@ const Sidebar = React.forwardRef<
         ref={ref}
         data-state={state}
         className={cn(
-            "group peer hidden md:block fixed inset-y-0 z-20 flex h-svh flex-col text-sidebar-foreground sidebar-glass sidebar-transition border-r border-white/10",
+            "group peer hidden md:block fixed inset-y-0 z-20 text-sidebar-foreground sidebar-glass sidebar-transition border-r border-white/10",
             state === 'expanded' ? 'w-[280px]' : 'w-[80px]',
+            "flex flex-col",
             className
         )}
         {...props}
