@@ -187,13 +187,9 @@ const Sidebar = React.forwardRef<
             side="left"
             className="w-[var(--sidebar-width-mobile)] p-0 text-sidebar-foreground sidebar-glass flex flex-col border-r-0"
             style={{ '--sidebar-width-mobile': SIDEBAR_WIDTH_MOBILE } as React.CSSProperties}
+            title="Navegación Principal"
           >
-              <SheetHeader className="p-4 border-b border-sidebar-border h-[80px]">
-                  <SheetTitle className="sr-only">Navegación Principal</SheetTitle>
-              </SheetHeader>
-              <div className="flex-grow overflow-y-auto">
-                 {children}
-              </div>
+            {children}
           </SheetContent>
         </Sheet>
       )
@@ -274,17 +270,17 @@ const SidebarHeader = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-  const { state, toggleSidebar } = useSidebar()
+  const { state, isMobile } = useSidebar()
   return (
     <div
       ref={ref}
       data-sidebar="header"
       data-state={state}
-      className={cn("relative flex h-[80px] items-center border-b border-sidebar-border z-10", state === 'expanded' ? 'px-4' : 'justify-center', className)}
+      className={cn("relative flex h-[80px] items-center border-b border-sidebar-border z-10", state === 'expanded' ? 'px-4' : 'justify-center', isMobile && 'px-4 justify-start', className)}
       {...props}
     >
         {props.children}
-        <SidebarTrigger />
+        {!isMobile && <SidebarTrigger />}
     </div>
   )
 })
@@ -294,7 +290,7 @@ const SidebarFooter = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-    const { state } = useSidebar();
+    const { state, isMobile } = useSidebar();
     return (
         <div
             ref={ref}
@@ -303,6 +299,7 @@ const SidebarFooter = React.forwardRef<
             className={cn(
                 "flex flex-col gap-2 p-4 mt-auto border-t border-sidebar-border z-10 bg-sidebar-background/50", 
                 state === 'collapsed' && "items-center",
+                 isMobile && 'items-start',
                 className
             )}
             {...props}
