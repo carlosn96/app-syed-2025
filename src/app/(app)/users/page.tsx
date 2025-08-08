@@ -182,20 +182,17 @@ export default function UsersPage() {
 
   const renderAdminView = () => (
     <>
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-        <div className="relative w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row items-center gap-2 justify-between">
+        <div className="relative w-full sm:w-auto sm:max-w-xs flex-grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
               type="search"
               placeholder="Buscar usuarios..."
-              className="pl-9 w-full sm:w-full"
+              className="pl-9 w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-      </div>
-      {/* Mobile View - Card List */}
-      <div className="grid grid-cols-1 gap-4 md:hidden">
         <div className="flex flex-wrap items-center gap-2">
             {filterButtons.map((role) => (
                 <Button
@@ -208,33 +205,19 @@ export default function UsersPage() {
                 </Button>
             ))}
         </div>
+      </div>
+      {/* Mobile View - Card List */}
+      <div className="grid grid-cols-1 md:hidden gap-4">
         {filteredUsers.map(renderUserCard)}
       </div>
       
       {/* Desktop View - Table */}
       <Card className="hidden md:block rounded-xl">
         <CardHeader>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <CardTitle>Usuarios</CardTitle>
-              <CardDescription>
+            <CardTitle>Usuarios</CardTitle>
+            <CardDescription>
                 Administra todas las cuentas de usuario en el sistema.
-              </CardDescription>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex gap-2">
-                {filterButtons.map((role) => (
-                  <Button
-                    key={role}
-                    variant={filter === role ? 'default' : 'outline-filter'}
-                    onClick={() => setFilter(role as RoleFilter)}
-                  >
-                    {roleDisplayMap[role]}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
+            </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -268,18 +251,18 @@ export default function UsersPage() {
         <TabsTrigger value="students">Alumnos</TabsTrigger>
       </TabsList>
       <TabsContent value="teachers">
-        <div className="relative w-full sm:w-auto my-4">
+        <div className="relative w-full sm:max-w-xs my-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
                 type="search"
                 placeholder="Buscar docentes..."
-                className="pl-9 w-full sm:w-full"
+                className="pl-9 w-full"
                 value={teacherSearch}
                 onChange={(e) => setTeacherSearch(e.target.value)}
             />
         </div>
          {/* Mobile View */}
-        <div className="grid grid-cols-1 gap-4 md:hidden">
+        <div className="grid grid-cols-1 md:hidden gap-4">
             {filteredTeachers.map(renderUserCard)}
         </div>
         {/* Desktop View */}
@@ -328,18 +311,18 @@ export default function UsersPage() {
         </Card>
       </TabsContent>
       <TabsContent value="students">
-        <div className="relative w-full sm:w-auto my-4">
+        <div className="relative w-full sm:max-w-xs my-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
                 type="search"
                 placeholder="Buscar alumnos..."
-                className="pl-9 w-full sm:w-full"
+                className="pl-9 w-full"
                 value={studentSearch}
                 onChange={(e) => setStudentSearch(e.target.value)}
             />
         </div>
          {/* Mobile View */}
-        <div className="grid grid-cols-1 gap-4 md:hidden">
+        <div className="grid grid-cols-1 md:hidden gap-4">
             {filteredStudents.map(renderUserCard)}
         </div>
          {/* Desktop View */}

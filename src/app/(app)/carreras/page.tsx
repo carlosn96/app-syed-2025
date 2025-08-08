@@ -287,7 +287,7 @@ export default function CareersPage() {
   );
 
   const renderDefaultView = () => (
-    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredGroupedCareers.map(group => renderCareerContent(group, false))}
     </div>
   );
@@ -316,8 +316,8 @@ export default function CareersPage() {
             </Dialog>
         )}
       </div>
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
-        <div className="relative w-full sm:w-auto flex-grow">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
+        <div className="relative w-full flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
                 type="search"

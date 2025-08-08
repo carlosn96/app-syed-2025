@@ -97,7 +97,9 @@ const SidebarProvider = React.forwardRef<
         if(isTablet) {
             setOpen(false);
         } else if (!isMobile && !isTablet) {
-            setOpen(true);
+            const cookieValue = document.cookie.split('; ').find(row => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`));
+            const storedState = cookieValue ? cookieValue.split('=')[1] === 'true' : defaultOpen;
+            setOpen(storedState);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isTablet, isMobile]);
@@ -189,7 +191,7 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, openMobile, setOpenMobile, state } = useSidebar()
+    const { isMobile, openMobile, setOpenMobile, state, isTablet } = useSidebar()
     const { pageNav } = usePageNavigation();
 
     if (isMobile) {
@@ -251,21 +253,22 @@ const Sidebar = React.forwardRef<
     return (
        <div
         ref={ref}
-        data-state={state}
+        data-state={isTablet ? 'collapsed' : state}
         className={cn(
             "group peer hidden md:block",
             "xl:w-[var(--sidebar-width)]",
             "md:w-[var(--sidebar-width-icon)]",
-            "md:data-[state=expanded]:w-[var(--sidebar-width)]"
+            "xl:data-[state=expanded]:w-[var(--sidebar-width)]"
         )}
       >
         <div
           data-sidebar="sidebar"
           className={cn(
             "fixed inset-y-0 z-20 flex h-svh flex-col text-sidebar-foreground glass-card",
-            "w-[var(--sidebar-width)] transition-[width] duration-200",
+            "xl:w-[var(--sidebar-width)] transition-[width] duration-300 ease-in-out",
+            "md:w-[var(--sidebar-width-icon)]",
             "left-0 border-r",
-            "md:group-data-[state=collapsed]:w-[var(--sidebar-width-icon)]",
+            "xl:group-data-[state=expanded]:w-[var(--sidebar-width)]",
              className
           )}
           {...props}
@@ -309,12 +312,12 @@ const SidebarHeader = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-  const { state } = useSidebar()
+  const { state, isTablet } = useSidebar()
   return (
     <div
       ref={ref}
       data-sidebar="header"
-      data-state={state}
+      data-state={isTablet ? 'collapsed' : state}
       className={cn("flex flex-col gap-2 p-2 data-[state=collapsed]:items-center", className)}
       {...props}
     />
@@ -326,12 +329,12 @@ const SidebarFooter = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-    const { state } = useSidebar();
+    const { state, isTablet } = useSidebar();
     return (
         <div
             ref={ref}
             data-sidebar="footer"
-            data-state={state}
+            data-state={isTablet ? 'collapsed' : state}
             className={cn("flex flex-col gap-2 p-2 mt-auto data-[state=collapsed]:items-center", className)}
             {...props}
         />
@@ -358,12 +361,12 @@ const SidebarContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-    const { state } = useSidebar();
+    const { state, isTablet } = useSidebar();
   return (
     <div
       ref={ref}
       data-sidebar="content"
-      data-state={state}
+      data-state={isTablet ? 'collapsed' : state}
       className={cn(
         "flex min-h-0 flex-1 flex-col gap-2 overflow-auto data-[state=collapsed]:overflow-hidden",
         className
@@ -406,7 +409,7 @@ const sidebarMenuButtonVariants = cva(
     variants: {
       variant: {
         default:
-          "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:drop-shadow-[0_0_8px_rgba(var(--sidebar-primary-foreground),0.8)]",
+          "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:drop-shadow-[0_0_8px_hsl(var(--sidebar-primary-foreground))]",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
@@ -444,7 +447,7 @@ const SidebarMenuButton = React.forwardRef<
     ref
   ) => {
     const Comp = asChild ? Slot : "button"
-    const { isMobile, state } = useSidebar()
+    const { isMobile, isTablet, state } = useSidebar()
 
     const button = (
       <Comp
@@ -473,7 +476,7 @@ const SidebarMenuButton = React.forwardRef<
         <TooltipContent
           side="right"
           align="center"
-          hidden={state !== "collapsed" || isMobile}
+          hidden={(isTablet ? false : state !== "collapsed") || isMobile}
           {...tooltip}
         />
       </Tooltip>
