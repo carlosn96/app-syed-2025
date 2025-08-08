@@ -1,4 +1,3 @@
-
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -31,6 +30,7 @@ import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useAuth } from "@/context/auth-context"
+import { Input } from "@/components/ui/input"
 
 const createSupervisionSchema = z.object({
   coordinatorId: z.string().min(1, "Por favor, seleccione un coordinador."),
