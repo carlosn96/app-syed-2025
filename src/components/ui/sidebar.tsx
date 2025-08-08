@@ -196,21 +196,14 @@ const Sidebar = React.forwardRef<
        <div
         ref={ref}
         data-state={state}
-        className={cn("group peer hidden md:block", className)}
+        className={cn(
+            "group peer hidden md:block fixed inset-y-0 z-20 flex h-svh flex-col text-sidebar-foreground sidebar-glass sidebar-transition border-r border-white/10",
+            state === 'expanded' ? 'w-[280px]' : 'w-[80px]',
+            className
+        )}
+        {...props}
       >
-        <div
-          data-sidebar="sidebar"
-          className={cn(
-            "fixed inset-y-0 z-20 flex h-svh flex-col text-sidebar-foreground sidebar-glass",
-            "transition-all duration-500 ease-in-out",
-            "left-0 border-r border-white/10",
-            state === "expanded" ? "w-[280px]" : "w-[80px]",
-             className
-          )}
-          {...props}
-        >
-          {children}
-        </div>
+        {children}
       </div>
     )
   }
@@ -367,7 +360,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-4 overflow-hidden rounded-full p-3 text-left text-sm outline-none ring-sidebar-ring transition-all duration-300 focus-visible:ring-2 active:opacity-80 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[state=collapsed]:w-11 group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:p-3 [&>span]:group-data-[state=collapsed]:hidden [&>svg]:size-5 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-4 overflow-hidden rounded-full p-3 text-left text-sm outline-none ring-sidebar-ring transition-all duration-300 focus-visible:ring-2 active:opacity-80 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[state=collapsed]:w-11 group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:p-3 [&>span]:group-data-[state=collapsed]:opacity-0 [&>svg]:size-5 [&>svg]:shrink-0",
   {
     variants: {
       variant: {

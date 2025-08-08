@@ -109,4 +109,21 @@ body {
       border-right: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 2px 0 15px rgba(0,0,0,0.2);
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition-duration: 0ms !important;
+      animation: none !important;
+    }
+  }
+
+  .sidebar-transition {
+      @apply transition-transform duration-300 ease-in-out;
+      will-change: transform;
+  }
+
+  .sidebar-content-transition {
+      @apply transition-opacity duration-200 ease-in-out;
+      will-change: opacity;
+  }
 }
