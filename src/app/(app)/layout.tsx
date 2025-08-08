@@ -19,15 +19,13 @@ import { cn } from "@/lib/utils";
 
 
 function AppMain({ children }: { children: React.ReactNode }) {
-    const { state, isMobile, isTablet } = useSidebar();
+    const { state, isMobile } = useSidebar();
 
     return (
         <main
             className={cn(
                 "transition-[padding-left] duration-300 ease-in-out",
-                 !isMobile && !isTablet && "pl-[280px]",
-                 isTablet && "pl-[80px]",
-                 isTablet && state === "expanded" && "pl-[280px]"
+                 !isMobile && (state === 'expanded' ? "pl-[280px]" : "pl-[80px]")
             )}
         >
             <MobileHeader />
