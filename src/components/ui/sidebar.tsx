@@ -193,8 +193,6 @@ const Sidebar = React.forwardRef<
     const { isMobile, openMobile, setOpenMobile, state } = useSidebar()
     const isCollapsed = state === 'collapsed';
 
-    const sidebarContent = <SidebarBody>{children}</SidebarBody>;
-
     if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
@@ -202,7 +200,7 @@ const Sidebar = React.forwardRef<
             side="left"
             className="w-[280px] p-0 text-sidebar-foreground sidebar-glass flex flex-col"
           >
-            {sidebarContent}
+            {children}
           </SheetContent>
         </Sheet>
       )
@@ -219,7 +217,7 @@ const Sidebar = React.forwardRef<
         )}
         {...props}
       >
-        {sidebarContent}
+        {children}
       </div>
     )
   }
@@ -286,7 +284,7 @@ const SidebarHeader = React.forwardRef<
       {...props}
     >
         {props.children}
-        {!isMobile && <SidebarTrigger />}
+        <SidebarTrigger />
     </div>
   )
 })
@@ -459,6 +457,7 @@ SidebarMenuButton.displayName = "SidebarMenuButton"
 
 export {
   Sidebar,
+  SidebarBody,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
