@@ -23,7 +23,7 @@ function AppMain({ children }: { children: React.ReactNode }) {
     return (
         <main
             className={cn(
-                "flex-1 flex flex-col transition-[margin-left] duration-200",
+                "transition-[margin-left] duration-200",
                 "lg:ml-[var(--sidebar-width)]",
                  "md:data-[state=expanded]:ml-[var(--sidebar-width)]",
                  "md:data-[state=collapsed]:ml-[var(--sidebar-width-icon)]"
@@ -31,7 +31,7 @@ function AppMain({ children }: { children: React.ReactNode }) {
             data-state={state}
             >
             <MobileHeader />
-            <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-gradient-to-br from-white/15 to-[#e11b1a]/15 relative">
+             <div className="w-full max-w-screen-xl mx-auto p-4 md:p-6 lg:p-8">
                 {children}
             </div>
         </main>

@@ -24,9 +24,15 @@ import { planteles } from "@/lib/data"
 export default function CampusesPage() {
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-        Gestión de Planteles
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
+            Gestión de Planteles
+        </h1>
+        <Button asChild>
+            <Link href="#">Crear Plantel</Link>
+        </Button>
+      </div>
+
       <Card className="rounded-xl">
         <CardHeader>
           <CardTitle>Planteles</CardTitle>

@@ -406,7 +406,7 @@ const sidebarMenuButtonVariants = cva(
     variants: {
       variant: {
         default:
-          "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-primary data-[active=true]:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]",
+          "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:drop-shadow-[0_0_8px_rgba(var(--sidebar-primary-foreground),0.8)]",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
