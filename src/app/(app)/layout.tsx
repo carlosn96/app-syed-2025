@@ -38,11 +38,16 @@ function AppMain({ children }: { children: React.ReactNode }) {
 }
 
 function SidebarLayout() {
+  const { toggleSidebar } = useSidebar();
   return (
     <Sidebar>
         <SidebarBody>
             <SidebarHeader>
-                <div className="flex items-center justify-center w-full p-4">
+                <button 
+                  onClick={toggleSidebar} 
+                  className="flex items-center justify-center w-full p-4 cursor-pointer"
+                  aria-label="Toggle Sidebar"
+                >
                     <Image
                     src="/UNELOGO.png"
                     alt="UNE Logo"
@@ -50,7 +55,7 @@ function SidebarLayout() {
                     height={40}
                     className="w-28 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]"
                     />
-                </div>
+                </button>
             </SidebarHeader>
             <SidebarContent>
                 <div className="flex-1 overflow-y-auto">
