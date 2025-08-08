@@ -17,9 +17,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { usePageNavigation } from "@/context/page-navigation-context"
-import Image from "next/image"
-import { usePathname } from "next/navigation"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 1 week
@@ -177,7 +174,6 @@ const Sidebar = React.forwardRef<
     ref
   ) => {
     const { isMobile, openMobile, setOpenMobile, state } = useSidebar()
-    const { pageNav } = usePageNavigation();
 
     if (isMobile) {
       return (
@@ -233,7 +229,7 @@ const SidebarTrigger = React.forwardRef<
           ref={ref}
           variant="ghost"
           size="icon"
-          className={cn("h-10 w-10 rounded-full text-white", className)}
+          className={cn("fixed top-4 left-4 h-12 w-12 rounded-full text-white bg-black/30 backdrop-blur-sm z-50", className)}
           onClick={(event) => {
             onClick?.(event)
             toggleSidebar()
@@ -276,7 +272,7 @@ const SidebarHeader = React.forwardRef<
       ref={ref}
       data-sidebar="header"
       data-state={state}
-      className={cn("relative flex h-[80px] items-center border-b border-sidebar-border z-10", state === 'expanded' ? 'px-4' : 'justify-center', isMobile && 'px-4 justify-start', className)}
+      className={cn("relative flex h-[80px] items-center z-10", state === 'expanded' ? 'px-4' : 'justify-center', isMobile && 'px-4 justify-start', className)}
       {...props}
     >
         {props.children}
