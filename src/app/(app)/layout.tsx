@@ -24,7 +24,7 @@ function AppMain({ children }: { children: React.ReactNode }) {
     return (
         <main
             className={cn(
-                "transition-[padding-left] duration-300 ease-in-out",
+                "transition-[padding-left] duration-500 ease-in-out",
                  !isMobile && (state === 'expanded' ? "pl-[280px]" : "pl-[80px]")
             )}
         >

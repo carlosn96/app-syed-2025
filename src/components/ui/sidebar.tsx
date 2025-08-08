@@ -202,7 +202,7 @@ const Sidebar = React.forwardRef<
           data-sidebar="sidebar"
           className={cn(
             "fixed inset-y-0 z-20 flex h-svh flex-col text-sidebar-foreground sidebar-glass",
-            "transition-all duration-300 ease-in-out",
+            "transition-all duration-500 ease-in-out",
             "left-0 border-r border-white/10",
             state === "expanded" ? "w-[280px]" : "w-[80px]",
              className
