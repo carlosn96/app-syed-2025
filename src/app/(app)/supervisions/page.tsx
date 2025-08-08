@@ -35,9 +35,8 @@ import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
-import { Pencil } from "lucide-react"
+import { Pencil, PlusCircle } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { DayPicker, DayProps } from "react-day-picker"
 
@@ -135,14 +134,17 @@ export default function SupervisionsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Agenda
         </h1>
         {user?.rol === 'coordinator' && (
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
-              <FloatingButton text="Agendar Cita" />
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Agendar Cita
+                </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>

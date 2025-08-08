@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react"
-import { Pencil, Trash2, Search } from "lucide-react"
+import { Pencil, Trash2, Search, PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/dialog"
 import { CreateSubjectForm } from "@/components/create-subject-form"
 import { Input } from "@/components/ui/input"
-import { FloatingButton } from "@/components/ui/floating-button"
 
 export default function SubjectsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -46,13 +45,16 @@ export default function SubjectsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Gestión de Materias
         </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
-            <FloatingButton text="Crear Materia" />
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Crear Materia
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>

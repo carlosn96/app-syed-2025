@@ -20,7 +20,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { supervisionRubrics, SupervisionRubric, evaluationRubrics, EvaluationRubric } from "@/lib/data"
-import { FloatingButton } from "@/components/ui/floating-button"
 import { Badge } from "@/components/ui/badge"
 import { CreateRubricForm } from "@/components/create-rubric-form"
 import { CreateCriterionForm } from "@/components/create-criterion-form"
@@ -182,13 +181,16 @@ export default function SupervisionRubricsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Gestión de Rúbricas
         </h1>
         <Dialog open={isRubricModalOpen} onOpenChange={setIsRubricModalOpen}>
           <DialogTrigger asChild>
-            <FloatingButton text="Crear Rúbrica" />
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Crear Rúbrica
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>

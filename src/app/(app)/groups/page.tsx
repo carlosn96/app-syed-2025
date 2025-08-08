@@ -33,7 +33,6 @@ import { groups as allGroups } from "@/lib/data"
 import { CreateGroupForm } from "@/components/create-group-form"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
-import { FloatingButton } from "@/components/ui/floating-button"
 
 export default function GroupsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,13 +47,16 @@ export default function GroupsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Grupos
         </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
-                <FloatingButton text="Crear Grupo" />
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Crear Grupo
+                </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

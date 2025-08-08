@@ -36,7 +36,6 @@ import { useAuth } from "@/context/auth-context"
 import { users as allUsersData, User, Role } from "@/lib/data"
 import { CreateUserForm } from "@/components/create-user-form"
 import { Input } from "@/components/ui/input"
-import { FloatingButton } from "@/components/ui/floating-button"
 
 type RoleFilter = Role | 'all';
 
@@ -253,14 +252,17 @@ export default function UsersPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Gestión de Usuarios
         </h1>
         {!isAuthLoading && (loggedInUser?.rol === 'administrator' || loggedInUser?.rol === 'coordinator') && (
            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
-                <FloatingButton text="Crear Usuario" />
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Crear Usuario
+                </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

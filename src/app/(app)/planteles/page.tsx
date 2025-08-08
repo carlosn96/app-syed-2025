@@ -33,7 +33,6 @@ import {
 import { planteles as allPlanteles } from "@/lib/data"
 import { CreatePlantelForm } from "@/components/create-plantel-form"
 import { Input } from "@/components/ui/input"
-import { FloatingButton } from "@/components/ui/floating-button"
 
 export default function PlantelesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,13 +46,16 @@ export default function PlantelesPage() {
 
     return (
         <div className="flex flex-col gap-8">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
                     Gestión de Planteles
                 </h1>
-                <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                 <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                     <DialogTrigger asChild>
-                       <FloatingButton text="Crear Plantel" />
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Crear Plantel
+                        </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
