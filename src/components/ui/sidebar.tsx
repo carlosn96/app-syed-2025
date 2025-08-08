@@ -286,7 +286,7 @@ const SidebarHeader = React.forwardRef<
       ref={ref}
       data-sidebar="header"
       data-state={state}
-      className={cn("relative flex h-[65px] items-center border-b border-sidebar-border shadow-inner-lg z-10", state === 'expanded' ? 'px-4' : 'justify-center', className)}
+      className={cn("relative flex h-[80px] items-center border-b border-sidebar-border shadow-inner-lg z-10", state === 'expanded' ? 'px-4' : 'justify-center', className)}
       {...props}
     >
         {props.children}
@@ -473,3 +473,5 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
+    
