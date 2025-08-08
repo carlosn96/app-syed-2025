@@ -35,6 +35,7 @@ type SidebarContext = {
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
+  isTablet: boolean;
   toggleSidebar: () => void
 }
 
@@ -69,7 +70,8 @@ const SidebarProvider = React.forwardRef<
     },
     ref
   ) => {
-    const isMobile = useIsMobile()
+    const isMobile = useIsMobile('md')
+    const isTablet = useIsMobile('lg') && !isMobile;
     const [openMobile, setOpenMobile] = React.useState(false)
 
     // This is the internal state of the sidebar.
@@ -91,6 +93,15 @@ const SidebarProvider = React.forwardRef<
       [setOpenProp, open]
     )
     
+    React.useEffect(() => {
+        if(isTablet) {
+            setOpen(false);
+        } else if (!isMobile && !isTablet) {
+            setOpen(true);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isTablet, isMobile])
+
     const pathname = usePathname();
     React.useEffect(() => {
         if (isMobile) {
@@ -131,11 +142,12 @@ const SidebarProvider = React.forwardRef<
         open,
         setOpen,
         isMobile,
+        isTablet,
         openMobile,
         setOpenMobile,
         toggleSidebar,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, isTablet, openMobile, setOpenMobile, toggleSidebar]
     )
 
     return (

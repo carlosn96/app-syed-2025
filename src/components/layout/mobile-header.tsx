@@ -5,6 +5,7 @@ import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { usePageNavigation } from "@/context/page-navigation-context";
 import { usePathname } from "next/navigation";
 import { allLinks } from "./main-nav";
+import { cn } from "@/lib/utils";
 
 export function MobileHeader() {
     const { isMobile } = useSidebar();
@@ -18,10 +19,11 @@ export function MobileHeader() {
         return currentLink ? currentLink.label : 'Panel de Control';
     }
     
-    if(!isMobile) return null;
-
     return (
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:hidden">
+        <header className={cn(
+            "sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4",
+            "md:hidden"
+        )}>
             <SidebarTrigger />
             <h1 className="text-lg font-semibold text-white">{getPageTitle()}</h1>
         </header>
