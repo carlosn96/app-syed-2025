@@ -242,8 +242,9 @@ const Sidebar = React.forwardRef<
         data-state={state}
         className={cn(
             "group peer hidden md:block",
-            "w-[var(--sidebar-width-icon)]",
-            "data-[state=expanded]:w-[var(--sidebar-width)]"
+            "lg:w-[var(--sidebar-width)]",
+            "md:w-[var(--sidebar-width-icon)]",
+            "md:data-[state=expanded]:w-[var(--sidebar-width)]"
         )}
       >
         <div
@@ -252,7 +253,7 @@ const Sidebar = React.forwardRef<
             "fixed inset-y-0 z-20 flex h-svh flex-col text-sidebar-foreground glass-card",
             "w-[var(--sidebar-width)] transition-[width] duration-200",
             "left-0 border-r",
-            "group-data-[state=collapsed]:w-[var(--sidebar-width-icon)]",
+            "md:group-data-[state=collapsed]:w-[var(--sidebar-width-icon)]",
              className
           )}
           {...props}

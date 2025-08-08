@@ -24,8 +24,9 @@ function AppMain({ children }: { children: React.ReactNode }) {
         <main
             className={cn(
                 "flex-1 flex flex-col transition-[margin-left] duration-200",
-                "md:ml-[var(--sidebar-width-icon)]",
-                state === 'expanded' && "md:ml-[var(--sidebar-width)]"
+                "lg:ml-[var(--sidebar-width)]",
+                 state === 'expanded' && "md:ml-[var(--sidebar-width)]",
+                 state === 'collapsed' && "md:ml-[var(--sidebar-width-icon)]"
             )}
             >
             <MobileHeader />
