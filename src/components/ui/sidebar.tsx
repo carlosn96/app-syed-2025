@@ -21,10 +21,6 @@ import {
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 1 week
-const SIDEBAR_WIDTH_EXPANDED = "280px"
-const SIDEBAR_WIDTH_COLLAPSED = "80px"
-const SIDEBAR_WIDTH_MOBILE = "280px"
-const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 type SidebarContext = {
   state: "expanded" | "collapsed"
@@ -121,7 +117,7 @@ const SidebarProvider = React.forwardRef<
     React.useEffect(() => {
       const handleKeyDown = (event: KeyboardEvent) => {
         if (
-          event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
+          event.key === "b" &&
           (event.metaKey || event.ctrlKey)
         ) {
           event.preventDefault()
@@ -204,8 +200,7 @@ const Sidebar = React.forwardRef<
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
            <SheetContent
             side="left"
-            className="w-[var(--sidebar-width-mobile)] p-0 text-sidebar-foreground sidebar-glass flex flex-col"
-            style={{ '--sidebar-width-mobile': SIDEBAR_WIDTH_MOBILE } as React.CSSProperties}
+            className="w-[280px] p-0 text-sidebar-foreground sidebar-glass flex flex-col"
           >
             {sidebarContent}
           </SheetContent>
