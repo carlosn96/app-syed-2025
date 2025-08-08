@@ -20,17 +20,33 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { planteles } from "@/lib/data"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { useState } from "react"
+import { CreatePlantelForm } from "@/components/create-plantel-form"
+import { FloatingButton } from "@/components/ui/floating-button"
 
 export default function CampusesPage() {
+    const [isModalOpen, setIsModalOpen] = useState(false)
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
             Gestión de Planteles
         </h1>
-        <Button asChild>
-            <Link href="#">Crear Plantel</Link>
-        </Button>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+                <FloatingButton text="Crear Plantel" />
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Crear Nuevo Plantel</DialogTitle>
+                    <DialogDescription>
+                        Completa el formulario para registrar un nuevo plantel.
+                    </DialogDescription>
+                </DialogHeader>
+                <CreatePlantelForm onSuccess={() => setIsModalOpen(false)} />
+            </DialogContent>
+        </Dialog>
       </div>
 
       <Card className="rounded-xl">
