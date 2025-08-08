@@ -198,7 +198,7 @@ const Sidebar = React.forwardRef<
         ref={ref}
         data-state={state}
         className={cn(
-            "group peer hidden md:flex fixed inset-y-0 left-0 z-20 text-sidebar-foreground sidebar-glass transition-all duration-300 ease-in-out",
+            "group peer hidden md:flex flex-col fixed inset-y-0 left-0 z-20 text-sidebar-foreground sidebar-glass transition-all duration-300 ease-in-out",
             state === 'expanded' ? "w-[280px]" : "w-[80px]",
             className
         )}
@@ -289,7 +289,7 @@ const SidebarFooter = React.forwardRef<
             data-state={state}
             className={cn(
                 "flex p-4 mt-auto border-t border-sidebar-border z-10 bg-sidebar-background/50", 
-                state === 'collapsed' && "items-center",
+                state === 'collapsed' && "items-center justify-center",
                  isMobile && 'items-start',
                 className
             )}
@@ -325,7 +325,7 @@ const SidebarContent = React.forwardRef<
       data-sidebar="content"
       data-state={state}
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-1 overflow-auto",
+        "flex-1 overflow-auto",
         className
       )}
       {...props}

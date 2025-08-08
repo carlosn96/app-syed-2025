@@ -54,8 +54,8 @@ export function UserNav() {
           </Avatar>
            <div
             className={cn(
-              "flex flex-col overflow-hidden transition-all duration-200",
-              state === 'collapsed' ? "w-0" : "w-auto"
+              "flex flex-col transition-all duration-200 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:w-0",
+              state === 'expanded' ? "w-auto" : "w-0"
             )}
           >
             <p className="truncate text-sm font-medium leading-none capitalize text-sidebar-foreground">{userName}</p>
