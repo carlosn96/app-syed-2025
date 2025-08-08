@@ -110,7 +110,7 @@ export default function UsersPage() {
   }, [loggedInUser]);
   
   const renderUserCard = (user: User) => (
-    <Card key={user.id} className="rounded-xl">
+    <Card key={user.id}>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>

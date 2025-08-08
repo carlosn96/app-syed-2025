@@ -221,7 +221,7 @@ export default function CareersPage() {
     if (isAccordion) {
         return (
             <AccordionItem value={key} key={key} className="bg-white/10 rounded-xl border-none">
-                <Card className="flex flex-col rounded-xl p-0">
+                <Card className="flex flex-col p-0">
                     <AccordionTrigger asChild disabled={!hasSubjects}>
                         <div className="flex flex-1 items-center justify-between p-6">
                             {header}
@@ -253,7 +253,7 @@ export default function CareersPage() {
     }
 
     return (
-         <Card key={key} className="flex flex-col rounded-xl">
+         <Card key={key} className="flex flex-col">
             <CardHeader>
                 {header}
             </CardHeader>
@@ -286,7 +286,7 @@ export default function CareersPage() {
   );
 
   const renderDefaultView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredGroupedCareers.map(group => renderCareerContent(group, false))}
     </div>
   );

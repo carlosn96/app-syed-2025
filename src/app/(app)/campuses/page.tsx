@@ -53,7 +53,7 @@ export default function CampusesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {planteles.map((campus) => (
-            <Card key={campus.id} className="rounded-xl">
+            <Card key={campus.id}>
                 <CardHeader className="flex-row items-start justify-between">
                     <div className="flex-grow">
                         <CardTitle>{campus.name}</CardTitle>
