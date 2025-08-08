@@ -109,9 +109,11 @@ const SidebarProvider = React.forwardRef<
     }, [pathname, isMobile]);
 
     const toggleSidebar = React.useCallback(() => {
-      return isMobile
-        ? setOpenMobile((open) => !open)
-        : setOpen((open) => !open)
+      if (isMobile) {
+          setOpenMobile((open) => !open)
+      } else {
+          setOpen((open) => !open)
+      }
     }, [isMobile, setOpen, setOpenMobile])
 
     React.useEffect(() => {
@@ -284,7 +286,7 @@ const SidebarHeader = React.forwardRef<
       ref={ref}
       data-sidebar="header"
       data-state={state}
-      className={cn("relative flex h-[65px] items-center border-b border-white/10", state === 'expanded' ? 'px-4' : 'justify-center', className)}
+      className={cn("relative flex h-[65px] items-center border-b border-sidebar-border shadow-inner-lg z-10", state === 'expanded' ? 'px-4' : 'justify-center', className)}
       {...props}
     >
         {props.children}
@@ -305,7 +307,7 @@ const SidebarFooter = React.forwardRef<
             data-sidebar="footer"
             data-state={state}
             className={cn(
-                "flex flex-col gap-2 p-4 mt-auto border-t border-white/10", 
+                "flex flex-col gap-2 p-4 mt-auto border-t border-sidebar-border z-10 bg-sidebar-background/50", 
                 state === 'collapsed' && "items-center",
                 className
             )}
@@ -385,9 +387,9 @@ const sidebarMenuButtonVariants = cva(
           "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:shadow-lg data-[active=true]:shadow-sidebar-primary/50",
       },
       size: {
-        default: "h-10 text-sm",
+        default: "h-11 text-sm",
         sm: "h-9 text-xs",
-        lg: "h-11 text-base",
+        lg: "h-12 text-base",
       },
     },
     defaultVariants: {
