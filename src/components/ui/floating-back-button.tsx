@@ -11,7 +11,7 @@ export function FloatingBackButton({ ...props }: FloatingBackButtonProps) {
 
   return (
     <div 
-      className="group fixed top-20 right-8 z-50 cursor-pointer"
+      className="group fixed top-1/2 left-4 -translate-y-1/2 z-50 cursor-pointer"
       onClick={() => router.back()}
     >
       <button 
