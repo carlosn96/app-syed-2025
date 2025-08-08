@@ -11,16 +11,37 @@ import {
   SidebarHeader,
   SidebarContent,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { PageNavigationProvider } from "@/context/page-navigation-context";
 import { MobileHeader } from "@/components/layout/mobile-header";
+import { cn } from "@/lib/utils";
+
+
+function AppMain({ children }: { children: React.ReactNode }) {
+    const { state } = useSidebar();
+    return (
+        <main
+            className={cn(
+                "flex-1 flex flex-col transition-[margin-left] duration-200",
+                "md:ml-[var(--sidebar-width-icon)]",
+                state === 'expanded' && "md:ml-[var(--sidebar-width)]"
+            )}
+            >
+            <MobileHeader />
+            <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-gradient-to-br from-white/15 to-[#e11b1a]/15 relative">
+                {children}
+            </div>
+        </main>
+    )
+}
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="login-background min-h-screen">
       <PageNavigationProvider>
         <SidebarProvider>
-          <Sidebar side="left" collapsible="icon">
+          <Sidebar>
             <SidebarHeader className="p-4 hidden md:flex items-center justify-between">
               <div className="flex items-center justify-center w-full">
                 <Image
@@ -39,12 +60,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <UserNav />
             </SidebarFooter>
           </Sidebar>
-          <main className="flex-1 flex flex-col">
-            <MobileHeader />
-            <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-gradient-to-br from-white/15 to-[#e11b1a]/15 relative">
-              {children}
-            </div>
-          </main>
+          <AppMain>{children}</AppMain>
         </SidebarProvider>
       </PageNavigationProvider>
     </div>
