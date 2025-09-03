@@ -3,51 +3,24 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { User, Role, users as initialUsers } from '@/lib/data';
+import { User, Role } from '@/lib/data';
 
-interface NewUserData {
-  nombre: string;
-  apellido_paterno: string;
-  apellido_materno: string;
-  correo: string;
-  rol: 'coordinator' | 'teacher' | 'student';
-  grupo?: string;
-  password?: string;
-}
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
-  addUser: (userData: NewUserData) => void;
+  addUser: (userData: any) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Initialize mock users with the admin user
-const mockUsers: Record<string, { password: string; user: User }> = {
-  'admin@example.com': {
-    password: 'admin',
-    user: { id: 1, nombre: 'Usuario', apellido_paterno: 'Administrador', apellido_materno: '', correo: 'admin@example.com', rol: 'administrator', fecha_registro: '2023-01-01T00:00:00Z', ultimo_acceso: null }
-  }
+const roleMapping: { [key: number]: Role } = {
+  1: 'administrator',
+  2: 'coordinator',
+  3: 'teacher',
+  4: 'student'
 };
-
-// Populate mockUsers from the initialUsers data
-initialUsers.forEach(user => {
-    if (!mockUsers[user.correo]) {
-        let password = 'password'; // Default password for sample users
-        if (user.correo === 'coordinator@example.com') password = 'coordinador';
-        if (user.correo === 'teacher@example.com') password = 'docente';
-        if (user.correo === 'docente@example.com') password = 'docente';
-        if (user.correo === 'alumno@example.com') password = 'alumno';
-        
-        mockUsers[user.correo] = {
-            password: password, 
-            user: user
-        };
-    }
-});
-
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -58,12 +31,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem('user');
-      if (storedUser) {
+      const token = localStorage.getItem('access_token');
+      if (storedUser && token) {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error("Fallo al analizar el usuario desde localStorage", error);
+      console.error("Failed to parse user from localStorage", error);
       localStorage.removeItem('user');
+      localStorage.removeItem('access_token');
     } finally {
       setIsLoading(false);
     }
@@ -79,52 +54,69 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isLoading, user, pathname, router]);
   
-  const addUser = (userData: NewUserData) => {
-    if (mockUsers[userData.correo]) {
-        throw new Error("El correo electrónico ya está en uso.");
-    }
-    
-    const newId = Math.max(...Object.values(mockUsers).map(u => u.user.id), 0) + 1;
-    const newUser: User = {
-        id: newId,
-        nombre: userData.nombre,
-        apellido_paterno: userData.apellido_paterno,
-        apellido_materno: userData.apellido_materno,
-        correo: userData.correo,
-        rol: userData.rol,
-        grupo: userData.grupo,
-        fecha_registro: new Date().toISOString(),
-        ultimo_acceso: null,
-    };
-
-    initialUsers.push(newUser); // Add to the data array for the users page
-    mockUsers[userData.correo] = {
-        password: userData.password || 'password', // Store password for mock login
-        user: newUser,
-    };
+  const addUser = (userData: any) => {
+    // This is a mock function, in a real app this would be an API call
+    console.log("Adding user (mock):", userData);
   };
 
-  const login = (email: string, password: string): boolean => {
-    const userData = mockUsers[email];
-    if (userData && userData.password === password) {
-      const userToLogin = userData.user;
-      localStorage.setItem('user', JSON.stringify(userToLogin));
-      setUser(userToLogin);
-      router.push('/dashboard');
-      return true;
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ correo: email, contrasena: password }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.status === 'éxito') {
+            const apiUser = result.data.user;
+            
+            // Map the API user structure to our local User interface
+            const loggedInUser: User = {
+                id: apiUser.id,
+                nombre: apiUser.name.split(' ')[0], // Simple split for name
+                apellido_paterno: apiUser.name.split(' ').slice(1).join(' '), // The rest is surname
+                apellido_materno: '', // Not provided by API
+                correo: apiUser.email,
+                rol: roleMapping[apiUser.role] || 'student', // Default to student if role is unknown
+                // Other fields like 'grupo', 'fecha_registro' are not in the API response,
+                // so they'll be undefined or you can set defaults.
+                grupo: undefined,
+                fecha_registro: new Date().toISOString(),
+                ultimo_acceso: new Date().toISOString(),
+            };
+            
+            localStorage.setItem('user', JSON.stringify(loggedInUser));
+            localStorage.setItem('access_token', result.data.access_token);
+            setUser(loggedInUser);
+            router.push('/dashboard');
+            return true;
+        } else {
+            console.error("Login failed:", result.mensaje);
+            return false;
+        }
+    } catch (error) {
+        console.error("Error during login request:", error);
+        return false;
+    } finally {
+        setIsLoading(false);
     }
-    return false;
   };
 
   const logout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('access_token');
     setUser(null);
     router.push('/login');
   };
 
   const value = { user, login, logout, isLoading, addUser };
   
-  if (isLoading) {
+  if (isLoading && !user) {
     return <div className="flex h-screen w-full items-center justify-center">Cargando...</div>;
   }
   

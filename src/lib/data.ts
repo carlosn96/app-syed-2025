@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 const academicData = {
     "Administración": {
       "UdeG": {
@@ -964,7 +956,7 @@ export interface Schedule {
 export const schedules: Schedule[] = [
     { id: 1, teacherId: 1, subjectId: 1, groupId: 1, groupName: 'COMPINCO2025A', dayOfWeek: 'Lunes', startTime: '07:00', endTime: '09:00' },
     { id: 2, teacherId: 2, subjectId: 2, groupId: 1, groupName: 'COMPINCO2025A', dayOfWeek: 'Lunes', startTime: '09:00', endTime: '11:00' },
-    { id: 3, teacherId: 10, subjectId: 24, groupId: 1, groupName: 'COMPINCO2025A', dayOfWeek: 'Lunes', startTime: '11:00', endTime: '13:00' },
+    { id: 10, teacherId: 10, subjectId: 24, groupId: 1, groupName: 'COMPINCO2025A', dayOfWeek: 'Lunes', startTime: '11:00', endTime: '13:00' },
 
     { id: 4, teacherId: 7, subjectId: 25, groupId: 1, groupName: 'COMPINCO2025A', dayOfWeek: 'Martes', startTime: '08:00', endTime: '10:00' },
     { id: 5, teacherId: 1, subjectId: 23, groupId: 1, groupName: 'COMPINCO2025A', dayOfWeek: 'Martes', startTime: '10:00', endTime: '12:00' },
@@ -1211,8 +1203,3 @@ export const evaluationPeriods: EvaluationPeriod[] = [
     if (!a.startDate || !b.startDate) return 0;
     return b.startDate.getTime() - a.startDate.getTime()
 });
-
-
-
-
-

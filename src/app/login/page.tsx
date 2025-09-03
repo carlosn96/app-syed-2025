@@ -23,25 +23,28 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const { login, user, isLoading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { login, user, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!isAuthLoading && user) {
       router.push('/dashboard');
     }
-  }, [user, isLoading, router]);
+  }, [user, isAuthLoading, router]);
 
-  const handleLogin = (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    const success = login(email, password);
+    setIsSubmitting(true);
+    const success = await login(email, password);
     if (!success) {
       setError("Correo o contraseña inválidos.");
     }
+    setIsSubmitting(false);
   };
 
-  if (isLoading || user) {
+  if (isAuthLoading || user) {
       return (
         <div className="flex h-screen w-full items-center justify-center">
             Cargando...
@@ -82,6 +85,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-white/10 text-white placeholder:text-white/60 border-white/20 focus:ring-white/80"
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="grid gap-2">
@@ -95,6 +99,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pr-10 bg-white/10 text-white placeholder:text-white/60 border-white/20 focus:ring-white/80"
+                    disabled={isSubmitting}
                   />
                   <Button 
                     type="button" 
@@ -102,6 +107,7 @@ export default function LoginPage() {
                     size="icon" 
                     className="absolute inset-y-0 right-0 h-full px-3 text-white/60 hover:text-white rounded-full hover:shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all duration-300"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={isSubmitting}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     <span className="sr-only">{showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}</span>
@@ -111,8 +117,8 @@ export default function LoginPage() {
               {error && <p className="text-sm text-destructive bg-destructive/20 p-2 rounded-md">{error}</p>}
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full bg-[#202d5d] text-white hover:bg-[#df1c1a] shadow-[0_0_15px_rgba(255,255,255,0.8)] hover:shadow-[0_0_25px_rgba(255,255,255,0.8)] transition-all duration-300">
-                Iniciar Sesión
+              <Button type="submit" className="w-full bg-[#202d5d] text-white hover:bg-[#df1c1a] shadow-[0_0_15px_rgba(255,255,255,0.8)] hover:shadow-[0_0_25px_rgba(255,255,255,0.8)] transition-all duration-300" disabled={isSubmitting}>
+                {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
               </Button>
             </CardFooter>
         </form>
@@ -120,10 +126,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-
-
-
-
-
-
