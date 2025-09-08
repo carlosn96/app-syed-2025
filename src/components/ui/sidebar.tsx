@@ -55,7 +55,7 @@ const SidebarProvider = React.forwardRef<
 >(
   (
     {
-      defaultOpen = false,
+      defaultOpen = true,
       open: openProp,
       onOpenChange: setOpenProp,
       className,
@@ -88,17 +88,13 @@ const SidebarProvider = React.forwardRef<
     )
     
     React.useEffect(() => {
-        if (typeof window !== 'undefined') {
-            if (isTablet) {
-                setOpen(false)
-            } else if (!isMobile) {
-                const cookieValue = document.cookie.split('; ').find(row => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`));
-                const storedState = cookieValue ? cookieValue.split('=')[1] === 'true' : defaultOpen;
-                setOpen(storedState);
-            }
+        if (typeof window !== 'undefined' && !isMobile) {
+          const cookieValue = document.cookie.split('; ').find(row => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`));
+          const storedState = cookieValue ? cookieValue.split('=')[1] === 'true' : defaultOpen;
+          setOpen(storedState);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isMobile, isTablet]);
+    }, [isMobile]);
 
     const pathname = usePathname();
     React.useEffect(() => {

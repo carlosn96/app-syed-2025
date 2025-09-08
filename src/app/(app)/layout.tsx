@@ -19,8 +19,8 @@ import { cn } from "@/lib/utils";
 
 
 function AppMain({ children }: { children: React.ReactNode }) {
-    const { state, isMobile, isTablet } = useSidebar();
-    const isCollapsed = state === 'collapsed' || isTablet;
+    const { state, isMobile } = useSidebar();
+    const isCollapsed = state === 'collapsed';
 
     return (
         <main
