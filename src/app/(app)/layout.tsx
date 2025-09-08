@@ -58,9 +58,7 @@ function SidebarLayout() {
                 </button>
             </SidebarHeader>
             <SidebarContent>
-                <div className="flex-1 overflow-y-auto">
-                    <MainNav />
-                </div>
+                <MainNav />
             </SidebarContent>
             <SidebarFooter>
                 <UserNav />

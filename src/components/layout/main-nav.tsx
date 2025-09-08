@@ -60,8 +60,8 @@ export function MainNav() {
                 onClick={() => setOpenMobile(false)}
                 size="lg"
                 >
-                <Link href={link.href}>
-                    <Icon />
+                <Link href={link.href} className="gap-3 p-3">
+                    <Icon className="size-5 shrink-0" />
                     <span>{link.label}</span>
                 </Link>
                 </SidebarMenuButton>

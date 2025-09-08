@@ -362,7 +362,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center rounded-full text-left outline-none ring-sidebar-ring transition-all duration-300 focus-visible:ring-2 active:opacity-80 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[state=expanded]:px-3 group-data-[state=expanded]:gap-3 group-data-[state=collapsed]:w-11 group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:p-0 [&>span]:group-data-[state=collapsed]:w-0 [&>span]:group-data-[state=collapsed]:opacity-0 [&>svg]:size-5 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center rounded-full text-left outline-none ring-sidebar-ring transition-all duration-300 focus-visible:ring-2 active:opacity-80 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[state=expanded]:px-3 group-data-[state=collapsed]:w-12 group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:p-0 [&>span]:group-data-[state=collapsed]:w-0 [&>span]:group-data-[state=collapsed]:opacity-0",
   {
     variants: {
       variant: {
