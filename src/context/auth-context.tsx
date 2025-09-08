@@ -95,6 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(loggedInUser);
             
             toast({
+              variant: "success",
               title: "Inicio de Sesión Exitoso",
               description: `¡Bienvenido de nuevo, ${loggedInUser.nombre}!`,
             });
@@ -102,7 +103,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             router.push('/dashboard');
             return true;
         } else {
-            console.error("Login failed:", result.mensaje, result.datos);
             const errorMessages = result.datos?.errors 
                 ? Object.values(result.datos.errors).flat().join(' ') 
                 : result.mensaje || "Ocurrió un error desconocido.";
