@@ -72,8 +72,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const result = await response.json();
 
-        if (response.ok && result.status === 'éxito') {
-            const apiUser = result.data.user;
+        if (result.exito) {
+            const apiUser = result.datos.user;
             
             const loggedInUser: User = {
                 id: apiUser.id,
@@ -88,12 +88,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             };
             
             localStorage.setItem('user', JSON.stringify(loggedInUser));
-            localStorage.setItem('access_token', result.data.access_token);
+            localStorage.setItem('access_token', result.datos.access_token);
             setUser(loggedInUser);
             router.push('/dashboard');
             return true;
         } else {
             console.error("Login failed:", result.mensaje, result.datos);
+            // Here you could handle the specific validation errors from result.datos.errors if needed
             return false;
         }
     } catch (error) {
