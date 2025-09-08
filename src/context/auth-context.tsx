@@ -4,6 +4,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { User, Role } from '@/lib/data';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -27,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const { toast } = useToast();
 
   useEffect(() => {
     try {
@@ -66,6 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
             },
             body: JSON.stringify({ correo: email, contrasena: password }),
         });
@@ -90,15 +93,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem('user', JSON.stringify(loggedInUser));
             localStorage.setItem('access_token', result.datos.access_token);
             setUser(loggedInUser);
+            
+            toast({
+              title: "Inicio de Sesión Exitoso",
+              description: `¡Bienvenido de nuevo, ${loggedInUser.nombre}!`,
+            });
+            
             router.push('/dashboard');
             return true;
         } else {
             console.error("Login failed:", result.mensaje, result.datos);
-            // Here you could handle the specific validation errors from result.datos.errors if needed
+            const errorMessages = result.datos?.errors 
+                ? Object.values(result.datos.errors).flat().join(' ') 
+                : result.mensaje || "Ocurrió un error desconocido.";
+            toast({
+              variant: "destructive",
+              title: "Error al iniciar sesión",
+              description: errorMessages,
+            });
             return false;
         }
     } catch (error) {
         console.error("Error during login request:", error);
+        toast({
+          variant: "destructive",
+          title: "Error de Conexión",
+          description: "No se pudo conectar con el servidor. Por favor, inténtalo de nuevo más tarde.",
+        });
         return false;
     } finally {
         setIsLoading(false);

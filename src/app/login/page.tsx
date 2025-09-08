@@ -22,7 +22,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login, user, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
@@ -35,12 +34,8 @@ export default function LoginPage() {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsSubmitting(true);
-    const success = await login(email, password);
-    if (!success) {
-      setError("Correo o contraseña inválidos.");
-    }
+    await login(email, password);
     setIsSubmitting(false);
   };
 
@@ -114,7 +109,6 @@ export default function LoginPage() {
                   </Button>
                 </div>
               </div>
-              {error && <p className="text-sm text-destructive bg-destructive/20 p-2 rounded-md">{error}</p>}
             </CardContent>
             <CardFooter>
               <Button type="submit" className="w-full bg-[#202d5d] text-white hover:bg-[#df1c1a] shadow-[0_0_15px_rgba(255,255,255,0.8)] hover:shadow-[0_0_25px_rgba(255,255,255,0.8)] transition-all duration-300" disabled={isSubmitting}>
