@@ -169,7 +169,7 @@ const SidebarBody = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex-1 flex flex-col", className)}
+      className={cn("flex-1 flex flex-col overflow-hidden", className)}
       {...props}
     >
       {children}
@@ -315,26 +315,6 @@ const SidebarSeparator = React.forwardRef<
 })
 SidebarSeparator.displayName = "SidebarSeparator"
 
-const SidebarContent = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<"div">
->(({ className, ...props }, ref) => {
-    const { state } = useSidebar();
-  return (
-    <div
-      ref={ref}
-      data-sidebar="content"
-      data-state={state}
-      className={cn(
-        "flex-1",
-        className
-      )}
-      {...props}
-    />
-  )
-})
-SidebarContent.displayName = "SidebarContent"
-
 const SidebarMenu = React.forwardRef<
   HTMLUListElement,
   React.ComponentProps<"ul">
@@ -342,7 +322,7 @@ const SidebarMenu = React.forwardRef<
   <ul
     ref={ref}
     data-sidebar="menu"
-    className={cn("flex w-full min-w-0 flex-col gap-2 p-3", className)}
+    className={cn("flex w-full min-w-0 flex-col gap-2", className)}
     {...props}
   />
 ))
@@ -446,7 +426,6 @@ SidebarMenuButton.displayName = "SidebarMenuButton"
 export {
   Sidebar,
   SidebarBody,
-  SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarSeparator,

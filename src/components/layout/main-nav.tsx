@@ -46,7 +46,7 @@ export function MainNav() {
   const links = allLinks.filter(link => user && link.roles.includes(user.rol));
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden">
+    <div className="flex-1 overflow-y-auto p-3">
         <SidebarMenu>
         {links.map((link) => {
             const Icon = link.icon

@@ -9,7 +9,6 @@ import {
   SidebarProvider,
   Sidebar,
   SidebarHeader,
-  SidebarContent,
   SidebarFooter,
   useSidebar,
   SidebarBody,
@@ -57,9 +56,7 @@ function SidebarLayout() {
           </button>
       </SidebarHeader>
       <SidebarBody>
-        <SidebarContent>
-            <MainNav />
-        </SidebarContent>
+        <MainNav />
       </SidebarBody>
       <SidebarFooter>
           <UserNav />
