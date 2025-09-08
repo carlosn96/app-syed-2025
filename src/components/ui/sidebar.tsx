@@ -169,7 +169,7 @@ const SidebarBody = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex flex-1 flex-col", className)}
+      className={cn("flex-1 flex flex-col", className)}
       {...props}
     >
       {children}
