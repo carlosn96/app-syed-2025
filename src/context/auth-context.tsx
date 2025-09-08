@@ -75,17 +75,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (response.ok && result.status === 'éxito') {
             const apiUser = result.data.user;
             
-            // Map the API user structure to our local User interface
             const loggedInUser: User = {
                 id: apiUser.id,
-                nombre: apiUser.name.split(' ')[0], // Simple split for name
-                apellido_paterno: apiUser.name.split(' ').slice(1).join(' '), // The rest is surname
-                apellido_materno: '', // Not provided by API
+                nombre: apiUser.name.split(' ')[0] || '',
+                apellido_paterno: apiUser.name.split(' ').slice(1).join(' ') || '',
+                apellido_materno: '',
                 correo: apiUser.email,
-                rol: roleMapping[apiUser.role] || 'student', // Default to student if role is unknown
-                // Other fields like 'grupo', 'fecha_registro' are not in the API response,
-                // so they'll be undefined or you can set defaults.
-                grupo: undefined,
+                rol: roleMapping[apiUser.role] || 'student',
+                grupo: undefined, 
                 fecha_registro: new Date().toISOString(),
                 ultimo_acceso: new Date().toISOString(),
             };
@@ -96,7 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             router.push('/dashboard');
             return true;
         } else {
-            console.error("Login failed:", result.mensaje);
+            console.error("Login failed:", result.mensaje, result.datos);
             return false;
         }
     } catch (error) {
