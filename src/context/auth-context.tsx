@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 apellido_paterno: apiUser.name.split(' ').slice(1).join(' ') || '',
                 apellido_materno: '',
                 correo: apiUser.email,
-                rol: roleMapping[apiUser.role] || 'student',
+                rol: roleMapping[apiUser.id_rol] || 'student',
                 grupo: undefined, 
                 fecha_registro: new Date().toISOString(),
                 ultimo_acceso: new Date().toISOString(),
