@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -85,6 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 apellido_materno: '',
                 correo: apiUser.email,
                 rol: roleMapping[apiUser.id_rol] || 'student',
+                rol_nombre: apiUser.rol,
                 grupo: undefined, 
                 fecha_registro: new Date().toISOString(),
                 ultimo_acceso: new Date().toISOString(),

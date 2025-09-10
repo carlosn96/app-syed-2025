@@ -59,8 +59,8 @@ export function UserNav() {
             )}
           >
             <p className="truncate text-sm font-medium leading-none capitalize text-sidebar-foreground">{userName}</p>
-            <p className="truncate text-xs leading-none text-muted-foreground">
-              {user.rol}
+            <p className="truncate text-xs leading-none text-muted-foreground capitalize">
+              {user.rol_nombre || user.rol}
             </p>
           </div>
         </button>
