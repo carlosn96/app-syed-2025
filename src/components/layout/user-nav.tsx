@@ -19,12 +19,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/context/auth-context"
 import { useRouter } from "next/navigation"
-import { useSidebar } from "../ui/sidebar"
-import { cn } from "@/lib/utils"
 
 export function UserNav() {
   const { user, logout } = useAuth();
-  const { state } = useSidebar();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -42,28 +39,12 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          className={cn(
-            "group flex w-full items-center gap-2 rounded-md p-2 text-left transition-colors duration-200 hover:bg-sidebar-accent",
-            state === 'collapsed' && "justify-center"
-          )}
-        >
-          <Avatar className="h-8 w-8 shrink-0">
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
             <AvatarImage src={`https://placehold.co/100x100.png?text=${nameInitial}`} alt={userName} data-ai-hint="person avatar" />
             <AvatarFallback>{nameInitial}</AvatarFallback>
           </Avatar>
-           <div
-            className={cn(
-              "flex flex-col transition-all duration-200 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:w-0",
-              state === 'expanded' ? "w-auto" : "w-0"
-            )}
-          >
-            <p className="truncate text-sm font-medium leading-none capitalize text-sidebar-foreground">{userName}</p>
-            <p className="truncate text-xs leading-none text-muted-foreground capitalize">
-              {user.rol_nombre || user.rol}
-            </p>
-          </div>
-        </button>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">

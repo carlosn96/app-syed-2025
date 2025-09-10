@@ -1,3 +1,4 @@
+
 const academicData = {
     "Administración": {
       "UdeG": {
@@ -724,15 +725,16 @@ export interface User {
 }
 
 export const users: User[] = [
-  { id: 2, nombre: 'Coordinador', apellido_paterno: 'User', apellido_materno: 'Staff', correo: 'coordinator@example.com', rol: 'coordinator', rol_nombre: 'Coordinador', fecha_registro: '2023-02-20T11:00:00Z', ultimo_acceso: '2024-05-21T09:00:00Z' },
-  { id: 3, nombre: 'Docente', apellido_paterno: 'User', apellido_materno: 'Faculty', correo: 'teacher@example.com', rol: 'teacher', rol_nombre: 'Docente', fecha_registro: '2023-03-10T09:00:00Z', ultimo_acceso: '2024-05-22T14:00:00Z' },
-  { id: 4, nombre: 'Alumno', apellido_paterno: 'User', apellido_materno: 'Student', correo: 'student@example.com', rol: 'student', rol_nombre: 'Alumno', grupo: 'COMPINCO2025A', fecha_registro: '2023-09-01T08:00:00Z', ultimo_acceso: '2024-05-22T16:45:00Z' },
-  { id: 5, nombre: 'John', apellido_paterno: 'Doe', apellido_materno: 'Smith', correo: 'john.d@example.com', rol: 'teacher', rol_nombre: 'Docente', fecha_registro: '2022-08-21T15:30:00Z', ultimo_acceso: '2024-05-19T11:00:00Z' },
-  { id: 6, nombre: 'Jane', apellido_paterno: 'Smith', apellido_materno: 'Doe', correo: 'jane.s@example.com', rol: 'student', rol_nombre: 'Alumno', grupo: 'COMPINCO2025A', fecha_registro: '2023-09-01T08:15:00Z', ultimo_acceso: '2024-05-21T18:00:00Z' },
-  { id: 7, nombre: 'Laura', apellido_paterno: 'García', apellido_materno: 'Perez', correo: 'laura.g@example.com', rol: 'coordinator', rol_nombre: 'Coordinador', fecha_registro: '2023-01-15T10:00:00Z', ultimo_acceso: '2024-05-23T10:00:00Z' },
-  { id: 8, nombre: 'Carlos', apellido_paterno: 'Martínez', apellido_materno: 'Rodriguez', correo: 'carlos.m@example.com', rol: 'coordinator', rol_nombre: 'Coordinador', fecha_registro: '2023-01-18T12:00:00Z', ultimo_acceso: '2024-05-23T11:30:00Z' },
-  { id: 14, nombre: 'Nuevo', apellido_paterno: 'Docente', apellido_materno: 'Test', correo: 'docente@example.com', rol: 'teacher', rol_nombre: 'Docente', fecha_registro: '2024-01-01T00:00:00Z', ultimo_acceso: null },
-  { id: 15, nombre: 'Alumno', apellido_paterno: 'Prueba', apellido_materno: 'Usuario', correo: 'alumno@example.com', rol: 'student', rol_nombre: 'Alumno', grupo: 'COMPINCO2025A', fecha_registro: '2024-05-24T10:00:00Z', ultimo_acceso: null },
+  { id: 1, nombre: 'Admin', apellido_paterno: 'User', apellido_materno: 'Super', correo: 'admin@example.com', rol: 'administrator', fecha_registro: '2023-01-15T09:00:00Z', ultimo_acceso: '2024-05-23T12:00:00Z' },
+  { id: 2, nombre: 'Coordinador', apellido_paterno: 'User', apellido_materno: 'Staff', correo: 'coordinator@example.com', rol: 'coordinator', fecha_registro: '2023-02-20T11:00:00Z', ultimo_acceso: '2024-05-21T09:00:00Z' },
+  { id: 3, nombre: 'Docente', apellido_paterno: 'User', apellido_materno: 'Faculty', correo: 'teacher@example.com', rol: 'teacher', fecha_registro: '2023-03-10T09:00:00Z', ultimo_acceso: '2024-05-22T14:00:00Z' },
+  { id: 4, nombre: 'Alumno', apellido_paterno: 'User', apellido_materno: 'Student', correo: 'student@example.com', rol: 'student', grupo: 'COMPINCO2025A', fecha_registro: '2023-09-01T08:00:00Z', ultimo_acceso: '2024-05-22T16:45:00Z' },
+  { id: 5, nombre: 'John', apellido_paterno: 'Doe', apellido_materno: 'Smith', correo: 'john.d@example.com', rol: 'teacher', fecha_registro: '2022-08-21T15:30:00Z', ultimo_acceso: '2024-05-19T11:00:00Z' },
+  { id: 6, nombre: 'Jane', apellido_paterno: 'Smith', apellido_materno: 'Doe', correo: 'jane.s@example.com', rol: 'student', grupo: 'COMPINCO2025A', fecha_registro: '2023-09-01T08:15:00Z', ultimo_acceso: '2024-05-21T18:00:00Z' },
+  { id: 7, nombre: 'Laura', apellido_paterno: 'García', apellido_materno: 'Perez', correo: 'laura.g@example.com', rol: 'coordinator', fecha_registro: '2023-01-15T10:00:00Z', ultimo_acceso: '2024-05-23T10:00:00Z' },
+  { id: 8, nombre: 'Carlos', apellido_paterno: 'Martínez', apellido_materno: 'Rodriguez', correo: 'carlos.m@example.com', rol: 'coordinator', fecha_registro: '2023-01-18T12:00:00Z', ultimo_acceso: '2024-05-23T11:30:00Z' },
+  { id: 14, nombre: 'Nuevo', apellido_paterno: 'Docente', apellido_materno: 'Test', correo: 'docente@example.com', rol: 'teacher', fecha_registro: '2024-01-01T00:00:00Z', ultimo_acceso: null },
+  { id: 15, nombre: 'Alumno', apellido_paterno: 'Prueba', apellido_materno: 'Usuario', correo: 'alumno@example.com', rol: 'student', grupo: 'COMPINCO2025A', fecha_registro: '2024-05-24T10:00:00Z', ultimo_acceso: null },
 ];
 
 export const planteles = [

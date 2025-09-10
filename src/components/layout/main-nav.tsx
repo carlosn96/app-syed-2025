@@ -46,29 +46,26 @@ export function MainNav() {
   const links = allLinks.filter(link => user && link.roles.includes(user.rol));
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden p-3">
-        <SidebarMenu>
-        {links.map((link) => {
-            const Icon = link.icon
-            const isActive = link.exact ? pathname === link.href : pathname.startsWith(link.href)
-            return (
-            <SidebarMenuItem key={link.href}>
-                <SidebarMenuButton
-                asChild
-                isActive={isActive}
-                tooltip={link.label}
-                onClick={() => setOpenMobile(false)}
-                size="lg"
-                >
-                <Link href={link.href} className="gap-3 p-3">
-                    <Icon className="size-5 shrink-0" />
-                    <span>{link.label}</span>
-                </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-            )
-        })}
-        </SidebarMenu>
-    </div>
+    <SidebarMenu>
+      {links.map((link) => {
+        const Icon = link.icon
+        const isActive = link.exact ? pathname === link.href : pathname.startsWith(link.href)
+        return (
+          <SidebarMenuItem key={link.href}>
+            <SidebarMenuButton
+              asChild
+              isActive={isActive}
+              tooltip={link.label}
+              onClick={() => setOpenMobile(false)}
+            >
+              <Link href={link.href} className="gap-3">
+                <Icon className="size-5 shrink-0" />
+                <span>{link.label}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )
+      })}
+    </SidebarMenu>
   )
 }
