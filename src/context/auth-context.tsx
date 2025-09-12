@@ -67,9 +67,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
 
         const result = await response.json();
-
+        
         if (result.exito) {
             const apiUser = result.datos.user;
+
+            const roleNameFromApi = apiUser.rol || '';
+            const internalRole = roleNameFromApi.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") as 'administrator' | 'coordinator' | 'teacher' | 'student';
             
             const loggedInUser: User = {
                 id: apiUser.id,
@@ -78,7 +81,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 apellido_materno: '',
                 correo: apiUser.email,
                 id_rol: apiUser.id_rol,
-                rol: apiUser.rol, 
+                rol: internalRole,
+                rol_nombre: apiUser.rol, 
                 fecha_registro: new Date().toISOString(),
                 ultimo_acceso: new Date().toISOString(),
             };
@@ -93,8 +97,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               description: `¡Bienvenido de nuevo, ${loggedInUser.nombre}!`,
             });
             
-            // router.push('/dashboard');
-            // return true;
             const redirectPath = getRedirectPath(loggedInUser.id_rol);
             router.push(redirectPath);
             return true;
