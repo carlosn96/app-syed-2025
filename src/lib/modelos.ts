@@ -14,15 +14,15 @@ export interface User {
 
 export const Roles = {
     Administrador: 1,
-    Docente: 2,
-    Coordinador: 3,
+    Coordinador: 2,
+    Docente: 3,
     Alumno: 4,
   };
   
   export const roleRedirects: { [key: number]: string } = {
     [Roles.Administrador]: '/dashboard',
-    [Roles.Docente]: '/dashboard',
     [Roles.Coordinador]: '/dashboard',
+    [Roles.Docente]: '/dashboard',
     [Roles.Alumno]: '/dashboard',
   };
   

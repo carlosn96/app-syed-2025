@@ -25,22 +25,32 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     headers,
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: 'Error en la respuesta de la API' }));
-    console.error(`API Error on ${endpoint}:`, response.status, response.statusText, errorData);
-    throw new Error(errorData.message || 'Ocurrió un error en la petición a la API');
-  }
-
   const result = await response.json();
+  
   if (result.exito) {
     return result.datos;
   } else {
-    throw new Error(result.mensaje || 'La API devolvió un error no exitoso.');
+    const errorMessage = result.mensaje || (result.datos?.errors ? Object.values(result.datos.errors).flat().join(' ') : 'Ocurrió un error desconocido.');
+    console.error(`API Error on ${endpoint}:`, response.status, response.statusText, result);
+    throw new Error(errorMessage);
   }
 };
 
-// Campus Management
-export const getPlanteles = (): Promise<Plantel[]> => apiFetch('/planteles');
+interface ApiPlantel {
+    id_plantel: number;
+    nombre: string;
+    ubicacion: string;
+}
+
+export const getPlanteles = async (): Promise<Plantel[]> => {
+    const apiPlanteles: ApiPlantel[] = await apiFetch('/planteles');
+    return apiPlanteles.map(p => ({
+        id: p.id_plantel,
+        name: p.nombre,
+        location: p.ubicacion,
+        director: '', // Director field is not in the API response
+    }));
+};
 export const createPlantel = (data: Omit<Plantel, 'id'>): Promise<Plantel> => apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
 export const getPlantelById = (id: number): Promise<Plantel> => apiFetch(`/planteles/${id}`);
 export const updatePlantel = (id: number, data: Partial<Omit<Plantel, 'id'>>): Promise<Plantel> => apiFetch(`/planteles/${id}`, { method: 'PUT', body: JSON.stringify(data) });

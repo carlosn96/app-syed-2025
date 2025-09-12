@@ -99,7 +99,6 @@ export default function CampusesPage() {
                     <div className="flex-grow">
                         <CardTitle>{campus.name}</CardTitle>
                         <CardDescription>{campus.location}</CardDescription>
-                        <p className="text-xs text-muted-foreground pt-2">{campus.director}</p>
                     </div>
                     <div className="flex gap-2">
                       <Button size="icon" variant="warning">
