@@ -11,7 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { careers as allCareers, subjects, Career } from "@/lib/data"
+import { careers as allCareers, subjects } from "@/lib/data"
+import { Career } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
 import { Book, Pencil, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"

@@ -25,6 +25,7 @@ import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { groups } from "@/lib/data"
 import { useMemo } from "react"
+import { Roles } from "@/lib/modelos"
 
 const createUserSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido."),
@@ -48,9 +49,9 @@ const createUserSchema = z.object({
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
 
 const baseRoleDisplayMap = {
-  coordinator: "Coordinador",
-  teacher: "Docente",
-  student: "Alumno",
+  [Roles.Coordinador]: "Coordinador",
+  [Roles.Docente]: "Docente",
+  [Roles.Alumno]: "Alumno",
 };
 
 export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
@@ -58,8 +59,8 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
   const { toast } = useToast();
 
   const roleDisplayMap = useMemo(() => {
-    if (loggedInUser?.rol === 'coordinator') {
-      const { coordinator, ...rest } = baseRoleDisplayMap;
+    if (loggedInUser?.id_rol === Roles.Coordinador) {
+      const { [Roles.Coordinador]: _, ...rest } = baseRoleDisplayMap;
       return rest;
     }
     return baseRoleDisplayMap;

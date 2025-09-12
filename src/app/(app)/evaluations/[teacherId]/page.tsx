@@ -34,6 +34,8 @@ const evaluationOptions = [
   { value: 'deficiente', label: 'Deficiente' },
 ] as const;
 
+type EvaluationOptionValue = typeof evaluationOptions[number]['value'];
+
 const evaluationSchema = z.object({
   clarity: z.enum(['excelente', 'bueno', 'regular', 'necesita_mejorar', 'deficiente'], { required_error: 'Debes seleccionar una opción.' }),
   engagement: z.enum(['excelente', 'bueno', 'regular', 'necesita_mejorar', 'deficiente'], { required_error: 'Debes seleccionar una opción.' }),
@@ -44,7 +46,7 @@ const evaluationSchema = z.object({
 
 type EvaluationFormValues = z.infer<typeof evaluationSchema>;
 
-const ratingMap: Record<EvaluationFormValues[keyof Omit<EvaluationFormValues, 'feedback'>], number> = {
+const ratingMap: Record<EvaluationOptionValue, number> = {
   excelente: 100,
   bueno: 80,
   regular: 60,

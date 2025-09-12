@@ -29,7 +29,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CreateSupervisionForm } from "@/components/create-supervision-form"
-import { supervisions as allSupervisions, Supervision } from "@/lib/data"
+import { supervisions as allSupervisions } from "@/lib/data"
+import { Supervision } from "@/lib/modelos"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"

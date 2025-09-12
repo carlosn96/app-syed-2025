@@ -33,11 +33,12 @@ import {
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/context/auth-context"
-import { users as allUsersData, User, Role } from "@/lib/data"
+import { users as allUsersData } from "@/lib/data"
+import { User } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
 import { Input } from "@/components/ui/input"
 
-type RoleFilter = Role | 'all';
+type RoleFilter = 'administrator' | 'coordinator' | 'teacher' | 'student' | 'all';
 
 export default function UsersPage() {
   const { user: loggedInUser, isLoading: isAuthLoading } = useAuth();

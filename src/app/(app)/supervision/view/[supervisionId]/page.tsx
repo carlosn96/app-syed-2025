@@ -3,7 +3,8 @@
 
 import { useParams } from 'next/navigation'
 import { useMemo } from 'react'
-import { supervisions, supervisionRubrics, Supervision, EvaluationResult } from '@/lib/data'
+import { supervisions, supervisionRubrics } from '@/lib/data'
+import { Supervision, EvaluationResult } from '@/lib/modelos'
 import {
   Card,
   CardContent,

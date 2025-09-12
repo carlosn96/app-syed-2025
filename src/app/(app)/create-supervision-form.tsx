@@ -1,3 +1,4 @@
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -25,7 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { supervisions, subjects, users, careers, teachers as allTeachers, Subject, User, groups, schedules, Group, Teacher, Schedule, Career } from "@/lib/data"
+import { supervisions, subjects, users, careers, teachers as allTeachers, groups, schedules } from "@/lib/data"
+import { Subject, User, Group, Teacher, Schedule, Career } from "@/lib/modelos"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
@@ -81,7 +83,7 @@ const getAvailableOptions = (coordinatorId?: string) => {
         
         const teacherIdsInCoordinatedCareers = new Set<number>();
         
-        allGroups.forEach(group => {
+        groups.forEach(group => {
             if (coordinatedCareers.includes(group.career)) {
                 schedules.filter(s => s.groupId === group.id).forEach(schedule => {
                     teacherIdsInCoordinatedCareers.add(schedule.teacherId);
@@ -94,7 +96,7 @@ const getAvailableOptions = (coordinatorId?: string) => {
         availableTeachers.forEach(teacher => {
             const teacherSchedules = schedules.filter(s => s.teacherId === teacher.id);
             const teacherGroupIds = [...new Set(teacherSchedules.map(s => s.groupId))];
-            const teacherGroups = allGroups.filter(g => teacherGroupIds.includes(g.id));
+            const teacherGroups = groups.filter(g => teacherGroupIds.includes(g.id));
             const teacherCareerName = teacherGroups.length > 0 ? teacherGroups[0].career : "N/A";
             teacherCareers[teacher.id] = teacherCareerName;
         });

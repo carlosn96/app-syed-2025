@@ -28,7 +28,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CreateEvaluationPeriodForm } from "@/components/create-evaluation-period-form"
-import { evaluationPeriods, schedules, teachers as allTeachers, EvaluationPeriod } from "@/lib/data"
+import { evaluationPeriods, schedules, teachers as allTeachers } from "@/lib/data"
+import { EvaluationPeriod } from "@/lib/modelos"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"

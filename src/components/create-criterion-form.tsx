@@ -16,8 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { supervisionRubrics, evaluationRubrics } from "@/lib/data"
-
-type RubricType = 'supervision' | 'evaluation';
+import { RubricType } from "@/app/(app)/supervision-rubrics/page"
 
 const createCriterionSchema = z.object({
   text: z.string().min(1, "El texto del criterio es requerido."),

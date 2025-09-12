@@ -19,7 +19,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { supervisionRubrics, SupervisionRubric, evaluationRubrics, EvaluationRubric } from "@/lib/data"
+import { supervisionRubrics, evaluationRubrics } from "@/lib/data"
+import { SupervisionRubric, EvaluationRubric } from "@/lib/modelos"
 import { Badge } from "@/components/ui/badge"
 import { CreateRubricForm } from "@/components/create-rubric-form"
 import { CreateCriterionForm } from "@/components/create-criterion-form"

@@ -6,7 +6,8 @@ import { useMemo, useState, useEffect } from 'react'
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { supervisions, supervisionRubrics, SupervisionRubric } from '@/lib/data'
+import { supervisions, supervisionRubrics } from '@/lib/data'
+import { SupervisionRubric } from '@/lib/modelos'
 import {
   Card,
   CardContent,

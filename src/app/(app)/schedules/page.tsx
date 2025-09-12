@@ -16,7 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { schedules, teachers, groups as allGroups, subjects, Group, careers as allCareers } from "@/lib/data"
+import { schedules, teachers, groups as allGroups, subjects, careers as allCareers } from "@/lib/data"
+import { Group } from "@/lib/modelos"
 import {
   Select,
   SelectContent,

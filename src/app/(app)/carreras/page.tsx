@@ -13,7 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { careers as allCareers, subjects, Career, planteles } from "@/lib/data"
+import { careers as allCareers, subjects, planteles } from "@/lib/data"
+import { Career } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,

@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { User, Role } from '@/lib/data';
+import { User, Roles, getRedirectPath, roleRedirects } from '@/lib/modelos';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
@@ -15,13 +15,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const roleMapping: { [key: number]: Role } = {
-  1: 'administrator',
-  2: 'coordinator',
-  3: 'teacher',
-  4: 'student'
-};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -64,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/login`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -84,8 +77,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 apellido_paterno: apiUser.name.split(' ').slice(1).join(' ') || '',
                 apellido_materno: '',
                 correo: apiUser.email,
-                rol: roleMapping[apiUser.role] || 'student',
-                grupo: undefined, 
+                id_rol: apiUser.id_rol,
+                rol: apiUser.rol, 
                 fecha_registro: new Date().toISOString(),
                 ultimo_acceso: new Date().toISOString(),
             };
@@ -100,7 +93,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               description: `¡Bienvenido de nuevo, ${loggedInUser.nombre}!`,
             });
             
-            router.push('/dashboard');
+            // router.push('/dashboard');
+            // return true;
+            const redirectPath = getRedirectPath(loggedInUser.id_rol);
+            router.push(redirectPath);
             return true;
         } else {
             const errorMessages = result.datos?.errors 

@@ -13,8 +13,8 @@ import {
   subjects as allSubjects,
   schedules,
   groups as allGroups,
-  Evaluation,
 } from "@/lib/data"
+import { Evaluation } from "@/lib/modelos"
 import {
   Card,
   CardContent,

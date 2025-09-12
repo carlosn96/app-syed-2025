@@ -3,7 +3,8 @@
 
 import { useParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
-import { careers, subjects as allSubjects, Subject } from '@/lib/data'
+import { careers, subjects as allSubjects } from '@/lib/data'
+import { Subject } from '@/lib/modelos'
 import {
   Card,
   CardContent,
