@@ -16,6 +16,19 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+type Role = 'administrator' | 'coordinator' | 'teacher' | 'student' | 'all';
+
+const roleIdToName = (id: number): Role => {
+    switch (id) {
+        case Roles.Administrador: return 'administrator';
+        case Roles.Coordinador: return 'coordinator';
+        case Roles.Docente: return 'teacher';
+        case Roles.Alumno: return 'student';
+        default: return 'all'; // Fallback, though should not happen
+    }
+}
+
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,20 +84,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (result.exito) {
             const apiUser = result.datos.user;
 
-            const roleNameFromApi = apiUser.rol || '';
-            const internalRole = roleNameFromApi.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") as 'administrator' | 'coordinator' | 'teacher' | 'student';
+            const internalRole = roleIdToName(apiUser.id_rol);
             
             const loggedInUser: User = {
                 id: apiUser.id,
-                nombre: apiUser.name.split(' ')[0] || '',
-                apellido_paterno: apiUser.name.split(' ').slice(1).join(' ') || '',
-                apellido_materno: '',
-                correo: apiUser.email,
+                nombre: apiUser.nombre,
+                apellido_paterno: apiUser.apellido_paterno,
+                apellido_materno: apiUser.apellido_materno,
+                correo: apiUser.correo,
                 id_rol: apiUser.id_rol,
                 rol: internalRole,
                 rol_nombre: apiUser.rol, 
-                fecha_registro: new Date().toISOString(),
-                ultimo_acceso: new Date().toISOString(),
+                fecha_registro: apiUser.fecha_registro,
+                ultimo_acceso: apiUser.ultimo_acceso,
             };
             
             localStorage.setItem('user', JSON.stringify(loggedInUser));
