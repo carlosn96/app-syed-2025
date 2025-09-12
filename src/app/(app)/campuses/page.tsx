@@ -19,13 +19,37 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { planteles } from "@/lib/data"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { CreatePlantelForm } from "@/components/create-plantel-form"
+import { getPlanteles } from "@/services/api"
+import type { Plantel } from "@/lib/modelos"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function CampusesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [planteles, setPlanteles] = useState<Plantel[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    
+    useEffect(() => {
+        const fetchPlanteles = async () => {
+            try {
+                setIsLoading(true);
+                const data = await getPlanteles();
+                setPlanteles(data);
+                setError(null);
+            } catch (err: any) {
+                setError(err.message || 'Error al cargar los planteles');
+                console.error(err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchPlanteles();
+    }, []);
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -51,8 +75,25 @@ export default function CampusesPage() {
         </Dialog>
       </div>
 
+      {error && <p className="text-destructive text-center">{error}</p>}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {planteles.map((campus) => (
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, index) => (
+                <Card key={index}>
+                    <CardHeader>
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                        <Skeleton className="h-4 w-full" />
+                    </CardContent>
+                    <CardFooter>
+                       <Skeleton className="h-10 w-full" />
+                    </CardFooter>
+                </Card>
+            ))
+          ) : planteles.map((campus) => (
             <Card key={campus.id}>
                 <CardHeader className="flex-row items-start justify-between">
                     <div className="flex-grow">
