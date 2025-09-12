@@ -44,7 +44,7 @@ export default function SupervisionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const supervisions = useMemo(() => {
-    if (user?.rol === 'coordinator') {
+    if (user?.rol === 'coordinador') {
       const coordinatorName = `${user.nombre} ${user.apellido_paterno}`.trim();
       return allSupervisions.filter(s => s.coordinator === coordinatorName);
     }
@@ -92,7 +92,7 @@ export default function SupervisionsPage() {
                                 <CardTitle className="text-base">{supervision.teacher}</CardTitle>
                                 <CardDescription>{supervision.career}</CardDescription>
                             </div>
-                            {user?.rol === 'coordinator' && (
+                            {user?.rol === 'coordinador' && (
                                 <div className="flex gap-2">
                                   {supervision.status === 'Programada' && (
                                     <>
@@ -112,7 +112,7 @@ export default function SupervisionsPage() {
                             )}
                         </CardHeader>
                         <CardContent className="text-sm space-y-2">
-                        {user?.rol !== 'coordinator' && (
+                        {user?.rol !== 'coordinador' && (
                             <p><span className="font-semibold">Coordinador:</span> {supervision.coordinator}</p>
                         )}
                         <p><span className="font-semibold">Fecha:</span> {supervision.date ? format(supervision.date, "P", { locale: es }) : 'N/A'}</p>
@@ -133,19 +133,19 @@ export default function SupervisionsPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Docente</TableHead>
-                                {user?.rol !== 'coordinator' && <TableHead>Coordinador</TableHead>}
+                                {user?.rol !== 'coordinador' && <TableHead>Coordinador</TableHead>}
                                 <TableHead>Carrera</TableHead>
                                 <TableHead>Fecha</TableHead>
                                 <TableHead>Horario</TableHead>
                                 <TableHead>Estado</TableHead>
-                                {user?.rol === 'coordinator' && <TableHead>Acciones</TableHead>}
+                                {user?.rol === 'coordinador' && <TableHead>Acciones</TableHead>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {supervisions.map((supervision) => (
                                 <TableRow key={supervision.id}>
                                     <TableCell className="font-medium py-2">{supervision.teacher}</TableCell>
-                                    {user?.rol !== 'coordinator' && <TableCell className="font-medium py-2">{supervision.coordinator}</TableCell>}
+                                    {user?.rol !== 'coordinador' && <TableCell className="font-medium py-2">{supervision.coordinator}</TableCell>}
                                     <TableCell className="py-2">{supervision.career}</TableCell>
                                     <TableCell className="py-2">{supervision.date ? format(supervision.date, "P", { locale: es }) : 'N/A'}</TableCell>
                                     <TableCell className="py-2 text-primary font-mono">{supervision.startTime} - {supervision.endTime}</TableCell>
@@ -154,7 +154,7 @@ export default function SupervisionsPage() {
                                             {supervision.status}
                                         </Badge>
                                     </TableCell>
-                                    {user?.rol === 'coordinator' && (
+                                    {user?.rol === 'coordinador' && (
                                       <TableCell className="py-2">
                                         {supervision.status === 'Programada' && (
                                             <div className="flex gap-2">

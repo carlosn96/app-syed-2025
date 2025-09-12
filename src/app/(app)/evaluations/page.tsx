@@ -88,7 +88,7 @@ export default function EvaluationsPage() {
   }
 
   const studentTeachers = useMemo(() => {
-      if (user?.rol !== 'student' || !user.grupo) return [];
+      if (user?.rol !== 'alumno' || !user.grupo) return [];
       
       const studentGroup = user.grupo;
       const groupSchedules = schedules.filter(s => s.groupName === studentGroup);
@@ -103,7 +103,7 @@ export default function EvaluationsPage() {
   }, []);
 
 
-  if (user?.rol === 'student') {
+  if (user?.rol === 'alumno') {
     return (
         <div className="flex flex-col gap-8">
             <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
@@ -158,7 +158,7 @@ export default function EvaluationsPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Agenda de Evaluaciones
         </h1>
-        {user?.rol === 'coordinator' && (
+        {user?.rol === 'coordinador' && (
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
               <FloatingButton text="Crear Periodo" />

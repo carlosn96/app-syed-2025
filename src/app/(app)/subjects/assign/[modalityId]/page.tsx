@@ -128,7 +128,7 @@ export default function ManageModalitySubjectsPage() {
                                 const semesterSubjects = subjectsForModality.filter(s => s.semester === semester);
                                 return (
                                     <TabsContent key={semester} value={`sem-${semester}`}>
-                                        {user?.rol === 'administrator' && (
+                                        {user?.rol === 'administrador' && (
                                             <div className="flex justify-end my-4">
                                                 <Button onClick={() => handleOpenModal(semester)}>
                                                     Crear Materia
@@ -141,7 +141,7 @@ export default function ManageModalitySubjectsPage() {
                                                     <TableHeader>
                                                         <TableRow>
                                                             <TableHead>Nombre</TableHead>
-                                                            {user?.rol === 'administrator' && (
+                                                            {user?.rol === 'administrador' && (
                                                                 <TableHead>Acciones</TableHead>
                                                             )}
                                                         </TableRow>
@@ -150,7 +150,7 @@ export default function ManageModalitySubjectsPage() {
                                                         {semesterSubjects.map(subject => (
                                                             <TableRow key={subject.id}>
                                                                 <TableCell className="font-medium">{subject.name}</TableCell>
-                                                                {user?.rol === 'administrator' && (
+                                                                {user?.rol === 'administrador' && (
                                                                     <TableCell>
                                                                         <div className="flex gap-2">
                                                                             <Button size="icon" variant="warning">
@@ -172,7 +172,7 @@ export default function ManageModalitySubjectsPage() {
                                                 <h3 className="text-lg font-semibold text-white">Grado Vacío</h3>
                                                 <p className="text-muted-foreground mt-2">
                                                     Aún no se han creado materias para este grado. <br/>
-                                                    {user?.rol === 'administrator' && `Usa el botón "Crear Nueva Materia" para empezar.`}
+                                                    {user?.rol === 'administrador' && `Usa el botón "Crear Nueva Materia" para empezar.`}
                                                 </p>
                                             </div>
                                         )}

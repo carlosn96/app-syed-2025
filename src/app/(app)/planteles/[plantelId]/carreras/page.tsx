@@ -285,7 +285,7 @@ export default function PlantelCarrerasPage() {
             </h1>
             <p className="text-muted-foreground">{plantel.name}</p>
         </div>
-        {user?.rol === 'administrator' && (
+        {user?.rol === 'administrador' && (
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogTrigger asChild>
                     <FloatingButton text="Crear Carrera" />
@@ -315,7 +315,7 @@ export default function PlantelCarrerasPage() {
         </div>
       </div>
       
-      {user?.rol === 'administrator' ? renderAdminView() : renderDefaultView()}
+      {user?.rol === 'administrador' ? renderAdminView() : renderDefaultView()}
 
     </div>
   )

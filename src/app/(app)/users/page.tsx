@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input"
 import { getUsers } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 
-type RoleFilter = 'administrator' | 'coordinator' | 'teacher' | 'student' | 'all';
+type RoleFilter = 'administrador' | 'coordinador' | 'docente' | 'alumno' | 'all';
 
 export default function UsersPage() {
   const { user: loggedInUser, isLoading: isAuthLoading } = useAuth();
@@ -47,10 +47,10 @@ export default function UsersPage() {
 
   const roleIdToName = (id: number): RoleFilter => {
     switch (id) {
-        case Roles.Administrador: return 'administrator';
-        case Roles.Coordinador: return 'coordinator';
-        case Roles.Docente: return 'teacher';
-        case Roles.Alumno: return 'student';
+        case Roles.Administrador: return 'administrador';
+        case Roles.Coordinador: return 'coordinador';
+        case Roles.Docente: return 'docente';
+        case Roles.Alumno: return 'alumno';
         default: return 'all';
     }
   }
@@ -67,8 +67,8 @@ export default function UsersPage() {
           rol_nombre: u.rol
         }));
         
-        if (loggedInUser?.rol === 'coordinator') {
-            setAllUsers(mappedData.filter(u => u.rol === 'teacher' || u.rol === 'student'));
+        if (loggedInUser?.rol === 'coordinador') {
+            setAllUsers(mappedData.filter(u => u.rol === 'docente' || u.rol === 'alumno'));
         } else {
             setAllUsers(mappedData);
         }
@@ -85,12 +85,12 @@ export default function UsersPage() {
   }, [loggedInUser]);
 
   const { teachers, students, filteredUsers } = useMemo(() => {
-    const teachers = allUsers.filter(user => user.rol === 'teacher');
-    const students = allUsers.filter(user => user.rol === 'student');
+    const teachers = allUsers.filter(user => user.rol === 'docente');
+    const students = allUsers.filter(user => user.rol === 'alumno');
     
     let usersToDisplay = allUsers;
-    if (loggedInUser?.rol === 'administrator') {
-        usersToDisplay = allUsers.filter(user => user.rol !== 'administrator');
+    if (loggedInUser?.rol === 'administrador') {
+        usersToDisplay = allUsers.filter(user => user.rol !== 'administrador');
 
         if (filter !== 'all') {
             usersToDisplay = usersToDisplay.filter((user) => user.rol === filter);
@@ -128,17 +128,17 @@ export default function UsersPage() {
 
   const roleDisplayMap: { [key: string]: string } = {
     'all': 'Todos',
-    'student': 'Alumnos',
-    'teacher': 'Docentes',
-    'coordinator': 'Coordinadores',
-    'administrator': 'Administrador'
+    'alumno': 'Alumnos',
+    'docente': 'Docentes',
+    'coordinador': 'Coordinadores',
+    'administrador': 'Administrador'
   };
 
   const filterButtons: RoleFilter[] = useMemo(() => {
-      if (loggedInUser?.rol === 'coordinator') {
-          return ['teacher', 'student'];
+      if (loggedInUser?.rol === 'coordinador') {
+          return ['docente', 'alumno'];
       }
-      return ['all', 'teacher', 'student', 'coordinator'];
+      return ['all', 'docente', 'alumno', 'coordinador'];
   }, [loggedInUser]);
   
   const renderUserCard = (user: User) => (
@@ -153,7 +153,7 @@ export default function UsersPage() {
         </div>
       </CardHeader>
       <CardContent className="text-sm space-y-2">
-        <p><span className="font-semibold">Grupo:</span> {user.rol === 'student' ? user.grupo : 'N/A'}</p>
+        <p><span className="font-semibold">Grupo:</span> {user.rol === 'alumno' ? user.grupo : 'N/A'}</p>
         <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
         <div className="flex gap-2 pt-2">
           <Button size="sm" variant="warning" className="flex-1">
@@ -164,7 +164,7 @@ export default function UsersPage() {
             <Trash2 className="mr-2 h-4 w-4" />
             Eliminar
           </Button>
-           {user.rol === 'teacher' && (
+           {user.rol === 'docente' && (
              <Button asChild size="sm" variant="outline" className="flex-1">
                 <Link href={`/users/teachers/${user.id}`}>
                     <Eye className="mr-2 h-4 w-4" />
@@ -235,12 +235,12 @@ export default function UsersPage() {
   );
 
   const renderCoordinatorView = () => (
-    <Tabs defaultValue="teachers" className="w-full">
+    <Tabs defaultValue="docentes" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="teachers">Docentes</TabsTrigger>
-        <TabsTrigger value="students">Alumnos</TabsTrigger>
+        <TabsTrigger value="docentes">Docentes</TabsTrigger>
+        <TabsTrigger value="alumnos">Alumnos</TabsTrigger>
       </TabsList>
-      <TabsContent value="teachers">
+      <TabsContent value="docentes">
         <div className="relative w-full sm:max-w-xs my-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -257,7 +257,7 @@ export default function UsersPage() {
                 : filteredTeachers.map(renderUserCard)}
         </div>
       </TabsContent>
-      <TabsContent value="students">
+      <TabsContent value="alumnos">
         <div className="relative w-full sm:max-w-xs my-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -283,7 +283,7 @@ export default function UsersPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Gestión de Usuarios
         </h1>
-        {!isAuthLoading && (loggedInUser?.rol === 'administrator' || loggedInUser?.rol === 'coordinator') && (
+        {!isAuthLoading && (loggedInUser?.rol === 'administrador' || loggedInUser?.rol === 'coordinador') && (
            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
                 <Button>
@@ -308,7 +308,7 @@ export default function UsersPage() {
 
       {isAuthLoading ? (
         <p>Cargando...</p>
-      ) : loggedInUser?.rol === 'coordinator' ? (
+      ) : loggedInUser?.rol === 'coordinador' ? (
         renderCoordinatorView()
       ) : (
         renderAdminView()

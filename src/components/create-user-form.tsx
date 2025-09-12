@@ -59,7 +59,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const roleDisplayMap = useMemo(() => {
-    if (loggedInUser?.rol === 'coordinator') {
+    if (loggedInUser?.rol === 'coordinador') {
       const { [Roles.Coordinador]: _, ...rest } = baseRoleDisplayMap;
       return rest;
     }

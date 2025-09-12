@@ -118,8 +118,8 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
   const [availableTeachers, setAvailableTeachers] = useState<Teacher[]>([]);
   const [teacherCareers, setTeacherCareers] = useState<Record<string, string>>({});
   
-  const coordinators = useMemo(() => users.filter(u => u.rol === 'coordinator'), []);
-  const defaultCoordinator = user?.rol === 'coordinator' ? String(user.id) : "";
+  const coordinators = useMemo(() => users.filter(u => u.rol === 'coordinador'), []);
+  const defaultCoordinator = user?.rol === 'coordinador' ? String(user.id) : "";
 
   const form = useForm<CreateSupervisionFormValues>({
     resolver: zodResolver(createSupervisionSchema),
@@ -178,14 +178,14 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {user?.rol !== 'coordinator' && (
+        {user?.rol !== 'coordinador' && (
             <FormField
             control={form.control}
             name="coordinatorId"
             render={({ field }) => (
                 <FormItem>
                 <FormLabel>Coordinador</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={user?.rol === 'coordinator'}>
+                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={user?.rol === 'coordinador'}>
                     <FormControl>
                     <SelectTrigger>
                         <SelectValue placeholder="Seleccione un coordinador" />
