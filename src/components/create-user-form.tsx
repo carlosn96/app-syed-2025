@@ -24,42 +24,42 @@ import {
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { groups } from "@/lib/data"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Roles } from "@/lib/modelos"
+import { createUser } from "@/services/api"
 
 const createUserSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido."),
   apellido_paterno: z.string().min(1, "El apellido paterno es requerido."),
   apellido_materno: z.string().min(1, "El apellido materno es requerido."),
   correo: z.string().email("Correo electrónico inválido."),
-  rol: z.enum(["coordinator", "teacher", "student"], {
-    required_error: "Por favor, seleccione un rol.",
-  }),
+  id_rol: z.coerce.number({ required_error: "Por favor, seleccione un rol." }),
   grupo: z.string().optional(),
-  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
-  confirmPassword: z.string(),
-}).refine(data => data.password === data.confirmPassword, {
+  contrasena: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+  contrasena_confirmation: z.string(),
+}).refine(data => data.contrasena === data.contrasena_confirmation, {
   message: "Las contraseñas no coinciden.",
-  path: ["confirmPassword"],
-}).refine(data => data.rol !== 'student' || (data.rol === 'student' && data.grupo), {
+  path: ["contrasena_confirmation"],
+}).refine(data => data.id_rol !== Roles.Alumno || (data.id_rol === Roles.Alumno && data.grupo), {
     message: "Por favor, seleccione un grupo para el alumno.",
     path: ["grupo"],
 });
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
 
-const baseRoleDisplayMap = {
+const baseRoleDisplayMap: { [key: number]: string } = {
   [Roles.Coordinador]: "Coordinador",
   [Roles.Docente]: "Docente",
   [Roles.Alumno]: "Alumno",
 };
 
 export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
-  const { addUser, user: loggedInUser } = useAuth();
+  const { user: loggedInUser } = useAuth();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const roleDisplayMap = useMemo(() => {
-    if (loggedInUser?.id_rol === Roles.Coordinador) {
+    if (loggedInUser?.rol === 'coordinator') {
       const { [Roles.Coordinador]: _, ...rest } = baseRoleDisplayMap;
       return rest;
     }
@@ -73,16 +73,17 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
       apellido_paterno: "",
       apellido_materno: "",
       correo: "",
-      password: "",
-      confirmPassword: "",
+      contrasena: "",
+      contrasena_confirmation: "",
     },
   });
   
-  const selectedRole = form.watch("rol");
+  const selectedRole = form.watch("id_rol");
 
-  const onSubmit = (data: CreateUserFormValues) => {
+  const onSubmit = async (data: CreateUserFormValues) => {
+    setIsSubmitting(true);
     try {
-      addUser(data);
+      await createUser(data);
       toast({
         title: "Usuario Creado",
         description: `El usuario ${data.nombre} ha sido creado con éxito.`,
@@ -97,6 +98,8 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
             description: error.message,
         });
       }
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -159,11 +162,11 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
         />
         <FormField
           control={form.control}
-          name="rol"
+          name="id_rol"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Rol</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione un rol" />
@@ -181,7 +184,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
             </FormItem>
           )}
         />
-         {selectedRole === 'student' && (
+         {selectedRole === Roles.Alumno && (
           <FormField
             control={form.control}
             name="grupo"
@@ -209,7 +212,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
         )}
          <FormField
           control={form.control}
-          name="password"
+          name="contrasena"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Contraseña</FormLabel>
@@ -222,7 +225,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
         />
         <FormField
           control={form.control}
-          name="confirmPassword"
+          name="contrasena_confirmation"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Confirmar Contraseña</FormLabel>
@@ -233,7 +236,9 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">Crear Usuario</Button>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Creando...' : 'Crear Usuario'}
+        </Button>
       </form>
     </Form>
   )

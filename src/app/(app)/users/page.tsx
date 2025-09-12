@@ -16,14 +16,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -33,10 +25,11 @@ import {
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/context/auth-context"
-import { users as allUsersData } from "@/lib/data"
-import { User } from "@/lib/modelos"
+import { User, Roles } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
 import { Input } from "@/components/ui/input"
+import { getUsers } from "@/services/api"
+import { Skeleton } from "@/components/ui/skeleton"
 
 type RoleFilter = 'administrator' | 'coordinator' | 'teacher' | 'student' | 'all';
 
@@ -44,24 +37,80 @@ export default function UsersPage() {
   const { user: loggedInUser, isLoading: isAuthLoading } = useAuth();
   const [filter, setFilter] = useState<RoleFilter>('all');
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [isUsersLoading, setIsUsersLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [teacherSearch, setTeacherSearch] = useState("");
   const [studentSearch, setStudentSearch] = useState("");
 
-  const allUsers = useMemo(() => {
-      if (loggedInUser?.rol === 'coordinator') {
-          return allUsersData.filter(u => u.rol === 'teacher' || u.rol === 'student');
+  const roleIdToName = (id: number): RoleFilter => {
+    switch (id) {
+        case Roles.Administrador: return 'administrator';
+        case Roles.Coordinador: return 'coordinator';
+        case Roles.Docente: return 'teacher';
+        case Roles.Alumno: return 'student';
+        default: return 'all';
+    }
+  }
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setIsUsersLoading(true);
+        const data = await getUsers();
+        
+        const mappedData: User[] = data.map(u => ({
+          ...u,
+          rol: roleIdToName(u.id_rol),
+          rol_nombre: u.rol
+        }));
+        
+        if (loggedInUser?.rol === 'coordinator') {
+            setAllUsers(mappedData.filter(u => u.rol === 'teacher' || u.rol === 'student'));
+        } else {
+            setAllUsers(mappedData);
+        }
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || 'Error al cargar los usuarios');
+        console.error(err);
+      } finally {
+        setIsUsersLoading(false);
       }
-      return allUsersData;
+    };
+
+    fetchUsers();
   }, [loggedInUser]);
 
-  const { teachers, students } = useMemo(() => {
+  const { teachers, students, filteredUsers } = useMemo(() => {
     const teachers = allUsers.filter(user => user.rol === 'teacher');
     const students = allUsers.filter(user => user.rol === 'student');
-    return { teachers, students };
-  }, [allUsers]);
+    
+    let usersToDisplay = allUsers;
+    if (loggedInUser?.rol === 'administrator') {
+        usersToDisplay = allUsers.filter(user => user.rol !== 'administrator');
+
+        if (filter !== 'all') {
+            usersToDisplay = usersToDisplay.filter((user) => user.rol === filter);
+        }
+        
+        if (searchTerm) {
+            usersToDisplay = usersToDisplay.filter(user =>
+            `${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (user.grupo && user.grupo.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+        }
+    }
+    
+    return { 
+        teachers, 
+        students, 
+        filteredUsers: usersToDisplay 
+    };
+  }, [allUsers, loggedInUser, filter, searchTerm]);
 
   const filteredTeachers = useMemo(() => 
     teachers.filter(user =>
@@ -76,26 +125,8 @@ export default function UsersPage() {
       (user.grupo && user.grupo.toLowerCase().includes(studentSearch.toLowerCase()))
     ), [students, studentSearch]);
 
-  useEffect(() => {
-    if (loggedInUser?.rol === 'administrator') {
-      let usersToDisplay = allUsersData.filter(user => user.rol !== 'administrator');
 
-      if (filter !== 'all') {
-        usersToDisplay = usersToDisplay.filter((user) => user.rol === filter);
-      }
-      
-      if (searchTerm) {
-        usersToDisplay = usersToDisplay.filter(user =>
-          `${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (user.grupo && user.grupo.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-      }
-      setFilteredUsers(usersToDisplay);
-    }
-  }, [filter, searchTerm, allUsersData, loggedInUser]);
-
-  const roleDisplayMap: { [key in RoleFilter]: string } = {
+  const roleDisplayMap: { [key: string]: string } = {
     'all': 'Todos',
     'student': 'Alumnos',
     'teacher': 'Docentes',
@@ -118,7 +149,7 @@ export default function UsersPage() {
             <CardTitle className="text-base">{`${user.nombre} ${user.apellido_paterno}`}</CardTitle>
             <CardDescription>{user.correo}</CardDescription>
           </div>
-          <Badge variant="outline">{roleDisplayMap[user.rol]}</Badge>
+          <Badge variant="outline">{user.rol_nombre || user.rol}</Badge>
         </div>
       </CardHeader>
       <CardContent className="text-sm space-y-2">
@@ -145,40 +176,29 @@ export default function UsersPage() {
       </CardContent>
     </Card>
   );
-
-  const renderUserTableRow = (user: User) => (
-    <TableRow key={user.id}>
-      <TableCell>
-        <div className="font-medium">{`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`}</div>
-        <div className="text-sm text-muted-foreground">{user.correo}</div>
-      </TableCell>
-      <TableCell>
-        <Badge variant="outline">{roleDisplayMap[user.rol]}</Badge>
-      </TableCell>
-      <TableCell>{user.rol === 'student' ? user.grupo : 'N/A'}</TableCell>
-      <TableCell>{new Date(user.fecha_registro).toLocaleDateString()}</TableCell>
-      <TableCell>
-        <div className="flex gap-2">
-          <Button size="icon" variant="warning">
-            <Pencil className="h-4 w-4" />
-            <span className="sr-only">Editar</span>
-          </Button>
-          <Button size="icon" variant="destructive">
-            <Trash2 className="h-4 w-4" />
-            <span className="sr-only">Eliminar</span>
-          </Button>
-           {user.rol === 'teacher' && (
-            <Button asChild size="icon" variant="outline">
-                <Link href={`/users/teachers/${user.id}`}>
-                    <Eye className="h-4 w-4" />
-                    <span className="sr-only">Ver Perfil</span>
-                </Link>
-            </Button>
-           )}
-        </div>
-      </TableCell>
-    </TableRow>
+  
+  const renderSkeletonCard = (index: number) => (
+    <Card key={index}>
+        <CardHeader>
+            <div className="flex items-start justify-between">
+                <div>
+                    <Skeleton className="h-5 w-32 mb-2" />
+                    <Skeleton className="h-4 w-40" />
+                </div>
+                <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+        </CardHeader>
+        <CardContent className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-28" />
+            <div className="flex gap-2 pt-2">
+                <Skeleton className="h-9 w-full rounded-full" />
+                <Skeleton className="h-9 w-full rounded-full" />
+            </div>
+        </CardContent>
+    </Card>
   );
+
 
   const renderAdminView = () => (
     <>
@@ -207,7 +227,9 @@ export default function UsersPage() {
         </div>
       </div>
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredUsers.map(renderUserCard)}
+        {isUsersLoading 
+            ? Array.from({ length: 6 }).map((_, i) => renderSkeletonCard(i))
+            : filteredUsers.map(renderUserCard)}
       </div>
     </>
   );
@@ -230,7 +252,9 @@ export default function UsersPage() {
             />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTeachers.map(renderUserCard)}
+            {isUsersLoading 
+                ? Array.from({ length: 3 }).map((_, i) => renderSkeletonCard(i))
+                : filteredTeachers.map(renderUserCard)}
         </div>
       </TabsContent>
       <TabsContent value="students">
@@ -245,7 +269,9 @@ export default function UsersPage() {
             />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredStudents.map(renderUserCard)}
+            {isUsersLoading 
+                ? Array.from({ length: 6 }).map((_, i) => renderSkeletonCard(i))
+                : filteredStudents.map(renderUserCard)}
         </div>
       </TabsContent>
     </Tabs>
@@ -278,6 +304,8 @@ export default function UsersPage() {
         )}
       </div>
       
+      {error && <p className="text-destructive text-center">{error}</p>}
+
       {isAuthLoading ? (
         <p>Cargando...</p>
       ) : loggedInUser?.rol === 'coordinator' ? (

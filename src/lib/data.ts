@@ -54,7 +54,7 @@ export interface Career {
 export const careers: Career[] = [
     { id: 1, name: 'Ingeniería en Computación', modality: 'INCO', campus: 'Reynosa', semesters: 9, coordinator: 'Sofía Gómez Díaz' },
     { id: 2, name: 'Licenciatura en Administración', modality: 'LAET', campus: 'Reynosa', semesters: 8, coordinator: 'Sofía Gómez Díaz' },
-    { id:_3, name: 'Derecho', modality: 'LDE', campus: 'Reynosa', semesters: 10, coordinator: 'Sofía Gómez Díaz' },
+    { id: 3, name: 'Derecho', modality: 'LDE', campus: 'Reynosa', semesters: 10, coordinator: 'Sofía Gómez Díaz' },
     { id: 4, name: 'Ingeniería en Computación', modality: 'INCO-S', campus: 'Río Bravo', semesters: 9, coordinator: 'Sofía Gómez Díaz' },
     { id: 5, name: 'Licenciatura en Administración', modality: 'LAET-M', campus: 'Matamoros', semesters: 8, coordinator: 'Sofía Gómez Díaz' },
 ];
@@ -310,7 +310,7 @@ export const supervisionRubrics: SupervisionRubric[] = [
         category: "No Contable",
         criteria: [
             { id: "3_1", text: "Utiliza diversas técnicas didácticas (exposición, debate, etc.)." },
-            { id_other: "3_2", text: "Emplea recursos tecnológicos de apoyo (presentaciones, videos, etc.)." },
+            { id: "3_2", text: "Emplea recursos tecnológicos de apoyo (presentaciones, videos, etc.)." },
             { id: "3_3", text: "Fomenta la participación activa de los estudiantes." },
         ]
     },
@@ -344,7 +344,7 @@ export const evaluationRubrics: EvaluationRubric[] = [
         criteria: [
             { id: "engagement_1", text: "Excelente" },
             { id: "engagement_2", text: "Bueno" },
-            { id_engagement: "engagement_3", text: "Regular" },
+            { id: "engagement_3", text: "Regular" },
             { id: "engagement_4", text: "Necesita Mejorar" },
         ]
     }
