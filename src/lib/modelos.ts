@@ -31,6 +31,16 @@ export interface Docente {
   grado_academico: string;
 }
 
+export interface Coordinador {
+  id_coordinador: number;
+  usuario_id: number;
+  nombre_completo: string;
+  correo: string;
+  rol: string;
+  fecha_registro: string;
+  ultimo_acceso: string;
+}
+
 export const Roles = {
     Administrador: 1,
     Coordinador: 2,
