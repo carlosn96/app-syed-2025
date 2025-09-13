@@ -1,5 +1,5 @@
 
-import type { Plantel, User, Alumno } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -68,7 +68,7 @@ export const getAlumnos = (): Promise<Alumno[]> => apiFetch('/alumnos');
 // ... y así sucesivamente para los demás endpoints de alumnos.
 
 // Teacher Management
-export const getDocentes = (): Promise<any[]> => apiFetch('/docentes');
+export const getDocentes = (): Promise<Docente[]> => apiFetch('/docentes');
 // ... y así sucesivamente para los demás endpoints de docentes.
 
 // Coordinator Management

@@ -23,6 +23,14 @@ export interface Alumno {
   carrera: string;
 }
 
+export interface Docente {
+  id_docente: number;
+  id_usuario: number;
+  nombre_completo: string;
+  correo: string;
+  grado_academico: string;
+}
+
 export const Roles = {
     Administrador: 1,
     Coordinador: 2,
