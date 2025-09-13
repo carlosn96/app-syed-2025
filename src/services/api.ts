@@ -1,5 +1,5 @@
 
-import type { Plantel, User } from '@/lib/modelos';
+import type { Plantel, User, Alumno } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -64,7 +64,7 @@ export const updateUser = (id: number, data: any): Promise<User> => apiFetch(`/u
 export const deleteUser = (id: number): Promise<void> => apiFetch(`/usuario/${id}`, { method: 'DELETE' });
 
 // Student Management
-export const getAlumnos = (): Promise<any[]> => apiFetch('/alumnos');
+export const getAlumnos = (): Promise<Alumno[]> => apiFetch('/alumnos');
 // ... y así sucesivamente para los demás endpoints de alumnos.
 
 // Teacher Management

@@ -1,3 +1,4 @@
+
 export interface User {
   id: number;
   nombre: string;
@@ -10,6 +11,16 @@ export interface User {
   ultimo_acceso: string | null;
   grupo?: string;
   rol_nombre?: string;
+}
+
+export interface Alumno {
+  id_alumno: number;
+  id_usuario: number;
+  matricula: string;
+  nombre_completo: string;
+  correo: string;
+  id_carrera: number;
+  carrera: string;
 }
 
 export const Roles = {
