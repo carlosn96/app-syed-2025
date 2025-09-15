@@ -119,7 +119,10 @@ export const deleteUser = (id: number): Promise<void> => apiFetch(`/usuario/${id
 export const getAlumnos = (): Promise<Alumno[]> => apiFetch('/alumnos');
 
 // Teacher Management
-export const getDocentes = (): Promise<Docente[]> => apiFetch('/docentes');
+export const getDocentes = (id?: number): Promise<Docente[] | Docente> => {
+    const endpoint = id ? `/docentes/${id}` : '/docentes';
+    return apiFetch(endpoint);
+}
 
 // Coordinator Management
 export const getCoordinadores = (): Promise<Coordinador[]> => apiFetch('/coordinadores');
@@ -209,6 +212,8 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
         { id: 3, title: "Estrategias de Enseñanza", type: "checkbox", category: "No Contable", criteria: [ { id: "3_1", text: "Utiliza diversas técnicas didácticas." }] },
     ]);
 };
+
+    
 
     
 

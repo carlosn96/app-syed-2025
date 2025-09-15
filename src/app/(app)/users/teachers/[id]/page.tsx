@@ -6,7 +6,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Star, ShieldCheck, BookUser, Library } from "lucide-react"
 import React, { useMemo, useState, useEffect } from "react"
 
-import { Evaluation, User, Supervision, Schedule, Subject, Group } from "@/lib/modelos"
+import { Evaluation, User, Supervision, Schedule, Subject, Group, Docente } from "@/lib/modelos"
 import {
   Card,
   CardContent,
@@ -31,7 +31,7 @@ import { ProgressRing } from "@/components/ui/progress-ring"
 import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getUserById, getSupervisions, getEvaluations, getSubjects, getSchedules, getGroups } from "@/services/api"
+import { getUserById, getSupervisions, getEvaluations, getSubjects, getSchedules, getGroups, getDocentes } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const getScoreColor = (score: number) => {
@@ -66,7 +66,7 @@ interface GroupEvaluationData {
 }
 
 interface TeacherProfileData {
-  teacher: User;
+  teacher: Docente;
   teacherFullName: string;
   teacherSupervisions: Supervision[];
   teacherEvaluations: Evaluation[];
@@ -101,7 +101,7 @@ export default function TeacherProfilePage() {
                 allSchedules,
                 allGroups,
             ] = await Promise.all([
-                getUserById(teacherId),
+                getDocentes(teacherId),
                 getSupervisions(),
                 getEvaluations(),
                 getSubjects(),
@@ -109,16 +109,21 @@ export default function TeacherProfilePage() {
                 getGroups(),
             ]);
             
-            if (!teacherUser || teacherUser.rol !== "docente") {
+            if (!teacherUser || !Array.isArray(teacherUser) && teacherUser.id_usuario !== teacherId) {
+              throw new Error("Docente no encontrado.");
+            }
+            const currentTeacher = Array.isArray(teacherUser) ? teacherUser.find(t => t.id_usuario === teacherId) : teacherUser
+
+            if (!currentTeacher) {
               throw new Error("Docente no encontrado.");
             }
 
-            const teacherFullName = `${teacherUser.nombre} ${teacherUser.apellido_paterno} ${teacherUser.apellido_materno}`.trim();
+            const teacherFullName = currentTeacher.nombre_completo;
 
             const teacherSupervisions = allSupervisions.filter(s => s.teacher === teacherFullName);
             const teacherEvaluations = allEvaluations.filter(e => e.teacherName === teacherFullName);
             
-            const teacherSchedules = allSchedules.filter(s => s.teacherId === teacherUser.id);
+            const teacherSchedules = allSchedules.filter(s => s.teacherId === currentTeacher.id_usuario);
             const subjectIds = [...new Set(teacherSchedules.map(s => s.subjectId))];
             const teacherSubjects = allSubjects.filter(s => subjectIds.includes(s.id));
             
@@ -178,7 +183,7 @@ export default function TeacherProfilePage() {
             });
 
             setTeacherData({
-              teacher: teacherUser,
+              teacher: currentTeacher,
               teacherFullName,
               teacherSupervisions,
               teacherEvaluations,
@@ -219,7 +224,7 @@ export default function TeacherProfilePage() {
   if (error || !teacherData) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p>{error || "Docente no encontrado."}</p>
+        <p className="text-destructive">{error || "Docente no encontrado."}</p>
       </div>
     )
   }
@@ -270,8 +275,8 @@ export default function TeacherProfilePage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20">
-                <AvatarImage src={`https://placehold.co/100x100.png?text=${teacher.nombre.charAt(0)}`} alt={teacherFullName} data-ai-hint="person avatar" />
-                <AvatarFallback>{teacher.nombre.charAt(0)}</AvatarFallback>
+                <AvatarImage src={`https://placehold.co/100x100.png?text=${teacher.nombre_completo.charAt(0)}`} alt={teacherFullName} data-ai-hint="person avatar" />
+                <AvatarFallback>{teacher.nombre_completo.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
                 <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
@@ -279,7 +284,7 @@ export default function TeacherProfilePage() {
                 </h1>
                 <p className="text-muted-foreground">{teacher.correo}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                Miembro desde: {new Date(teacher.fecha_registro).toLocaleDateString("es-ES")}
+                Grado Académico: {teacher.grado_academico}
                 </p>
             </div>
         </div>
@@ -497,5 +502,7 @@ export default function TeacherProfilePage() {
     </div>
   )
 }
+
+    
 
     
