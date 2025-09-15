@@ -36,11 +36,22 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   }
 };
 
-export const getPlanteles = (): Promise<Plantel[]> => apiFetch('/planteles');
+// Campus Management
+export const getPlanteles = async (): Promise<Plantel[]> => {
+    const data = await apiFetch('/planteles');
+    // Map API response to the Plantel interface used in the frontend
+    return data.map((item: any) => ({
+        id: item.id_plantel,
+        name: item.nombre,
+        location: item.ubicacion,
+        director: item.director || "Director no asignado" // API does not provide director yet
+    }));
+};
 export const createPlantel = (data: Omit<Plantel, 'id'>): Promise<Plantel> => apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
 export const getPlantelById = (id: number): Promise<Plantel> => apiFetch(`/planteles/${id}`);
 export const updatePlantel = (id: number, data: Partial<Omit<Plantel, 'id'>>): Promise<Plantel> => apiFetch(`/planteles/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles/${id}`, { method: 'DELETE' });
+
 
 // User Management
 export const getUsers = (): Promise<User[]> => apiFetch('/usuario');
