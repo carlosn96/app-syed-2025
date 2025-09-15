@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Pencil, PlusCircle, Trash2, Search, ChevronDown, BookOpenCheck, Filter } from "lucide-react"
 import Link from "next/link"
 
@@ -13,8 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { careers as allCareers, subjects, planteles } from "@/lib/data"
-import { Career } from "@/lib/modelos"
+import { Career, Subject, Plantel } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -35,6 +34,8 @@ import {
 } from "@/components/ui/accordion"
 import { FilterPopover } from "@/components/ui/filter-popover"
 import { Badge } from "@/components/ui/badge"
+import { getCareers, getSubjects, getPlanteles } from "@/services/api"
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 interface GroupedCareer {
@@ -51,6 +52,35 @@ export default function CareersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedModalities, setSelectedModalities] = useState<Record<string, number>>({});
   const [selectedCampuses, setSelectedCampuses] = useState<string[]>([]);
+
+  const [allCareers, setAllCareers] = useState<Career[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [planteles, setPlanteles] = useState<Plantel[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [careersData, subjectsData, plantelesData] = await Promise.all([
+          getCareers(),
+          getSubjects(),
+          getPlanteles()
+        ]);
+        setAllCareers(careersData);
+        setSubjects(subjectsData);
+        setPlanteles(plantelesData);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || 'Error al cargar los datos');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const filteredGroupedCareers = useMemo(() => {
     let careersToProcess = allCareers;
@@ -89,7 +119,7 @@ export default function CareersPage() {
     });
 
     return Object.values(groups);
-  }, [selectedCampuses, searchTerm]);
+  }, [allCareers, selectedCampuses, searchTerm]);
 
   const handleTabChange = (key: string, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [key]: value }))
@@ -107,7 +137,7 @@ export default function CareersPage() {
   const plantelOptions = useMemo(() => planteles.map(p => ({
     value: p.name,
     label: p.name
-  })), []);
+  })), [planteles]);
 
 
   const renderSubjectTabs = (career: Career, uniqueKey: string) => {
@@ -280,17 +310,35 @@ export default function CareersPage() {
   };
 
 
-  const renderAdminView = () => (
-    <Accordion type="single" collapsible className="w-full space-y-4">
-        {filteredGroupedCareers.map(group => renderCareerContent(group, true))}
-    </Accordion>
-  );
+  const renderAdminView = () => {
+    if (isLoading) {
+      return (
+        <div className="w-full space-y-4">
+          {Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
+        </div>
+      )
+    }
+    return (
+      <Accordion type="single" collapsible className="w-full space-y-4">
+          {filteredGroupedCareers.map(group => renderCareerContent(group, true))}
+      </Accordion>
+    );
+  }
 
-  const renderDefaultView = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredGroupedCareers.map(group => renderCareerContent(group, false))}
-    </div>
-  );
+  const renderDefaultView = () => {
+    if (isLoading) {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-xl" />)}
+        </div>
+      )
+    }
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredGroupedCareers.map(group => renderCareerContent(group, false))}
+      </div>
+    );
+  }
 
 
   return (
@@ -339,6 +387,8 @@ export default function CareersPage() {
             />
         </div>
       </div>
+      
+      {error && <p className="text-destructive text-center">{error}</p>}
       
       {user?.rol === 'administrador' ? renderAdminView() : renderDefaultView()}
 

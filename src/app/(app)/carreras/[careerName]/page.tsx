@@ -1,6 +1,6 @@
 
 "use client"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -11,27 +11,53 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { careers as allCareers, subjects } from "@/lib/data"
-import { Career } from "@/lib/modelos"
+import { Career, Subject } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
 import { Book, Pencil, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { CreateStudyPlanForm } from "@/components/create-study-plan-form"
 import { useAuth } from "@/context/auth-context"
+import { getCareers, getSubjects } from "@/services/api"
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 export default function CareerPlansPage() {
   const params = useParams();
   const careerName = decodeURIComponent(params.careerName as string);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [_, setForceRender] = useState(0);
   const { user } = useAuth();
+
+  const [allCareers, setAllCareers] = useState<Career[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [activeTabs, setActiveTabs] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [careersData, subjectsData] = await Promise.all([
+          getCareers(),
+          getSubjects()
+        ]);
+        setAllCareers(careersData);
+        setSubjects(subjectsData);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || 'Error al cargar los datos');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const careerModalities = useMemo(() => {
     return allCareers.filter(c => c.name === careerName);
-  }, [careerName, _]);
+  }, [careerName, allCareers]);
 
   const handleTabChange = (key: string, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [key]: value }));
@@ -41,9 +67,15 @@ export default function CareerPlansPage() {
     return `${n}°`;
   };
 
-  const handleSuccess = () => {
+  const handleSuccess = async () => {
     setIsModalOpen(false);
-    setForceRender(Math.random());
+    // Re-fetch data
+    try {
+      const careersData = await getCareers();
+      setAllCareers(careersData);
+    } catch (err: any) {
+      setError(err.message || 'Error al recargar las carreras');
+    }
   }
 
   const renderSubjectTabs = (career: Career, uniqueKey: string) => {
@@ -104,11 +136,7 @@ export default function CareerPlansPage() {
       </Tabs>
     );
   };
-
-  if (careerModalities.length === 0 && !careerName) {
-    return <div>Cargando...</div>;
-  }
-
+  
   const firstModality = careerModalities[0];
 
   return (
@@ -145,53 +173,74 @@ export default function CareerPlansPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {careerModalities.length > 0 ? careerModalities.map(modality => {
-            const key = `${modality.name}-${modality.campus}-${modality.modality}`;
-            return (
-                <Card key={key} className="flex flex-col rounded-xl">
+      {error && <p className="text-destructive text-center">{error}</p>}
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 3 }).map((_, i) => (
+                 <Card key={i} className="flex flex-col rounded-xl">
                     <CardHeader>
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <CardTitle>{modality.modality}</CardTitle>
-                                <CardDescription>{modality.campus}</CardDescription>
-                                <p className="text-xs text-muted-foreground pt-2">{modality.coordinator}</p>
-                            </div>
-                            {user?.rol === 'administrador' && (
-                              <div className="flex gap-2">
-                                  <Button size="icon" variant="warning">
-                                      <Pencil className="h-4 w-4" />
-                                      <span className="sr-only">Editar</span>
-                                  </Button>
-                                  <Button size="icon" variant="destructive">
-                                      <Trash2 className="h-4 w-4" />
-                                      <span className="sr-only">Eliminar</span>
-                                  </Button>
-                                  <Button asChild size="icon" variant="default">
-                                      <Link href={`/subjects/assign/${modality.id}`}>
-                                          <Book className="h-4 w-4" />
-                                          <span className="sr-only">Gestionar Materias</span>
-                                      </Link>
-                                  </Button>
-                              </div>
-                            )}
-                        </div>
+                      <Skeleton className="h-5 w-2/3 mb-2" />
+                      <Skeleton className="h-4 w-1/3" />
+                      <Skeleton className="h-3 w-1/2 mt-2" />
                     </CardHeader>
                     <CardContent className="flex flex-col flex-grow pb-2">
-                        {renderSubjectTabs(modality, key)}
+                      <div className="flex-grow flex items-center justify-center p-6">
+                        <Skeleton className="h-24 w-full" />
+                      </div>
                     </CardContent>
                 </Card>
-            )
-        }) : (
-             <div className="md:col-span-2 flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
-                <h3 className="text-lg font-semibold text-white">No hay planes de estudio</h3>
-                <p className="text-muted-foreground mt-2">
-                    Aún no se han creado planes de estudio para esta carrera. <br/>
-                    {user?.rol === 'administrador' && `Usa el botón "Crear Plan de Estudio" para empezar.`}
-                </p>
-            </div>
-        )}
-      </div>
+            ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {careerModalities.length > 0 ? careerModalities.map(modality => {
+              const key = `${modality.name}-${modality.campus}-${modality.modality}`;
+              return (
+                  <Card key={key} className="flex flex-col rounded-xl">
+                      <CardHeader>
+                          <div className="flex items-start justify-between">
+                              <div>
+                                  <CardTitle>{modality.modality}</CardTitle>
+                                  <CardDescription>{modality.campus}</CardDescription>
+                                  <p className="text-xs text-muted-foreground pt-2">{modality.coordinator}</p>
+                              </div>
+                              {user?.rol === 'administrador' && (
+                                <div className="flex gap-2">
+                                    <Button size="icon" variant="warning">
+                                        <Pencil className="h-4 w-4" />
+                                        <span className="sr-only">Editar</span>
+                                    </Button>
+                                    <Button size="icon" variant="destructive">
+                                        <Trash2 className="h-4 w-4" />
+                                        <span className="sr-only">Eliminar</span>
+                                    </Button>
+                                    <Button asChild size="icon" variant="default">
+                                        <Link href={`/subjects/assign/${modality.id}`}>
+                                            <Book className="h-4 w-4" />
+                                            <span className="sr-only">Gestionar Materias</span>
+                                        </Link>
+                                    </Button>
+                                </div>
+                              )}
+                          </div>
+                      </CardHeader>
+                      <CardContent className="flex flex-col flex-grow pb-2">
+                          {renderSubjectTabs(modality, key)}
+                      </CardContent>
+                  </Card>
+              )
+          }) : (
+              <div className="md:col-span-2 flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
+                  <h3 className="text-lg font-semibold text-white">No hay planes de estudio</h3>
+                  <p className="text-muted-foreground mt-2">
+                      Aún no se han creado planes de estudio para esta carrera. <br/>
+                      {user?.rol === 'administrador' && `Usa el botón "Crear Plan de Estudio" para empezar.`}
+                  </p>
+              </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
