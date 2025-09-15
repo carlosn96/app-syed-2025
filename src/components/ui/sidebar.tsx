@@ -108,11 +108,7 @@ const SidebarProvider = React.forwardRef<
             ref={ref}
             data-layout="sidebar"
             data-state={state}
-            className={cn(
-              "grid transition-all duration-300 ease-in-out",
-              !isMobile && (open ? "grid-cols-[280px_1fr]" : "grid-cols-[80px_1fr]"),
-              className
-            )}
+            className={className}
             style={style}
             {...props}
           >
@@ -160,7 +156,7 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, openMobile, setOpenMobile, state } = useSidebar()
+    const { isMobile, openMobile, setOpenMobile, state, open } = useSidebar()
     const isCollapsed = state === 'collapsed';
 
     const renderContent = () => (
@@ -203,7 +199,8 @@ const Sidebar = React.forwardRef<
         data-sidebar="sidebar"
         data-state={state}
         className={cn(
-          "peer z-10 hidden md:flex flex-col text-sidebar-foreground sidebar-glass",
+          "peer z-10 hidden md:flex flex-col text-sidebar-foreground sidebar-glass transition-all duration-300 ease-in-out",
+          open ? "w-[280px]" : "w-[80px]",
           className
         )}
         {...props}
