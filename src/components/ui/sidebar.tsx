@@ -248,12 +248,11 @@ const SidebarHeader = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-  const { state } = useSidebar()
   return (
     <div
       ref={ref}
       data-sidebar="header"
-      className={cn("flex h-24 items-center p-4", state === 'collapsed' && 'justify-center', className)}
+      className={cn("flex h-24 items-center justify-center p-4", className)}
       {...props}
     />
   )
