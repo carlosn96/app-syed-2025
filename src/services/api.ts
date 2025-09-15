@@ -1,5 +1,6 @@
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric } from '@/lib/modelos';
+
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -43,7 +44,7 @@ export const getPlanteles = async (): Promise<Plantel[]> => {
         id: item.id_plantel,
         name: item.nombre,
         location: item.ubicacion,
-        director: item.director || "Director no asignado"
+        director: "Director no asignado" // API does not provide director yet
     }));
 };
 export const createPlantel = (data: Omit<Plantel, 'id'>): Promise<Plantel> => apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
@@ -52,8 +53,22 @@ export const updatePlantel = (id: number, data: Partial<Omit<Plantel, 'id'>>): P
 export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles/${id}`, { method: 'DELETE' });
 
 // Career and Subject Management
-export const getCareers = async (): Promise<Career[]> => {
-    console.warn("getCareers is using mock data. Implement API endpoint.");
+export const getCareers = async (): Promise<CareerSummary[]> => {
+    const data = await apiFetch('/carreras');
+    return data.map((item: any) => ({
+        id: item.id_carrera,
+        name: item.carrera,
+        coordinator: item.coordinador,
+        totalMaterias: item.total_materias,
+        totalPlanteles: item.total_planteles,
+        totalModalidades: item.total_modalidades,
+    }));
+};
+
+export const getCareerModalities = async (): Promise<Career[]> => {
+    // This function might need a more specific endpoint, e.g., /carreras/modalities
+    // For now, it's a placeholder.
+    console.warn("getCareerModalities is using mock data. Implement API endpoint.");
     return Promise.resolve([
         { id: 1, name: 'Ingeniería en Computación', modality: 'INCO', campus: 'Reynosa', semesters: 9, coordinator: 'Sofía Gómez Díaz' },
         { id: 2, name: 'Licenciatura en Administración', modality: 'LAET', campus: 'Reynosa', semesters: 8, coordinator: 'Sofía Gómez Díaz' },
@@ -62,13 +77,14 @@ export const getCareers = async (): Promise<Career[]> => {
         { id: 5, name: 'Licenciatura en Administración', modality: 'LAET-M', campus: 'Matamoros', semesters: 8, coordinator: 'Sofía Gómez Díaz' },
     ]);
 };
+
 export const createCareer = (data: any): Promise<Career> => {
     console.warn("createCareer is using mock implementation.");
     return Promise.resolve({ ...data, id: Date.now() });
 }
 
 export const getSubjects = async (): Promise<Subject[]> => {
-    console.warn("getSubjects is using mock data. Implement API endpoint.");
+    console.warn("getSubjects is using mock data. Implement API endpoint for /materias.");
     return Promise.resolve([
         { id: 1, name: 'Cálculo Diferencial', career: 'Ingeniería en Computación', semester: 1, modality: 'INCO' },
         { id: 2, name: 'Programación Orientada a Objetos', career: 'Ingeniería en Computación', semester: 2, modality: 'INCO' },
@@ -185,3 +201,5 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
         { id: 3, title: "Estrategias de Enseñanza", type: "checkbox", category: "No Contable", criteria: [ { id: "3_1", text: "Utiliza diversas técnicas didácticas." }] },
     ]);
 };
+
+    

@@ -1,4 +1,5 @@
 
+
 export interface User {
   id: number;
   nombre: string;
@@ -74,6 +75,15 @@ export interface Career {
   campus: string;
   semesters: number;
   coordinator: string;
+}
+
+export interface CareerSummary {
+  id: number;
+  name: string;
+  coordinator: string | null;
+  totalMaterias: number;
+  totalPlanteles: number;
+  totalModalidades: number;
 }
 
 export interface Subject {
@@ -180,3 +190,5 @@ export interface EvaluationPeriod {
   endDate: Date | null;
   careers: string[];
 }
+
+    
