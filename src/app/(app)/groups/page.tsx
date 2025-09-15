@@ -116,11 +116,11 @@ export default function GroupsPage() {
             <div className="md:hidden flex flex-col gap-4">
               {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 w-full" />)}
             </div>
-            <Card className="hidden md:block">
+            <Card className="hidden md:block rounded-xl">
               <CardHeader>
                 <Skeleton className="h-6 w-1/4" />
                 <Skeleton className="h-4 w-1/2" />
-              </Header>
+              </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <Skeleton className="h-12 w-full" />
