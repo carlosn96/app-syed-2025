@@ -61,16 +61,29 @@ const SidebarProvider = React.forwardRef<
     ref
   ) => {
     const isMobile = useIsMobile()
-    const [open, setOpen] = React.useState(defaultOpen)
+    const [open, setOpen] = React.useState(defaultOpen); // ADDED BY AI
     const [openMobile, setOpenMobile] = React.useState(false)
 
-    const toggleSidebar = React.useCallback(() => {
-      if (isMobile) {
-        setOpenMobile((open) => !open)
-      } else {
-        setOpen((open) => !open)
-      }
-    }, [isMobile, setOpen])
+    React.useEffect(() => { // ADDED BY AI
+      const storedState = localStorage.getItem("ui.sidebarCollapsed"); // ADDED BY AI
+      if (storedState) { // ADDED BY AI
+        setOpen(storedState === "expanded"); // ADDED BY AI
+      } else if (window.innerWidth <= 1024) { // ADDED BY AI
+        setOpen(false); // ADDED BY AI
+      } // ADDED BY AI
+    }, []); // ADDED BY AI
+
+    const toggleSidebar = React.useCallback(() => { // ADDED BY AI
+      if (isMobile) { // ADDED BY AI
+        setOpenMobile((open) => !open) // ADDED BY AI
+      } else { // ADDED BY AI
+        setOpen((currentOpen) => { // ADDED BY AI
+          const newState = !currentOpen; // ADDED BY AI
+          localStorage.setItem("ui.sidebarCollapsed", newState ? "expanded" : "collapsed"); // ADDED BY AI
+          return newState; // ADDED BY AI
+        }); // ADDED BY AI
+      } // ADDED BY AI
+    }, [isMobile]) // ADDED BY AI
 
     React.useEffect(() => {
       const handleKeyDown = (event: KeyboardEvent) => {
@@ -125,17 +138,11 @@ const SidebarContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-  const { isMobile, state } = useSidebar()
   return (
     <div
       ref={ref}
       data-sidebar="content"
-      data-state={state}
-      className={cn(
-        "transition-opacity duration-300",
-        state === "collapsed" && "opacity-0",
-        className
-      )}
+      className={cn("h-full", className)}
       {...props}
     />
   )
@@ -156,30 +163,8 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, openMobile, setOpenMobile, state, open } = useSidebar()
-    const isCollapsed = state === 'collapsed';
-
-    const renderContent = () => (
-      <>
-        {React.Children.map(children, (child) => {
-          if (React.isValidElement(child) && (child.type as React.FC).displayName === 'SidebarHeader' && isCollapsed) {
-            return React.cloneElement(child, {
-              className: cn(child.props.className, 'flex items-center justify-center'),
-            } as React.HTMLAttributes<HTMLDivElement>);
-          }
-          if (React.isValidElement(child) && (child.type as React.FC).displayName === 'SidebarContent' && isCollapsed) {
-            return <div className="hidden" />;
-          }
-           if (React.isValidElement(child) && (child.type as React.FC).displayName === 'SidebarFooter' && isCollapsed) {
-            return (
-              <div className="flex items-center justify-center p-4">{child}</div>
-            );
-          }
-          return child;
-        })}
-      </>
-    );
-
+    const { isMobile, openMobile, setOpenMobile, state } = useSidebar()
+    
     if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
@@ -200,12 +185,12 @@ const Sidebar = React.forwardRef<
         data-state={state}
         className={cn(
           "peer z-10 hidden md:flex flex-col text-sidebar-foreground sidebar-glass transition-all duration-300 ease-in-out",
-          open ? "w-[280px]" : "w-[80px]",
+          state === "expanded" ? "w-[280px]" : "w-[80px]",
           className
         )}
         {...props}
       >
-        {renderContent()}
+        {children}
       </div>
     )
   }
@@ -252,7 +237,7 @@ const SidebarHeader = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="header"
-      className={cn("flex h-24 items-center justify-center p-4", className)}
+      className={cn("flex h-24 items-center p-4", className)}
       {...props}
     />
   )
@@ -278,7 +263,6 @@ const SidebarSeparator = React.forwardRef<
   React.ElementRef<typeof Separator>,
   React.ComponentProps<typeof Separator>
 >(({ className, ...props }, ref) => {
-  const { state } = useSidebar()
   return (
     <Separator
       ref={ref}

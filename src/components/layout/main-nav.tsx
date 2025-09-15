@@ -43,7 +43,7 @@ export function MainNav() {
   const pathname = usePathname()
   const { user } = useAuth()
   const { setOpenMobile, state } = useSidebar();
-  const isCollapsed = state === 'collapsed';
+  const isCollapsed = state === 'collapsed'; // ADDED BY AI
 
   const links = allLinks.filter(link => user && link.roles.includes(user.rol));
 
@@ -62,7 +62,7 @@ export function MainNav() {
             >
               <Link href={link.href} className="gap-3">
                 <Icon className="size-5 shrink-0" />
-                <span className={cn("transition-opacity duration-200", isCollapsed && "opacity-0 hidden")}>{link.label}</span>
+                <span className={cn("transition-all duration-200", isCollapsed && "opacity-0 w-0")}>{link.label}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
