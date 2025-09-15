@@ -267,7 +267,7 @@ const SidebarFooter = React.forwardRef<
         <div
             ref={ref}
             data-sidebar="footer"
-            className={cn("flex flex-col p-4", className)}
+            className={cn("flex flex-col items-center p-4", className)}
             {...props}
         />
     )
