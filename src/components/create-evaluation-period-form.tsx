@@ -23,10 +23,11 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { careers, evaluationPeriods } from "@/lib/data"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Checkbox } from "./ui/checkbox"
 import { ScrollArea } from "./ui/scroll-area"
+import { getCareers, createEvaluationPeriod } from "@/services/api"
+import { Career } from "@/lib/modelos"
 
 const evaluationPeriodSchema = z.object({
   name: z.string().min(1, "El nombre del periodo es requerido."),
@@ -47,28 +48,24 @@ const evaluationPeriodSchema = z.object({
 
 type EvaluationPeriodFormValues = z.infer<typeof evaluationPeriodSchema>;
 
-const uniqueCareerNames = [...new Set(careers.map(item => item.name))];
-
-const addEvaluationPeriod = (data: EvaluationPeriodFormValues) => {
-    const newId = Math.max(...evaluationPeriods.map(p => p.id), 0) + 1;
-    const newPeriod = {
-        id: newId,
-        name: data.name,
-        startDate: data.startDate,
-        endDate: data.endDate,
-        careers: data.careerNames,
-    };
-    evaluationPeriods.push(newPeriod);
-    evaluationPeriods.sort((a,b) => b.startDate.getTime() - a.startDate.getTime());
-    console.log("Periodo de evaluación creado:", newPeriod);
-}
-
 export function CreateEvaluationPeriodForm({
   onSuccess,
 }: {
   onSuccess?: () => void
 }) {
   const { toast } = useToast()
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [careers, setCareers] = useState<Career[]>([]);
+  
+  const uniqueCareerNames = useMemo(() => [...new Set(careers.map(item => item.name))], [careers]);
+
+  useEffect(() => {
+    const fetchCareers = async () => {
+      const careersData = await getCareers();
+      setCareers(careersData);
+    };
+    fetchCareers();
+  }, []);
 
   const form = useForm<EvaluationPeriodFormValues>({
     resolver: zodResolver(evaluationPeriodSchema),
@@ -89,9 +86,10 @@ export function CreateEvaluationPeriodForm({
     }
   };
 
-  function onSubmit(data: EvaluationPeriodFormValues) {
+  async function onSubmit(data: EvaluationPeriodFormValues) {
+    setIsSubmitting(true);
     try {
-        addEvaluationPeriod(data);
+        await createEvaluationPeriod(data);
         toast({
             title: "Periodo de Evaluación Creado",
             description: `El periodo "${data.name}" ha sido agendado.`,
@@ -106,6 +104,8 @@ export function CreateEvaluationPeriodForm({
                 description: error.message,
             });
         }
+    } finally {
+        setIsSubmitting(false);
     }
   }
 
@@ -267,8 +267,8 @@ export function CreateEvaluationPeriodForm({
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
-          Crear Periodo
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Creando...' : 'Crear Periodo'}
         </Button>
       </form>
     </Form>

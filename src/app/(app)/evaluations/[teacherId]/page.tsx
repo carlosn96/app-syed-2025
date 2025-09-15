@@ -5,9 +5,10 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useParams, useRouter } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { teachers, evaluations } from '@/lib/data';
+import { Teacher } from '@/lib/modelos';
+import { getTeachers, createEvaluation } from '@/services/api';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -22,8 +23,8 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Star } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const evaluationOptions = [
@@ -61,8 +62,25 @@ export default function StudentEvaluationPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const teacherId = Number(params.teacherId);
+  
+  const [teacher, setTeacher] = useState<Teacher | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const teacher = useMemo(() => teachers.find(t => t.id === teacherId), [teacherId]);
+  useEffect(() => {
+    const fetchTeacher = async () => {
+        setIsLoading(true);
+        try {
+            const allTeachers = await getTeachers();
+            const currentTeacher = allTeachers.find(t => t.id === teacherId) || null;
+            setTeacher(currentTeacher);
+        } catch (error) {
+            console.error("Failed to fetch teacher", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchTeacher();
+  }, [teacherId]);
 
   const form = useForm<EvaluationFormValues>({
     resolver: zodResolver(evaluationSchema),
@@ -70,7 +88,7 @@ export default function StudentEvaluationPage() {
   
   const { control, handleSubmit } = form;
 
-  const onSubmit = (data: EvaluationFormValues) => {
+  const onSubmit = async (data: EvaluationFormValues) => {
     if (!user || !teacher) return;
     
     const clarityScore = ratingMap[data.clarity];
@@ -79,12 +97,10 @@ export default function StudentEvaluationPage() {
     const knowledgeScore = ratingMap[data.knowledge];
 
     const newEvaluation = {
-        id: Math.max(...evaluations.map(e => e.id), 0) + 1,
-        student: "Alumno Anónimo",
+        student: "Alumno Anónimo", // In a real app, this would come from the user context
         teacherName: teacher.name,
         groupName: user.grupo || "Desconocido",
         feedback: data.feedback,
-        date: new Date().toISOString(),
         overallRating: Math.round((clarityScore + engagementScore + punctualityScore + knowledgeScore) / 4),
         ratings: {
             clarity: data.clarity,
@@ -94,16 +110,47 @@ export default function StudentEvaluationPage() {
         }
     };
 
-    evaluations.push(newEvaluation);
-    console.log("Nueva evaluación guardada:", newEvaluation);
-    
-    toast({
-        title: "Evaluación Enviada",
-        description: `Gracias por evaluar a ${teacher.name}.`,
-    });
-    
-    router.push('/evaluations');
+    try {
+        await createEvaluation(newEvaluation);
+        toast({
+            title: "Evaluación Enviada",
+            description: `Gracias por evaluar a ${teacher.name}.`,
+        });
+        router.push('/evaluations');
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Error al enviar",
+            description: "No se pudo guardar la evaluación. Inténtalo de nuevo."
+        })
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-8">
+        <Card className="rounded-xl">
+          <CardHeader>
+            <Skeleton className="h-7 w-1/2 mb-2" />
+            <Skeleton className="h-4 w-3/4" />
+          </CardHeader>
+          <CardContent className="space-y-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i}>
+                <Skeleton className="h-6 w-1/3 mb-4" />
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {Array.from({ length: 5 }).map((_, j) => <Skeleton key={j} className="h-6 w-24" />)}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+          <CardFooter>
+            <Skeleton className="h-10 w-full" />
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   if (!teacher) {
     return <div>Docente no encontrado</div>;

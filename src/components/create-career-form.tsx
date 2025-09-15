@@ -23,9 +23,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { careers, planteles, users } from "@/lib/data"
+import { createCareer, getPlanteles, getUsers } from "@/services/api"
 import { Checkbox } from "./ui/checkbox"
 import { ScrollArea } from "./ui/scroll-area"
+import { useState, useEffect } from "react"
+import { Plantel, User } from "@/lib/modelos"
 
 const createCareerSchema = z.object({
   name: z.string().min(1, "El nombre de la carrera es requerido."),
@@ -37,33 +39,28 @@ const createCareerSchema = z.object({
 
 type CreateCareerFormValues = z.infer<typeof createCareerSchema>;
 
-const coordinators = users.filter(u => u.rol === 'coordinator');
-
 interface CreateCareerFormProps {
   onSuccess?: () => void;
   careerName?: string;
 }
 
-// This is a mock function, in a real app this would be an API call
-const addCareer = (data: CreateCareerFormValues) => {
-    // For simplicity, we add a default modality. This can be edited later.
-    data.campuses.forEach(campus => {
-        const newId = Math.max(...careers.map(c => c.id), 0) + 1;
-        const newCareer = {
-            id: newId,
-            name: data.name,
-            modality: "Nuevo Plan",
-            campus: campus,
-            coordinator: data.coordinator === 'unassigned' ? "No asignado" : data.coordinator || "No asignado",
-            semesters: 1, // Default value, can be edited later
-        };
-        careers.push(newCareer);
-        console.log("Carrera creada:", newCareer);
-    })
-};
-
 export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProps) {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [coordinators, setCoordinators] = useState<User[]>([]);
+  const [planteles, setPlanteles] = useState<Plantel[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+        const [usersData, plantelesData] = await Promise.all([
+            getUsers(),
+            getPlanteles()
+        ]);
+        setCoordinators(usersData.filter(u => u.rol === 'coordinador'));
+        setPlanteles(plantelesData);
+    };
+    fetchData();
+  }, []);
 
   const form = useForm<CreateCareerFormValues>({
     resolver: zodResolver(createCareerSchema),
@@ -74,9 +71,20 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
     },
   });
 
-  const onSubmit = (data: CreateCareerFormValues) => {
+  const onSubmit = async (data: CreateCareerFormValues) => {
+    setIsSubmitting(true);
     try {
-      addCareer(data);
+        for (const campus of data.campuses) {
+            const careerData = {
+                name: data.name,
+                modality: "Nuevo Plan",
+                campus: campus,
+                coordinator: data.coordinator === 'unassigned' ? "No asignado" : data.coordinator || "No asignado",
+                semesters: 1, 
+            };
+            await createCareer(careerData);
+        }
+      
       toast({
         title: "Operación Exitosa",
         description: `La carrera ${data.name} ha sido creada en los planteles seleccionados. Ahora puedes configurar sus planes de estudio.`,
@@ -91,6 +99,8 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
             description: error.message,
         });
       }
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -187,7 +197,9 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">{careerName ? 'Crear Plan de Estudio' : 'Crear Carrera'}</Button>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Creando...' : (careerName ? 'Crear Plan de Estudio' : 'Crear Carrera')}
+        </Button>
       </form>
     </Form>
   )

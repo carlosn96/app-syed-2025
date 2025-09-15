@@ -16,8 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { schedules, teachers, groups as allGroups, subjects, careers as allCareers } from "@/lib/data"
-import { Group } from "@/lib/modelos"
+import { Group, Schedule, Subject, Teacher, Career } from "@/lib/modelos"
 import {
   Select,
   SelectContent,
@@ -27,6 +26,8 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/context/auth-context"
+import { getSchedules, getTeachers, getGroups, getSubjects, getCareers } from "@/services/api"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const daysOfWeek = [
   "Lunes",
@@ -40,11 +41,45 @@ export default function SchedulesPage() {
   const { user } = useAuth()
   const [filterType, setFilterType] = useState("group")
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null)
+  
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [allGroups, setAllGroups] = useState<Group[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [allCareers, setAllCareers] = useState<Career[]>([]);
 
-  const [availableGroups, setAvailableGroups] = useState<Group[]>(allGroups);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [availableGroups, setAvailableGroups] = useState<Group[]>([]);
   const [availableCareers, setAvailableCareers] = useState<string[]>([]);
   
-  const uniqueCareerNames = useMemo(() => [...new Set(allCareers.map(c => c.name))], []);
+  const uniqueCareerNames = useMemo(() => [...new Set(allCareers.map(c => c.name))], [allCareers]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [schedulesData, teachersData, groupsData, subjectsData, careersData] = await Promise.all([
+          getSchedules(),
+          getTeachers(),
+          getGroups(),
+          getSubjects(),
+          getCareers()
+        ]);
+        setSchedules(schedulesData);
+        setTeachers(teachersData);
+        setAllGroups(groupsData);
+        setSubjects(subjectsData);
+        setAllCareers(careersData);
+      } catch (err: any) {
+        setError(err.message || 'Error al cargar los horarios');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
 
   useEffect(() => {
@@ -62,7 +97,7 @@ export default function SchedulesPage() {
         setAvailableGroups(allGroups);
         setAvailableCareers(uniqueCareerNames);
     }
-  }, [user, uniqueCareerNames]);
+  }, [user, schedules, allGroups, uniqueCareerNames]);
 
 
   const getSchedulesForDay = (day: string) => {
@@ -199,7 +234,19 @@ export default function SchedulesPage() {
             </div>
         )}
       </div>
+      
+      {error && <p className="text-destructive text-center">{error}</p>}
 
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-6">
+            {Array.from({length: 5}).map((_, i) => (
+                <Card key={i}>
+                    <CardHeader><Skeleton className="h-6 w-1/4" /></CardHeader>
+                    <CardContent><Skeleton className="h-24 w-full" /></CardContent>
+                </Card>
+            ))}
+        </div>
+      ) : (
       <div className="grid grid-cols-1 gap-6">
         {daysOfWeek.map((day) => {
           const dailySchedules = getSchedulesForDay(day);
@@ -255,6 +302,7 @@ export default function SchedulesPage() {
           );
         })}
       </div>
+      )}
     </div>
   )
 }

@@ -15,8 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { subjects } from "@/lib/data"
-import { useEffect } from "react"
+import { createSubject } from "@/services/api"
+import { useEffect, useState } from "react"
 
 const createSubjectSchema = z.object({
   name: z.string().min(1, "El nombre de la materia es requerido."),
@@ -32,22 +32,10 @@ interface CreateSubjectFormProps {
   semester?: number | null;
 }
 
-// This is a mock function, in a real app this would be an API call
-const addSubject = (data: CreateSubjectFormValues, careerName?: string, modalityName?: string) => {
-    const newId = Math.max(...subjects.map(s => s.id), 0) + 1;
-    const newSubject = {
-        id: newId,
-        name: data.name,
-        semester: data.semester,
-        career: careerName || "Sin Asignar",
-        modality: modalityName || "Sin Asignar"
-    };
-    subjects.push(newSubject);
-    console.log("Materia creada:", newSubject);
-};
 
 export function CreateSubjectForm({ onSuccess, careerName, semester, modalityName }: CreateSubjectFormProps) {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateSubjectFormValues>({
     resolver: zodResolver(createSubjectSchema),
@@ -63,9 +51,15 @@ export function CreateSubjectForm({ onSuccess, careerName, semester, modalityNam
     }
   }, [semester, form]);
 
-  const onSubmit = (data: CreateSubjectFormValues) => {
+  const onSubmit = async (data: CreateSubjectFormValues) => {
+    setIsSubmitting(true);
+    const subjectData = {
+        ...data,
+        career: careerName || "Sin Asignar",
+        modality: modalityName || "Sin Asignar"
+    };
     try {
-      addSubject(data, careerName, modalityName);
+      await createSubject(subjectData);
       toast({
         title: "Materia Creada",
         description: `La materia ${data.name} ha sido creada con éxito.`,
@@ -80,6 +74,8 @@ export function CreateSubjectForm({ onSuccess, careerName, semester, modalityNam
             description: error.message,
         });
       }
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -112,7 +108,9 @@ export function CreateSubjectForm({ onSuccess, careerName, semester, modalityNam
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">Crear Materia</Button>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Creando...' : 'Crear Materia'}
+        </Button>
       </form>
     </Form>
   )

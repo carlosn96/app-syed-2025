@@ -2,9 +2,8 @@
 "use client"
 
 import { useParams } from 'next/navigation'
-import { useMemo } from 'react'
-import { supervisions, supervisionRubrics } from '@/lib/data'
-import { Supervision, EvaluationResult } from '@/lib/modelos'
+import { useMemo, useState, useEffect } from 'react'
+import { Supervision, EvaluationResult, SupervisionRubric } from '@/lib/modelos'
 import {
   Card,
   CardContent,
@@ -15,6 +14,8 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { getSupervisions, getSupervisionRubrics } from '@/services/api'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const getScoreColor = (score: number) => {
     if (score < 60) return 'bg-destructive/80';
@@ -26,23 +27,48 @@ export default function ViewSupervisionPage() {
     const params = useParams()
     const supervisionId = Number(params.supervisionId)
     
-    const supervisionData = useMemo(() => {
-        const supervision = supervisions.find(s => s.id === supervisionId) as Supervision & { evaluationData?: EvaluationResult };
-        if (!supervision) return null;
-        
-        // This is a mock: in a real app, you would fetch the evaluation data from your backend
-        // For now, we'll try to find it in the supervisions object if it was mocked there.
-        const evaluationData = supervision.evaluationData || null;
+    const [supervisionData, setSupervisionData] = useState<{ supervision: Supervision; evaluationData: EvaluationResult; rubrics: SupervisionRubric[] } | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-        return { supervision, evaluationData };
-    }, [supervisionId])
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsLoading(true);
+        try {
+          const allSupervisions = await getSupervisions();
+          const rubrics = await getSupervisionRubrics();
+          const supervision = allSupervisions.find(s => s.id === supervisionId);
+          if (!supervision) {
+            throw new Error("Supervisión no encontrada");
+          }
+          // Assuming evaluationData is part of the supervision object from API
+          const evaluationData = supervision.evaluationData || {}; 
+          setSupervisionData({ supervision, evaluationData, rubrics });
+        } catch(err: any) {
+          setError(err.message || "Error al cargar los datos de la supervisión");
+        } finally {
+          setIsLoading(false);
+        }
+      }
+      fetchData();
+    }, [supervisionId]);
 
-
-    if (!supervisionData || !supervisionData.supervision) {
-        return <div>Supervisión no encontrada.</div>
+    if (isLoading) {
+        return (
+          <div className="flex flex-col gap-8">
+            <Card className="rounded-xl">
+              <CardHeader><Skeleton className="h-8 w-1/2" /></CardHeader>
+              <CardContent><Skeleton className="h-96 w-full" /></CardContent>
+            </Card>
+          </div>
+        );
     }
 
-    const { supervision, evaluationData } = supervisionData;
+    if (error || !supervisionData) {
+        return <p className="text-destructive text-center">{error || "No se encontraron datos."}</p>
+    }
+
+    const { supervision, evaluationData, rubrics } = supervisionData;
 
     if (supervision.status !== 'Completada' || !evaluationData) {
         return (
@@ -87,7 +113,7 @@ export default function ViewSupervisionPage() {
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-8">
-                    {supervisionRubrics.map(rubric => {
+                    {rubrics.map(rubric => {
                         const rubricResult = evaluationData[`rubric_${rubric.id}`];
                         if (!rubricResult) return null;
 

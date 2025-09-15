@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import {
   Table,
   TableBody,
@@ -28,8 +28,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CreateEvaluationPeriodForm } from "@/components/create-evaluation-period-form"
-import { evaluationPeriods, schedules, teachers as allTeachers } from "@/lib/data"
-import { EvaluationPeriod } from "@/lib/modelos"
+import { EvaluationPeriod, Teacher, Schedule } from "@/lib/modelos"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
@@ -39,18 +38,47 @@ import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
 import { Pencil, FilePenLine } from "lucide-react"
 import Link from "next/link"
+import { getEvaluationPeriods, getSchedules, getTeachers } from "@/services/api"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function EvaluationsPage() {
   const { user } = useAuth()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [date, setDate] = useState<Date | undefined>(new Date())
 
+  const [evaluationPeriods, setEvaluationPeriods] = useState<EvaluationPeriod[]>([]);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [allTeachers, setAllTeachers] = useState<Teacher[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+        const [periodsData, schedulesData, teachersData] = await Promise.all([
+            getEvaluationPeriods(),
+            getSchedules(),
+            getTeachers()
+        ]);
+        setEvaluationPeriods(periodsData.map(p => ({ ...p, startDate: new Date(p.startDate!), endDate: new Date(p.endDate!) })));
+        setSchedules(schedulesData);
+        setAllTeachers(teachersData);
+    } catch(err: any) {
+        setError(err.message || 'Error al cargar los datos');
+    } finally {
+        setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const periodsByDate = useMemo(() => {
     const map = new Map<string, EvaluationPeriod[]>()
     evaluationPeriods.forEach(p => {
-      let day = new Date(p.startDate);
-      // Ensure we don't loop infinitely if endDate is far in the future
-      let endDate = new Date(p.endDate);
+      let day = new Date(p.startDate!);
+      let endDate = new Date(p.endDate!);
       let limit = 0;
       while (day <= endDate && limit < 365) {
         const dateKey = format(day, "yyyy-MM-dd");
@@ -65,23 +93,23 @@ export default function EvaluationsPage() {
       }
     });
     return map;
-  }, []);
+  }, [evaluationPeriods]);
 
 
   const upcomingPeriods = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return evaluationPeriods
-        .filter(p => new Date(p.endDate) >= today)
-        .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+        .filter(p => new Date(p.endDate!) >= today)
+        .sort((a,b) => new Date(a.startDate!).getTime() - new Date(b.startDate!).getTime())
         .slice(0, 5);
-  }, []);
+  }, [evaluationPeriods]);
 
   const getStatus = (period: EvaluationPeriod) => {
     const today = new Date();
     today.setHours(0,0,0,0);
-    const startDate = new Date(period.startDate);
-    const endDate = new Date(period.endDate);
+    const startDate = new Date(period.startDate!);
+    const endDate = new Date(period.endDate!);
     if (today < startDate) return { text: 'Programado', variant: 'warning' as const };
     if (today > endDate) return { text: 'Finalizado', variant: 'destructive' as const };
     return { text: 'Activo', variant: 'success' as const };
@@ -95,14 +123,17 @@ export default function EvaluationsPage() {
       const teacherIds = [...new Set(groupSchedules.map(s => s.teacherId))];
       
       return allTeachers.filter(t => teacherIds.includes(t.id));
-  }, [user]);
+  }, [user, schedules, allTeachers]);
 
   const activeEvaluationPeriod = useMemo(() => {
       const today = new Date();
-      return evaluationPeriods.find(p => today >= new Date(p.startDate) && today <= new Date(p.endDate));
-  }, []);
+      return evaluationPeriods.find(p => today >= new Date(p.startDate!) && today <= new Date(p.endDate!));
+  }, [evaluationPeriods]);
 
-
+  if (error) {
+    return <p className="text-destructive text-center">{error}</p>
+  }
+  
   if (user?.rol === 'alumno') {
     return (
         <div className="flex flex-col gap-8">
@@ -123,7 +154,11 @@ export default function EvaluationsPage() {
                     )}
                 </CardHeader>
                 <CardContent>
-                   {activeEvaluationPeriod ? (
+                   {isLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+                    </div>
+                   ) : activeEvaluationPeriod ? (
                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {studentTeachers.map(teacher => (
                             <Card key={teacher.id} className="bg-black/10">
@@ -171,13 +206,19 @@ export default function EvaluationsPage() {
                 </DialogDescription>
               </DialogHeader>
               <CreateEvaluationPeriodForm 
-                  onSuccess={() => setIsModalOpen(false)} 
+                  onSuccess={() => { setIsModalOpen(false); fetchData(); }} 
               />
             </DialogContent>
           </Dialog>
         )}
       </div>
-
+      
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2"><Skeleton className="h-[380px] w-full" /></div>
+            <div className="lg:col-span-1"><Skeleton className="h-[380px] w-full" /></div>
+        </div>
+      ) : (
        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
             <Card className="rounded-xl flex flex-col h-full">
@@ -209,14 +250,14 @@ export default function EvaluationsPage() {
                             {upcomingPeriods.map(p => (
                                 <li key={p.id} className="flex items-start gap-3">
                                     <div className="flex flex-col items-center justify-center p-2 bg-primary/20 rounded-md">
-                                        <span className="text-xs font-bold text-primary uppercase">{format(new Date(p.startDate), 'MMM', { locale: es })}</span>
-                                        <span className="text-lg font-bold text-white">{format(new Date(p.startDate), 'dd')}</span>
+                                        <span className="text-xs font-bold text-primary uppercase">{format(new Date(p.startDate!), 'MMM', { locale: es })}</span>
+                                        <span className="text-lg font-bold text-white">{format(new Date(p.startDate!), 'dd')}</span>
                                     </div>
                                     <div>
                                         <p className="font-semibold text-sm">{p.name}</p>
                                         <p className="text-xs text-muted-foreground">{p.careers.length} carreras</p>
                                         <p className="text-xs text-primary/80 font-mono">
-                                            {format(new Date(p.startDate), 'P')} - {format(new Date(p.endDate), 'P')}
+                                            {format(new Date(p.startDate!), 'P')} - {format(new Date(p.endDate!), 'P')}
                                         </p>
                                     </div>
                                 </li>
@@ -229,6 +270,7 @@ export default function EvaluationsPage() {
             </Card>
         </div>
       </div>
+      )}
 
       <Card className="rounded-xl">
             <CardHeader>
@@ -236,6 +278,9 @@ export default function EvaluationsPage() {
                 <CardDescription>Periodos de evaluación programados y finalizados.</CardDescription>
             </CardHeader>
             <CardContent>
+              {isLoading ? (
+                  <Skeleton className="h-40 w-full" />
+              ) : (
                 <ScrollArea className="h-auto max-h-[600px]">
                     <Table>
                         <TableHeader>
@@ -254,8 +299,8 @@ export default function EvaluationsPage() {
                                 return (
                                     <TableRow key={period.id}>
                                         <TableCell className="font-medium py-3">{period.name}</TableCell>
-                                        <TableCell className="py-3">{format(new Date(period.startDate), "P", { locale: es })}</TableCell>
-                                        <TableCell className="py-3">{format(new Date(period.endDate), "P", { locale: es })}</TableCell>
+                                        <TableCell className="py-3">{format(new Date(period.startDate!), "P", { locale: es })}</TableCell>
+                                        <TableCell className="py-3">{format(new Date(period.endDate!), "P", { locale: es })}</TableCell>
                                         <TableCell className="py-3">{period.careers.join(', ')}</TableCell>
                                         <TableCell className="py-3">
                                             <Badge variant={status.variant}>
@@ -276,6 +321,7 @@ export default function EvaluationsPage() {
                         </TableBody>
                     </Table>
                 </ScrollArea>
+              )}
             </CardContent>
         </Card>
     </div>

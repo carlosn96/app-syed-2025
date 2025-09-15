@@ -23,9 +23,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { groups, careers, users } from "@/lib/data"
 import { ScrollArea } from "./ui/scroll-area"
 import { Checkbox } from "./ui/checkbox"
+import { useState, useEffect } from "react"
+import { User, Career } from "@/lib/modelos"
+import { getCareers, getUsers, createGroup } from "@/services/api"
 
 const createGroupSchema = z.object({
   name: z.string().min(1, "El nombre del grupo es requerido."),
@@ -40,40 +42,25 @@ type CreateGroupFormValues = z.infer<typeof createGroupSchema>;
 
 const availableCycles = ["2024-A", "2024-B", "2025-A", "2025-B"];
 const availableTurnos = ["Matutino", "Vespertino"];
-const uniqueCareerNames = [...new Set(careers.map(c => c.name))];
-
-const studentUsers = users.filter(u => u.rol === 'student');
-
-// This is a mock function, in a real app this would be an API call
-const addGroup = (data: CreateGroupFormValues) => {
-    const newId = Math.max(...groups.map(g => g.id), 0) + 1;
-    const newGroup = {
-        id: newId,
-        name: data.name,
-        career: data.career,
-        semester: data.semester,
-        cycle: data.cycle,
-        turno: data.turno,
-        students: data.studentIds || [],
-    };
-    groups.push(newGroup);
-    
-    // In a real app, you would also update the `grupo` property of the user records.
-    if(data.studentIds) {
-        data.studentIds.forEach(studentId => {
-            const student = users.find(u => u.id === studentId);
-            if(student) {
-                student.grupo = data.name;
-                console.log(`Asignando grupo ${data.name} a alumno ${student.nombre}`);
-            }
-        });
-    }
-
-    console.log("Grupo creado:", newGroup);
-};
 
 export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [careers, setCareers] = useState<Career[]>([]);
+  const [studentUsers, setStudentUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+        const [careersData, usersData] = await Promise.all([
+            getCareers(),
+            getUsers()
+        ]);
+        const uniqueCareerNames = [...new Set(careersData.map(c => c.name))];
+        setCareers(uniqueCareerNames.map(name => ({ name } as Career))); // Simplified for the form
+        setStudentUsers(usersData.filter(u => u.rol === 'alumno'));
+    };
+    fetchData();
+  }, []);
 
   const form = useForm<CreateGroupFormValues>({
     resolver: zodResolver(createGroupSchema),
@@ -89,9 +76,10 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
   
   const selectedCycle = form.watch("cycle");
 
-  const onSubmit = (data: CreateGroupFormValues) => {
+  const onSubmit = async (data: CreateGroupFormValues) => {
+    setIsSubmitting(true);
     try {
-      addGroup(data);
+      await createGroup(data);
       toast({
         title: "Grupo Creado",
         description: `El grupo ${data.name} ha sido creado con éxito.`,
@@ -106,6 +94,8 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
             description: error.message,
         });
       }
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -186,9 +176,9 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {uniqueCareerNames.map((careerName) => (
-                    <SelectItem key={careerName} value={careerName}>
-                      {careerName}
+                  {careers.map((career) => (
+                    <SelectItem key={career.name} value={career.name}>
+                      {career.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -264,7 +254,9 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
           )}
         />
 
-        <Button type="submit" className="w-full">Crear Grupo</Button>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Creando...' : 'Crear Grupo'}
+        </Button>
       </form>
     </Form>
   )

@@ -22,7 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { supervisionRubrics } from "@/lib/data"
+// Mock API call - replace with actual API call
+const addRubric = (data: any) => new Promise((res) => setTimeout(() => res(data), 500));
 
 const createRubricSchema = z.object({
   title: z.string().min(1, "El título es requerido."),
@@ -32,19 +33,6 @@ const createRubricSchema = z.object({
 });
 
 type CreateRubricFormValues = z.infer<typeof createRubricSchema>;
-
-const addRubric = (data: CreateRubricFormValues) => {
-    const newId = Math.max(...supervisionRubrics.map(r => r.id), 0) + 1;
-    const newRubric = {
-        id: newId,
-        title: data.title,
-        category: data.category,
-        type: "checkbox",
-        criteria: [],
-    };
-    supervisionRubrics.push(newRubric);
-    console.log("Rúbrica creada:", newRubric);
-};
 
 export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
   const { toast } = useToast();
@@ -56,9 +44,9 @@ export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
     },
   });
 
-  const onSubmit = (data: CreateRubricFormValues) => {
+  const onSubmit = async (data: CreateRubricFormValues) => {
     try {
-      addRubric(data);
+      await addRubric({ ...data, type: "checkbox", criteria: [] });
       toast({
         title: "Rúbrica Creada",
         description: `La rúbrica "${data.title}" ha sido creada con éxito.`,

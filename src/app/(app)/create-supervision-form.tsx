@@ -26,13 +26,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { supervisions, subjects, users, careers, teachers as allTeachers, groups, schedules } from "@/lib/data"
-import { Subject, User, Group, Teacher, Schedule, Career } from "@/lib/modelos"
+import { Teacher, User, Career, Group, Schedule } from "@/lib/modelos"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useAuth } from "@/context/auth-context"
 import { Input } from "@/components/ui/input"
+import { getCareers, getSchedules, getUsers, getTeachers, getGroups, createSupervision } from "@/services/api"
 
 const createSupervisionSchema = z.object({
   coordinatorId: z.string().min(1, "Por favor, seleccione un coordinador."),
@@ -47,63 +47,10 @@ const createSupervisionSchema = z.object({
 
 type CreateSupervisionFormValues = z.infer<typeof createSupervisionSchema>;
 
-const addSupervision = (data: CreateSupervisionFormValues) => {
-    const newId = Math.max(...supervisions.map(s => s.id), 0) + 1;
-    const teacherName = allTeachers.find(t => t.id === parseInt(data.teacherId))?.name || "N/A";
-    const coordinator = users.find(u => u.id === parseInt(data.coordinatorId));
-    const coordinatorName = coordinator ? `${coordinator.nombre} ${coordinator.apellido_paterno}`.trim() : "N/A";
-
-    const newSupervision = {
-        id: newId,
-        teacher: teacherName,
-        career: data.careerName,
-        coordinator: coordinatorName,
-        date: data.date,
-        status: "Programada",
-        startTime: data.startTime,
-        endTime: data.endTime,
-    };
-    supervisions.push(newSupervision);
-    supervisions.sort((a,b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0));
-    console.log("Supervisión creada:", newSupervision);
-};
-
 interface CreateSupervisionFormProps {
   onSuccess?: () => void;
 }
 
-const getAvailableOptions = (coordinatorId?: string) => {
-    let availableTeachers: Teacher[] = [];
-    const teacherCareers: Record<string, string> = {};
-
-    const coordinatorUser = users.find(u => u.id === Number(coordinatorId));
-    if (coordinatorUser) {
-        const coordinatorName = `${coordinatorUser.nombre} ${coordinatorUser.apellido_paterno}`.trim();
-        const coordinatedCareers = careers.filter(c => c.coordinator === coordinatorName).map(c => c.name);
-        
-        const teacherIdsInCoordinatedCareers = new Set<number>();
-        
-        groups.forEach(group => {
-            if (coordinatedCareers.includes(group.career)) {
-                schedules.filter(s => s.groupId === group.id).forEach(schedule => {
-                    teacherIdsInCoordinatedCareers.add(schedule.teacherId);
-                });
-            }
-        });
-
-        availableTeachers = allTeachers.filter(t => teacherIdsInCoordinatedCareers.has(t.id));
-
-        availableTeachers.forEach(teacher => {
-            const teacherSchedules = schedules.filter(s => s.teacherId === teacher.id);
-            const teacherGroupIds = [...new Set(teacherSchedules.map(s => s.groupId))];
-            const teacherGroups = groups.filter(g => teacherGroupIds.includes(g.id));
-            const teacherCareerName = teacherGroups.length > 0 ? teacherGroups[0].career : "N/A";
-            teacherCareers[teacher.id] = teacherCareerName;
-        });
-    }
-
-    return { availableTeachers, teacherCareers };
-};
 
 const timeOptions = Array.from({ length: 15 }, (_, i) => {
     const hour = 7 + i;
@@ -115,11 +62,69 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
   const { toast } = useToast();
   const { user } = useAuth();
   
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [allCareers, setAllCareers] = useState<Career[]>([]);
+  const [allSchedules, setAllSchedules] = useState<Schedule[]>([]);
+  const [allTeachers, setAllTeachers] = useState<Teacher[]>([]);
+  const [allGroups, setAllGroups] = useState<Group[]>([]);
+  
   const [availableTeachers, setAvailableTeachers] = useState<Teacher[]>([]);
   const [teacherCareers, setTeacherCareers] = useState<Record<string, string>>({});
   
-  const coordinators = useMemo(() => users.filter(u => u.rol === 'coordinador'), []);
+  const coordinators = useMemo(() => allUsers.filter(u => u.rol === 'coordinador'), [allUsers]);
   const defaultCoordinator = user?.rol === 'coordinador' ? String(user.id) : "";
+
+  useEffect(() => {
+    const fetchData = async () => {
+        const [users, careers, schedules, teachers, groups] = await Promise.all([
+            getUsers(),
+            getCareers(),
+            getSchedules(),
+            getTeachers(),
+            getGroups()
+        ]);
+        setAllUsers(users);
+        setAllCareers(careers);
+        setAllSchedules(schedules);
+        setAllTeachers(teachers);
+        setAllGroups(groups);
+    }
+    fetchData();
+  }, []);
+
+  const getAvailableOptions = (coordinatorId?: string) => {
+    let availableTeachers: Teacher[] = [];
+    const teacherCareers: Record<string, string> = {};
+
+    const coordinatorUser = allUsers.find(u => u.id === Number(coordinatorId));
+    if (coordinatorUser) {
+        const coordinatorName = `${coordinatorUser.nombre} ${coordinatorUser.apellido_paterno}`.trim();
+        const coordinatedCareers = allCareers.filter(c => c.coordinator === coordinatorName).map(c => c.name);
+        
+        const teacherIdsInCoordinatedCareers = new Set<number>();
+        
+        allGroups.forEach(group => {
+            if (coordinatedCareers.includes(group.career)) {
+                allSchedules.filter(s => s.groupId === group.id).forEach(schedule => {
+                    teacherIdsInCoordinatedCareers.add(schedule.teacherId);
+                });
+            }
+        });
+
+        availableTeachers = allTeachers.filter(t => teacherIdsInCoordinatedCareers.has(t.id));
+
+        availableTeachers.forEach(teacher => {
+            const teacherSchedules = allSchedules.filter(s => s.teacherId === teacher.id);
+            const teacherGroupIds = [...new Set(teacherSchedules.map(s => s.groupId))];
+            const teacherGroups = allGroups.filter(g => teacherGroupIds.includes(g.id));
+            const teacherCareerName = teacherGroups.length > 0 ? teacherGroups[0].career : "N/A";
+            teacherCareers[String(teacher.id)] = teacherCareerName;
+        });
+    }
+
+    return { availableTeachers, teacherCareers };
+  };
 
   const form = useForm<CreateSupervisionFormValues>({
     resolver: zodResolver(createSupervisionSchema),
@@ -144,7 +149,7 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
     const { availableTeachers, teacherCareers } = getAvailableOptions(selectedCoordinatorId);
     setAvailableTeachers(availableTeachers);
     setTeacherCareers(teacherCareers);
-  }, [selectedCoordinatorId, form]);
+  }, [selectedCoordinatorId, form, allUsers, allCareers, allSchedules, allTeachers, allGroups]);
 
   useEffect(() => {
     if (selectedTeacherId && teacherCareers[selectedTeacherId]) {
@@ -155,9 +160,23 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
   }, [selectedTeacherId, teacherCareers, form]);
 
 
-  const onSubmit = (data: CreateSupervisionFormValues) => {
+  const onSubmit = async (data: CreateSupervisionFormValues) => {
+    setIsSubmitting(true);
+    const teacher = allTeachers.find(t => t.id === parseInt(data.teacherId));
+    const coordinator = allUsers.find(u => u.id === parseInt(data.coordinatorId));
+    
+    const submissionData = {
+      teacher: teacher?.name,
+      career: data.careerName,
+      coordinator: coordinator ? `${coordinator.nombre} ${coordinator.apellido_paterno}`.trim() : "N/A",
+      date: data.date,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      status: "Programada",
+    }
+
     try {
-      addSupervision(data);
+      await createSupervision(submissionData);
       toast({
         title: "Cita Agendada",
         description: `La supervisión para el ${format(data.date, "PPP", { locale: es })} ha sido agendada.`,
@@ -172,6 +191,8 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
             description: error.message,
         });
       }
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -333,7 +354,9 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
             />
         </div>
 
-        <Button type="submit" className="w-full">Agendar Cita</Button>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Agendando...' : 'Agendar Cita'}
+        </Button>
       </form>
     </Form>
   )

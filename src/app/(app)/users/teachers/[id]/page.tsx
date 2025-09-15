@@ -4,17 +4,9 @@
 import { useParams } from "next/navigation"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Dot } from "recharts"
 import { Star, ShieldCheck, BookUser, Library } from "lucide-react"
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 
-import {
-  users,
-  supervisions,
-  evaluations,
-  subjects as allSubjects,
-  schedules,
-  groups as allGroups,
-} from "@/lib/data"
-import { Evaluation } from "@/lib/modelos"
+import { Evaluation, User, Supervision, Schedule, Subject, Group } from "@/lib/modelos"
 import {
   Card,
   CardContent,
@@ -39,6 +31,8 @@ import { ProgressRing } from "@/components/ui/progress-ring"
 import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { getUsers, getSupervisions, getEvaluations, getSubjects, getSchedules, getGroups } from "@/services/api"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const getScoreColor = (score: number) => {
   if (score < 60) return 'hsl(var(--destructive))';
@@ -71,107 +65,163 @@ interface GroupEvaluationData {
   performanceData: { date: string; Calificación: number }[];
 }
 
+interface TeacherProfileData {
+  teacher: User;
+  teacherFullName: string;
+  teacherSupervisions: Supervision[];
+  teacherEvaluations: Evaluation[];
+  teacherSubjects: Subject[];
+  supervisionPerformanceData: { date: string; Calificación: number }[];
+  averageSupervisionScore: number;
+  averageEvaluationScore: number;
+  groupPerformance: GroupEvaluationData[];
+}
+
 
 export default function TeacherProfilePage() {
   const params = useParams();
   const teacherId = Number(params.id);
   const [activeTab, setActiveTab] = useState<'supervisions' | 'evaluations' | 'subjects'>('supervisions');
-  const isMobile = useIsMobile()
+  const isMobile = useIsMobile();
+  
+  const [teacherData, setTeacherData] = useState<TeacherProfileData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const teacherData = useMemo(() => {
-    const teacherUser = users.find(
-      (user) => user.id === teacherId && user.rol === "docente"
-    );
-    
-    if (!teacherUser) return null;
+  useEffect(() => {
+    const fetchData = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const [
+                allUsers,
+                allSupervisions,
+                allEvaluations,
+                allSubjects,
+                allSchedules,
+                allGroups,
+            ] = await Promise.all([
+                getUsers(),
+                getSupervisions(),
+                getEvaluations(),
+                getSubjects(),
+                getSchedules(),
+                getGroups(),
+            ]);
 
-    const teacherFullName = `${teacherUser.nombre} ${teacherUser.apellido_paterno} ${teacherUser.apellido_materno}`.trim()
-
-    const teacherSupervisions = supervisions.filter(
-      (s) => s.teacher === teacherFullName
-    );
-    const teacherEvaluations = evaluations.filter(
-      (e) => e.teacherName === teacherFullName
-    );
-    
-    const teacherSchedules = schedules.filter(s => s.teacherId === teacherUser.id);
-    const subjectIds = [...new Set(teacherSchedules.map(s => s.subjectId))];
-    const teacherSubjects = allSubjects.filter(s => subjectIds.includes(s.id));
-    
-    const completedSupervisions = teacherSupervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
-
-    const supervisionPerformanceData = completedSupervisions
-      .sort((a, b) => (a.date?.getTime() || 0) - (b.date?.getTime() || 0))
-      .map(s => ({
-        date: s.date ? format(s.date, "dd/MM/yy") : 'N/A',
-        Calificación: s.score,
-      }));
-
-    const averageSupervisionScore = completedSupervisions.length > 0 
-      ? Math.round(completedSupervisions.reduce((acc, s) => acc + s.score!, 0) / completedSupervisions.length)
-      : 0;
-
-    const averageEvaluationScore = teacherEvaluations.length > 0
-        ? Math.round(teacherEvaluations.reduce((acc, e) => acc + e.overallRating, 0) / teacherEvaluations.length)
-        : 0;
-
-    const evaluationsByGroup = teacherEvaluations.reduce((acc, evaluation) => {
-        const groupName = evaluation.groupName || 'Grupo Desconocido';
-        if (!acc[groupName]) {
-            acc[groupName] = [];
-        }
-        acc[groupName].push(evaluation);
-        return acc;
-    }, {} as Record<string, Evaluation[]>);
-
-
-    const groupPerformance: GroupEvaluationData[] = Object.entries(evaluationsByGroup).map(([groupName, groupEvaluations]) => {
-        const groupDetails = allGroups.find(g => g.name === groupName);
-        
-        const evaluationsByBatch = groupEvaluations.reduce((acc, ev) => {
-            const batchId = ev.evaluationBatchId || new Date(ev.date).toISOString().split('T')[0];
-            if (!acc[batchId]) {
-                acc[batchId] = { date: new Date(ev.date), ratings: [] };
+            const teacherUser = allUsers.find(user => user.id === teacherId && user.rol === "docente");
+            
+            if (!teacherUser) {
+              throw new Error("Docente no encontrado.");
             }
-            acc[batchId].ratings.push(ev.overallRating);
-            return acc;
-        }, {} as Record<string, { date: Date, ratings: number[] }>);
 
-        const performanceData = Object.values(evaluationsByBatch)
-            .sort((a, b) => a.date.getTime() - b.date.getTime())
-            .map(batch => ({
-                date: format(batch.date, "dd/MM/yy"),
-                Calificación: Math.round(batch.ratings.reduce((sum, r) => sum + r, 0) / batch.ratings.length),
-            }));
+            const teacherFullName = `${teacherUser.nombre} ${teacherUser.apellido_paterno} ${teacherUser.apellido_materno}`.trim();
 
-        const latestAverageRating = performanceData.length > 0 ? performanceData[performanceData.length - 1].Calificación : 0;
-        
-        return {
-            groupName,
-            careerName: groupDetails?.career || 'Carrera Desconocida',
-            latestAverageRating,
-            performanceData
-        };
-    });
+            const teacherSupervisions = allSupervisions.filter(s => s.teacher === teacherFullName);
+            const teacherEvaluations = allEvaluations.filter(e => e.teacherName === teacherFullName);
+            
+            const teacherSchedules = allSchedules.filter(s => s.teacherId === teacherUser.id);
+            const subjectIds = [...new Set(teacherSchedules.map(s => s.subjectId))];
+            const teacherSubjects = allSubjects.filter(s => subjectIds.includes(s.id));
+            
+            const completedSupervisions = teacherSupervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
 
+            const supervisionPerformanceData = completedSupervisions
+              .sort((a, b) => (new Date(a.date!).getTime() || 0) - (new Date(b.date!).getTime() || 0))
+              .map(s => ({
+                date: s.date ? format(new Date(s.date), "dd/MM/yy") : 'N/A',
+                Calificación: s.score!,
+              }));
 
-    return {
-      teacher: teacherUser,
-      teacherFullName,
-      teacherSupervisions,
-      teacherEvaluations,
-      teacherSubjects,
-      supervisionPerformanceData,
-      averageSupervisionScore,
-      averageEvaluationScore,
-      groupPerformance,
-    }
+            const averageSupervisionScore = completedSupervisions.length > 0 
+              ? Math.round(completedSupervisions.reduce((acc, s) => acc + s.score!, 0) / completedSupervisions.length)
+              : 0;
+
+            const averageEvaluationScore = teacherEvaluations.length > 0
+                ? Math.round(teacherEvaluations.reduce((acc, e) => acc + e.overallRating, 0) / teacherEvaluations.length)
+                : 0;
+
+            const evaluationsByGroup = teacherEvaluations.reduce((acc, evaluation) => {
+                const groupName = evaluation.groupName || 'Grupo Desconocido';
+                if (!acc[groupName]) {
+                    acc[groupName] = [];
+                }
+                acc[groupName].push(evaluation);
+                return acc;
+            }, {} as Record<string, Evaluation[]>);
+
+            const groupPerformance: GroupEvaluationData[] = Object.entries(evaluationsByGroup).map(([groupName, groupEvaluations]) => {
+                const groupDetails = allGroups.find(g => g.name === groupName);
+                
+                const evaluationsByBatch = groupEvaluations.reduce((acc, ev) => {
+                    const batchId = ev.evaluationBatchId || new Date(ev.date).toISOString().split('T')[0];
+                    if (!acc[batchId]) {
+                        acc[batchId] = { date: new Date(ev.date), ratings: [] };
+                    }
+                    acc[batchId].ratings.push(ev.overallRating);
+                    return acc;
+                }, {} as Record<string, { date: Date, ratings: number[] }>);
+
+                const performanceData = Object.values(evaluationsByBatch)
+                    .sort((a, b) => a.date.getTime() - b.date.getTime())
+                    .map(batch => ({
+                        date: format(batch.date, "dd/MM/yy"),
+                        Calificación: Math.round(batch.ratings.reduce((sum, r) => sum + r, 0) / batch.ratings.length),
+                    }));
+
+                const latestAverageRating = performanceData.length > 0 ? performanceData[performanceData.length - 1].Calificación : 0;
+                
+                return {
+                    groupName,
+                    careerName: groupDetails?.career || 'Carrera Desconocida',
+                    latestAverageRating,
+                    performanceData
+                };
+            });
+
+            setTeacherData({
+              teacher: teacherUser,
+              teacherFullName,
+              teacherSupervisions,
+              teacherEvaluations,
+              teacherSubjects,
+              supervisionPerformanceData,
+              averageSupervisionScore,
+              averageEvaluationScore,
+              groupPerformance,
+            });
+
+        } catch (err) {
+            setError((err as Error).message || "Error al cargar el perfil del docente.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    fetchData();
   }, [teacherId]);
 
-  if (!teacherData) {
+  if (isLoading) {
+      return (
+          <div className="flex flex-col gap-8">
+              <div className="flex items-center gap-4">
+                  <Skeleton className="h-20 w-20 rounded-full" />
+                  <div>
+                      <Skeleton className="h-8 w-64 mb-2" />
+                      <Skeleton className="h-4 w-48" />
+                      <Skeleton className="h-3 w-32 mt-2" />
+                  </div>
+              </div>
+              <Skeleton className="h-96 w-full" />
+              <Skeleton className="h-64 w-full" />
+          </div>
+      );
+  }
+
+  if (error || !teacherData) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p>Docente no encontrado.</p>
+        <p>{error || "Docente no encontrado."}</p>
       </div>
     )
   }
@@ -322,7 +372,7 @@ export default function TeacherProfilePage() {
                         </TableCell>
                         <TableCell>{supervision.coordinator}</TableCell>
                         <TableCell>
-                            {supervision.date ? format(supervision.date, "P", { locale: es }) : 'N/A'}
+                            {supervision.date ? format(new Date(supervision.date), "P", { locale: es }) : 'N/A'}
                         </TableCell>
                         <TableCell>
                             <Badge

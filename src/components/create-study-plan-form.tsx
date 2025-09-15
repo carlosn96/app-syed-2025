@@ -15,7 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { careers } from "@/lib/data"
+import { createCareer } from "@/services/api" // Assuming a similar function for study plans
+import { useState } from "react"
 
 const createStudyPlanSchema = z.object({
   modality: z.string().min(1, "El nombre de la modalidad es requerido."),
@@ -31,23 +32,10 @@ interface CreateStudyPlanFormProps {
   coordinator: string;
 }
 
-// This is a mock function, in a real app this would be an API call
-const addStudyPlan = (data: CreateStudyPlanFormValues, careerName: string, campus: string, coordinator: string) => {
-    const newId = Math.max(...careers.map(c => c.id), 0) + 1;
-    const newPlan = {
-        id: newId,
-        name: careerName,
-        modality: data.modality,
-        semesters: data.semesters,
-        campus,
-        coordinator,
-    };
-    careers.push(newPlan);
-    console.log("Plan de estudio creado:", newPlan);
-};
 
 export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator }: CreateStudyPlanFormProps) {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateStudyPlanFormValues>({
     resolver: zodResolver(createStudyPlanSchema),
@@ -57,17 +45,25 @@ export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator
     },
   });
 
-  const onSubmit = (data: CreateStudyPlanFormValues) => {
+  const onSubmit = async (data: CreateStudyPlanFormValues) => {
+    setIsSubmitting(true);
     if (!campus || !coordinator) {
         toast({
             variant: "destructive",
             title: "Error",
             description: "No se pudo determinar el plantel o coordinador para este plan.",
         });
+        setIsSubmitting(false);
         return;
     }
+    const newPlanData = {
+        name: careerName,
+        ...data,
+        campus,
+        coordinator,
+    };
     try {
-      addStudyPlan(data, careerName, campus, coordinator);
+      await createCareer(newPlanData); // We can rename createCareer to a more generic name
       toast({
         title: "Plan de Estudio Creado",
         description: `La modalidad ${data.modality} ha sido creada para ${careerName}.`,
@@ -82,6 +78,8 @@ export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator
             description: error.message,
         });
       }
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -114,7 +112,9 @@ export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">Crear Plan de Estudio</Button>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Creando...' : 'Crear Plan de Estudio'}
+        </Button>
       </form>
     </Form>
   )

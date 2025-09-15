@@ -2,9 +2,8 @@
 "use client"
 
 import { useParams } from 'next/navigation'
-import { useMemo, useState } from 'react'
-import { careers, subjects as allSubjects } from '@/lib/data'
-import { Subject } from '@/lib/modelos'
+import { useMemo, useState, useEffect } from 'react'
+import { Subject, Career } from '@/lib/modelos'
 import {
   Card,
   CardContent,
@@ -33,6 +32,8 @@ import {
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/context/auth-context'
+import { getCareers, getSubjects } from '@/services/api'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function ManageModalitySubjectsPage() {
     const params = useParams()
@@ -40,19 +41,34 @@ export default function ManageModalitySubjectsPage() {
     const { user } = useAuth()
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
-    const [_, setForceRender] = useState(0); 
+    
+    const [modality, setModality] = useState<Career | null>(null);
+    const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const modality = useMemo(() => {
-        return careers.find(c => c.id === modalityId)
-    }, [modalityId])
+    const fetchAllData = async () => {
+      setIsLoading(true);
+      try {
+        const [allCareers, allSubjects] = await Promise.all([getCareers(), getSubjects()]);
+        const currentModality = allCareers.find(c => c.id === modalityId) || null;
+        setModality(currentModality);
+        if (currentModality) {
+          const modalitySubjects = allSubjects
+            .filter(s => s.career === currentModality.name && s.modality === currentModality.modality)
+            .sort((a, b) => a.semester - b.semester);
+          setSubjects(modalitySubjects);
+        }
+      } catch (err: any) {
+        setError(err.message || "Error al cargar los datos");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    const subjectsForModality = useMemo(() => {
-      if (!modality) return [];
-      return allSubjects
-          .filter(s => s.career === modality.name && s.modality === modality.modality) 
-          .sort((a, b) => a.semester - b.semester);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [modality, _]);
+    useEffect(() => {
+        fetchAllData();
+    }, [modalityId]);
 
     const semesters = useMemo(() => {
         if (!modality) return [];
@@ -67,8 +83,32 @@ export default function ManageModalitySubjectsPage() {
     const handleSuccess = () => {
         setIsModalOpen(false);
         setSelectedSemester(null);
-        setForceRender(Math.random()); 
+        fetchAllData(); // Re-fetch data
     };
+    
+    if (isLoading) {
+      return (
+        <div className="flex flex-col gap-8">
+            <div className="flex flex-col">
+                <Skeleton className="h-8 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-1/3" />
+            </div>
+             <Card className="rounded-xl">
+                <CardHeader>
+                    <Skeleton className="h-6 w-1/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-40 w-full" />
+                </CardContent>
+            </Card>
+        </div>
+      )
+    }
+
+    if (error) {
+      return <p className="text-destructive text-center">{error}</p>
+    }
     
     if (!modality) {
         return <div>Modalidad no encontrada.</div>
@@ -125,7 +165,7 @@ export default function ManageModalitySubjectsPage() {
                                 ))}
                             </TabsList>
                             {semesters.map(semester => {
-                                const semesterSubjects = subjectsForModality.filter(s => s.semester === semester);
+                                const semesterSubjects = subjects.filter(s => s.semester === semester);
                                 return (
                                     <TabsContent key={semester} value={`sem-${semester}`}>
                                         {user?.rol === 'administrador' && (

@@ -15,35 +15,16 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { supervisionRubrics, evaluationRubrics } from "@/lib/data"
-import { RubricType } from "@/app/(app)/supervision-rubrics/page"
+import type { RubricType } from "@/app/(app)/supervision-rubrics/page"
+
+// Mock API call
+const addCriterion = (data: any, rubricId: number, rubricType: RubricType) => new Promise((res) => setTimeout(() => res({ ...data, rubricId, rubricType }), 500));
 
 const createCriterionSchema = z.object({
   text: z.string().min(1, "El texto del criterio es requerido."),
 });
 
 type CreateCriterionFormValues = z.infer<typeof createCriterionSchema>;
-
-const addCriterion = (data: CreateCriterionFormValues, rubricId: number, rubricType: RubricType) => {
-    let rubric;
-    if (rubricType === 'supervision') {
-        rubric = supervisionRubrics.find(r => r.id === rubricId);
-    } else {
-        rubric = evaluationRubrics.find(r => r.id === rubricId);
-    }
-    
-    if (!rubric) {
-        throw new Error("No se encontró la rúbrica.");
-    }
-    
-    const newId = `${rubricId}_${rubric.criteria.length + 1}`;
-    const newCriterion = {
-        id: newId,
-        text: data.text,
-    };
-    rubric.criteria.push(newCriterion);
-    console.log("Criterio añadido:", newCriterion, "a la rúbrica:", rubric.title || rubric.category);
-};
 
 export function CreateCriterionForm({ rubricId, rubricType, onSuccess }: { rubricId: number | null, rubricType: RubricType, onSuccess?: () => void }) {
   const { toast } = useToast();
@@ -55,7 +36,7 @@ export function CreateCriterionForm({ rubricId, rubricType, onSuccess }: { rubri
     },
   });
 
-  const onSubmit = (data: CreateCriterionFormValues) => {
+  const onSubmit = async (data: CreateCriterionFormValues) => {
     if (rubricId === null) {
         toast({
             variant: "destructive",
@@ -65,7 +46,7 @@ export function CreateCriterionForm({ rubricId, rubricType, onSuccess }: { rubri
         return;
     }
     try {
-      addCriterion(data, rubricId, rubricType);
+      await addCriterion(data, rubricId, rubricType);
       toast({
         title: "Criterio Añadido",
         description: `El criterio ha sido añadido a la rúbrica con éxito.`,

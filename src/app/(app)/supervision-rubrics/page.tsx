@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Pencil, Trash2, PlusCircle, ChevronDown } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -19,13 +19,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { supervisionRubrics, evaluationRubrics } from "@/lib/data"
 import { SupervisionRubric, EvaluationRubric } from "@/lib/modelos"
 import { Badge } from "@/components/ui/badge"
 import { CreateRubricForm } from "@/components/create-rubric-form"
 import { CreateCriterionForm } from "@/components/create-criterion-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { getSupervisionRubrics } from "@/services/api" // Assuming getEvaluationRubrics exists too
+import { Skeleton } from "@/components/ui/skeleton"
 
 type RubricType = 'supervision' | 'evaluation';
 
@@ -34,12 +35,36 @@ export default function SupervisionRubricsPage() {
   const [isCriterionModalOpen, setIsCriterionModalOpen] = useState(false)
   const [selectedRubricId, setSelectedRubricId] = useState<number | null>(null)
   const [selectedRubricType, setSelectedRubricType] = useState<RubricType>('supervision');
-  const [_, setForceRender] = useState(0)
+
+  const [supervisionRubrics, setSupervisionRubrics] = useState<SupervisionRubric[]>([]);
+  const [evaluationRubrics, setEvaluationRubrics] = useState<EvaluationRubric[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRubrics = async () => {
+    setIsLoading(true);
+    try {
+      const [supervisionData] = await Promise.all([
+        getSupervisionRubrics(),
+        // getEvaluationRubrics() // TODO: Implement this in api.ts
+      ]);
+      setSupervisionRubrics(supervisionData);
+      // setEvaluationRubrics(evaluationData);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar las rúbricas');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRubrics();
+  }, []);
 
   const handleSuccess = () => {
     setIsRubricModalOpen(false)
     setIsCriterionModalOpen(false)
-    setForceRender(Math.random())
+    fetchRubrics()
   }
 
   const openCriterionModal = (rubricId: number, type: RubricType) => {
@@ -179,6 +204,9 @@ export default function SupervisionRubricsPage() {
       </Accordion>
   )
 
+  if (error) {
+    return <p className="text-destructive text-center">{error}</p>
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -231,13 +259,24 @@ export default function SupervisionRubricsPage() {
               <TabsTrigger value="evaluation">Evaluación</TabsTrigger>
             </TabsList>
             <TabsContent value="supervision" className="mt-6">
-                <div className="space-y-8">
-                    {renderSupervisionRubricAccordion(supervisionRubricsContable, "Rubros Contables")}
-                    {renderSupervisionRubricAccordion(supervisionRubricsNoContable, "Rubros No Contables")}
-                </div>
+                {isLoading ? (
+                    <div className="space-y-4">
+                        <Skeleton className="h-20 w-full" />
+                        <Skeleton className="h-20 w-full" />
+                    </div>
+                ) : (
+                  <div className="space-y-8">
+                      {renderSupervisionRubricAccordion(supervisionRubricsContable, "Rubros Contables")}
+                      {renderSupervisionRubricAccordion(supervisionRubricsNoContable, "Rubros No Contables")}
+                  </div>
+                )}
             </TabsContent>
             <TabsContent value="evaluation" className="mt-6">
-              {renderEvaluationRubricAccordion(evaluationRubrics)}
+              {isLoading ? (
+                  <Skeleton className="h-20 w-full" />
+              ) : (
+                evaluationRubrics.length > 0 ? renderEvaluationRubricAccordion(evaluationRubrics) : <p className="text-muted-foreground text-center">No hay rúbricas de evaluación disponibles.</p>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>

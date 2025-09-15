@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Pencil, Trash2, Search, PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { subjects as allSubjects } from "@/lib/data"
+import { Subject } from "@/lib/modelos"
 import {
   Dialog,
   DialogContent,
@@ -32,15 +32,48 @@ import {
 } from "@/components/ui/dialog"
 import { CreateSubjectForm } from "@/components/create-subject-form"
 import { Input } from "@/components/ui/input"
+import { getSubjects } from "@/services/api"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function SubjectsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const filteredSubjects = allSubjects.filter(subject => 
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      try {
+        setIsLoading(true)
+        const data = await getSubjects()
+        setSubjects(data)
+      } catch (err: any) {
+        setError(err.message || "Error al cargar las materias")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchSubjects()
+  }, [])
+
+  const filteredSubjects = subjects.filter(subject => 
     subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     subject.career.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleSuccess = async () => {
+    setIsModalOpen(false)
+    setIsLoading(true)
+    try {
+      const data = await getSubjects()
+      setSubjects(data)
+    } catch (err: any) {
+      setError(err.message || "Error al recargar las materias")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
 
   return (
@@ -63,7 +96,7 @@ export default function SubjectsPage() {
                 Completa el formulario para registrar una nueva materia.
               </DialogDescription>
             </DialogHeader>
-            <CreateSubjectForm onSuccess={() => setIsModalOpen(false)} />
+            <CreateSubjectForm onSuccess={handleSuccess} />
           </DialogContent>
         </Dialog>
       </div>
@@ -77,87 +110,113 @@ export default function SubjectsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
           />
       </div>
+      
+      {error && <p className="text-destructive text-center">{error}</p>}
 
-       {/* Mobile View - Card List */}
-      <div className="grid grid-cols-1 gap-4 md:hidden">
-        {filteredSubjects.map((subject) => (
-          <Card key={subject.id} className="rounded-xl">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle>{subject.name}</CardTitle>
-                  <CardDescription>Carrera: {subject.career}</CardDescription>
-                </div>
-                 <div className="flex gap-2">
-                    <Button size="icon" variant="warning">
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Editar</span>
-                    </Button>
-                    <Button size="icon" variant="destructive">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Eliminar</span>
-                    </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">Grado: </span>
-                {subject.semester}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Desktop View - Table */}
-      <Card className="hidden md:block rounded-xl">
-        <CardHeader>
-          <CardTitle>Materias</CardTitle>
-          <CardDescription>
-            Administra todas las materias en el sistema.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Carrera</TableHead>
-                <TableHead>Grado</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredSubjects.map((subject) => (
-                <TableRow key={subject.id}>
-                  <TableCell className="font-medium">{subject.name}</TableCell>
-                  <TableCell>{subject.career}</TableCell>
-                  <TableCell>{subject.semester}</TableCell>
-                  <TableCell>
+      {isLoading ? (
+        <>
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+            </div>
+            <Card className="hidden md:block">
+                <CardHeader>
+                    <Skeleton className="h-6 w-1/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                </CardContent>
+            </Card>
+        </>
+      ) : (
+        <>
+        {/* Mobile View - Card List */}
+        <div className="grid grid-cols-1 gap-4 md:hidden">
+            {filteredSubjects.map((subject) => (
+            <Card key={subject.id} className="rounded-xl">
+                <CardHeader>
+                <div className="flex items-start justify-between">
+                    <div>
+                    <CardTitle>{subject.name}</CardTitle>
+                    <CardDescription>Carrera: {subject.career}</CardDescription>
+                    </div>
                     <div className="flex gap-2">
-                      <Button size="icon" variant="warning">
+                        <Button size="icon" variant="warning">
                         <Pencil className="h-4 w-4" />
                         <span className="sr-only">Editar</span>
-                      </Button>
-                      <Button size="icon" variant="destructive">
+                        </Button>
+                        <Button size="icon" variant="destructive">
                         <Trash2 className="h-4 w-4" />
                         <span className="sr-only">Eliminar</span>
-                      </Button>
+                        </Button>
                     </div>
-                  </TableCell>
+                </div>
+                </CardHeader>
+                <CardContent>
+                <div className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground">Grado: </span>
+                    {subject.semester}
+                </div>
+                </CardContent>
+            </Card>
+            ))}
+        </div>
+
+        {/* Desktop View - Table */}
+        <Card className="hidden md:block rounded-xl">
+            <CardHeader>
+            <CardTitle>Materias</CardTitle>
+            <CardDescription>
+                Administra todas las materias en el sistema.
+            </CardDescription>
+            </CardHeader>
+            <CardContent>
+            <Table>
+                <TableHeader>
+                <TableRow>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Carrera</TableHead>
+                    <TableHead>Grado</TableHead>
+                    <TableHead>Acciones</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-        <CardFooter>
-          <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-{filteredSubjects.length}</strong> de{" "}
-            <strong>{allSubjects.length}</strong> materias
-          </div>
-        </CardFooter>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                {filteredSubjects.map((subject) => (
+                    <TableRow key={subject.id}>
+                    <TableCell className="font-medium">{subject.name}</TableCell>
+                    <TableCell>{subject.career}</TableCell>
+                    <TableCell>{subject.semester}</TableCell>
+                    <TableCell>
+                        <div className="flex gap-2">
+                        <Button size="icon" variant="warning">
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Editar</span>
+                        </Button>
+                        <Button size="icon" variant="destructive">
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Eliminar</span>
+                        </Button>
+                        </div>
+                    </TableCell>
+                    </TableRow>
+                ))}
+                </TableBody>
+            </Table>
+            </CardContent>
+            <CardFooter>
+            <div className="text-xs text-muted-foreground">
+                Mostrando <strong>1-{filteredSubjects.length}</strong> de{" "}
+                <strong>{subjects.length}</strong> materias
+            </div>
+            </CardFooter>
+        </Card>
+        </>
+      )}
+
     </div>
   )
 }

@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Pencil, PlusCircle, Trash2, Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -29,21 +29,51 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { groups as allGroups } from "@/lib/data"
 import { CreateGroupForm } from "@/components/create-group-form"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
+import { Group } from "@/lib/modelos"
+import { getGroups } from "@/services/api"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function GroupsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredGroups = allGroups.filter(group => 
+  const fetchGroups = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getGroups();
+      setGroups(data);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar los grupos');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  const filteredGroups = groups.filter(group => 
     group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     group.career.toLowerCase().includes(searchTerm.toLowerCase()) ||
     group.cycle.toLowerCase().includes(searchTerm.toLowerCase()) ||
     group.turno.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleSuccess = () => {
+    setIsModalOpen(false);
+    fetchGroups();
+  };
+
+  if (error) {
+    return <p className="text-destructive text-center">{error}</p>
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -65,7 +95,7 @@ export default function GroupsPage() {
                         Completa el formulario para registrar un nuevo grupo.
                     </DialogDescription>
                 </DialogHeader>
-                <CreateGroupForm onSuccess={() => setIsModalOpen(false)} />
+                <CreateGroupForm onSuccess={handleSuccess} />
             </DialogContent>
         </Dialog>
       </div>
@@ -81,98 +111,121 @@ export default function GroupsPage() {
           />
       </div>
 
-       {/* Mobile View - Card List */}
-      <div className="md:hidden flex flex-col gap-4">
-        {filteredGroups.map((group) => (
-          <Card key={group.id} className="rounded-xl">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle>{group.name}</CardTitle>
-                  <CardDescription>{group.career}</CardDescription>
+       {isLoading ? (
+         <>
+            <div className="md:hidden flex flex-col gap-4">
+              {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 w-full" />)}
+            </div>
+            <Card className="hidden md:block">
+              <CardHeader>
+                <Skeleton className="h-6 w-1/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </Header>
+              <CardContent>
+                <div className="space-y-4">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
                 </div>
-                 <div className="flex gap-2">
-                    <Button size="icon" variant="warning">
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Editar</span>
-                    </Button>
-                    <Button size="icon" variant="destructive">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Eliminar</span>
-                    </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-                <Separator className="my-2"/>
-                <div className="grid grid-cols-2 gap-2 text-sm mt-4">
-                    <div className="font-semibold">Grado:</div>
-                    <div>{group.semester}</div>
-                    <div className="font-semibold">Ciclo:</div>
-                    <div>{group.cycle}</div>
-                    <div className="font-semibold">Turno:</div>
-                    <div>{group.turno}</div>
-                    <div className="font-semibold">Alumnos:</div>
-                    <div>{group.students.length}</div>
-                </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Desktop View - Table */}
-      <Card className="hidden md:block rounded-xl">
-        <CardHeader>
-          <CardTitle>Grupos</CardTitle>
-          <CardDescription>
-            Administra todos los grupos en el sistema.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Grupo</TableHead>
-                <TableHead>Carrera</TableHead>
-                <TableHead>Grado</TableHead>
-                <TableHead>Ciclo</TableHead>
-                <TableHead>Turno</TableHead>
-                <TableHead>Alumnos</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredGroups.map((group) => (
-                <TableRow key={group.id}>
-                  <TableCell className="font-medium">{group.name}</TableCell>
-                  <TableCell>{group.career}</TableCell>
-                  <TableCell>{group.semester}</TableCell>
-                  <TableCell>{group.cycle}</TableCell>
-                  <TableCell>{group.turno}</TableCell>
-                  <TableCell>{group.students.length}</TableCell>
-                  <TableCell>
+              </CardContent>
+            </Card>
+         </>
+       ) : (
+         <>
+          {/* Mobile View - Card List */}
+          <div className="md:hidden flex flex-col gap-4">
+            {filteredGroups.map((group) => (
+              <Card key={group.id} className="rounded-xl">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle>{group.name}</CardTitle>
+                      <CardDescription>{group.career}</CardDescription>
+                    </div>
                     <div className="flex gap-2">
                         <Button size="icon" variant="warning">
-                        <Pencil className="h-4 w-4" />
-                        <span className="sr-only">Editar</span>
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Editar</span>
                         </Button>
                         <Button size="icon" variant="destructive">
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Eliminar</span>
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Eliminar</span>
                         </Button>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-        <CardFooter>
-          <div className="text-xs text-muted-foreground">
-            Mostrando <strong>1-{filteredGroups.length}</strong> de <strong>{allGroups.length}</strong> grupos
+                  </div>
+                </CardHeader>
+                <CardContent>
+                    <Separator className="my-2"/>
+                    <div className="grid grid-cols-2 gap-2 text-sm mt-4">
+                        <div className="font-semibold">Grado:</div>
+                        <div>{group.semester}</div>
+                        <div className="font-semibold">Ciclo:</div>
+                        <div>{group.cycle}</div>
+                        <div className="font-semibold">Turno:</div>
+                        <div>{group.turno}</div>
+                        <div className="font-semibold">Alumnos:</div>
+                        <div>{group.students.length}</div>
+                    </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </CardFooter>
-      </Card>
+
+          {/* Desktop View - Table */}
+          <Card className="hidden md:block rounded-xl">
+            <CardHeader>
+              <CardTitle>Grupos</CardTitle>
+              <CardDescription>
+                Administra todos los grupos en el sistema.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Grupo</TableHead>
+                    <TableHead>Carrera</TableHead>
+                    <TableHead>Grado</TableHead>
+                    <TableHead>Ciclo</TableHead>
+                    <TableHead>Turno</TableHead>
+                    <TableHead>Alumnos</TableHead>
+                    <TableHead>Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredGroups.map((group) => (
+                    <TableRow key={group.id}>
+                      <TableCell className="font-medium">{group.name}</TableCell>
+                      <TableCell>{group.career}</TableCell>
+                      <TableCell>{group.semester}</TableCell>
+                      <TableCell>{group.cycle}</TableCell>
+                      <TableCell>{group.turno}</TableCell>
+                      <TableCell>{group.students.length}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                            <Button size="icon" variant="warning">
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Editar</span>
+                            </Button>
+                            <Button size="icon" variant="destructive">
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Eliminar</span>
+                            </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+            <CardFooter>
+              <div className="text-xs text-muted-foreground">
+                Mostrando <strong>1-{filteredGroups.length}</strong> de <strong>{groups.length}</strong> grupos
+              </div>
+            </CardFooter>
+          </Card>
+         </>
+       )}
     </div>
   )
 }

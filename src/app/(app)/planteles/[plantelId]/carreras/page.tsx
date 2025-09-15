@@ -1,6 +1,6 @@
 
 "use client"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Pencil, PlusCircle, Trash2, Search, ChevronDown } from "lucide-react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
@@ -13,8 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { careers as allCareers, subjects, planteles } from "@/lib/data"
-import { Career } from "@/lib/modelos"
+import { Career, Plantel, Subject } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -34,6 +33,8 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
+import { getCareers, getSubjects, getPlantelById } from "@/services/api"
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 interface GroupedCareer {
@@ -46,19 +47,44 @@ interface GroupedCareer {
 export default function PlantelCarrerasPage() {
   const params = useParams();
   const plantelId = Number(params.plantelId);
-
   const { user } = useAuth();
   const [activeTabs, setActiveTabs] = useState<Record<string, string>>({})
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedModalities, setSelectedModalities] = useState<Record<string, number>>({});
+  
+  const [plantel, setPlantel] = useState<Plantel | null>(null);
+  const [allCareers, setAllCareers] = useState<Career[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const plantel = useMemo(() => planteles.find(p => p.id === plantelId), [plantelId]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [plantelData, careersData, subjectsData] = await Promise.all([
+          getPlantelById(plantelId),
+          getCareers(),
+          getSubjects(),
+        ]);
+        setPlantel(plantelData);
+        setAllCareers(careersData);
+        setSubjects(subjectsData);
+      } catch (err: any) {
+        setError(err.message || 'Error al cargar los datos');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [plantelId]);
+
 
   const careersForPlantel = useMemo(() => {
     if (!plantel) return [];
     return allCareers.filter(c => c.campus === plantel.name);
-  }, [plantel]);
+  }, [plantel, allCareers]);
 
   const groupedCareers = useMemo(() => {
     const groups: Record<string, GroupedCareer> = {};
@@ -258,18 +284,23 @@ export default function PlantelCarrerasPage() {
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col">
+            <Skeleton className="h-8 w-1/3" />
+            <Skeleton className="h-4 w-1/4 mt-2" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+        </div>
+      </div>
+    );
+  }
 
-  const renderAdminView = () => (
-    <Accordion type="single" collapsible className="w-full space-y-4">
-        {filteredGroupedCareers.map(group => renderCareerContent(group, true))}
-    </Accordion>
-  );
-
-  const renderDefaultView = () => (
-    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-        {filteredGroupedCareers.map(group => renderCareerContent(group, false))}
-    </div>
-  );
+  if (error) {
+    return <p className="text-destructive text-center">{error}</p>;
+  }
 
 
   if (!plantel) {
@@ -315,7 +346,15 @@ export default function PlantelCarrerasPage() {
         </div>
       </div>
       
-      {user?.rol === 'administrador' ? renderAdminView() : renderDefaultView()}
+      {user?.rol === 'administrador' ? (
+        <Accordion type="single" collapsible className="w-full space-y-4">
+          {filteredGroupedCareers.map(group => renderCareerContent(group, true))}
+        </Accordion>
+      ) : (
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+          {filteredGroupedCareers.map(group => renderCareerContent(group, false))}
+        </div>
+      )}
 
     </div>
   )
