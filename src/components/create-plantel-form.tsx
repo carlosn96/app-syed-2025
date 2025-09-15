@@ -15,44 +15,31 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { planteles } from "@/lib/data"
+import { createPlantel } from "@/services/api"
 
 const createPlantelSchema = z.object({
   name: z.string().min(1, "El nombre del plantel es requerido."),
   location: z.string().min(1, "La ubicación es requerida."),
-  director: z.string().min(1, "El nombre del director es requerido."),
 });
 
 type CreatePlantelFormValues = z.infer<typeof createPlantelSchema>;
 
-// This is a mock function, in a real app this would be an API call
-const addPlantel = (data: CreatePlantelFormValues) => {
-    const newId = Math.max(...planteles.map(p => p.id), 0) + 1;
-    const newPlantel = {
-        id: newId,
-        name: data.name,
-        location: data.location,
-        director: data.director,
-    };
-    planteles.push(newPlantel);
-    console.log("Plantel creado:", newPlantel);
-};
-
 export function CreatePlantelForm({ onSuccess }: { onSuccess?: () => void }) {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreatePlantelFormValues>({
     resolver: zodResolver(createPlantelSchema),
     defaultValues: {
       name: "",
       location: "",
-      director: "",
     },
   });
 
-  const onSubmit = (data: CreatePlantelFormValues) => {
+  const onSubmit = async (data: CreatePlantelFormValues) => {
+    setIsSubmitting(true);
     try {
-      addPlantel(data);
+      await createPlantel(data);
       toast({
         title: "Plantel Creado",
         description: `El plantel ${data.name} ha sido creado con éxito.`,
@@ -67,6 +54,8 @@ export function CreatePlantelForm({ onSuccess }: { onSuccess?: () => void }) {
             description: error.message,
         });
       }
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -99,20 +88,9 @@ export function CreatePlantelForm({ onSuccess }: { onSuccess?: () => void }) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="director"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Director(a)</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej. Dr. Juan Pérez" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full">Crear Plantel</Button>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Creando..." : "Crear Plantel"}
+        </Button>
       </form>
     </Form>
   )

@@ -43,8 +43,8 @@ export interface Coordinador {
 
 export const Roles = {
     Administrador: 1,
-    Coordinador: 2,
-    Docente: 3,
+    Docente: 2,
+    Coordinador: 3,
     Alumno: 4,
   };
   

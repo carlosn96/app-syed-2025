@@ -51,7 +51,13 @@ export const getPlanteles = async (): Promise<Plantel[]> => {
         director: '', // Director field is not in the API response
     }));
 };
-export const createPlantel = (data: Omit<Plantel, 'id'>): Promise<Plantel> => apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
+export const createPlantel = (data: Omit<Plantel, 'id' | 'director'>): Promise<Plantel> => {
+    const apiData = {
+        nombre: data.name,
+        ubicacion: data.location
+    };
+    return apiFetch('/planteles', { method: 'POST', body: JSON.stringify(apiData) });
+};
 export const getPlantelById = (id: number): Promise<Plantel> => apiFetch(`/planteles/${id}`);
 export const updatePlantel = (id: number, data: Partial<Omit<Plantel, 'id'>>): Promise<Plantel> => apiFetch(`/planteles/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles/${id}`, { method: 'DELETE' });
