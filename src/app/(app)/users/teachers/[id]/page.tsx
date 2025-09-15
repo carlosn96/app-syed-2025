@@ -31,7 +31,7 @@ import { ProgressRing } from "@/components/ui/progress-ring"
 import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getUsers, getSupervisions, getEvaluations, getSubjects, getSchedules, getGroups } from "@/services/api"
+import { getUserById, getSupervisions, getEvaluations, getSubjects, getSchedules, getGroups } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const getScoreColor = (score: number) => {
@@ -94,24 +94,22 @@ export default function TeacherProfilePage() {
         setError(null);
         try {
             const [
-                allUsers,
+                teacherUser,
                 allSupervisions,
                 allEvaluations,
                 allSubjects,
                 allSchedules,
                 allGroups,
             ] = await Promise.all([
-                getUsers(),
+                getUserById(teacherId),
                 getSupervisions(),
                 getEvaluations(),
                 getSubjects(),
                 getSchedules(),
                 getGroups(),
             ]);
-
-            const teacherUser = allUsers.find(user => user.id === teacherId && user.rol === "docente");
             
-            if (!teacherUser) {
+            if (!teacherUser || teacherUser.rol !== "docente") {
               throw new Error("Docente no encontrado.");
             }
 
@@ -499,3 +497,5 @@ export default function TeacherProfilePage() {
     </div>
   )
 }
+
+    
