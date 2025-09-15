@@ -36,28 +36,8 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   }
 };
 
-interface ApiPlantel {
-    id_plantel: number;
-    nombre: string;
-    ubicacion: string;
-}
-
-export const getPlanteles = async (): Promise<Plantel[]> => {
-    const apiPlanteles: ApiPlantel[] = await apiFetch('/planteles');
-    return apiPlanteles.map(p => ({
-        id: p.id_plantel,
-        name: p.nombre,
-        location: p.ubicacion,
-        director: '', // Director field is not in the API response
-    }));
-};
-export const createPlantel = (data: Omit<Plantel, 'id' | 'director'>): Promise<Plantel> => {
-    const apiData = {
-        nombre: data.name,
-        ubicacion: data.location
-    };
-    return apiFetch('/planteles', { method: 'POST', body: JSON.stringify(apiData) });
-};
+export const getPlanteles = (): Promise<Plantel[]> => apiFetch('/planteles');
+export const createPlantel = (data: Omit<Plantel, 'id'>): Promise<Plantel> => apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
 export const getPlantelById = (id: number): Promise<Plantel> => apiFetch(`/planteles/${id}`);
 export const updatePlantel = (id: number, data: Partial<Omit<Plantel, 'id'>>): Promise<Plantel> => apiFetch(`/planteles/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles/${id}`, { method: 'DELETE' });
