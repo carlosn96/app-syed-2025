@@ -23,6 +23,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/context/auth-context"
+import { cn } from "@/lib/utils"
 
 export const allLinks = [
   { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrador', 'coordinador', 'docente', 'alumno'], exact: true },
@@ -41,7 +42,8 @@ export const allLinks = [
 export function MainNav() {
   const pathname = usePathname()
   const { user } = useAuth()
-  const { setOpenMobile } = useSidebar();
+  const { setOpenMobile, state } = useSidebar();
+  const isCollapsed = state === 'collapsed';
 
   const links = allLinks.filter(link => user && link.roles.includes(user.rol));
 
@@ -60,7 +62,7 @@ export function MainNav() {
             >
               <Link href={link.href} className="gap-3">
                 <Icon className="size-5 shrink-0" />
-                <span>{link.label}</span>
+                <span className={cn("transition-opacity duration-200", isCollapsed && "opacity-0 hidden")}>{link.label}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
