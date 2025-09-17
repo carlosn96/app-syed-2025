@@ -23,24 +23,41 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/context/auth-context"
 import { User, Roles } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
+import { EditUserForm } from "@/components/edit-user-form"
 import { Input } from "@/components/ui/input"
-import { getUsers } from "@/services/api"
+import { getUsers, deleteUser } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useToast } from "@/hooks/use-toast"
 
 type RoleFilter = 'administrador' | 'coordinador' | 'docente' | 'alumno' | 'all';
 
 export default function UsersPage() {
   const { user: loggedInUser, isLoading: isAuthLoading } = useAuth();
+  const { toast } = useToast();
   const [filter, setFilter] = useState<RoleFilter>('all');
   const [searchTerm, setSearchTerm] = useState("");
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [isUsersLoading, setIsUsersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
   const [teacherSearch, setTeacherSearch] = useState("");
   const [studentSearch, setStudentSearch] = useState("");
@@ -55,32 +72,32 @@ export default function UsersPage() {
     }
   }
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setIsUsersLoading(true);
-        const data = await getUsers();
-        
-        const mappedData: User[] = data.map(u => ({
-          ...u,
-          rol: roleIdToName(u.id_rol),
-          rol_nombre: u.rol
-        }));
-        
-        if (loggedInUser?.rol === 'coordinador') {
-            setAllUsers(mappedData.filter(u => u.rol === 'docente' || u.rol === 'alumno'));
-        } else {
-            setAllUsers(mappedData);
-        }
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Error al cargar los usuarios');
-        console.error(err);
-      } finally {
-        setIsUsersLoading(false);
+  const fetchUsers = async () => {
+    try {
+      setIsUsersLoading(true);
+      const data = await getUsers();
+      
+      const mappedData: User[] = data.map(u => ({
+        ...u,
+        rol: roleIdToName(u.id_rol),
+        rol_nombre: u.rol
+      }));
+      
+      if (loggedInUser?.rol === 'coordinador') {
+          setAllUsers(mappedData.filter(u => u.rol === 'docente' || u.rol === 'alumno'));
+      } else {
+          setAllUsers(mappedData);
       }
-    };
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar los usuarios');
+      console.error(err);
+    } finally {
+      setIsUsersLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchUsers();
   }, [loggedInUser]);
 
@@ -125,6 +142,30 @@ export default function UsersPage() {
       (user.grupo && user.grupo.toLowerCase().includes(studentSearch.toLowerCase()))
     ), [students, studentSearch]);
 
+  const handleEditClick = (user: User) => {
+    setUserToEdit(user);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteUser = async (userId: number) => {
+    try {
+        await deleteUser(userId);
+        toast({
+            variant: "success",
+            title: "Usuario Eliminado",
+            description: "El usuario ha sido eliminado correctamente.",
+        });
+        fetchUsers(); // Re-fetch users to update the list
+    } catch (error) {
+        if (error instanceof Error) {
+            toast({
+                variant: "destructive",
+                title: "Error al eliminar",
+                description: error.message,
+            });
+        }
+    }
+  };
 
   const roleDisplayMap: { [key: string]: string } = {
     'all': 'Todos',
@@ -156,14 +197,33 @@ export default function UsersPage() {
         <p><span className="font-semibold">Grupo:</span> {user.rol === 'alumno' ? user.grupo : 'N/A'}</p>
         <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
         <div className="flex gap-2 pt-2">
-          <Button size="sm" variant="warning" className="flex-1">
+          <Button size="sm" variant="warning" className="flex-1" onClick={() => handleEditClick(user)}>
             <Pencil className="mr-2 h-4 w-4" />
             Editar
           </Button>
-          <Button size="sm" variant="destructive" className="flex-1">
-            <Trash2 className="mr-2 h-4 w-4" />
-            Eliminar
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button size="sm" variant="destructive" className="flex-1">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Eliminar
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario
+                        <span className="font-bold text-white"> {`${user.nombre} ${user.apellido_paterno}`}</span>.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
+                        Confirmar
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
            {user.rol === 'docente' && (
              <Button asChild size="sm" variant="outline" className="flex-1">
                 <Link href={`/users/teachers/${user.id}`}>
@@ -284,7 +344,7 @@ export default function UsersPage() {
           Gestión de Usuarios
         </h1>
         {!isAuthLoading && (loggedInUser?.rol === 'administrador' || loggedInUser?.rol === 'coordinador') && (
-           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
                 <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -298,11 +358,28 @@ export default function UsersPage() {
                     Completa el formulario para registrar una nueva cuenta.
                     </DialogDescription>
                 </DialogHeader>
-                <CreateUserForm onSuccess={() => setIsModalOpen(false)} />
+                <CreateUserForm onSuccess={() => { setIsCreateModalOpen(false); fetchUsers(); }} />
             </DialogContent>
            </Dialog>
         )}
       </div>
+
+       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>Editar Usuario</DialogTitle>
+                <DialogDescription>
+                    Modifica los datos del usuario. La contraseña solo se actualizará si se ingresa un nuevo valor.
+                </DialogDescription>
+            </DialogHeader>
+            {userToEdit && (
+                <EditUserForm 
+                    user={userToEdit} 
+                    onSuccess={() => { setIsEditModalOpen(false); fetchUsers(); }} 
+                />
+            )}
+        </DialogContent>
+       </Dialog>
       
       {error && <p className="text-destructive text-center">{error}</p>}
 

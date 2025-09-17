@@ -11,6 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -25,27 +26,30 @@ import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { groups } from "@/lib/data"
 import { useMemo, useState } from "react"
-import { Roles } from "@/lib/modelos"
-import { createUser } from "@/services/api"
+import { User, Roles } from "@/lib/modelos"
+import { updateUser } from "@/services/api"
 
-const createUserSchema = z.object({
+const editUserSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido."),
   apellido_paterno: z.string().min(1, "El apellido paterno es requerido."),
   apellido_materno: z.string().min(1, "El apellido materno es requerido."),
   correo: z.string().email("Correo electrónico inválido."),
   id_rol: z.coerce.number({ required_error: "Por favor, seleccione un rol." }),
   grupo: z.string().optional(),
-  contrasena: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
-  contrasena_confirmation: z.string(),
-}).refine(data => data.contrasena === data.contrasena_confirmation, {
+  contrasena: z.string().optional(),
+  contrasena_confirmation: z.string().optional(),
+}).refine(data => !data.contrasena || data.contrasena === data.contrasena_confirmation, {
   message: "Las contraseñas no coinciden.",
   path: ["contrasena_confirmation"],
+}).refine(data => !data.contrasena || data.contrasena.length >= 6, {
+    message: "La contraseña debe tener al menos 6 caracteres.",
+    path: ["contrasena"],
 }).refine(data => data.id_rol !== Roles.Alumno || (data.id_rol === Roles.Alumno && data.grupo), {
     message: "Por favor, seleccione un grupo para el alumno.",
     path: ["grupo"],
 });
 
-type CreateUserFormValues = z.infer<typeof createUserSchema>;
+type EditUserFormValues = z.infer<typeof editUserSchema>;
 
 const baseRoleDisplayMap: { [key: number]: string } = {
   [Roles.Coordinador]: "Coordinador",
@@ -53,7 +57,12 @@ const baseRoleDisplayMap: { [key: number]: string } = {
   [Roles.Alumno]: "Alumno",
 };
 
-export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
+interface EditUserFormProps {
+  user: User;
+  onSuccess?: () => void;
+}
+
+export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   const { user: loggedInUser } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,13 +75,15 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
     return baseRoleDisplayMap;
   }, [loggedInUser]);
 
-  const form = useForm<CreateUserFormValues>({
-    resolver: zodResolver(createUserSchema),
+  const form = useForm<EditUserFormValues>({
+    resolver: zodResolver(editUserSchema),
     defaultValues: {
-      nombre: "",
-      apellido_paterno: "",
-      apellido_materno: "",
-      correo: "",
+      nombre: user.nombre,
+      apellido_paterno: user.apellido_paterno,
+      apellido_materno: user.apellido_materno,
+      correo: user.correo,
+      id_rol: user.id_rol,
+      grupo: user.grupo || "",
       contrasena: "",
       contrasena_confirmation: "",
     },
@@ -80,22 +91,27 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
   
   const selectedRole = form.watch("id_rol");
 
-  const onSubmit = async (data: CreateUserFormValues) => {
+  const onSubmit = async (data: EditUserFormValues) => {
     setIsSubmitting(true);
+    
+    const dataToSend: Partial<EditUserFormValues> = { ...data };
+    if (!data.contrasena) {
+      delete dataToSend.contrasena;
+      delete dataToSend.contrasena_confirmation;
+    }
+    
     try {
-      await createUser(data);
+      await updateUser(user.id, dataToSend);
       toast({
-        variant: "success",
-        title: "Usuario Creado",
-        description: `El usuario ${data.nombre} ha sido creado con éxito.`,
+        title: "Usuario Actualizado",
+        description: `El usuario ${data.nombre} ha sido actualizado con éxito.`,
       });
-      form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
         toast({
             variant: "destructive",
-            title: "Error al crear usuario",
+            title: "Error al actualizar",
             description: error.message,
         });
       }
@@ -216,10 +232,13 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
           name="contrasena"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Contraseña</FormLabel>
+              <FormLabel>Nueva Contraseña</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input type="password" {...field} placeholder="Dejar en blanco para no cambiar"/>
               </FormControl>
+               <FormDescription>
+                Deja este campo en blanco si no deseas cambiar la contraseña.
+               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -229,7 +248,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
           name="contrasena_confirmation"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirmar Contraseña</FormLabel>
+              <FormLabel>Confirmar Nueva Contraseña</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
               </FormControl>
@@ -238,7 +257,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
           )}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Creando...' : 'Crear Usuario'}
+            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
         </Button>
       </form>
     </Form>
