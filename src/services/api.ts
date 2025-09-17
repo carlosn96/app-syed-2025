@@ -26,13 +26,25 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     headers,
   });
 
+  if (!response.ok) {
+    let errorMessage = `Error: ${response.status} ${response.statusText}`;
+    try {
+      const errorResult = await response.json();
+      errorMessage = errorResult.mensaje || (errorResult.datos?.errors ? Object.values(errorResult.datos.errors).flat().join(' ') : errorMessage);
+    } catch (e) {
+      // The response was not a valid JSON, so we stick with the status text.
+    }
+    console.error(`API Error on ${endpoint}:`, response.status, response.statusText);
+    throw new Error(errorMessage);
+  }
+
   const result = await response.json();
   
   if (result.exito) {
     return result.datos;
   } else {
     const errorMessage = result.mensaje || (result.datos?.errors ? Object.values(result.datos.errors).flat().join(' ') : 'Ocurrió un error desconocido.');
-    console.error(`API Error on ${endpoint}:`, response.status, response.statusText, result);
+    console.error(`API Error on ${endpoint} (with exito=false):`, result);
     throw new Error(errorMessage);
   }
 };
