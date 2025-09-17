@@ -14,21 +14,13 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { createCareer, getUsers } from "@/services/api"
+import { createCareer } from "@/services/api"
 import { useState, useEffect } from "react"
 import { User } from "@/lib/modelos"
 
 const createCareerSchema = z.object({
-  name: z.string().min(1, "El nombre de la carrera es requerido."),
-  coordinator: z.string().optional().or(z.literal("unassigned")),
+  nombre: z.string().min(1, "El nombre de la carrera es requerido."),
 });
 
 type CreateCareerFormValues = z.infer<typeof createCareerSchema>;
@@ -41,36 +33,22 @@ interface CreateCareerFormProps {
 export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [coordinators, setCoordinators] = useState<User[]>([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-        const usersData = await getUsers();
-        setCoordinators(usersData.filter(u => u.rol === 'coordinador'));
-    };
-    fetchData();
-  }, []);
 
   const form = useForm<CreateCareerFormValues>({
     resolver: zodResolver(createCareerSchema),
     defaultValues: {
-      name: careerName || "",
-      coordinator: "unassigned",
+      nombre: careerName || "",
     },
   });
 
   const onSubmit = async (data: CreateCareerFormValues) => {
     setIsSubmitting(true);
     try {
-        const careerData = {
-            carrera: data.name,
-            coordinador: data.coordinator === 'unassigned' ? null : data.coordinator,
-        };
-        await createCareer(careerData);
+        await createCareer(data);
       
       toast({
         title: "Carrera Creada",
-        description: `La carrera ${data.name} ha sido creada. Ahora puedes asignarle planteles y planes de estudio.`,
+        description: `La carrera ${data.nombre} ha sido creada. Ahora puedes asignarle planes de estudio.`,
       });
       form.reset();
       onSuccess?.();
@@ -92,38 +70,13 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="name"
+          name="nombre"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Nombre de la Carrera</FormLabel>
               <FormControl>
                 <Input placeholder="Ej. Ingeniería en Software" {...field} disabled={!!careerName} />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="coordinator"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Coordinador (Opcional)</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un coordinador" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                   <SelectItem value="unassigned">Sin asignar</SelectItem>
-                  {coordinators.map((coordinator) => (
-                    <SelectItem key={coordinator.id} value={`${coordinator.nombre} ${coordinator.apellido_paterno}`.trim()}>
-                       {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}

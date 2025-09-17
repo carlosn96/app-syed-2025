@@ -1,5 +1,6 @@
 
 
+
 import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, Roles } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
@@ -105,7 +106,7 @@ export const getCareerModalities = async (): Promise<Career[]> => {
     ]);
 };
 
-export const createCareer = (data: {carrera: string, coordinador: string | null}): Promise<Career> => apiFetch('/carreras', { method: 'POST', body: JSON.stringify(data) });
+export const createCareer = (data: {nombre: string}): Promise<Career> => apiFetch('/carreras', { method: 'POST', body: JSON.stringify(data) });
 export const updateCareer = (id: number, data: {carrera: string, coordinador: string | null}): Promise<Career> => apiFetch(`/carreras/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deleteCareer = (id: number): Promise<void> => apiFetch(`/carreras/${id}`, { method: 'DELETE' });
 
@@ -283,6 +284,7 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     
 
     
+
 
 
 
