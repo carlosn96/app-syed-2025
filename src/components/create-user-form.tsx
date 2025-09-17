@@ -35,6 +35,7 @@ const createUserSchema = z.object({
   correo: z.string().email("Correo electrónico inválido."),
   id_rol: z.coerce.number({ required_error: "Por favor, seleccione un rol." }),
   grupo: z.string().optional(),
+  grado_academico: z.string().optional(),
   contrasena: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
   contrasena_confirmation: z.string(),
 }).refine(data => data.contrasena === data.contrasena_confirmation, {
@@ -43,6 +44,9 @@ const createUserSchema = z.object({
 }).refine(data => data.id_rol !== Roles.Alumno || (data.id_rol === Roles.Alumno && data.grupo), {
     message: "Por favor, seleccione un grupo para el alumno.",
     path: ["grupo"],
+}).refine(data => data.id_rol !== Roles.Docente || (data.id_rol === Roles.Docente && data.grado_academico && data.grado_academico.length > 0), {
+    message: "El grado académico es requerido para los docentes.",
+    path: ["grado_academico"],
 });
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
@@ -75,6 +79,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
       correo: "",
       contrasena: "",
       contrasena_confirmation: "",
+      grado_academico: "",
     },
   });
   
@@ -210,6 +215,21 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
               </FormItem>
             )}
           />
+        )}
+        {selectedRole === Roles.Docente && (
+            <FormField
+            control={form.control}
+            name="grado_academico"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Grado Académico</FormLabel>
+                <FormControl>
+                    <Input placeholder="Ej. Maestría en Educación" {...field} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
         )}
          <FormField
           control={form.control}

@@ -1,6 +1,6 @@
 
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, Roles } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -27,7 +27,7 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   });
 
   if (!response.ok) {
-    let errorMessage = `Error: ${response.status} ${response.statusText}`;
+    let errorMessage = `Error de servidor: ${response.status} ${response.statusText}`;
     try {
       const errorResult = await response.json();
       errorMessage = errorResult.mensaje || (errorResult.datos?.errors ? Object.values(errorResult.datos.errors).flat().join(' ') : errorMessage);
@@ -40,8 +40,8 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
 
   const result = await response.json();
   
-  if (result.exito) {
-    return result.datos;
+  if (result.exito || response.ok) { // Some endpoints might not have 'exito'
+    return result.datos ?? result; // Return 'datos' if it exists, otherwise the whole result.
   } else {
     const errorMessage = result.mensaje || (result.datos?.errors ? Object.values(result.datos.errors).flat().join(' ') : 'Ocurrió un error desconocido.');
     console.error(`API Error on ${endpoint} (with exito=false):`, result);
@@ -123,7 +123,37 @@ export const createSubject = (data: any): Promise<Subject> => {
 
 // User Management
 export const getUsers = (): Promise<User[]> => apiFetch('/usuario');
-export const createUser = (data: any): Promise<User> => apiFetch('/usuario', { method: 'POST', body: JSON.stringify(data) });
+
+export const createUser = (data: any): Promise<User> => {
+    let endpoint = '/usuario';
+    let payload = { ...data };
+    delete payload.contrasena_confirmation;
+
+    switch (data.id_rol) {
+        case Roles.Docente:
+            endpoint = '/docentes';
+            payload = {
+                nombre: data.nombre,
+                apellido_paterno: data.apellido_paterno,
+                apellido_materno: data.apellido_materno,
+                grado_academico: data.grado_academico,
+                correo: data.correo,
+                contrasena: data.contrasena
+            };
+            break;
+        case Roles.Alumno:
+            endpoint = '/alumnos'; // Assuming this endpoint exists
+            // Adapt payload for student if necessary
+            break;
+        case Roles.Coordinador:
+             endpoint = '/coordinadores'; // Assuming this endpoint exists
+            // Adapt payload for coordinator if necessary
+            break;
+        // Admin case falls through to default /usuario
+    }
+    return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(payload) });
+};
+
 export const getUserById = (id: number): Promise<User> => apiFetch(`/usuario/${id}`);
 export const updateUser = (id: number, data: any): Promise<User> => apiFetch(`/usuario/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deleteUser = (id: number): Promise<void> => apiFetch(`/usuario/${id}`, { method: 'DELETE' });
@@ -233,3 +263,4 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     
 
     
+
