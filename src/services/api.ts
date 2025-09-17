@@ -146,8 +146,14 @@ export const createUser = (data: any): Promise<User> => {
             // Adapt payload for student if necessary
             break;
         case Roles.Coordinador:
-             endpoint = '/coordinadores'; // Assuming this endpoint exists
-            // Adapt payload for coordinator if necessary
+             endpoint = '/coordinadores';
+             payload = {
+                nombre: data.nombre,
+                apellido_paterno: data.apellido_paterno,
+                apellido_materno: data.apellido_materno,
+                correo: data.correo,
+                contrasena: data.contrasena
+            };
             break;
         // Admin case falls through to default /usuario
     }
@@ -263,4 +269,5 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     
 
     
+
 
