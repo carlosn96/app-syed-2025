@@ -31,16 +31,34 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { CreateCareerForm } from "@/components/create-career-form"
+import { EditCareerForm } from "@/components/edit-career-form"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/context/auth-context"
-import { getCareers } from "@/services/api"
+import { getCareers, deleteCareer } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/hooks/use-toast"
 
 export default function CareersPage() {
   const { user } = useAuth();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { toast } = useToast();
+  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [careerToEdit, setCareerToEdit] = useState<CareerSummary | null>(null);
+  const [careerToDelete, setCareerToDelete] = useState<CareerSummary | null>(null);
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const [allCareers, setAllCareers] = useState<CareerSummary[]>([]);
@@ -64,6 +82,39 @@ export default function CareersPage() {
   useEffect(() => {
     fetchCareers();
   }, []);
+
+  const handleSuccess = () => {
+    setIsCreateModalOpen(false);
+    setIsEditModalOpen(false);
+    fetchCareers();
+  };
+
+  const handleEditClick = (career: CareerSummary) => {
+    setCareerToEdit(career);
+    setIsEditModalOpen(true);
+  };
+  
+  const handleDelete = async () => {
+    if (!careerToDelete) return;
+    try {
+      await deleteCareer(careerToDelete.id);
+      toast({
+        variant: "success",
+        title: "Carrera Eliminada",
+        description: `La carrera ${careerToDelete.name} ha sido eliminada.`,
+      });
+      setCareerToDelete(null);
+      fetchCareers();
+    } catch (error) {
+      if (error instanceof Error) {
+        toast({
+            variant: "destructive",
+            title: "Error al eliminar",
+            description: error.message,
+        });
+      }
+    }
+  };
 
   const filteredCareers = useMemo(() => {
     let careersToProcess = allCareers;
@@ -144,6 +195,14 @@ export default function CareersPage() {
                                     <span className="sr-only">Planes de estudio</span>
                                 </Link>
                             </Button>
+                             <Button size="icon" variant="warning" onClick={() => handleEditClick(career)}>
+                                <Pencil className="h-4 w-4" />
+                                <span className="sr-only">Editar</span>
+                            </Button>
+                            <Button size="icon" variant="destructive" onClick={() => setCareerToDelete(career)}>
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Eliminar</span>
+                            </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -212,7 +271,7 @@ export default function CareersPage() {
           Carreras
         </h1>
         {user?.rol === 'administrador' && (
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
                 <DialogTrigger asChild>
                     <Button>
                         <PlusCircle className="mr-2 h-4 w-4" />
@@ -226,11 +285,45 @@ export default function CareersPage() {
                             Completa el formulario para registrar una nueva carrera.
                         </DialogDescription>
                     </DialogHeader>
-                    <CreateCareerForm onSuccess={() => { setIsModalOpen(false); fetchCareers(); }} />
+                    <CreateCareerForm onSuccess={handleSuccess} />
                 </DialogContent>
             </Dialog>
         )}
       </div>
+
+       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar Carrera</DialogTitle>
+            <DialogDescription>
+              Modifica los detalles de la carrera.
+            </DialogDescription>
+          </DialogHeader>
+          {careerToEdit && (
+            <EditCareerForm
+              career={careerToEdit}
+              onSuccess={handleSuccess}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      <AlertDialog open={!!careerToDelete} onOpenChange={(open) => !open && setCareerToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+                Esta acción no se puede deshacer. Esto eliminará permanentemente la carrera 
+                <span className="font-bold text-white"> {careerToDelete?.name}</span> y todos sus planes de estudio asociados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCareerToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
         <div className="relative w-full sm:max-w-xs flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -251,5 +344,3 @@ export default function CareersPage() {
     </div>
   )
 }
-
-    

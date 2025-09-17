@@ -22,23 +22,23 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { createCareer, getUsers } from "@/services/api"
+import { updateCareer, getUsers } from "@/services/api"
 import { useState, useEffect } from "react"
-import { User } from "@/lib/modelos"
+import { CareerSummary, User } from "@/lib/modelos"
 
-const createCareerSchema = z.object({
+const editCareerSchema = z.object({
   name: z.string().min(1, "El nombre de la carrera es requerido."),
   coordinator: z.string().optional().or(z.literal("unassigned")),
 });
 
-type CreateCareerFormValues = z.infer<typeof createCareerSchema>;
+type EditCareerFormValues = z.infer<typeof editCareerSchema>;
 
-interface CreateCareerFormProps {
+interface EditCareerFormProps {
+  career: CareerSummary;
   onSuccess?: () => void;
-  careerName?: string;
 }
 
-export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProps) {
+export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coordinators, setCoordinators] = useState<User[]>([]);
@@ -51,39 +51,37 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
     fetchData();
   }, []);
 
-  const form = useForm<CreateCareerFormValues>({
-    resolver: zodResolver(createCareerSchema),
+  const form = useForm<EditCareerFormValues>({
+    resolver: zodResolver(editCareerSchema),
     defaultValues: {
-      name: careerName || "",
-      coordinator: "unassigned",
+      name: career.name,
+      coordinator: career.coordinator || "unassigned",
     },
   });
 
-  const onSubmit = async (data: CreateCareerFormValues) => {
+  const onSubmit = async (data: EditCareerFormValues) => {
     setIsSubmitting(true);
     try {
         const careerData = {
             carrera: data.name,
             coordinador: data.coordinator === 'unassigned' ? null : data.coordinator,
         };
-        await createCareer(careerData);
-      
+      await updateCareer(career.id, careerData);
       toast({
-        title: "Carrera Creada",
-        description: `La carrera ${data.name} ha sido creada. Ahora puedes asignarle planteles y planes de estudio.`,
+        title: "Carrera Actualizada",
+        description: `La carrera ${data.name} ha sido actualizada con éxito.`,
       });
-      form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
         toast({
             variant: "destructive",
-            title: "Error al crear",
+            title: "Error al actualizar",
             description: error.message,
         });
       }
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -97,7 +95,7 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
             <FormItem>
               <FormLabel>Nombre de la Carrera</FormLabel>
               <FormControl>
-                <Input placeholder="Ej. Ingeniería en Software" {...field} disabled={!!careerName} />
+                <Input placeholder="Ej. Ingeniería en Software" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -129,7 +127,7 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
           )}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Creando...' : 'Crear Carrera'}
+            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
         </Button>
       </form>
     </Form>
