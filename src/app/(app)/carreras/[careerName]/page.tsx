@@ -15,16 +15,26 @@ import { Career, Subject } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
 import { Book, Pencil, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { CreateStudyPlanForm } from "@/components/create-study-plan-form"
 import { useAuth } from "@/context/auth-context"
-import { getCareers, getSubjects } from "@/services/api"
+import { getCareers, getSubjects, deleteCareer } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useToast } from "@/hooks/use-toast"
+import { EditStudyPlanForm } from "@/components/edit-study-plan-form"
 
 
 export default function CareerPlansPage() {
   const params = useParams();
   const careerName = decodeURIComponent(params.careerName as string);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [modalityToEdit, setModalityToEdit] = useState<Career | null>(null);
+  const [modalityToDelete, setModalityToDelete] = useState<Career | null>(null);
+  
   const { user } = useAuth();
 
   const [allCareers, setAllCareers] = useState<Career[]>([]);
@@ -34,15 +44,20 @@ export default function CareerPlansPage() {
 
   const [activeTabs, setActiveTabs] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = async () => {
       try {
         setIsLoading(true);
         const [careersData, subjectsData] = await Promise.all([
           getCareers(),
           getSubjects()
         ]);
-        setAllCareers(careersData);
+        // Since getCareers returns CareerSummary, we need a way to get full Career objects
+        // This is a temporary solution, API should provide full objects
+        const fullCareers: Career[] = careersData.flatMap(summary => 
+            (summary.modalities as Career[] || []).map(mod => ({...mod, id: mod.id || Math.random()}))
+        );
+
+        setAllCareers(fullCareers);
         setSubjects(subjectsData);
         setError(null);
       } catch (err: any) {
@@ -52,6 +67,8 @@ export default function CareerPlansPage() {
         setIsLoading(false);
       }
     };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -67,16 +84,47 @@ export default function CareerPlansPage() {
     return `${n}°`;
   };
 
-  const handleSuccess = async () => {
-    setIsModalOpen(false);
-    // Re-fetch data
-    try {
-      const careersData = await getCareers();
-      setAllCareers(careersData);
-    } catch (err: any) {
-      setError(err.message || 'Error al recargar las carreras');
-    }
+  const handleCreateSuccess = () => {
+    setIsCreateModalOpen(false);
+    fetchData();
   }
+
+  const handleEditSuccess = () => {
+    setIsEditModalOpen(false);
+    setModalityToEdit(null);
+    fetchData();
+  };
+
+  const handleEditClick = (modality: Career) => {
+    setModalityToEdit(modality);
+    setIsEditModalOpen(true);
+  };
+  
+  const handleDelete = async () => {
+    if (!modalityToDelete) return;
+    try {
+      await deleteCareer(modalityToDelete.id);
+      toast({
+        variant: "success",
+        title: "Plan de Estudio Eliminado",
+        description: `La modalidad ${modalityToDelete.modality} ha sido eliminada.`,
+      });
+      setModalityToDelete(null);
+      fetchData();
+      if (careerModalities.length === 1) { // If it was the last one
+        router.push('/carreras');
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast({
+            variant: "destructive",
+            title: "Error al eliminar",
+            description: error.message,
+        });
+      }
+    }
+  };
+
 
   const renderSubjectTabs = (career: Career, uniqueKey: string) => {
     const filteredSubjects = subjects.filter(
@@ -129,7 +177,7 @@ export default function CareerPlansPage() {
               value={`sem-${semester}`}
               className="text-xs"
             >
-              {getOrdinal(semester)}
+              {getOrdinal(semester)}°
             </TabsTrigger>
           ))}
         </TabsList>
@@ -151,7 +199,7 @@ export default function CareerPlansPage() {
           </p>
         </div>
         {user?.rol === 'administrador' && (
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
                 <DialogTrigger asChild>
                     <Button>Crear Plan de Estudio</Button>
                 </DialogTrigger>
@@ -163,7 +211,7 @@ export default function CareerPlansPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <CreateStudyPlanForm 
-                        onSuccess={handleSuccess} 
+                        onSuccess={handleCreateSuccess} 
                         careerName={careerName}
                         campus={firstModality?.campus}
                         coordinator={firstModality?.coordinator}
@@ -172,6 +220,41 @@ export default function CareerPlansPage() {
             </Dialog>
         )}
       </div>
+
+       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar Plan de Estudio</DialogTitle>
+            <DialogDescription>
+              Modifica los detalles de la modalidad.
+            </DialogDescription>
+          </DialogHeader>
+          {modalityToEdit && (
+            <EditStudyPlanForm
+              modality={modalityToEdit}
+              onSuccess={handleEditSuccess}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!modalityToDelete} onOpenChange={(open) => !open && setModalityToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+                Esta acción no se puede deshacer. Esto eliminará permanentemente la modalidad 
+                <span className="font-bold text-white"> {modalityToDelete?.modality}</span> de la carrera 
+                <span className="font-bold text-white"> {modalityToDelete?.name}</span>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setModalityToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       {error && <p className="text-destructive text-center">{error}</p>}
 
@@ -197,7 +280,7 @@ export default function CareerPlansPage() {
           {careerModalities.length > 0 ? careerModalities.map(modality => {
               const key = `${modality.name}-${modality.campus}-${modality.modality}`;
               return (
-                  <Card key={key} className="flex flex-col rounded-xl">
+                  <Card key={modality.id} className="flex flex-col rounded-xl">
                       <CardHeader>
                           <div className="flex items-start justify-between">
                               <div>
@@ -207,11 +290,11 @@ export default function CareerPlansPage() {
                               </div>
                               {user?.rol === 'administrador' && (
                                 <div className="flex gap-2">
-                                    <Button size="icon" variant="warning">
+                                    <Button size="icon" variant="warning" onClick={() => handleEditClick(modality)}>
                                         <Pencil className="h-4 w-4" />
                                         <span className="sr-only">Editar</span>
                                     </Button>
-                                    <Button size="icon" variant="destructive">
+                                    <Button size="icon" variant="destructive" onClick={() => setModalityToDelete(modality)}>
                                         <Trash2 className="h-4 w-4" />
                                         <span className="sr-only">Eliminar</span>
                                     </Button>
@@ -231,7 +314,7 @@ export default function CareerPlansPage() {
                   </Card>
               )
           }) : (
-              <div className="md:col-span-2 flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
+              <div className="md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
                   <h3 className="text-lg font-semibold text-white">No hay planes de estudio</h3>
                   <p className="text-muted-foreground mt-2">
                       Aún no se han creado planes de estudio para esta carrera. <br/>
@@ -244,3 +327,5 @@ export default function CareerPlansPage() {
     </div>
   );
 }
+
+    

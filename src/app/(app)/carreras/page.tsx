@@ -47,21 +47,22 @@ export default function CareersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchCareers = async () => {
+    try {
+      setIsLoading(true);
+      const careersData = await getCareers();
+      setAllCareers(careersData);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar los datos');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const careersData = await getCareers();
-        setAllCareers(careersData);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Error al cargar los datos');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
+    fetchCareers();
   }, []);
 
   const filteredCareers = useMemo(() => {
@@ -75,7 +76,17 @@ export default function CareersPage() {
       );
     }
     
-    return careersToProcess;
+    // Group by name
+    const grouped: { [key: string]: CareerSummary } = {};
+    careersToProcess.forEach(career => {
+        if (!grouped[career.name]) {
+            grouped[career.name] = { ...career, totalPlanteles: 0, totalModalidades: 0, id: career.id };
+        }
+        grouped[career.name].totalPlanteles += 1; // This logic might need adjustment based on real data
+        grouped[career.name].totalModalidades = grouped[career.name].totalModalidades + (career.totalModalidades || 1); // This logic might need adjustment
+    });
+
+    return Object.values(grouped);
   }, [allCareers, searchTerm]);
 
 
@@ -127,15 +138,7 @@ export default function CareersPage() {
                       <TableCell>{career.totalModalidades}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                           <Button size="icon" variant="warning">
-                                <Pencil className="h-4 w-4" />
-                                <span className="sr-only">Editar</span>
-                            </Button>
-                            <Button size="icon" variant="destructive">
-                                <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Eliminar</span>
-                            </Button>
-                            <Button asChild size="icon" variant="success">
+                           <Button asChild size="icon" variant="success">
                                 <Link href={`/carreras/${encodeURIComponent(career.name)}`}>
                                     <BookOpenCheck className="h-4 w-4" />
                                     <span className="sr-only">Planes de estudio</span>
@@ -150,7 +153,7 @@ export default function CareersPage() {
             </CardContent>
             <CardFooter>
               <div className="text-xs text-muted-foreground">
-                Mostrando <strong>1-{filteredCareers.length}</strong> de <strong>{allCareers.length}</strong> carreras
+                Mostrando <strong>1-{filteredCareers.length}</strong> de <strong>{filteredCareers.length}</strong> carreras
               </div>
             </CardFooter>
         </Card>
@@ -223,7 +226,7 @@ export default function CareersPage() {
                             Completa el formulario para registrar una nueva carrera.
                         </DialogDescription>
                     </DialogHeader>
-                    <CreateCareerForm onSuccess={() => setIsModalOpen(false)} />
+                    <CreateCareerForm onSuccess={() => { setIsModalOpen(false); fetchCareers(); }} />
                 </DialogContent>
             </Dialog>
         )}
@@ -248,3 +251,5 @@ export default function CareersPage() {
     </div>
   )
 }
+
+    

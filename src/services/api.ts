@@ -70,6 +70,7 @@ export const getCareers = async (): Promise<CareerSummary[]> => {
         totalMaterias: item.total_materias,
         totalPlanteles: item.total_planteles,
         totalModalidades: item.total_modalidades,
+        modalities: item.modalidades, // Assuming API returns this
     }));
 };
 
@@ -86,10 +87,10 @@ export const getCareerModalities = async (): Promise<Career[]> => {
     ]);
 };
 
-export const createCareer = (data: any): Promise<Career> => {
-    console.warn("createCareer is using mock implementation.");
-    return Promise.resolve({ ...data, id: Date.now() });
-}
+export const createCareer = (data: any): Promise<Career> => apiFetch('/carreras', { method: 'POST', body: JSON.stringify(data) });
+export const updateCareer = (id: number, data: any): Promise<Career> => apiFetch(`/carreras/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteCareer = (id: number): Promise<void> => apiFetch(`/carreras/${id}`, { method: 'DELETE' });
+
 
 export const getSubjects = async (): Promise<Subject[]> => {
     console.warn("getSubjects is using mock data. Implement API endpoint for /materias.");
@@ -212,6 +213,8 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
         { id: 3, title: "Estrategias de Enseñanza", type: "checkbox", category: "No Contable", criteria: [ { id: "3_1", text: "Utiliza diversas técnicas didácticas." }] },
     ]);
 };
+
+    
 
     
 

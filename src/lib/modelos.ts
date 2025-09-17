@@ -84,6 +84,7 @@ export interface CareerSummary {
   totalMaterias: number;
   totalPlanteles: number;
   totalModalidades: number;
+  modalities?: Career[];
 }
 
 export interface Subject {
@@ -190,5 +191,7 @@ export interface EvaluationPeriod {
   endDate: Date | null;
   careers: string[];
 }
+
+    
 
     
