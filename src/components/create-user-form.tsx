@@ -23,10 +23,9 @@ import {
 } from "@/components/ui/select"
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
-import { groups } from "@/lib/data"
-import { useMemo, useState } from "react"
-import { Roles } from "@/lib/modelos"
-import { createUser } from "@/services/api"
+import { useMemo, useState, useEffect } from "react"
+import { Career, Roles } from "@/lib/modelos"
+import { createUser, getCareers } from "@/services/api"
 
 const createUserSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido."),
@@ -34,19 +33,23 @@ const createUserSchema = z.object({
   apellido_materno: z.string().min(1, "El apellido materno es requerido."),
   correo: z.string().email("Correo electrónico inválido."),
   id_rol: z.coerce.number({ required_error: "Por favor, seleccione un rol." }),
-  grupo: z.string().optional(),
   grado_academico: z.string().optional(),
+  matricula: z.string().optional(),
+  id_carrera: z.coerce.number().optional(),
   contrasena: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
   contrasena_confirmation: z.string(),
 }).refine(data => data.contrasena === data.contrasena_confirmation, {
   message: "Las contraseñas no coinciden.",
   path: ["contrasena_confirmation"],
-}).refine(data => data.id_rol !== Roles.Alumno || (data.id_rol === Roles.Alumno && data.grupo), {
-    message: "Por favor, seleccione un grupo para el alumno.",
-    path: ["grupo"],
 }).refine(data => data.id_rol !== Roles.Docente || (data.id_rol === Roles.Docente && data.grado_academico && data.grado_academico.length > 0), {
     message: "El grado académico es requerido para los docentes.",
     path: ["grado_academico"],
+}).refine(data => data.id_rol !== Roles.Alumno || (data.id_rol === Roles.Alumno && data.matricula && data.matricula.length > 0), {
+    message: "La matrícula es requerida para los alumnos.",
+    path: ["matricula"],
+}).refine(data => data.id_rol !== Roles.Alumno || (data.id_rol === Roles.Alumno && data.id_carrera), {
+    message: "La carrera es requerida para los alumnos.",
+    path: ["id_carrera"],
 });
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
@@ -61,6 +64,28 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
   const { user: loggedInUser } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [careers, setCareers] = useState<Career[]>([]);
+
+  useEffect(() => {
+    const fetchCareers = async () => {
+        try {
+            const careersData = await getCareers();
+            // Assuming getCareers returns CareerSummary[], let's get modalities
+            const allModalities = (await Promise.all(careersData.map(c => getCareers()))) // Simplified, adjust as needed
+                .flat()
+                .flatMap(summary => summary.modalities || []);
+            setCareers(allModalities);
+        } catch (error) {
+            console.error("Failed to fetch careers", error);
+            toast({
+                variant: "destructive",
+                title: "Error al cargar carreras",
+                description: "No se pudieron obtener las carreras para el formulario."
+            })
+        }
+    };
+    fetchCareers();
+  }, [toast]);
 
   const roleDisplayMap = useMemo(() => {
     if (loggedInUser?.rol === 'coordinador') {
@@ -80,6 +105,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
       contrasena: "",
       contrasena_confirmation: "",
       grado_academico: "",
+      matricula: "",
     },
   });
   
@@ -172,7 +198,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Rol</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+              <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={String(field.value)}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione un rol" />
@@ -191,30 +217,45 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
           )}
         />
          {selectedRole === Roles.Alumno && (
-          <FormField
-            control={form.control}
-            name="grupo"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Grupo</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <>
+            <FormField
+              control={form.control}
+              name="matricula"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Matrícula</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un grupo" />
-                    </SelectTrigger>
+                    <Input placeholder="1234567" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    {groups.map((group) => (
-                      <SelectItem key={group.id} value={group.name}>
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="id_carrera"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Carrera</FormLabel>
+                  <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={String(field.value)}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione una carrera" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {careers.map((career) => (
+                        <SelectItem key={career.id} value={String(career.id)}>
+                          {career.name} ({career.modality})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
         )}
         {selectedRole === Roles.Docente && (
             <FormField

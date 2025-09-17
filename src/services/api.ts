@@ -142,8 +142,16 @@ export const createUser = (data: any): Promise<User> => {
             };
             break;
         case Roles.Alumno:
-            endpoint = '/alumnos'; // Assuming this endpoint exists
-            // Adapt payload for student if necessary
+            endpoint = '/alumnos';
+            payload = {
+                nombre: data.nombre,
+                apellido_paterno: data.apellido_paterno,
+                apellido_materno: data.apellido_materno,
+                correo: data.correo,
+                contrasena: data.contrasena,
+                matricula: data.matricula,
+                id_carrera: data.id_carrera
+            };
             break;
         case Roles.Coordinador:
              endpoint = '/coordinadores';
@@ -168,7 +176,7 @@ export const deleteUser = (id: number): Promise<void> => apiFetch(`/usuario/${id
 export const getAlumnos = (): Promise<Alumno[]> => apiFetch('/alumnos');
 
 // Teacher Management
-export const getDocentes = (id?: number): Promise<Docente[] | Docente> => {
+export const getDocentes = (id?: number): Promise<Docente | Docente[]> => {
     const endpoint = id ? `/docentes/${id}` : '/docentes';
     return apiFetch(endpoint);
 }
@@ -269,5 +277,6 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     
 
     
+
 
 
