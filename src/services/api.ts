@@ -34,7 +34,7 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     } catch (e) {
       // The response was not a valid JSON, so we stick with the status text.
     }
-    console.error(`API Error on ${endpoint}:`, response.status, response.statusText);
+    console.error(`API Error on ${endpoint}:`, errorMessage);
     throw new Error(errorMessage);
   }
 
@@ -60,7 +60,7 @@ export const getPlanteles = async (): Promise<Plantel[]> => {
 
 export const createPlantel = async (data: { nombre: string, ubicacion: string }): Promise<Plantel> => {
     const newPlantel = await apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
-    return {
+     return {
         id: newPlantel.id_plantel,
         name: newPlantel.nombre,
         location: newPlantel.ubicacion
@@ -283,6 +283,7 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     
 
     
+
 
 
 
