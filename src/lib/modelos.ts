@@ -65,7 +65,6 @@ export interface Plantel {
   id: number;
   name: string;
   location: string;
-  director: string;
 }
 
 export interface Career {

@@ -56,20 +56,20 @@ export const getPlanteles = async (): Promise<Plantel[]> => {
         id: item.id_plantel,
         name: item.nombre,
         location: item.ubicacion,
-        director: "Director no asignado" // API does not provide director yet
     }));
 };
-export const createPlantel = (data: Omit<Plantel, 'id'>): Promise<Plantel> => apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
+
+export const createPlantel = (data: { nombre: string, ubicacion: string }): Promise<Plantel> => apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
+
 export const getPlantelById = async (id: number): Promise<Plantel> => {
     const item = await apiFetch(`/planteles/${id}`);
     return {
         id: item.id_plantel,
         name: item.nombre,
         location: item.ubicacion,
-        director: "Director no asignado"
-    }
+    };
 };
-export const updatePlantel = (id: number, data: Partial<Omit<Plantel, 'id'>>): Promise<Plantel> => apiFetch(`/planteles/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const updatePlantel = (id: number, data: { nombre: string, ubicacion: string }): Promise<Plantel> => apiFetch(`/planteles/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles/${id}`, { method: 'DELETE' });
 
 // Career and Subject Management
@@ -277,6 +277,7 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     
 
     
+
 
 
 

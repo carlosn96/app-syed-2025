@@ -11,43 +11,78 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { useState, useEffect } from "react"
 import { CreatePlantelForm } from "@/components/create-plantel-form"
+import { EditPlantelForm } from "@/components/edit-plantel-form"
 import { Plantel } from "@/lib/modelos"
-import { getPlanteles } from "@/services/api"
+import { getPlanteles, deletePlantel } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useToast } from "@/hooks/use-toast"
 
 export default function CampusesPage() {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { toast } = useToast();
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [plantelToEdit, setPlantelToEdit] = useState<Plantel | null>(null);
+    const [plantelToDelete, setPlantelToDelete] = useState<Plantel | null>(null);
+    
     const [planteles, setPlanteles] = useState<Plantel[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const fetchPlanteles = async () => {
+        try {
+            setIsLoading(true);
+            const data = await getPlanteles();
+            setPlanteles(data);
+            setError(null);
+        } catch (err: any) {
+            setError(err.message || 'Error al cargar los planteles');
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchPlanteles = async () => {
-            try {
-                setIsLoading(true);
-                const data = await getPlanteles();
-                setPlanteles(data);
-                setError(null);
-            } catch (err: any) {
-                setError(err.message || 'Error al cargar los planteles');
-                console.error(err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
         fetchPlanteles();
     }, []);
+    
+    const handleSuccess = () => {
+        setIsCreateModalOpen(false);
+        setIsEditModalOpen(false);
+        fetchPlanteles();
+    }
+    
+    const handleEditClick = (plantel: Plantel) => {
+        setPlantelToEdit(plantel);
+        setIsEditModalOpen(true);
+    }
+    
+    const handleDelete = async () => {
+        if (!plantelToDelete) return;
+        try {
+            await deletePlantel(plantelToDelete.id);
+            toast({
+                variant: "success",
+                title: "Plantel Eliminado",
+                description: `El plantel ${plantelToDelete.name} ha sido eliminado.`,
+            });
+            setPlantelToDelete(null);
+            fetchPlanteles();
+        } catch (error) {
+            if (error instanceof Error) {
+                toast({
+                    variant: "destructive",
+                    title: "Error al eliminar",
+                    description: error.message,
+                });
+            }
+        }
+    }
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -55,7 +90,7 @@ export default function CampusesPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
             Gestión de Planteles
         </h1>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
                 <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -69,10 +104,43 @@ export default function CampusesPage() {
                         Completa el formulario para registrar un nuevo plantel.
                     </DialogDescription>
                 </DialogHeader>
-                <CreatePlantelForm onSuccess={() => setIsModalOpen(false)} />
+                <CreatePlantelForm onSuccess={handleSuccess} />
             </DialogContent>
         </Dialog>
       </div>
+
+       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar Plantel</DialogTitle>
+            <DialogDescription>
+              Modifica los detalles del plantel.
+            </DialogDescription>
+          </DialogHeader>
+          {plantelToEdit && (
+            <EditPlantelForm
+              plantel={plantelToEdit}
+              onSuccess={handleSuccess}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      <AlertDialog open={!!plantelToDelete} onOpenChange={(open) => !open && setPlantelToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+                Esta acción no se puede deshacer. Esto eliminará permanentemente el plantel 
+                <span className="font-bold text-white"> {plantelToDelete?.name}</span>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPlantelToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {error && <p className="text-destructive text-center">{error}</p>}
 
@@ -98,11 +166,11 @@ export default function CampusesPage() {
                             <CardDescription>{campus.location}</CardDescription>
                         </div>
                         <div className="flex gap-2">
-                          <Button size="icon" variant="warning">
+                          <Button size="icon" variant="warning" onClick={() => handleEditClick(campus)}>
                               <Pencil className="h-4 w-4" />
                               <span className="sr-only">Editar</span>
                           </Button>
-                          <Button size="icon" variant="destructive">
+                          <Button size="icon" variant="destructive" onClick={() => setPlantelToDelete(campus)}>
                               <Trash2 className="h-4 w-4" />
                               <span className="sr-only">Eliminar</span>
                           </Button>

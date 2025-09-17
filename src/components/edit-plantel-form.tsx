@@ -15,44 +15,48 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { createPlantel } from "@/services/api"
+import { updatePlantel } from "@/services/api"
 import { useState } from "react"
 import { Plantel } from "@/lib/modelos"
 
-const createPlantelSchema = z.object({
+const editPlantelSchema = z.object({
   nombre: z.string().min(1, "El nombre del plantel es requerido."),
   ubicacion: z.string().min(1, "La ubicación es requerida."),
 });
 
-type CreatePlantelFormValues = z.infer<typeof createPlantelSchema>;
+type EditPlantelFormValues = z.infer<typeof editPlantelSchema>;
 
-export function CreatePlantelForm({ onSuccess }: { onSuccess?: () => void }) {
+interface EditPlantelFormProps {
+  plantel: Plantel;
+  onSuccess?: () => void;
+}
+
+export function EditPlantelForm({ plantel, onSuccess }: EditPlantelFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<CreatePlantelFormValues>({
-    resolver: zodResolver(createPlantelSchema),
+  const form = useForm<EditPlantelFormValues>({
+    resolver: zodResolver(editPlantelSchema),
     defaultValues: {
-      nombre: "",
-      ubicacion: "",
+      nombre: plantel.name,
+      ubicacion: plantel.location,
     },
   });
 
-  const onSubmit = async (data: CreatePlantelFormValues) => {
+  const onSubmit = async (data: EditPlantelFormValues) => {
     setIsSubmitting(true);
     try {
-      await createPlantel(data);
+      await updatePlantel(plantel.id, data);
       toast({
-        title: "Plantel Creado",
-        description: `El plantel ${data.nombre} ha sido creado con éxito.`,
+        title: "Plantel Actualizado",
+        description: `El plantel ${data.nombre} ha sido actualizado con éxito.`,
       });
-      form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
         toast({
             variant: "destructive",
-            title: "Error al crear plantel",
+            title: "Error al actualizar",
             description: error.message,
         });
       }
@@ -91,7 +95,7 @@ export function CreatePlantelForm({ onSuccess }: { onSuccess?: () => void }) {
           )}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Creando...' : 'Crear Plantel'}
+            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
         </Button>
       </form>
     </Form>
