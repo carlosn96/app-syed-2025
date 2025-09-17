@@ -44,7 +44,6 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     return result.datos ?? result; // Return 'datos' if it exists, otherwise the whole result.
   } else {
     const errorMessage = result.mensaje || (result.datos?.errors ? Object.values(result.datos.errors).flat().join(' ') : 'Ocurrió un error desconocido.');
-    console.error(`API Error on ${endpoint} (with exito=false):`, result);
     throw new Error(errorMessage);
   }
 };
@@ -59,7 +58,14 @@ export const getPlanteles = async (): Promise<Plantel[]> => {
     }));
 };
 
-export const createPlantel = (data: { nombre: string, ubicacion: string }): Promise<Plantel> => apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
+export const createPlantel = async (data: { nombre: string, ubicacion: string }): Promise<Plantel> => {
+    const newPlantel = await apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
+    return {
+        id: newPlantel.id_plantel,
+        name: newPlantel.nombre,
+        location: newPlantel.ubicacion
+    };
+};
 
 export const getPlantelById = async (id: number): Promise<Plantel> => {
     const item = await apiFetch(`/planteles/${id}`);
@@ -277,6 +283,7 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     
 
     
+
 
 
 
