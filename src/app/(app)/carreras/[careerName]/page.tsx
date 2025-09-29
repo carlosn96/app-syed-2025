@@ -22,6 +22,7 @@ import { getCareers, getSubjects, deleteCareer } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { EditStudyPlanForm } from "@/components/edit-study-plan-form"
+import { FloatingBackButton } from "@/components/ui/floating-back-button"
 
 
 export default function CareerPlansPage() {
@@ -189,6 +190,7 @@ export default function CareerPlansPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <FloatingBackButton />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col">
           <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
@@ -328,4 +330,5 @@ export default function CareerPlansPage() {
   );
 }
 
+    
     

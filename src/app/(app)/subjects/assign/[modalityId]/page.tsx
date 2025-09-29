@@ -34,6 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/context/auth-context'
 import { getCareers, getSubjects } from '@/services/api'
 import { Skeleton } from '@/components/ui/skeleton'
+import { FloatingBackButton } from '@/components/ui/floating-back-button'
 
 export default function ManageModalitySubjectsPage() {
     const params = useParams()
@@ -120,6 +121,7 @@ export default function ManageModalitySubjectsPage() {
     
     return (
         <div className="flex flex-col gap-8">
+            <FloatingBackButton />
             <div className="flex flex-col">
                 <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
                     Gestionar Plan de Estudio
@@ -235,3 +237,5 @@ export default function ManageModalitySubjectsPage() {
         </div>
     )
 }
+
+    

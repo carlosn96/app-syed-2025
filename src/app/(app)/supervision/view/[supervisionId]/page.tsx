@@ -16,6 +16,7 @@ import { CheckCircle2, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { getSupervisions, getSupervisionRubrics } from '@/services/api'
 import { Skeleton } from '@/components/ui/skeleton'
+import { FloatingBackButton } from '@/components/ui/floating-back-button'
 
 const getScoreColor = (score: number) => {
     if (score < 60) return 'bg-destructive/80';
@@ -73,6 +74,7 @@ export default function ViewSupervisionPage() {
     if (supervision.status !== 'Completada' || !evaluationData) {
         return (
              <div className="flex flex-col gap-8">
+                 <FloatingBackButton />
                  <Card className="rounded-xl">
                     <CardHeader>
                         <CardTitle>Evaluación No Disponible</CardTitle>
@@ -95,6 +97,7 @@ export default function ViewSupervisionPage() {
 
     return (
         <div className="flex flex-col gap-8">
+            <FloatingBackButton />
             <Card className="rounded-xl">
                  <CardHeader>
                     <div className="flex justify-between items-start">
@@ -160,3 +163,5 @@ export default function ViewSupervisionPage() {
         </div>
     )
 }
+
+    

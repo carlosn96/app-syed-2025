@@ -27,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { MessageSquarePlus, MessageSquareX } from 'lucide-react'
 import { ProgressRing } from '@/components/ui/progress-ring'
+import { FloatingBackButton } from '@/components/ui/floating-back-button'
 
 type EvaluationFormValues = {
   [key: string]: {
@@ -335,6 +336,7 @@ export default function EvaluateSupervisionPage() {
     
     return (
         <div className="flex flex-col gap-8">
+            <FloatingBackButton />
              <form onSubmit={handleSubmit(onSubmit)}>
                 <Card className="rounded-xl">
                     <CardHeader>
@@ -437,3 +439,5 @@ export default function EvaluateSupervisionPage() {
         </div>
     )
 }
+
+    

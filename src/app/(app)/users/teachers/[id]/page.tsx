@@ -33,6 +33,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getUserById, getSupervisions, getEvaluations, getSubjects, getSchedules, getGroups, getDocentes } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
+import { FloatingBackButton } from "@/components/ui/floating-back-button"
 
 const getScoreColor = (score: number) => {
   if (score < 60) return 'hsl(var(--destructive))';
@@ -269,6 +270,7 @@ export default function TeacherProfilePage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <FloatingBackButton />
       <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20">
@@ -499,3 +501,5 @@ export default function TeacherProfilePage() {
     </div>
   )
 }
+
+    
