@@ -28,7 +28,7 @@ import { CareerSummary, User } from "@/lib/modelos"
 
 const editCareerSchema = z.object({
   name: z.string().min(1, "El nombre de la carrera es requerido."),
-  coordinator: z.string().optional().or(z.literal("unassigned")),
+  coordinatorId: z.string().optional(),
 });
 
 type EditCareerFormValues = z.infer<typeof editCareerSchema>;
@@ -46,25 +46,38 @@ export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
   useEffect(() => {
     const fetchData = async () => {
         const usersData = await getUsers();
-        setCoordinators(usersData.filter(u => u.rol === 'coordinador'));
+        const coordinatorUsers = usersData.filter(u => u.rol === 'coordinador');
+        setCoordinators(coordinatorUsers);
     };
     fetchData();
   }, []);
+
+  const initialCoordinator = coordinators.find(c => `${c.nombre} ${c.apellido_paterno}`.trim() === career.coordinator);
 
   const form = useForm<EditCareerFormValues>({
     resolver: zodResolver(editCareerSchema),
     defaultValues: {
       name: career.name,
-      coordinator: career.coordinator || "unassigned",
+      coordinatorId: initialCoordinator?.id.toString() || "unassigned",
     },
   });
+
+   useEffect(() => {
+    if (coordinators.length > 0) {
+        const initialCoordinator = coordinators.find(c => `${c.nombre} ${c.apellido_paterno}`.trim() === career.coordinator);
+        form.reset({
+            name: career.name,
+            coordinatorId: initialCoordinator?.id.toString() || "unassigned",
+        });
+    }
+  }, [coordinators, career, form]);
 
   const onSubmit = async (data: EditCareerFormValues) => {
     setIsSubmitting(true);
     try {
         const careerData = {
             carrera: data.name,
-            coordinador: data.coordinator === 'unassigned' ? null : data.coordinator,
+            id_coordinador: data.coordinatorId === 'unassigned' ? null : Number(data.coordinatorId),
         };
       await updateCareer(career.id, careerData);
       toast({
@@ -103,11 +116,11 @@ export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
         />
         <FormField
           control={form.control}
-          name="coordinator"
+          name="coordinatorId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Coordinador (Opcional)</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione un coordinador" />
@@ -116,7 +129,7 @@ export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
                 <SelectContent>
                    <SelectItem value="unassigned">Sin asignar</SelectItem>
                   {coordinators.map((coordinator) => (
-                    <SelectItem key={coordinator.id} value={`${coordinator.nombre} ${coordinator.apellido_paterno}`.trim()}>
+                    <SelectItem key={coordinator.id} value={coordinator.id.toString()}>
                        {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
                     </SelectItem>
                   ))}

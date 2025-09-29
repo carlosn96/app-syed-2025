@@ -1,6 +1,5 @@
 
 
-
 import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, Roles } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
@@ -107,7 +106,25 @@ export const getCareerModalities = async (): Promise<Career[]> => {
 };
 
 export const createCareer = (data: {nombre: string}): Promise<Career> => apiFetch('/carreras', { method: 'POST', body: JSON.stringify(data) });
-export const updateCareer = (id: number, data: {carrera: string, coordinador: string | null}): Promise<Career> => apiFetch(`/carreras/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+
+export const assignCoordinatorToCareer = (data: { id_coordinador: number, id_carrera: number }): Promise<void> => 
+    apiFetch('/asignarCarreraCoordinador', { method: 'POST', body: JSON.stringify(data) });
+
+
+export const updateCareer = async (id_carrera: number, data: {carrera: string, id_coordinador: number | null}): Promise<Career> => {
+    // First, update the career name
+    const updatePayload = { carrera: data.carrera };
+    const updatedCareer = await apiFetch(`/carreras/${id_carrera}`, { method: 'PUT', body: JSON.stringify(updatePayload) });
+
+    // Then, if a coordinator is selected, assign them.
+    if (data.id_coordinador) {
+        await assignCoordinatorToCareer({ id_coordinador: data.id_coordinador, id_carrera });
+    }
+    // If coordinator is null, we might need a /de-assign endpoint, or the backend handles this.
+    // For now, we assume assigning a new one overwrites or we can only assign.
+
+    return updatedCareer;
+};
 export const deleteCareer = (id: number): Promise<void> => apiFetch(`/carreras/${id}`, { method: 'DELETE' });
 
 
@@ -284,6 +301,7 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     
 
     
+
 
 
 
