@@ -22,9 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { updateCareer, getUsers } from "@/services/api"
+import { updateCareer, getCoordinadores } from "@/services/api"
 import { useState, useEffect } from "react"
-import { CareerSummary, User } from "@/lib/modelos"
+import { CareerSummary, Coordinador } from "@/lib/modelos"
 
 const editCareerSchema = z.object({
   name: z.string().min(1, "El nombre de la carrera es requerido."),
@@ -41,33 +41,32 @@ interface EditCareerFormProps {
 export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [coordinators, setCoordinators] = useState<User[]>([]);
+  const [coordinators, setCoordinators] = useState<Coordinador[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
-        const usersData = await getUsers();
-        const coordinatorUsers = usersData.filter(u => u.rol === 'coordinador');
-        setCoordinators(coordinatorUsers);
+        const coordinatorsData = await getCoordinadores();
+        setCoordinators(coordinatorsData);
     };
     fetchData();
   }, []);
 
-  const initialCoordinator = coordinators.find(c => `${c.nombre} ${c.apellido_paterno}`.trim() === career.coordinator);
+  const initialCoordinator = coordinators.find(c => c.nombre_completo.trim() === career.coordinator);
 
   const form = useForm<EditCareerFormValues>({
     resolver: zodResolver(editCareerSchema),
     defaultValues: {
       name: career.name,
-      coordinatorId: initialCoordinator?.id.toString() || "unassigned",
+      coordinatorId: initialCoordinator?.id_coordinador.toString() || "unassigned",
     },
   });
 
    useEffect(() => {
     if (coordinators.length > 0) {
-        const initialCoordinator = coordinators.find(c => `${c.nombre} ${c.apellido_paterno}`.trim() === career.coordinator);
+        const initialCoordinator = coordinators.find(c => c.nombre_completo.trim() === career.coordinator);
         form.reset({
             name: career.name,
-            coordinatorId: initialCoordinator?.id.toString() || "unassigned",
+            coordinatorId: initialCoordinator?.id_coordinador.toString() || "unassigned",
         });
     }
   }, [coordinators, career, form]);
@@ -129,8 +128,8 @@ export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
                 <SelectContent>
                    <SelectItem value="unassigned">Sin asignar</SelectItem>
                   {coordinators.map((coordinator) => (
-                    <SelectItem key={coordinator.id} value={coordinator.id.toString()}>
-                       {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
+                    <SelectItem key={coordinator.id_coordinador} value={coordinator.id_coordinador.toString()}>
+                       {coordinator.nombre_completo}
                     </SelectItem>
                   ))}
                 </SelectContent>
