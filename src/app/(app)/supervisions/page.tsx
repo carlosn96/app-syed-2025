@@ -66,7 +66,7 @@ export default function SupervisionsPage() {
   }, []);
 
   const supervisions = useMemo(() => {
-    if (user?.rol === 'coordinator') {
+    if (user?.rol === 'coordinador') {
       const coordinatorName = `${user.nombre} ${user.apellido_paterno}`.trim();
       return allSupervisions.filter(s => s.coordinator === coordinatorName);
     }
@@ -305,3 +305,5 @@ export default function SupervisionsPage() {
     </div>
   )
 }
+
+    

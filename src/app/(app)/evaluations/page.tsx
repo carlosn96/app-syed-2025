@@ -34,9 +34,8 @@ import { es } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { FloatingButton } from "@/components/ui/floating-button"
 import { useAuth } from "@/context/auth-context"
-import { Pencil, FilePenLine } from "lucide-react"
+import { Pencil, FilePenLine, PlusCircle } from "lucide-react"
 import Link from "next/link"
 import { getEvaluationPeriods, getSchedules, getTeachers } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -189,14 +188,17 @@ export default function EvaluationsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Agenda de Evaluaciones
         </h1>
         {user?.rol === 'coordinador' && (
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
-              <FloatingButton text="Crear Periodo" />
+              <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Crear Periodo
+              </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
@@ -327,3 +329,5 @@ export default function EvaluationsPage() {
     </div>
   )
 }
+
+    
