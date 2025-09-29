@@ -93,15 +93,21 @@ export default function TeacherProfilePage() {
         setIsLoading(true);
         setError(null);
         try {
+            const teacherUserResult = await getDocentes(teacherId);
+
+            if (!teacherUserResult || Array.isArray(teacherUserResult)) {
+                throw new Error("Docente no encontrado.");
+            }
+            
+            const currentTeacher: Docente = teacherUserResult;
+
             const [
-                teacherUser,
                 allSupervisions,
                 allEvaluations,
                 allSubjects,
                 allSchedules,
                 allGroups,
             ] = await Promise.all([
-                getDocentes(teacherId),
                 getSupervisions(),
                 getEvaluations(),
                 getSubjects(),
@@ -109,15 +115,6 @@ export default function TeacherProfilePage() {
                 getGroups(),
             ]);
             
-            if (!teacherUser || !Array.isArray(teacherUser) && teacherUser.id_usuario !== teacherId) {
-              throw new Error("Docente no encontrado.");
-            }
-            const currentTeacher = Array.isArray(teacherUser) ? teacherUser.find(t => t.id_usuario === teacherId) : teacherUser
-
-            if (!currentTeacher) {
-              throw new Error("Docente no encontrado.");
-            }
-
             const teacherFullName = currentTeacher.nombre_completo;
 
             const teacherSupervisions = allSupervisions.filter(s => s.teacher === teacherFullName);
@@ -502,7 +499,3 @@ export default function TeacherProfilePage() {
     </div>
   )
 }
-
-    
-
-    

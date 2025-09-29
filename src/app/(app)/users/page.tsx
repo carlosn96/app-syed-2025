@@ -36,11 +36,11 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/context/auth-context"
-import { User, Roles } from "@/lib/modelos"
+import { User, Roles, Docente } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
 import { EditUserForm } from "@/components/edit-user-form"
 import { Input } from "@/components/ui/input"
-import { getUsers, deleteUser } from "@/services/api"
+import { getUsers, deleteUser, getDocentes } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 
@@ -54,6 +54,7 @@ export default function UsersPage() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [isUsersLoading, setIsUsersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [allDocentes, setAllDocentes] = useState<Docente[]>([]);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -72,12 +73,12 @@ export default function UsersPage() {
     }
   }
 
-  const fetchUsers = async () => {
+  const fetchUsersAndDocentes = async () => {
     try {
       setIsUsersLoading(true);
-      const data = await getUsers();
+      const [usersData, docentesData] = await Promise.all([getUsers(), getDocentes()]);
       
-      const mappedData: User[] = data.map(u => ({
+      const mappedData: User[] = usersData.map(u => ({
         ...u,
         rol: roleIdToName(u.id_rol),
         rol_nombre: u.rol
@@ -88,6 +89,11 @@ export default function UsersPage() {
       } else {
           setAllUsers(mappedData);
       }
+
+      if (Array.isArray(docentesData)) {
+        setAllDocentes(docentesData);
+      }
+      
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Error al cargar los usuarios');
@@ -98,7 +104,7 @@ export default function UsersPage() {
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsersAndDocentes();
   }, [loggedInUser]);
 
   const { teachers, students, filteredUsers } = useMemo(() => {
@@ -155,7 +161,7 @@ export default function UsersPage() {
             title: "Usuario Eliminado",
             description: "El usuario ha sido eliminado correctamente.",
         });
-        fetchUsers(); // Re-fetch users to update the list
+        fetchUsersAndDocentes(); // Re-fetch users to update the list
     } catch (error) {
         if (error instanceof Error) {
             toast({
@@ -182,60 +188,65 @@ export default function UsersPage() {
       return ['all', 'docente', 'alumno', 'coordinador'];
   }, [loggedInUser]);
   
-  const renderUserCard = (user: User) => (
-    <Card key={user.id}>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="text-base">{`${user.nombre} ${user.apellido_paterno}`}</CardTitle>
-            <CardDescription>{user.correo}</CardDescription>
-          </div>
-          <Badge variant="outline">{user.rol_nombre || user.rol}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="text-sm space-y-2">
-        <p><span className="font-semibold">Grupo:</span> {user.rol === 'alumno' ? user.grupo : 'N/A'}</p>
-        <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
-        <div className="flex gap-2 pt-2">
-          <Button size="sm" variant="warning" className="flex-1" onClick={() => handleEditClick(user)}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Editar
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-                <Button size="sm" variant="destructive" className="flex-1">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Eliminar
+  const renderUserCard = (user: User) => {
+    const docenteInfo = user.rol === 'docente' ? allDocentes.find(d => d.id_usuario === user.id) : undefined;
+    const docenteId = docenteInfo?.id_docente;
+
+    return (
+        <Card key={user.id}>
+        <CardHeader>
+            <div className="flex items-start justify-between">
+            <div>
+                <CardTitle className="text-base">{`${user.nombre} ${user.apellido_paterno}`}</CardTitle>
+                <CardDescription>{user.correo}</CardDescription>
+            </div>
+            <Badge variant="outline">{user.rol_nombre || user.rol}</Badge>
+            </div>
+        </CardHeader>
+        <CardContent className="text-sm space-y-2">
+            <p><span className="font-semibold">Grupo:</span> {user.rol === 'alumno' ? user.grupo : 'N/A'}</p>
+            <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
+            <div className="flex gap-2 pt-2">
+            <Button size="sm" variant="warning" className="flex-1" onClick={() => handleEditClick(user)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Editar
+            </Button>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="destructive" className="flex-1">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Eliminar
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario
+                            <span className="font-bold text-white"> {`${user.nombre} ${user.apellido_paterno}`}</span>.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
+                            Confirmar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            {user.rol === 'docente' && docenteId && (
+                <Button asChild size="sm" variant="outline" className="flex-1">
+                    <Link href={`/users/teachers/${docenteId}`}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        Ver Perfil
+                    </Link>
                 </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario
-                        <span className="font-bold text-white"> {`${user.nombre} ${user.apellido_paterno}`}</span>.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
-                        Confirmar
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-           {user.rol === 'docente' && (
-             <Button asChild size="sm" variant="outline" className="flex-1">
-                <Link href={`/users/teachers/${user.id}`}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    Ver Perfil
-                </Link>
-             </Button>
-           )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+            )}
+            </div>
+        </CardContent>
+        </Card>
+    );
+  };
   
   const renderSkeletonCard = (index: number) => (
     <Card key={index}>
@@ -358,7 +369,7 @@ export default function UsersPage() {
                     Completa el formulario para registrar una nueva cuenta.
                     </DialogDescription>
                 </DialogHeader>
-                <CreateUserForm onSuccess={() => { setIsCreateModalOpen(false); fetchUsers(); }} />
+                <CreateUserForm onSuccess={() => { setIsCreateModalOpen(false); fetchUsersAndDocentes(); }} />
             </DialogContent>
            </Dialog>
         )}
@@ -375,7 +386,7 @@ export default function UsersPage() {
             {userToEdit && (
                 <EditUserForm 
                     user={userToEdit} 
-                    onSuccess={() => { setIsEditModalOpen(false); fetchUsers(); }} 
+                    onSuccess={() => { setIsEditModalOpen(false); fetchUsersAndDocentes(); }} 
                 />
             )}
         </DialogContent>

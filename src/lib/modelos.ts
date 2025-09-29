@@ -190,8 +190,3 @@ export interface EvaluationPeriod {
   endDate: Date | null;
   careers: string[];
 }
-
-    
-
-    
-
