@@ -1,6 +1,6 @@
 
 "use client"
-import { Pencil, Trash2, BookOpenCheck, PlusCircle } from "lucide-react"
+import { Pencil, Trash2, BookCopy, PlusCircle } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -179,8 +179,8 @@ export default function CampusesPage() {
                     <CardFooter>
                       <Button asChild size="sm" variant="success" className="w-full">
                           <Link href={`/planteles/${campus.id}/carreras`}>
-                              <BookOpenCheck className="h-4 w-4" />
-                              <span>Planes de estudio</span>
+                              <BookCopy className="h-4 w-4" />
+                              <span>Ver Carreras</span>
                           </Link>
                       </Button>
                     </CardFooter>

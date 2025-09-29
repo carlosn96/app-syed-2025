@@ -5,5 +5,6 @@ export {
     ClipboardCheck,
     ClipboardEdit,
     ClipboardList,
-    Eye
+    Eye,
+    BookCopy
 } from "lucide-react";
