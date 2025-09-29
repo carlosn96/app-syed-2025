@@ -86,6 +86,11 @@ export interface CareerSummary {
   modalities?: Career[];
 }
 
+export interface AssignedCareer {
+    id_carrera: number;
+    carrera: string;
+}
+
 export interface Subject {
   id: number;
   name: string;

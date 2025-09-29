@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Career, Plantel } from "@/lib/modelos"
+import { Career, Plantel, CareerSummary } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -21,50 +21,58 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { CreateCareerForm } from "@/components/create-career-form"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/context/auth-context"
-import { getCareers, getPlantelById } from "@/services/api"
+import { getCarrerasPorPlantel, getPlantelById, removeCarreraFromPlantel, getCareers } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
+import { AssignCareerToPlantelForm } from "@/components/assign-career-to-plantel-form"
+import { useToast } from "@/hooks/use-toast"
 
 
-interface GroupedCareer {
-    name: string;
-    campus: string;
-    modalities: Career[];
+interface AssignedCareer {
+    id_carrera: number;
+    carrera: string;
 }
-
 
 export default function PlantelCarrerasPage() {
   const params = useParams();
   const plantelId = Number(params.plantelId);
   const { user } = useAuth();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { toast } = useToast();
+
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [careerToRemove, setCareerToRemove] = useState<AssignedCareer | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   
   const [plantel, setPlantel] = useState<Plantel | null>(null);
-  const [allCareers, setAllCareers] = useState<Career[]>([]);
+  const [assignedCareers, setAssignedCareers] = useState<AssignedCareer[]>([]);
+  const [allCareers, setAllCareers] = useState<CareerSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [plantelData, careersData] = await Promise.all([
+        const [plantelData, assignedCareersData, allCareersData] = await Promise.all([
           getPlantelById(plantelId),
-          getCareers(),
+          getCarrerasPorPlantel(plantelId),
+          getCareers()
         ]);
         setPlantel(plantelData);
-        
-        // This is a temporary solution since API doesn't filter by plantel
-        const careersInPlantel = careersData
-            .map(summary => summary.modalities || [])
-            .flat()
-            .filter(modality => modality.campus === plantelData.name);
-
-        setAllCareers(careersInPlantel);
+        setAssignedCareers(assignedCareersData);
+        setAllCareers(allCareersData)
 
       } catch (err: any) {
         setError(err.message || 'Error al cargar los datos');
@@ -72,65 +80,65 @@ export default function PlantelCarrerasPage() {
         setIsLoading(false);
       }
     };
+
+  useEffect(() => {
     fetchData();
   }, [plantelId]);
+  
+  const handleSuccess = () => {
+    setIsAssignModalOpen(false);
+    fetchData();
+  }
+  
+  const handleRemove = async () => {
+    if (!careerToRemove || !plantel) return;
+    try {
+        await removeCarreraFromPlantel({ id_plantel: plantel.id, id_carrera: careerToRemove.id_carrera });
+        toast({
+            variant: "success",
+            title: "Carrera Desasignada",
+            description: `La carrera ${careerToRemove.carrera} ha sido desasignada del plantel.`,
+        });
+        setCareerToRemove(null);
+        fetchData();
+    } catch (error) {
+       if (error instanceof Error) {
+        toast({
+            variant: "destructive",
+            title: "Error al desasignar",
+            description: error.message,
+        });
+      }
+    }
+  }
 
-
-  const groupedCareers = useMemo(() => {
-    const groups: Record<string, GroupedCareer> = {};
-    allCareers.forEach(career => {
-        const key = `${career.name}-${career.campus}`;
-        if (!groups[key]) {
-            groups[key] = {
-                name: career.name,
-                campus: career.campus,
-                modalities: [],
-            };
-        }
-        groups[key].modalities.push(career);
-    });
-    return Object.values(groups);
-  }, [allCareers]);
-
-
-  const filteredGroupedCareers = groupedCareers.filter(group => 
-    group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    group.campus.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    group.modalities.some(m => m.coordinator.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredCareers = assignedCareers.filter(career => 
+    career.carrera.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  const unassignedCareers = useMemo(() => {
+    const assignedIds = new Set(assignedCareers.map(c => c.id_carrera));
+    return allCareers.filter(c => !assignedIds.has(c.id));
+  }, [assignedCareers, allCareers]);
 
-
-  const renderCareerContent = (group: GroupedCareer) => {
-    const key = `${group.name}-${group.campus}`;
-
+  const renderCareerContent = (career: AssignedCareer) => {
     return (
-         <Card key={key} className="flex flex-col rounded-xl">
+         <Card key={career.id_carrera} className="flex flex-col rounded-xl">
             <CardHeader>
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left w-full">
                   <div>
-                      <CardTitle>{group.name}</CardTitle>
-                      <CardDescription>{group.campus}</CardDescription>
-                      <p className="text-xs text-muted-foreground pt-2">{group.modalities[0].coordinator}</p>
+                      <CardTitle>{career.carrera}</CardTitle>
                   </div>
                    {user?.rol === 'administrador' && (
                     <div className="flex gap-2 shrink-0">
-                        <Button size="icon" variant="warning">
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Editar</span>
-                        </Button>
-                        <Button size="icon" variant="destructive">
+                        <Button size="icon" variant="destructive" onClick={() => setCareerToRemove(career)}>
                             <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Eliminar</span>
+                            <span className="sr-only">Desasignar</span>
                         </Button>
                     </div>
                    )}
               </div>
             </CardHeader>
-            <CardContent>
-                <p className="text-sm text-muted-foreground">
-                    {group.modalities.length} {group.modalities.length === 1 ? 'modalidad' : 'modalidades'} disponible(s).
-                </p>
-            </CardContent>
         </Card>
     );
   };
@@ -143,7 +151,7 @@ export default function PlantelCarrerasPage() {
             <Skeleton className="h-4 w-1/4 mt-2" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 w-full" />)}
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
         </div>
       </div>
     );
@@ -169,21 +177,25 @@ export default function PlantelCarrerasPage() {
             <p className="text-muted-foreground">Lista de carreras disponibles en este plantel.</p>
         </div>
         {user?.rol === 'administrador' && (
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <Dialog open={isAssignModalOpen} onOpenChange={setIsAssignModalOpen}>
                 <DialogTrigger asChild>
                     <Button>
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Crear Carrera
+                        Asignar Carrera
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Crear Nueva Carrera</DialogTitle>
+                        <DialogTitle>Asignar Carrera al Plantel</DialogTitle>
                         <DialogDescription>
-                            Completa el formulario para registrar una nueva carrera.
+                            Selecciona una carrera de la lista para asignarla a {plantel.name}.
                         </DialogDescription>
                     </DialogHeader>
-                    <CreateCareerForm onSuccess={() => setIsModalOpen(false)} />
+                    <AssignCareerToPlantelForm 
+                      plantelId={plantelId} 
+                      availableCareers={unassignedCareers} 
+                      onSuccess={handleSuccess} 
+                    />
                 </DialogContent>
             </Dialog>
         )}
@@ -201,9 +213,9 @@ export default function PlantelCarrerasPage() {
         </div>
       </div>
       
-       {filteredGroupedCareers.length > 0 ? (
+       {filteredCareers.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {filteredGroupedCareers.map(group => renderCareerContent(group))}
+          {filteredCareers.map(group => renderCareerContent(group))}
         </div>
        ) : (
         <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
@@ -214,10 +226,23 @@ export default function PlantelCarrerasPage() {
         </div>
        )}
 
+      <AlertDialog open={!!careerToRemove} onOpenChange={(open) => !open && setCareerToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+                Esta acción no se puede deshacer. Esto desasignará la carrera 
+                <span className="font-bold text-white"> {careerToRemove?.carrera}</span> del plantel 
+                <span className="font-bold text-white"> {plantel?.name}</span>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCareerToRemove(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRemove}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   )
 }
-
-    
-
-    

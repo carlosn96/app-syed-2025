@@ -1,6 +1,6 @@
 
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, Roles } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, Roles, AssignedCareer } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -294,20 +294,18 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     ]);
 };
 
+// Plantel-Career relationship
+export const getCarrerasPorPlantel = async (plantelId: number): Promise<AssignedCareer[]> => {
+    const data = await apiFetch(`/carrerasPorPlantel/${plantelId}`);
+    return data.map((item: any) => ({
+        id_carrera: item.id_carrera,
+        carrera: item.carrera,
+    }));
+}
+
+export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> => 
+    apiFetch('/asignarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
+
+export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
+    apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
     
-
-    
-
-    
-
-    
-
-
-
-
-
-
-
-
-
-
