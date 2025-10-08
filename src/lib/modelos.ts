@@ -165,17 +165,19 @@ export interface Schedule {
 }
 
 export interface SupervisionCriterion {
-  id: string;
+  id: number;
   text: string;
+  rubricId: number;
 }
 
 export interface SupervisionRubric {
   id: number;
   title: string;
-  type: 'checkbox';
+  type: string;
   category: 'Contable' | 'No Contable';
   criteria: SupervisionCriterion[];
 }
+
 
 export interface EvaluationCriterion {
     id: string;

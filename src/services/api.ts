@@ -1,6 +1,6 @@
 
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, Roles, AssignedCareer } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, Roles, AssignedCareer, SupervisionCriterion } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -286,13 +286,31 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
-    console.warn("getSupervisionRubrics is using mock data. Implement API endpoint.");
-    return Promise.resolve([
-        { id: 1, title: "Presentación de la clase", type: "checkbox", category: "Contable", criteria: [ { id: "1_1", text: "Inicia la clase puntualmente." }] },
-        { id: 2, title: "Dominio del Contenido", type: "checkbox", category: "Contable", criteria: [ { id: "2_1", text: "Demuestra conocimiento profundo y actualizado del tema." }] },
-        { id: 3, title: "Estrategias de Enseñanza", type: "checkbox", category: "No Contable", criteria: [ { id: "3_1", text: "Utiliza diversas técnicas didácticas." }] },
-    ]);
+    const rubricsData = await apiFetch('/supervision/rubros');
+    const criteriaData = await apiFetch('/supervision/contable');
+
+    const criteriaByRubric = criteriaData.reduce((acc: Record<number, SupervisionCriterion[]>, criterion: any) => {
+        const rubricId = criterion.id_rubro;
+        if (!acc[rubricId]) {
+            acc[rubricId] = [];
+        }
+        acc[rubricId].push({
+            id: criterion.id_supcriterio,
+            text: criterion.descripcion,
+            rubricId: rubricId,
+        });
+        return acc;
+    }, {});
+
+    return rubricsData.map((rubric: any) => ({
+        id: rubric.id_rubro,
+        title: rubric.nombre,
+        category: rubric.tipo === 'Contable' ? 'Contable' : 'No Contable',
+        type: rubric.tipo,
+        criteria: criteriaByRubric[rubric.id_rubro] || [],
+    }));
 };
+
 
 // Plantel-Career relationship
 export const getCarrerasPorPlantel = async (plantelId: number): Promise<AssignedCareer[]> => {
