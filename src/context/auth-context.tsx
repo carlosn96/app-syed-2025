@@ -145,10 +145,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    setIsLoading(true);
     localStorage.removeItem('user');
     localStorage.removeItem('access_token');
     setUser(null);
     router.replace('/login');
+    // We can set isLoading to false after a short delay to allow the redirect to happen smoothly.
+    setTimeout(() => setIsLoading(false), 50);
   };
 
   const value = { user, login, logout, isLoading, addUser };
