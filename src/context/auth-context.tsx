@@ -155,7 +155,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
   const isAuthPage = pathname === '/login';
 
-  if (isLoading || (!user && !isAuthPage) || (user && isAuthPage)) {
+  if (isLoading || (!user && !isAuthPage)) {
     return <LoadingSpinner />;
   }
 
