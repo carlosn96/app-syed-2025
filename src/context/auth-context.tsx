@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { User, Roles, getRedirectPath, roleRedirects } from '@/lib/modelos';
+import { User, Roles, getRedirectPath } from '@/lib/modelos';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
@@ -28,6 +28,13 @@ const roleIdToName = (id: number): Role => {
     }
 }
 
+const LoadingSpinner = () => (
+    <div className="flex h-screen w-full items-center justify-center login-background">
+        <div className="animate-pulse flex h-16 w-16 items-center justify-center rounded-full bg-primary/50">
+            <div className="h-8 w-8 rounded-full bg-primary/80"></div>
+        </div>
+    </div>
+);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -37,6 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    setIsLoading(true);
     try {
       const storedUser = localStorage.getItem('user');
       const token = localStorage.getItem('access_token');
@@ -53,17 +61,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (!isLoading) {
-        if (!user && pathname !== '/login') {
-            router.push('/login');
-        } else if (user && pathname === '/login') {
-            router.push('/dashboard');
-        }
+    if (isLoading) return;
+
+    const isAuthPage = pathname === '/login';
+
+    if (!user && !isAuthPage) {
+      router.replace('/login');
+    } else if (user && isAuthPage) {
+      const redirectPath = getRedirectPath(user.id_rol);
+      router.replace(redirectPath);
     }
   }, [isLoading, user, pathname, router]);
   
   const addUser = (userData: any) => {
-    // This is a mock function, in a real app this would be an API call
     console.log("Adding user (mock):", userData);
   };
 
@@ -83,9 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         if (result.exito) {
             const apiUser = result.datos.user;
-            
             const internalRole = roleIdToName(apiUser.id_rol);
-
             const loggedInUser: User = {
                 id: apiUser.id,
                 nombre: apiUser.nombre,
@@ -110,7 +118,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
             
             const redirectPath = getRedirectPath(loggedInUser.id_rol);
-            router.push(redirectPath);
+            router.replace(redirectPath);
             return true;
         } else {
             const errorMessages = result.datos?.errors 
@@ -140,21 +148,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('user');
     localStorage.removeItem('access_token');
     setUser(null);
-    router.push('/login');
+    router.replace('/login');
   };
 
   const value = { user, login, logout, isLoading, addUser };
   
-  if (isLoading && !user) {
-    return <div className="flex h-screen w-full items-center justify-center">Cargando...</div>;
-  }
-  
-  if (!user && pathname !== '/login') {
-    return <div className="flex h-screen w-full items-center justify-center">Redirigiendo al inicio de sesión...</div>;
-  }
-  
-  if (user && pathname === '/login') {
-      return <div className="flex h-screen w-full items-center justify-center">Redirigiendo al panel de control...</div>;
+  const isAuthPage = pathname === '/login';
+
+  if (isLoading || (!user && !isAuthPage) || (user && isAuthPage)) {
+    return <LoadingSpinner />;
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

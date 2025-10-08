@@ -18,10 +18,12 @@ import { PageNavigationProvider } from "@/context/page-navigation-context";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { PanelLeft, PanelRight } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
-    const { state, isMobile, toggleSidebar } = useSidebar(); // ADDED BY AI
-    const isCollapsed = state === "collapsed"; // ADDED BY AI
+    const { state, isMobile, toggleSidebar } = useSidebar();
+    const isCollapsed = state === "collapsed";
 
     return (
         <>
@@ -37,13 +39,13 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                                 className={cn("w-28 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] transition-opacity duration-300", isCollapsed && "opacity-0 w-0")}
                             />
                         </div>
-                        <Button // ADDED BY AI
-                          variant="ghost" // ADDED BY AI
-                          size="icon" // ADDED BY AI
-                          className="h-10 w-10 text-white/80 hover:text-white" // ADDED BY AI
-                          onClick={toggleSidebar} // ADDED BY AI
-                          aria-label={isCollapsed ? "Expandir sidebar" : "Contraer sidebar"} // ADDED BY AI
-                          aria-pressed={isCollapsed} // ADDED BY AI
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-10 w-10 text-white/80 hover:text-white"
+                          onClick={toggleSidebar}
+                          aria-label={isCollapsed ? "Expandir sidebar" : "Contraer sidebar"}
+                          aria-pressed={isCollapsed}
                         >
                             {isCollapsed ? <PanelRight /> : <PanelLeft />}
                         </Button>
@@ -74,6 +76,19 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace('/login');
+    }
+  }, [isLoading, user, router]);
+
+  if (isLoading || !user) {
+    return null; // O un spinner de carga para el layout
+  }
+
   return (
     <div className="min-h-screen login-background">
       <PageNavigationProvider>
