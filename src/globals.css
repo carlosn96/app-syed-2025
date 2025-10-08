@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 229 25% 97.5%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 229 25% 25%;
+    --primary: 227 100% 22%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 229 25% 97.5%;
+    --muted-foreground: 0 0% 100% / 0.8;
+    --accent: 3 80% 51%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --warning: 45 93% 47%;
+    --success: 142 71% 45%;
+    --border: 229 20% 89.8%;
+    --input: 229 20% 89.8%;
+    --ring: 227 100% 22%;
+    --radius: 1.5rem;
+    --chart-1: 227 100% 22%;
+    --chart-2: 3 80% 51%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --sidebar-background: 240 6% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 229 44% 60%;
+    --sidebar-primary-foreground: 227 100% 22%;
+    --sidebar-accent: hsl(229 44% 60% / 0.1);
+    --sidebar-accent-foreground: hsl(0 0% 98%);
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 229 44% 60%;
+  }
+  .dark {
+    --background: 240 6% 10%;
+    --foreground: 0 0% 100%;
+    --card: 240 6% 10%;
+    --card-foreground: 0 0% 100%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 229 44% 60%;
+    --primary-foreground: 227 100% 22%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 0 0% 100% / 0.8;
+    --accent: 3 80% 60%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+    --warning: 45 93% 47%;
+    --success: 142 71% 45%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 229 44% 60%;
+    --chart-1: 227 90% 75%;
+    --chart-2: 3 80% 60%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 6% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 229 44% 60%;
+    --sidebar-primary-foreground: 227 100% 22%;
+    --sidebar-accent: hsl(229 44% 60% / 0.1);
+    --sidebar-accent-foreground: hsl(0 0% 98%);
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 229 44% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  .login-background {
+    background: linear-gradient(to bottom right, rgba(32, 45, 93, 0.8), rgba(225, 27, 26, 0.8));
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+  .glass-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  .sidebar-glass {
+      background: linear-gradient(180deg, rgba(32,45,93,0.7) 0%, rgba(17,33,114,0.7) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition-duration: 0ms !important;
+      animation: none !important;
+    }
+  }
+
+  .sidebar-transition {
+      @apply transition-transform duration-300 ease-in-out;
+      will-change: transform;
+  }
+
+  .sidebar-content-transition {
+      @apply transition-opacity duration-200 ease-in-out;
+      will-change: opacity;
+  }
+}
+
+@layer utilities {
+    .fill-toast-destructive-wave {
+        fill: #fc0c0c3a;
+    }
+    .bg-toast-destructive-icon-bg {
+        background-color: #fc0c0c48;
+    }
+    .text-toast-destructive-icon {
+        color: #d10d0d;
+    }
+    .text-toast-destructive-title {
+        color: #d10d0d;
+    }
+
+    .fill-toast-success-wave {
+        fill: #28a7453a;
+    }
+    .bg-toast-success-icon-bg {
+        background-color: #28a74548;
+    }
+    .text-toast-success-icon {
+        color: #155724;
+    }
+    .text-toast-success-title {
+        color: #155724;
+    }
+}
