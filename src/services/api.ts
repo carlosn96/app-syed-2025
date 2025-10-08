@@ -1,5 +1,4 @@
 
-
 import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, Roles, AssignedCareer, SupervisionCriterion } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
@@ -41,7 +40,7 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   const result = await response.json();
   
   if (result.exito || response.ok) { // Some endpoints might not have 'exito'
-    return result.datos ?? result; // Return 'datos' if it exists, otherwise the whole result.
+    return result; // Return 'datos' if it exists, otherwise the whole result.
   } else {
     const errorMessage = result.mensaje || (result.datos?.errors ? Object.values(result.datos.errors).flat().join(' ') : 'Ocurrió un error desconocido.');
     throw new Error(errorMessage);
@@ -51,7 +50,7 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
 // Campus Management
 export const getPlanteles = async (): Promise<Plantel[]> => {
     const data = await apiFetch('/planteles');
-    return data.map((item: any) => ({
+    return data.datos.map((item: any) => ({
         id: item.id_plantel,
         name: item.nombre,
         location: item.ubicacion,
@@ -61,18 +60,18 @@ export const getPlanteles = async (): Promise<Plantel[]> => {
 export const createPlantel = async (data: { nombre: string, ubicacion: string }): Promise<Plantel> => {
     const newPlantel = await apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
      return {
-        id: newPlantel.id_plantel,
-        name: newPlantel.nombre,
-        location: newPlantel.ubicacion
+        id: newPlantel.datos.id_plantel,
+        name: newPlantel.datos.nombre,
+        location: newPlantel.datos.ubicacion
     };
 };
 
 export const getPlantelById = async (id: number): Promise<Plantel> => {
     const item = await apiFetch(`/planteles/${id}`);
     return {
-        id: item.id_plantel,
-        name: item.nombre,
-        location: item.ubicacion,
+        id: item.datos.id_plantel,
+        name: item.datos.nombre,
+        location: item.datos.ubicacion,
     };
 };
 export const updatePlantel = (id: number, data: { nombre: string, ubicacion: string }): Promise<Plantel> => apiFetch(`/planteles/${id}`, { method: 'PUT', body: JSON.stringify(data) });
@@ -81,7 +80,7 @@ export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles
 // Career and Subject Management
 export const getCareers = async (): Promise<CareerSummary[]> => {
     const data = await apiFetch('/carreras');
-    return data.map((item: any) => ({
+    return data.datos.map((item: any) => ({
         id: item.id_carrera,
         name: item.carrera,
         coordinator: item.coordinador,
@@ -146,7 +145,10 @@ export const createSubject = (data: any): Promise<Subject> => {
 };
 
 // User Management
-export const getUsers = (): Promise<User[]> => apiFetch('/usuario');
+export const getUsers = async (): Promise<User[]> => {
+    const result = await apiFetch('/usuario');
+    return result.datos;
+};
 
 export const createUser = (data: any): Promise<User> => {
     let endpoint = '/usuario';
@@ -200,13 +202,17 @@ export const deleteUser = (id: number): Promise<void> => apiFetch(`/usuario/${id
 export const getAlumnos = (): Promise<Alumno[]> => apiFetch('/alumnos');
 
 // Teacher Management
-export const getDocentes = (id?: number): Promise<Docente | Docente[]> => {
+export const getDocentes = async (id?: number): Promise<Docente | Docente[]> => {
     const endpoint = id ? `/docentes/${id}` : '/docentes';
-    return apiFetch(endpoint);
+    const result = await apiFetch(endpoint);
+    return result.datos;
 }
 
 // Coordinator Management
-export const getCoordinadores = (): Promise<Coordinador[]> => apiFetch('/coordinadores');
+export const getCoordinadores = async (): Promise<Coordinador[]> => {
+    const result = await apiFetch('/coordinadores');
+    return result.datos;
+};
 
 // Group Management
 export const getGroups = async (): Promise<Group[]> => {
@@ -289,7 +295,7 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     const rubricsData = await apiFetch('/supervision/rubros');
     const criteriaData = await apiFetch('/supervision/contable');
 
-    const criteriaByRubric = criteriaData.reduce((acc: Record<number, SupervisionCriterion[]>, criterion: any) => {
+    const criteriaByRubric = criteriaData.datos.reduce((acc: Record<number, SupervisionCriterion[]>, criterion: any) => {
         const rubricId = criterion.id_rubro;
         if (!acc[rubricId]) {
             acc[rubricId] = [];
@@ -302,7 +308,7 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
         return acc;
     }, {});
 
-    return rubricsData.map((rubric: any) => ({
+    return rubricsData.datos.map((rubric: any) => ({
         id: rubric.id_rubro,
         title: rubric.nombre,
         category: rubric.tipo === 'Contable' ? 'Contable' : 'No Contable',
@@ -315,7 +321,7 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
 // Plantel-Career relationship
 export const getCarrerasPorPlantel = async (plantelId: number): Promise<AssignedCareer[]> => {
     const data = await apiFetch(`/carrerasPorPlantel/${plantelId}`);
-    return data.map((item: any) => ({
+    return data.datos.map((item: any) => ({
         id_carrera: item.id_carrera,
         carrera: item.carrera,
     }));
