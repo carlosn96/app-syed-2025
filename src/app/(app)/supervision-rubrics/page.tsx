@@ -80,9 +80,7 @@ export default function SupervisionRubricsPage() {
     (r) => r.category === "No Contable"
   )
 
-  const renderSupervisionRubricAccordion = (rubrics: SupervisionRubric[], title: string) => (
-    <div>
-      <h2 className="text-xl font-semibold text-white mb-4">{title}</h2>
+  const renderSupervisionRubricAccordion = (rubrics: SupervisionRubric[]) => (
       <Accordion type="multiple" className="w-full space-y-4">
         {rubrics.map((rubric) => (
           <AccordionItem
@@ -143,7 +141,6 @@ export default function SupervisionRubricsPage() {
           </AccordionItem>
         ))}
       </Accordion>
-    </div>
   )
   
   const renderEvaluationRubricAccordion = (rubrics: EvaluationRubric[]) => (
@@ -265,10 +262,34 @@ export default function SupervisionRubricsPage() {
                         <Skeleton className="h-20 w-full" />
                     </div>
                 ) : (
-                  <div className="space-y-8">
-                      {renderSupervisionRubricAccordion(supervisionRubricsContable, "Rubros Contables")}
-                      {renderSupervisionRubricAccordion(supervisionRubricsNoContable, "Rubros No Contables")}
-                  </div>
+                  <Tabs defaultValue="contable" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="contable">Rubros Contables</TabsTrigger>
+                      <TabsTrigger value="no-contable">Rubros No Contables</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="contable" className="mt-6">
+                      <Card>
+                        <CardHeader>
+                            <CardTitle>Rubros Contables</CardTitle>
+                            <CardDescription>Criterios cuantitativos para la supervisión.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {renderSupervisionRubricAccordion(supervisionRubricsContable)}
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    <TabsContent value="no-contable" className="mt-6">
+                       <Card>
+                        <CardHeader>
+                            <CardTitle>Rubros No Contables</CardTitle>
+                            <CardDescription>Criterios cualitativos para la supervisión.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {renderSupervisionRubricAccordion(supervisionRubricsNoContable)}
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  </Tabs>
                 )}
             </TabsContent>
             <TabsContent value="evaluation" className="mt-6">
