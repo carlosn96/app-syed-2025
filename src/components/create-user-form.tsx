@@ -31,7 +31,6 @@ const createUserSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido."),
   apellido_paterno: z.string().min(1, "El apellido paterno es requerido."),
   apellido_materno: z.string().min(1, "El apellido materno es requerido."),
-  correo: z.string().email("Correo electrónico inválido."),
   id_rol: z.coerce.number({ required_error: "Por favor, seleccione un rol." }),
   grado_academico: z.string().optional(),
   matricula: z.string().optional(),
@@ -97,7 +96,6 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
       nombre: "",
       apellido_paterno: "",
       apellido_materno: "",
-      correo: "",
       contrasena: "",
       contrasena_confirmation: "",
       grado_academico: "",
@@ -174,19 +172,6 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
                 <FormMessage />
                 </FormItem>
             )}
-        />
-        <FormField
-          control={form.control}
-          name="correo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Correo Electrónico</FormLabel>
-              <FormControl>
-                <Input placeholder="user@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
         />
         <FormField
           control={form.control}

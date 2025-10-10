@@ -80,7 +80,6 @@ export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles
 // Career and Subject Management
 export const getCareers = async (): Promise<CareerSummary[]> => {
     const data = await apiFetch('/carreras');
-    // Simplified structure for the user form
     return data.datos.map((item: any) => ({
         id: item.id_carrera,
         name: item.carrera,
@@ -154,8 +153,7 @@ export const getUsers = async (): Promise<User[]> => {
 
 export const createUser = (data: any): Promise<User> => {
     let endpoint = '/usuario';
-    let payload: any = { ...data };
-    delete payload.contrasena_confirmation;
+    let payload: any = {};
 
     switch (data.id_rol) {
         case Roles.Docente:
@@ -165,7 +163,6 @@ export const createUser = (data: any): Promise<User> => {
                 apellido_paterno: data.apellido_paterno,
                 apellido_materno: data.apellido_materno,
                 grado_academico: data.grado_academico,
-                correo: data.correo,
                 contrasena: data.contrasena
             };
             break;
@@ -175,7 +172,6 @@ export const createUser = (data: any): Promise<User> => {
                 nombre: data.nombre,
                 apellido_paterno: data.apellido_paterno,
                 apellido_materno: data.apellido_materno,
-                correo: data.correo,
                 contrasena: data.contrasena,
                 matricula: data.matricula,
                 id_carrera: data.id_carrera
@@ -187,8 +183,16 @@ export const createUser = (data: any): Promise<User> => {
                 nombre: data.nombre,
                 apellido_paterno: data.apellido_paterno,
                 apellido_materno: data.apellido_materno,
-                correo: data.correo,
                 contrasena: data.contrasena
+            };
+            break;
+        default:
+             payload = {
+                nombre: data.nombre,
+                apellido_paterno: data.apellido_paterno,
+                apellido_materno: data.apellido_materno,
+                contrasena: data.contrasena,
+                id_rol: data.id_rol
             };
             break;
     }
@@ -334,4 +338,5 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
     
+
 
