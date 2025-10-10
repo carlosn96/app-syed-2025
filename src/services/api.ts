@@ -80,6 +80,7 @@ export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles
 // Career and Subject Management
 export const getCareers = async (): Promise<CareerSummary[]> => {
     const data = await apiFetch('/carreras');
+    // Assuming the endpoint returns a list of careers with id and name
     return data.datos.map((item: any) => ({
         id: item.id_carrera,
         name: item.carrera,
@@ -153,54 +154,19 @@ export const getUsers = async (): Promise<User[]> => {
 
 export const createUser = (data: any): Promise<User> => {
     let endpoint = '/usuario';
-    let payload: any = {};
 
     switch (data.id_rol) {
         case Roles.Docente:
             endpoint = '/docentes';
-            payload = {
-                nombre: data.nombre,
-                apellido_paterno: data.apellido_paterno,
-                apellido_materno: data.apellido_materno,
-                grado_academico: data.grado_academico,
-                correo: data.correo,
-                contrasena: data.contrasena
-            };
             break;
         case Roles.Alumno:
             endpoint = '/alumnos';
-            payload = {
-                nombre: data.nombre,
-                apellido_paterno: data.apellido_paterno,
-                apellido_materno: data.apellido_materno,
-                correo: data.correo,
-                contrasena: data.contrasena,
-                matricula: data.matricula,
-                id_carrera: data.id_carrera
-            };
             break;
         case Roles.Coordinador:
              endpoint = '/coordinadores';
-             payload = {
-                nombre: data.nombre,
-                apellido_paterno: data.apellido_paterno,
-                apellido_materno: data.apellido_materno,
-                correo: data.correo,
-                contrasena: data.contrasena
-            };
-            break;
-        default:
-             payload = {
-                nombre: data.nombre,
-                apellido_paterno: data.apellido_paterno,
-                apellido_materno: data.apellido_materno,
-                correo: data.correo,
-                contrasena: data.contrasena,
-                id_rol: data.id_rol
-            };
             break;
     }
-    return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(payload) });
+    return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(data) });
 };
 
 export const getUserById = (id: number): Promise<User> => apiFetch(`/usuario/${id}`);
@@ -345,5 +311,7 @@ export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera:
 
 
 
+
+    
 
     
