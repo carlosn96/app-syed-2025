@@ -94,14 +94,16 @@ export const getCareers = async (): Promise<CareerSummary[]> => {
 export const getCareerModalities = async (): Promise<Career[]> => {
     // This function might need a more specific endpoint, e.g., /carreras/modalities
     // For now, it's a placeholder.
-    console.warn("getCareerModalities is using mock data. Implement API endpoint.");
-    return Promise.resolve([
-        { id: 1, name: 'Ingeniería en Computación', modality: 'INCO', campus: 'Reynosa', semesters: 9, coordinator: 'Sofía Gómez Díaz' },
-        { id: 2, name: 'Licenciatura en Administración', modality: 'LAET', campus: 'Reynosa', semesters: 8, coordinator: 'Sofía Gómez Díaz' },
-        { id: 3, name: 'Derecho', modality: 'LDE', campus: 'Reynosa', semesters: 10, coordinator: 'Sofía Gómez Díaz' },
-        { id: 4, name: 'Ingeniería en Computación', modality: 'INCO-S', campus: 'Río Bravo', semesters: 9, coordinator: 'Sofía Gómez Díaz' },
-        { id: 5, name: 'Licenciatura en Administración', modality: 'LAET-M', campus: 'Matamoros', semesters: 8, coordinator: 'Sofía Gómez Díaz' },
-    ]);
+    console.warn("getCareerModalities is using mock data. Implement API endpoint for /carreras/modalities");
+    const data = await apiFetch('/carreras'); // Assuming this returns all career variations
+    return data.datos.map((item:any) => ({
+        id: item.id_carrera, // This might not be unique per modality, adjust if needed
+        name: item.carrera,
+        modality: item.modalidad || 'N/A', // Adjust field name if different
+        campus: item.plantel || 'N/A', // Adjust field name
+        semesters: item.semestres || 0, // Adjust field name
+        coordinator: item.coordinador || 'No Asignado', // Adjust field name
+    }));
 };
 
 export const createCareer = (data: {nombre: string}): Promise<Career> => apiFetch('/carreras', { method: 'POST', body: JSON.stringify(data) });
@@ -152,7 +154,7 @@ export const getUsers = async (): Promise<User[]> => {
 
 export const createUser = (data: any): Promise<User> => {
     let endpoint = '/usuario';
-    let payload = { ...data };
+    let payload: any = { ...data };
     delete payload.contrasena_confirmation;
 
     switch (data.id_rol) {
@@ -189,7 +191,6 @@ export const createUser = (data: any): Promise<User> => {
                 contrasena: data.contrasena
             };
             break;
-        // Admin case falls through to default /usuario
     }
     return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(payload) });
 };
@@ -333,3 +334,4 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
     
+
