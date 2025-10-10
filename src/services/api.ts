@@ -1,5 +1,5 @@
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, Roles, AssignedCareer, SupervisionCriterion } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -80,7 +80,6 @@ export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles
 // Career and Subject Management
 export const getCareers = async (): Promise<CareerSummary[]> => {
     const data = await apiFetch('/carreras');
-    // Assuming the endpoint returns a list of careers with id and name
     return data.datos.map((item: any) => ({
         id: item.id_carrera,
         name: item.carrera,
@@ -151,29 +150,21 @@ export const getUsers = async (): Promise<User[]> => {
     const result = await apiFetch('/usuario');
     return result.datos.map((user: any) => ({
         ...user,
-        id_rol: user.id_rol, 
         rol: user.rol.toLowerCase(), 
     }));
 };
 
-export const createUser = (data: any): Promise<User> => {
-    let endpoint = '/usuario';
-    switch (data.id_rol) {
-        case Roles.Docente:
-            endpoint = '/docentes';
-            break;
-        case Roles.Alumno:
-            endpoint = '/alumnos';
-            break;
-        case Roles.Coordinador:
-             endpoint = '/coordinadores';
-            break;
-    }
-    return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(data) });
+export const createUser = (data: any, basePath: string): Promise<User> => {
+    return apiFetch(basePath, { method: 'POST', body: JSON.stringify(data) });
 };
 
 export const getUserById = (id: number): Promise<User> => apiFetch(`/usuario/${id}`);
-export const updateUser = (id: number, data: any): Promise<User> => apiFetch(`/usuario/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+
+export const updateUser = (id: number, data: any, options?: { basePath?: string }): Promise<User> => {
+    const endpoint = options?.basePath ? `${options.basePath}/${id}` : `/usuario/${id}`;
+    return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(data) });
+};
+
 export const deleteUser = (id: number): Promise<void> => apiFetch(`/usuario/${id}`, { method: 'DELETE' });
 
 // Student Management
@@ -310,11 +301,4 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
 
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
-    
-
-
-
-
-    
-
     

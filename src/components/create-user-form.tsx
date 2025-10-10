@@ -24,7 +24,7 @@ import {
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { useMemo, useState, useEffect } from "react"
-import { CareerSummary, Roles } from "@/lib/modelos"
+import { CareerSummary } from "@/lib/modelos"
 import { createUser, getCareers } from "@/services/api"
 
 const createUserSchema = z.object({
@@ -32,7 +32,6 @@ const createUserSchema = z.object({
   apellido_paterno: z.string().min(1, "El apellido paterno es requerido."),
   apellido_materno: z.string().min(1, "El apellido materno es requerido."),
   correo: z.string().email("El correo electrónico no es válido."),
-  id_rol: z.coerce.number({ required_error: "Por favor, seleccione un rol." }),
   grado_academico: z.string().optional(),
   matricula: z.string().optional(),
   id_carrera: z.coerce.number().optional(),
@@ -41,30 +40,29 @@ const createUserSchema = z.object({
 }).refine(data => data.contrasena === data.contrasena_confirmation, {
   message: "Las contraseñas no coinciden.",
   path: ["contrasena_confirmation"],
-}).refine(data => data.id_rol !== Roles.Docente || (data.id_rol === Roles.Docente && data.grado_academico && data.grado_academico.length > 0), {
-    message: "El grado académico es requerido para los docentes.",
-    path: ["grado_academico"],
-}).refine(data => data.id_rol !== Roles.Alumno || (data.id_rol === Roles.Alumno && data.matricula && data.matricula.length > 0), {
-    message: "La matrícula es requerida para los alumnos.",
-    path: ["matricula"],
-}).refine(data => data.id_rol !== Roles.Alumno || (data.id_rol === Roles.Alumno && data.id_carrera), {
-    message: "La carrera es requerida para los alumnos.",
-    path: ["id_carrera"],
 });
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
 
-const baseRoleDisplayMap: { [key: number]: string } = {
-  [Roles.Coordinador]: "Coordinador",
-  [Roles.Docente]: "Docente",
-  [Roles.Alumno]: "Alumno",
+const roleDisplayMap: Record<string, string> = {
+  coordinador: "Coordinador",
+  docente: "Docente",
+  alumno: "Alumno",
 };
+
+const roleRouteMap: Record<"coordinador" | "docente" | "alumno", string> = {
+  coordinador: "/coordinadores",
+  docente: "/docentes",
+  alumno: "/alumnos",
+};
+
 
 export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
   const { user: loggedInUser } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [careers, setCareers] = useState<CareerSummary[]>([]);
+  const [selectedRole, setSelectedRole] = useState<"coordinador" | "docente" | "alumno">("docente");
 
   useEffect(() => {
     const fetchCareers = async () => {
@@ -83,12 +81,12 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
     fetchCareers();
   }, [toast]);
 
-  const roleDisplayMap = useMemo(() => {
+  const roleDisplayFiltered = useMemo(() => {
     if (loggedInUser?.rol === 'coordinador') {
-      const { [Roles.Coordinador]: _, ...rest } = baseRoleDisplayMap;
+      const { coordinador, ...rest } = roleDisplayMap;
       return rest;
     }
-    return baseRoleDisplayMap;
+    return roleDisplayMap;
   }, [loggedInUser]);
 
   const form = useForm<CreateUserFormValues>({
@@ -105,12 +103,30 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
     },
   });
   
-  const selectedRole = form.watch("id_rol");
-
   const onSubmit = async (data: CreateUserFormValues) => {
     setIsSubmitting(true);
+
+    if (selectedRole === "alumno") {
+        if (!data.matricula) {
+            form.setError("matricula", { type: "manual", message: "La matrícula es requerida para los alumnos." });
+            setIsSubmitting(false);
+            return;
+        }
+        if (!data.id_carrera) {
+            form.setError("id_carrera", { type: "manual", message: "La carrera es requerida para los alumnos." });
+            setIsSubmitting(false);
+            return;
+        }
+    }
+    if (selectedRole === "docente" && !data.grado_academico) {
+        form.setError("grado_academico", { type: "manual", message: "El grado académico es requerido para los docentes." });
+        setIsSubmitting(false);
+        return;
+    }
+
     try {
-      await createUser(data);
+      const endpoint = roleRouteMap[selectedRole];
+      await createUser(data, endpoint);
       toast({
         variant: "success",
         title: "Usuario Creado",
@@ -188,31 +204,26 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="id_rol"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Rol</FormLabel>
-              <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={String(field.value)}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un rol" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {Object.entries(roleDisplayMap).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-         {selectedRole === Roles.Alumno && (
+        <FormItem>
+            <FormLabel>Rol</FormLabel>
+            <Select onValueChange={(value) => setSelectedRole(value as any)} defaultValue={selectedRole}>
+            <FormControl>
+                <SelectTrigger>
+                <SelectValue placeholder="Seleccione un rol" />
+                </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+                {Object.entries(roleDisplayFiltered).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                    {label}
+                </SelectItem>
+                ))}
+            </SelectContent>
+            </Select>
+            <FormMessage />
+        </FormItem>
+
+         {selectedRole === "alumno" && (
           <>
             <FormField
               control={form.control}
@@ -253,7 +264,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
             />
           </>
         )}
-        {selectedRole === Roles.Docente && (
+        {selectedRole === "docente" && (
             <FormField
             control={form.control}
             name="grado_academico"
@@ -301,7 +312,3 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
     </Form>
   )
 }
-
-    
-
-    

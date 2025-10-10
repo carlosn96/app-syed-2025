@@ -26,7 +26,7 @@ import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { groups } from "@/lib/data"
 import { useMemo, useState } from "react"
-import { User, Roles } from "@/lib/modelos"
+import { User } from "@/lib/modelos"
 import { updateUser } from "@/services/api"
 
 const editUserSchema = z.object({
@@ -34,7 +34,6 @@ const editUserSchema = z.object({
   apellido_paterno: z.string().min(1, "El apellido paterno es requerido."),
   apellido_materno: z.string().min(1, "El apellido materno es requerido."),
   correo: z.string().email("Correo electrónico inválido."),
-  id_rol: z.coerce.number({ required_error: "Por favor, seleccione un rol." }),
   grupo: z.string().optional(),
   contrasena: z.string().optional(),
   contrasena_confirmation: z.string().optional(),
@@ -44,17 +43,20 @@ const editUserSchema = z.object({
 }).refine(data => !data.contrasena || data.contrasena.length >= 6, {
     message: "La contraseña debe tener al menos 6 caracteres.",
     path: ["contrasena"],
-}).refine(data => data.id_rol !== Roles.Alumno || (data.id_rol === Roles.Alumno && data.grupo), {
-    message: "Por favor, seleccione un grupo para el alumno.",
-    path: ["grupo"],
 });
 
 type EditUserFormValues = z.infer<typeof editUserSchema>;
 
-const baseRoleDisplayMap: { [key: string]: string } = {
-  [Roles.Coordinador]: "Coordinador",
-  [Roles.Docente]: "Docente",
-  [Roles.Alumno]: "Alumno",
+const roleDisplayMap: Record<string, string> = {
+  coordinador: "Coordinador",
+  docente: "Docente",
+  alumno: "Alumno",
+};
+
+const roleRouteMap: Record<"coordinador" | "docente" | "alumno", string> = {
+    coordinador: "/coordinadores",
+    docente: "/docentes",
+    alumno: "/alumnos",
 };
 
 interface EditUserFormProps {
@@ -66,13 +68,14 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   const { user: loggedInUser } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<"coordinador" | "docente" | "alumno">(user.rol as any || "docente");
 
-  const roleDisplayMap = useMemo(() => {
+  const roleDisplayFiltered = useMemo(() => {
     if (loggedInUser?.rol === 'coordinador') {
-      const { [Roles.Coordinador]: _, ...rest } = baseRoleDisplayMap;
+      const { coordinador, ...rest } = roleDisplayMap;
       return rest;
     }
-    return baseRoleDisplayMap;
+    return roleDisplayMap;
   }, [loggedInUser]);
 
   const form = useForm<EditUserFormValues>({
@@ -82,14 +85,11 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       apellido_paterno: user.apellido_paterno,
       apellido_materno: user.apellido_materno,
       correo: user.correo,
-      id_rol: user.id_rol,
       grupo: user.grupo || "",
       contrasena: "",
       contrasena_confirmation: "",
     },
   });
-  
-  const selectedRole = form.watch("id_rol");
 
   const onSubmit = async (data: EditUserFormValues) => {
     setIsSubmitting(true);
@@ -100,8 +100,15 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       delete dataToSend.contrasena_confirmation;
     }
     
+    if (selectedRole === "alumno" && !dataToSend.grupo) {
+        form.setError("grupo", { type: "manual", message: "Por favor, seleccione un grupo para el alumno." });
+        setIsSubmitting(false);
+        return;
+    }
+
     try {
-      await updateUser(user.id, dataToSend);
+      const endpoint = roleRouteMap[selectedRole];
+      await updateUser(user.id, dataToSend, { basePath: endpoint });
       toast({
         title: "Usuario Actualizado",
         description: `El usuario ${data.nombre} ha sido actualizado con éxito.`,
@@ -177,31 +184,25 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="id_rol"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Rol</FormLabel>
-              <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={String(field.value)}>
+        <FormItem>
+            <FormLabel>Rol</FormLabel>
+            <Select onValueChange={(value) => setSelectedRole(value as any)} defaultValue={selectedRole}>
                 <FormControl>
-                  <SelectTrigger>
+                <SelectTrigger>
                     <SelectValue placeholder="Seleccione un rol" />
-                  </SelectTrigger>
+                </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {Object.entries(roleDisplayMap).map(([value, label]) => (
+                {Object.entries(roleDisplayFiltered).map(([value, label]) => (
                     <SelectItem key={value} value={value}>
-                      {label}
+                    {label}
                     </SelectItem>
-                  ))}
+                ))}
                 </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-         {selectedRole === Roles.Alumno && (
+            </Select>
+        </FormItem>
+
+         {selectedRole === "alumno" && (
           <FormField
             control={form.control}
             name="grupo"
@@ -263,6 +264,3 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
     </Form>
   )
 }
-
-
-    
