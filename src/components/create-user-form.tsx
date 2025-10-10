@@ -24,7 +24,7 @@ import {
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { useMemo, useState, useEffect } from "react"
-import { Career, Roles } from "@/lib/modelos"
+import { CareerSummary, Roles } from "@/lib/modelos"
 import { createUser, getCareers } from "@/services/api"
 
 const createUserSchema = z.object({
@@ -64,23 +64,13 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
   const { user: loggedInUser } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [careers, setCareers] = useState<Career[]>([]);
+  const [careers, setCareers] = useState<CareerSummary[]>([]);
 
   useEffect(() => {
     const fetchCareers = async () => {
         try {
             const careersData = await getCareers();
-            const allModalities: Career[] = careersData.flatMap(summary =>
-                (summary.modalities || []).map((mod: any) => ({
-                    id: mod.id_carrera,
-                    name: summary.name,
-                    modality: mod.modalidad,
-                    campus: mod.plantel,
-                    semesters: mod.semestres,
-                    coordinator: mod.coordinador
-                }))
-            );
-            setCareers(allModalities);
+            setCareers(careersData);
         } catch (error) {
             console.error("Failed to fetch careers", error);
             toast({
@@ -252,7 +242,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
                     <SelectContent>
                       {careers.map((career) => (
                         <SelectItem key={career.id} value={String(career.id)}>
-                          {career.name} ({career.modality})
+                          {career.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

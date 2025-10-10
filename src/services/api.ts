@@ -80,14 +80,14 @@ export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles
 // Career and Subject Management
 export const getCareers = async (): Promise<CareerSummary[]> => {
     const data = await apiFetch('/carreras');
+    // Simplified structure for the user form
     return data.datos.map((item: any) => ({
         id: item.id_carrera,
         name: item.carrera,
-        coordinator: item.coordinador,
-        totalMaterias: item.total_materias,
-        totalPlanteles: item.total_planteles,
-        totalModalidades: item.total_modalidades,
-        modalities: item.modalidades, // Assuming API returns this
+        coordinator: null,
+        totalMaterias: 0,
+        totalPlanteles: 0,
+        totalModalidades: 0,
     }));
 };
 
