@@ -16,9 +16,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-type Role = 'administrador' | 'coordinador' | 'docente' | 'alumno';
-
-const roleIdToName = (id: number): Role => {
+const roleIdToName = (id: number): string => {
     switch (id) {
         case Roles.Administrador: return 'administrador';
         case Roles.Coordinador: return 'coordinador';

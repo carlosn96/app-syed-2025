@@ -51,7 +51,7 @@ const editUserSchema = z.object({
 
 type EditUserFormValues = z.infer<typeof editUserSchema>;
 
-const baseRoleDisplayMap: { [key: number]: string } = {
+const baseRoleDisplayMap: { [key: string]: string } = {
   [Roles.Coordinador]: "Coordinador",
   [Roles.Docente]: "Docente",
   [Roles.Alumno]: "Alumno",
@@ -183,7 +183,7 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Rol</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+              <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={String(field.value)}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione un rol" />

@@ -149,12 +149,15 @@ export const createSubject = (data: any): Promise<Subject> => {
 // User Management
 export const getUsers = async (): Promise<User[]> => {
     const result = await apiFetch('/usuario');
-    return result.datos;
+    return result.datos.map((user: any) => ({
+        ...user,
+        id_rol: user.id_rol, 
+        rol: user.rol.toLowerCase(), 
+    }));
 };
 
 export const createUser = (data: any): Promise<User> => {
     let endpoint = '/usuario';
-
     switch (data.id_rol) {
         case Roles.Docente:
             endpoint = '/docentes';
