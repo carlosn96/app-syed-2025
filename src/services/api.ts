@@ -163,6 +163,7 @@ export const createUser = (data: any): Promise<User> => {
                 apellido_paterno: data.apellido_paterno,
                 apellido_materno: data.apellido_materno,
                 grado_academico: data.grado_academico,
+                correo: data.correo,
                 contrasena: data.contrasena
             };
             break;
@@ -172,6 +173,7 @@ export const createUser = (data: any): Promise<User> => {
                 nombre: data.nombre,
                 apellido_paterno: data.apellido_paterno,
                 apellido_materno: data.apellido_materno,
+                correo: data.correo,
                 contrasena: data.contrasena,
                 matricula: data.matricula,
                 id_carrera: data.id_carrera
@@ -183,6 +185,7 @@ export const createUser = (data: any): Promise<User> => {
                 nombre: data.nombre,
                 apellido_paterno: data.apellido_paterno,
                 apellido_materno: data.apellido_materno,
+                correo: data.correo,
                 contrasena: data.contrasena
             };
             break;
@@ -191,6 +194,7 @@ export const createUser = (data: any): Promise<User> => {
                 nombre: data.nombre,
                 apellido_paterno: data.apellido_paterno,
                 apellido_materno: data.apellido_materno,
+                correo: data.correo,
                 contrasena: data.contrasena,
                 id_rol: data.id_rol
             };
@@ -340,3 +344,6 @@ export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera:
     
 
 
+
+
+    
