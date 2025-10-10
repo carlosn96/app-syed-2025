@@ -292,7 +292,7 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
-    const rubricsData = await apiFetch('/supervision/rubros');
+    const rubricsData = await apiFetch('/supervision/rubros');//Corregir para las 4 Rubricas exisgentes
     const criteriaData = await apiFetch('/supervision/contable');
 
     const criteriaByRubric = criteriaData.datos.reduce((acc: Record<number, SupervisionCriterion[]>, criterion: any) => {

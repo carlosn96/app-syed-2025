@@ -70,10 +70,16 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
     const fetchCareers = async () => {
         try {
             const careersData = await getCareers();
-            // Assuming getCareers returns CareerSummary[], let's get modalities
-            const allModalities = (await Promise.all(careersData.map(c => getCareers()))) // Simplified, adjust as needed
-                .flat()
-                .flatMap(summary => summary.modalities || []);
+            const allModalities: Career[] = careersData.flatMap(summary =>
+                (summary.modalities || []).map((mod: any) => ({
+                    id: mod.id_carrera,
+                    name: summary.name,
+                    modality: mod.modalidad,
+                    campus: mod.plantel,
+                    semesters: mod.semestres,
+                    coordinator: mod.coordinador
+                }))
+            );
             setCareers(allModalities);
         } catch (error) {
             console.error("Failed to fetch careers", error);
