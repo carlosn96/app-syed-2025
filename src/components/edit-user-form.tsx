@@ -51,6 +51,7 @@ const roleDisplayMap: Record<string, string> = {
   coordinador: "Coordinador",
   docente: "Docente",
   alumno: "Alumno",
+  administrador: "Administrador",
 };
 
 const roleRouteMap: Record<"coordinador" | "docente" | "alumno", string> = {
@@ -68,15 +69,9 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   const { user: loggedInUser } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<"coordinador" | "docente" | "alumno">(user.rol as any || "docente");
-
-  const roleDisplayFiltered = useMemo(() => {
-    if (loggedInUser?.rol === 'coordinador') {
-      const { coordinador, ...rest } = roleDisplayMap;
-      return rest;
-    }
-    return roleDisplayMap;
-  }, [loggedInUser]);
+  
+  // The role is now determined by the user prop and is not changeable.
+  const selectedRole = user.rol as "coordinador" | "docente" | "alumno";
 
   const form = useForm<EditUserFormValues>({
     resolver: zodResolver(editUserSchema),
@@ -186,20 +181,9 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
         />
         <FormItem>
             <FormLabel>Rol</FormLabel>
-            <Select onValueChange={(value) => setSelectedRole(value as any)} defaultValue={selectedRole}>
-                <FormControl>
-                <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un rol" />
-                </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                {Object.entries(roleDisplayFiltered).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                    {label}
-                    </SelectItem>
-                ))}
-                </SelectContent>
-            </Select>
+            <FormControl>
+                <Input value={roleDisplayMap[selectedRole] || "Desconocido"} disabled />
+            </FormControl>
         </FormItem>
 
          {selectedRole === "alumno" && (
