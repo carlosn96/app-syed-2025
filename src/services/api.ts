@@ -177,10 +177,13 @@ export const getCoordinadores = async (): Promise<Coordinador[]> => {
 
 export const getCoordinadorById = async (id: number): Promise<User> => {
     const result = await apiFetch(`/coordinadores/${id}`);
-    const coord = result.datos;
+    const coord = result.datos.coordinador;
+    if (!coord) {
+      throw new Error("Coordinador not found in API response");
+    }
     // Adapt the response to the User interface
     return {
-        id: coord.id_coordinador,
+        id: coord.id,
         nombre: coord.nombre,
         apellido_paterno: coord.apellido_paterno,
         apellido_materno: coord.apellido_materno,
@@ -189,6 +192,7 @@ export const getCoordinadorById = async (id: number): Promise<User> => {
         rol: 'coordinador',
         fecha_registro: coord.fecha_registro,
         ultimo_acceso: coord.ultimo_acceso,
+        rol_nombre: coord.rol,
     };
 };
 
