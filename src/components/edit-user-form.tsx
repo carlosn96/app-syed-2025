@@ -23,9 +23,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useAuth } from "@/context/auth-context"
-import { useToast } from "@/hooks/use-toast"
+import { Toast } from 'primereact/toast';
 import { groups } from "@/lib/data"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useRef } from "react"
 import { User } from "@/lib/modelos"
 import { updateUser } from "@/services/api"
 
@@ -67,7 +67,7 @@ interface EditUserFormProps {
 
 export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   const { user: loggedInUser } = useAuth();
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // The role is now determined by the user prop and is not changeable.
@@ -104,17 +104,18 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
     try {
       const endpoint = roleRouteMap[selectedRole];
       await updateUser(user.id, dataToSend, { basePath: endpoint });
-      toast({
-        title: "Usuario Actualizado",
-        description: `El usuario ${data.nombre} ha sido actualizado con éxito.`,
+      toast.current?.show({
+        severity: "success",
+        summary: "Usuario Actualizado",
+        detail: `El usuario ${data.nombre} ha sido actualizado con éxito.`,
       });
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al actualizar",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al actualizar",
+            detail: error.message,
         });
       }
     } finally {
@@ -123,128 +124,133 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormField
-            control={form.control}
-            name="nombre"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Nombre</FormLabel>
-                <FormControl>
-                    <Input placeholder="John" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-            <FormField
-            control={form.control}
-            name="apellido_paterno"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Apellido Paterno</FormLabel>
-                <FormControl>
-                    <Input placeholder="Doe" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-        </div>
-        <FormField
-            control={form.control}
-            name="apellido_materno"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Apellido Materno</FormLabel>
-                <FormControl>
-                    <Input placeholder="Smith" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-        />
-        <FormField
-          control={form.control}
-          name="correo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Correo Electrónico</FormLabel>
-              <FormControl>
-                <Input placeholder="user@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormItem>
-            <FormLabel>Rol</FormLabel>
-            <FormControl>
-                <Input value={roleDisplayMap[selectedRole] || "Desconocido"} disabled />
-            </FormControl>
-        </FormItem>
-
-         {selectedRole === "alumno" && (
+    <>
+      <Toast ref={toast} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+              control={form.control}
+              name="nombre"
+              render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>Nombre</FormLabel>
+                  <FormControl>
+                      <Input placeholder="John" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+              )}
+              />
+              <FormField
+              control={form.control}
+              name="apellido_paterno"
+              render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>Apellido Paterno</FormLabel>
+                  <FormControl>
+                      <Input placeholder="Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+              )}
+              />
+          </div>
+          <FormField
+              control={form.control}
+              name="apellido_materno"
+              render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>Apellido Materno</FormLabel>
+                  <FormControl>
+                      <Input placeholder="Smith" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+              )}
+          />
           <FormField
             control={form.control}
-            name="grupo"
+            name="correo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Grupo</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un grupo" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {groups.map((group) => (
-                      <SelectItem key={group.id} value={group.name}>
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormLabel>Correo Electrónico</FormLabel>
+                <FormControl>
+                  <Input placeholder="user@example.com" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        )}
-         <FormField
-          control={form.control}
-          name="contrasena"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nueva Contraseña</FormLabel>
+          <FormItem>
+              <FormLabel>Rol</FormLabel>
               <FormControl>
-                <Input type="password" {...field} placeholder="Dejar en blanco para no cambiar"/>
+                  <Input value={roleDisplayMap[selectedRole] || "Desconocido"} disabled />
               </FormControl>
-               <FormDescription>
-                Deja este campo en blanco si no deseas cambiar la contraseña.
-               </FormDescription>
-              <FormMessage />
-            </FormItem>
+          </FormItem>
+
+          {selectedRole === "alumno" && (
+            <FormField
+              control={form.control}
+              name="grupo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Grupo</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un grupo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {groups.map((group) => (
+                        <SelectItem key={group.id} value={group.name}>
+                          {group.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           )}
-        />
-        <FormField
-          control={form.control}
-          name="contrasena_confirmation"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirmar Nueva Contraseña</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-        </Button>
-      </form>
-    </Form>
+          <FormField
+            control={form.control}
+            name="contrasena"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nueva Contraseña</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} placeholder="Dejar en blanco para no cambiar"/>
+                </FormControl>
+                <FormDescription>
+                  Deja este campo en blanco si no deseas cambiar la contraseña.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="contrasena_confirmation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirmar Nueva Contraseña</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+          </Button>
+        </form>
+      </Form>
+    </>
   )
 }
+
+    
