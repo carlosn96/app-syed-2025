@@ -145,8 +145,9 @@ export const getUsers = async (): Promise<User[]> => {
     }));
 };
 
-export const createUser = (data: any, basePath: string): Promise<User> => {
-    return apiFetch(basePath, { method: 'POST', body: JSON.stringify(data) });
+export const createUser = (data: any, options?: { basePath?: string }): Promise<User> => {
+    const endpoint = options?.basePath || '/usuario';
+    return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(data) });
 };
 
 export const getUserById = (id: number): Promise<User> => apiFetch(`/usuario/${id}`);
@@ -173,6 +174,38 @@ export const getCoordinadores = async (): Promise<Coordinador[]> => {
     const result = await apiFetch('/coordinadores');
     return result.datos;
 };
+
+export const getCoordinadorById = async (id: number): Promise<User> => {
+    const result = await apiFetch(`/coordinadores/${id}`);
+    const coord = result.datos;
+    // Adapt the response to the User interface
+    return {
+        id: coord.id_coordinador,
+        nombre: coord.nombre,
+        apellido_paterno: coord.apellido_paterno,
+        apellido_materno: coord.apellido_materno,
+        correo: coord.correo,
+        id_rol: 3, // Assuming 3 is the role ID for coordinators
+        rol: 'coordinador',
+        fecha_registro: coord.fecha_registro,
+        ultimo_acceso: coord.ultimo_acceso,
+    };
+};
+
+export const getCarrerasPorCoordinador = async (coordinadorId: number): Promise<AssignedCareer[]> => {
+    const data = await apiFetch(`/carrerasPorCoordinador/${coordinadorId}`);
+    return data.datos.map((item: any) => ({
+        id_carrera: item.id_carrera,
+        carrera: item.carrera,
+    }));
+};
+
+export const assignCarreraToCoordinador = (data: { id_coordinador: number, id_carrera: number }): Promise<void> => 
+    apiFetch('/asignarCarreraCoordinador', { method: 'POST', body: JSON.stringify(data) });
+    
+export const removeCarreraFromCoordinador = (data: { id_coordinador: number, id_carrera: number }): Promise<void> =>
+    apiFetch('/eliminarCarreraCoordinador', { method: 'POST', body: JSON.stringify(data) });
+
 
 // Group Management
 export const getGroups = async (): Promise<Group[]> => {

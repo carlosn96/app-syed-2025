@@ -2,8 +2,9 @@
 "use client"
 
 import { useState, useEffect, useMemo, useRef } from "react"
-import { Pencil, PlusCircle, Trash2, Search, Eye } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search, BookCopy } from "lucide-react"
 import { Toast } from 'primereact/toast';
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -121,6 +122,12 @@ export default function CoordinadoresPage() {
         <CardContent className="text-sm space-y-2">
             <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
             <div className="flex gap-2 pt-2">
+            <Button asChild size="sm" variant="success" className="flex-1">
+              <Link href={`/coordinadores/${user.id}/carreras`}>
+                <BookCopy className="h-4 w-4 mr-2" />
+                <span>Ver Carreras</span>
+              </Link>
+            </Button>
             <Button size="sm" variant="warning" className="flex-1" onClick={() => handleEditClick(user)}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Editar
@@ -168,6 +175,7 @@ export default function CoordinadoresPage() {
         <CardContent className="space-y-2">
             <Skeleton className="h-4 w-28" />
             <div className="flex gap-2 pt-2">
+                <Skeleton className="h-9 w-full rounded-full" />
                 <Skeleton className="h-9 w-full rounded-full" />
                 <Skeleton className="h-9 w-full rounded-full" />
             </div>
