@@ -14,9 +14,10 @@ import {
 } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
+import { Toast } from 'primereact/toast';
 import { createNonCountableCriterion } from "@/services/api" // Assuming you'll create these
 import type { RubricType } from "@/app/(app)/supervision-rubrics/page"
+import { useRef } from "react"
 
 // Mock API call for countable criteria
 const addCountableCriterion = (data: any, rubricId: number) => new Promise((res) => setTimeout(() => res({ ...data, rubricId }), 500));
@@ -29,7 +30,7 @@ const createCriterionSchema = z.object({
 type CreateCriterionFormValues = z.infer<typeof createCriterionSchema>;
 
 export function CreateCriterionForm({ rubricId, rubricType, onSuccess }: { rubricId: number | null, rubricType: RubricType, onSuccess?: () => void }) {
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
 
   const form = useForm<CreateCriterionFormValues>({
     resolver: zodResolver(createCriterionSchema),
@@ -40,10 +41,10 @@ export function CreateCriterionForm({ rubricId, rubricType, onSuccess }: { rubri
 
   const onSubmit = async (data: CreateCriterionFormValues) => {
     if (rubricId === null) {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "No se ha seleccionado una rúbrica.",
+        toast.current?.show({
+            severity: "error",
+            summary: "Error",
+            detail: "No se ha seleccionado una rúbrica.",
         });
         return;
     }
@@ -63,41 +64,45 @@ export function CreateCriterionForm({ rubricId, rubricType, onSuccess }: { rubri
           }
       }
 
-      toast({
-        title: "Criterio Añadido",
-        description: `El criterio ha sido añadido a la rúbrica con éxito.`,
+      toast.current?.show({
+        severity: "success",
+        summary: "Criterio Añadido",
+        detail: `El criterio ha sido añadido a la rúbrica con éxito.`,
       });
       form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al añadir criterio",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al añadir criterio",
+            detail: error.message,
         });
       }
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="text"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Texto del Criterio</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Ej. El docente utiliza ejemplos relevantes para la vida cotidiana de los alumnos." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full">Añadir Criterio</Button>
-      </form>
-    </Form>
+    <>
+      <Toast ref={toast} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="text"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Texto del Criterio</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Ej. El docente utiliza ejemplos relevantes para la vida cotidiana de los alumnos." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full">Añadir Criterio</Button>
+        </form>
+      </Form>
+    </>
   )
 }

@@ -7,7 +7,8 @@ import { z } from "zod"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { es } from "date-fns/locale"
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, useRef } from "react"
+import { Toast } from 'primereact/toast';
 
 import {
   Form,
@@ -25,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
 import { supervisions, subjects, users, careers, teachers as allTeachers, groups, schedules } from "@/lib/data"
 import { Teacher } from "@/lib/modelos"
 import { cn } from "@/lib/utils"
@@ -98,7 +98,7 @@ const getAvailableOptions = (coordinatorId?: string) => {
             const teacherGroupIds = [...new Set(teacherSchedules.map(s => s.groupId))];
             const teacherGroups = groups.filter(g => teacherGroupIds.includes(g.id));
             const teacherCareerName = teacherGroups.length > 0 ? teacherGroups[0].career : "N/A";
-            teacherCareers[teacher.id] = teacherCareerName;
+            teacherCareers[String(teacher.id)] = teacherCareerName;
         });
     }
 
@@ -112,14 +112,14 @@ const timeOptions = Array.from({ length: 15 }, (_, i) => {
 
 
 export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps) {
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
   const { user } = useAuth();
   
   const [availableTeachers, setAvailableTeachers] = useState<Teacher[]>([]);
   const [teacherCareers, setTeacherCareers] = useState<Record<string, string>>({});
   
-  const coordinators = useMemo(() => users.filter(u => u.rol === 'coordinator'), []);
-  const defaultCoordinator = user?.rol === 'coordinator' ? String(user.id) : "";
+  const coordinators = useMemo(() => users.filter(u => u.rol === 'coordinador'), []);
+  const defaultCoordinator = user?.rol === 'coordinador' ? String(user.id) : "";
 
   const form = useForm<CreateSupervisionFormValues>({
     resolver: zodResolver(createSupervisionSchema),
@@ -158,183 +158,187 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
   const onSubmit = (data: CreateSupervisionFormValues) => {
     try {
       addSupervision(data);
-      toast({
-        title: "Cita Agendada",
-        description: `La supervisión para el ${format(data.date, "PPP", { locale: es })} ha sido agendada.`,
+      toast.current?.show({
+        severity: "success",
+        summary: "Cita Agendada",
+        detail: `La supervisión para el ${format(data.date, "PPP", { locale: es })} ha sido agendada.`,
       });
       form.reset({ coordinatorId: defaultCoordinator, teacherId: "", careerName: "", date: undefined, startTime: "", endTime: "" });
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al agendar",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al agendar",
+            detail: error.message,
         });
       }
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {user?.rol !== 'coordinator' && (
-            <FormField
+    <>
+      <Toast ref={toast} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {user?.rol !== 'coordinator' && (
+              <FormField
+              control={form.control}
+              name="coordinatorId"
+              render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>Coordinador</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={user?.rol === 'coordinator'}>
+                      <FormControl>
+                      <SelectTrigger>
+                          <SelectValue placeholder="Seleccione un coordinador" />
+                      </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                      {coordinators.map((coordinator) => (
+                          <SelectItem key={coordinator.id} value={String(coordinator.id)}>
+                          {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
+                          </SelectItem>
+                      ))}
+                      </SelectContent>
+                  </Select>
+                  <FormMessage />
+                  </FormItem>
+              )}
+              />
+          )}
+          <FormField
             control={form.control}
-            name="coordinatorId"
+            name="teacherId"
             render={({ field }) => (
-                <FormItem>
-                <FormLabel>Coordinador</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={user?.rol === 'coordinator'}>
-                    <FormControl>
+              <FormItem>
+                <FormLabel>Docente a Evaluar</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  value={field.value}
+                  disabled={!selectedCoordinatorId || availableTeachers.length === 0}
+                >
+                  <FormControl>
                     <SelectTrigger>
-                        <SelectValue placeholder="Seleccione un coordinador" />
+                      <SelectValue placeholder="Seleccione un docente" />
                     </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                    {coordinators.map((coordinator) => (
-                        <SelectItem key={coordinator.id} value={String(coordinator.id)}>
-                        {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
-                        </SelectItem>
+                  </FormControl>
+                  <SelectContent>
+                    {availableTeachers.map((teacher) => (
+                      <SelectItem key={teacher.id} value={String(teacher.id)}>
+                        {teacher.name}
+                      </SelectItem>
                     ))}
-                    </SelectContent>
+                  </SelectContent>
                 </Select>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
-        )}
-        <FormField
-          control={form.control}
-          name="teacherId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Docente a Evaluar</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                value={field.value}
-                disabled={!selectedCoordinatorId || availableTeachers.length === 0}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un docente" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {availableTeachers.map((teacher) => (
-                    <SelectItem key={teacher.id} value={String(teacher.id)}>
-                      {teacher.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
+          />
+          <FormField
+              control={form.control}
+              name="careerName"
+              render={({ field }) => (
+                  <FormItem>
+                      <FormLabel>Carrera</FormLabel>
+                      <FormControl>
+                          <Input {...field} disabled />
+                      </FormControl>
+                      <FormMessage />
+                  </FormItem>
+              )}
+          />
+          <FormField
             control={form.control}
-            name="careerName"
+            name="date"
             render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Carrera</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel>Fecha de Supervisión</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
                     <FormControl>
-                        <Input {...field} disabled />
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                        disabled={!selectedTeacherId}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP", { locale: es})
+                        ) : (
+                          <span>Seleccione una fecha</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
                     </FormControl>
-                    <FormMessage />
-                </FormItem>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => {
+                          const today = new Date();
+                          today.setHours(0,0,0,0);
+                          return date < today;
+                      }}
+                      initialFocus
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
             )}
-        />
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Fecha de Supervisión</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                      disabled={!selectedTeacherId}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP", { locale: es})
-                      ) : (
-                        <span>Seleccione una fecha</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) => {
-                        const today = new Date();
-                        today.setHours(0,0,0,0);
-                        return date < today;
-                    }}
-                    initialFocus
-                    locale={es}
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="grid grid-cols-2 gap-4">
-            <FormField
-            control={form.control}
-            name="startTime"
-            render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Hora de Inicio</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!form.getValues('date')}>
-                        <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Inicio" />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            {timeOptions.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                </FormItem>
-            )}
-            />
-            <FormField
-            control={form.control}
-            name="endTime"
-            render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Hora de Fin</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!form.getValues('startTime')}>
-                        <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Fin" />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                             {timeOptions.filter(t => t > form.getValues('startTime')).map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                </FormItem>
-            )}
-            />
-        </div>
+          />
+          <div className="grid grid-cols-2 gap-4">
+              <FormField
+              control={form.control}
+              name="startTime"
+              render={({ field }) => (
+                  <FormItem>
+                      <FormLabel>Hora de Inicio</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!form.getValues('date')}>
+                          <FormControl>
+                              <SelectTrigger>
+                                  <SelectValue placeholder="Inicio" />
+                              </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                              {timeOptions.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                          </SelectContent>
+                      </Select>
+                      <FormMessage />
+                  </FormItem>
+              )}
+              />
+              <FormField
+              control={form.control}
+              name="endTime"
+              render={({ field }) => (
+                  <FormItem>
+                      <FormLabel>Hora de Fin</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!form.getValues('startTime')}>
+                          <FormControl>
+                              <SelectTrigger>
+                                  <SelectValue placeholder="Fin" />
+                              </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                               {timeOptions.filter(t => t > form.getValues('startTime')).map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                          </SelectContent>
+                      </Select>
+                      <FormMessage />
+                  </FormItem>
+              )}
+              />
+          </div>
 
-        <Button type="submit" className="w-full">Agendar Cita</Button>
-      </form>
-    </Form>
+          <Button type="submit" className="w-full">Agendar Cita</Button>
+        </form>
+      </Form>
+    </>
   )
 }

@@ -21,7 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
+import { Toast } from 'primereact/toast';
+import { useRef } from "react"
+
 // Mock API call - replace with actual API call
 const addRubric = (data: any) => new Promise((res) => setTimeout(() => res(data), 500));
 
@@ -35,7 +37,7 @@ const createRubricSchema = z.object({
 type CreateRubricFormValues = z.infer<typeof createRubricSchema>;
 
 export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
 
   const form = useForm<CreateRubricFormValues>({
     resolver: zodResolver(createRubricSchema),
@@ -47,62 +49,66 @@ export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
   const onSubmit = async (data: CreateRubricFormValues) => {
     try {
       await addRubric({ ...data, type: "checkbox", criteria: [] });
-      toast({
-        title: "Rúbrica Creada",
-        description: `La rúbrica "${data.title}" ha sido creada con éxito.`,
+      toast.current?.show({
+        severity: "success",
+        summary: "Rúbrica Creada",
+        detail: `La rúbrica "${data.title}" ha sido creada con éxito.`,
       });
       form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al crear la rúbrica",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al crear la rúbrica",
+            detail: error.message,
         });
       }
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Título de la Rúbrica</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej. Presentación Personal" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoría</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+    <>
+      <Toast ref={toast} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Título de la Rúbrica</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione una categoría" />
-                  </SelectTrigger>
+                  <Input placeholder="Ej. Presentación Personal" {...field} />
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="Contable">Contable</SelectItem>
-                  <SelectItem value="No Contable">No Contable</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full">Crear Rúbrica</Button>
-      </form>
-    </Form>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Categoría</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione una categoría" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Contable">Contable</SelectItem>
+                    <SelectItem value="No Contable">No Contable</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full">Crear Rúbrica</Button>
+        </form>
+      </Form>
+    </>
   )
 }

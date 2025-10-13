@@ -1,8 +1,9 @@
 
 "use client"
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 import { Pencil, PlusCircle, Trash2, Search, BookCopy } from "lucide-react"
 import { useParams } from "next/navigation"
+import { Toast } from 'primereact/toast';
 
 import {
   Card,
@@ -38,7 +39,6 @@ import { getCarrerasPorPlantel, getPlantelById, removeCarreraFromPlantel, getCar
 import { Skeleton } from "@/components/ui/skeleton"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
 import { AssignCareerToPlantelForm } from "@/components/assign-career-to-plantel-form"
-import { useToast } from "@/hooks/use-toast"
 
 
 interface AssignedCareer {
@@ -50,7 +50,7 @@ export default function PlantelCarrerasPage() {
   const params = useParams();
   const plantelId = Number(params.plantelId);
   const { user } = useAuth();
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
 
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [careerToRemove, setCareerToRemove] = useState<AssignedCareer | null>(null);
@@ -94,19 +94,19 @@ export default function PlantelCarrerasPage() {
     if (!careerToRemove || !plantel) return;
     try {
         await removeCarreraFromPlantel({ id_plantel: plantel.id, id_carrera: careerToRemove.id_carrera });
-        toast({
-            variant: "success",
-            title: "Carrera Desasignada",
-            description: `La carrera ${careerToRemove.carrera} ha sido desasignada del plantel.`,
+        toast.current?.show({
+            severity: "success",
+            summary: "Carrera Desasignada",
+            detail: `La carrera ${careerToRemove.carrera} ha sido desasignada del plantel.`,
         });
         setCareerToRemove(null);
         fetchData();
     } catch (error) {
        if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al desasignar",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al desasignar",
+            detail: error.message,
         });
       }
     }
@@ -168,6 +168,7 @@ export default function PlantelCarrerasPage() {
   
   return (
     <div className="flex flex-col gap-8">
+      <Toast ref={toast} />
       <FloatingBackButton />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col">

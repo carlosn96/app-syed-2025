@@ -1,6 +1,8 @@
 import type {Metadata} from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster"
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
 import { AuthProvider } from '@/context/auth-context';
 
 export const metadata: Metadata = {
@@ -24,7 +26,6 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <AuthProvider>
           {children}
-          <Toaster />
         </AuthProvider>
       </body>
     </html>

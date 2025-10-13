@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
+import { Toast } from 'primereact/toast';
 import { createCareer } from "@/services/api"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { User } from "@/lib/modelos"
 
 const createCareerSchema = z.object({
@@ -31,7 +31,7 @@ interface CreateCareerFormProps {
 }
 
 export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProps) {
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateCareerFormValues>({
@@ -46,18 +46,19 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
     try {
         await createCareer(data);
       
-      toast({
-        title: "Carrera Creada",
-        description: `La carrera ${data.nombre} ha sido creada. Ahora puedes asignarle planes de estudio.`,
+      toast.current?.show({
+        severity: "success",
+        summary: "Carrera Creada",
+        detail: `La carrera ${data.nombre} ha sido creada. Ahora puedes asignarle planes de estudio.`,
       });
       form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al crear",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al crear",
+            detail: error.message,
         });
       }
     } finally {
@@ -66,25 +67,28 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="nombre"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre de la Carrera</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej. Ingeniería en Software" {...field} disabled={!!careerName} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Creando...' : 'Crear Carrera'}
-        </Button>
-      </form>
-    </Form>
+    <>
+      <Toast ref={toast} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="nombre"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre de la Carrera</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ej. Ingeniería en Software" {...field} disabled={!!careerName} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Creando...' : 'Crear Carrera'}
+          </Button>
+        </form>
+      </Form>
+    </>
   )
 }

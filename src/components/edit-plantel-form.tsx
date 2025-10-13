@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
+import { Toast } from 'primereact/toast';
 import { updatePlantel } from "@/services/api"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Plantel } from "@/lib/modelos"
 
 const editPlantelSchema = z.object({
@@ -32,7 +32,7 @@ interface EditPlantelFormProps {
 }
 
 export function EditPlantelForm({ plantel, onSuccess }: EditPlantelFormProps) {
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<EditPlantelFormValues>({
@@ -47,17 +47,18 @@ export function EditPlantelForm({ plantel, onSuccess }: EditPlantelFormProps) {
     setIsSubmitting(true);
     try {
       await updatePlantel(plantel.id, data);
-      toast({
-        title: "Plantel Actualizado",
-        description: `El plantel ${data.nombre} ha sido actualizado con éxito.`,
+      toast.current?.show({
+        severity: "success",
+        summary: "Plantel Actualizado",
+        detail: `El plantel ${data.nombre} ha sido actualizado con éxito.`,
       });
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al actualizar",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al actualizar",
+            detail: error.message,
         });
       }
     } finally {
@@ -66,38 +67,41 @@ export function EditPlantelForm({ plantel, onSuccess }: EditPlantelFormProps) {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="nombre"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre del Plantel</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej. Plantel Centro" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="ubicacion"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ubicación</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej. Av. Principal 123" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-        </Button>
-      </form>
-    </Form>
+    <>
+      <Toast ref={toast} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="nombre"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre del Plantel</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ej. Plantel Centro" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="ubicacion"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ubicación</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ej. Av. Principal 123" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+          </Button>
+        </form>
+      </Form>
+    </>
   )
 }

@@ -1,9 +1,10 @@
 
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 import { Pencil, PlusCircle, Trash2, Search, BookOpenCheck } from "lucide-react"
 import Link from "next/link"
+import { Toast } from 'primereact/toast';
 
 import {
   Card,
@@ -48,11 +49,10 @@ import { useAuth } from "@/context/auth-context"
 import { getCareers, deleteCareer } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
 
 export default function CareersPage() {
   const { user } = useAuth();
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
   
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -98,19 +98,19 @@ export default function CareersPage() {
     if (!careerToDelete) return;
     try {
       await deleteCareer(careerToDelete.id);
-      toast({
-        variant: "success",
-        title: "Carrera Eliminada",
-        description: `La carrera ${careerToDelete.name} ha sido eliminada.`,
+      toast.current?.show({
+        severity: "success",
+        summary: "Carrera Eliminada",
+        detail: `La carrera ${careerToDelete.name} ha sido eliminada.`,
       });
       setCareerToDelete(null);
       fetchCareers();
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al eliminar",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al eliminar",
+            detail: error.message,
         });
       }
     }
@@ -266,6 +266,7 @@ export default function CareersPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <Toast ref={toast} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Carreras

@@ -1,9 +1,10 @@
 
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { Pencil, PlusCircle, Trash2, Search, Eye } from "lucide-react"
 import Link from "next/link"
+import { Toast } from 'primereact/toast';
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -40,10 +41,9 @@ import { EditUserForm } from "@/components/edit-user-form"
 import { Input } from "@/components/ui/input"
 import { getUsers, deleteUser, getDocentes } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useToast } from "@/hooks/use-toast"
 
 export default function DocentesPage() {
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [allDocentes, setAllDocentes] = useState<Docente[]>([]);
@@ -95,18 +95,18 @@ export default function DocentesPage() {
   const handleDeleteUser = async (userId: number) => {
     try {
         await deleteUser(userId);
-        toast({
-            variant: "success",
-            title: "Usuario Eliminado",
-            description: "El docente ha sido eliminado correctamente.",
+        toast.current?.show({
+            severity: "success",
+            summary: "Usuario Eliminado",
+            detail: "El docente ha sido eliminado correctamente.",
         });
         fetchUsers();
     } catch (error) {
         if (error instanceof Error) {
-            toast({
-                variant: "destructive",
-                title: "Error al eliminar",
-                description: error.message,
+            toast.current?.show({
+                severity: "error",
+                summary: "Error al eliminar",
+                detail: error.message,
             });
         }
     }
@@ -195,6 +195,7 @@ export default function DocentesPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <Toast ref={toast} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Gestión de Docentes

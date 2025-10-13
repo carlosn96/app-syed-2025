@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
+import { Toast } from 'primereact/toast';
 import { createCareer } from "@/services/api" // Assuming a similar function for study plans
-import { useState } from "react"
+import { useState, useRef } from "react"
 
 const createStudyPlanSchema = z.object({
   modality: z.string().min(1, "El nombre de la modalidad es requerido."),
@@ -34,7 +34,7 @@ interface CreateStudyPlanFormProps {
 
 
 export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator }: CreateStudyPlanFormProps) {
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateStudyPlanFormValues>({
@@ -48,10 +48,10 @@ export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator
   const onSubmit = async (data: CreateStudyPlanFormValues) => {
     setIsSubmitting(true);
     if (!campus || !coordinator) {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "No se pudo determinar el plantel o coordinador para este plan.",
+        toast.current?.show({
+            severity: "error",
+            summary: "Error",
+            detail: "No se pudo determinar el plantel o coordinador para este plan.",
         });
         setIsSubmitting(false);
         return;
@@ -64,18 +64,19 @@ export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator
     };
     try {
       await createCareer(newPlanData); // We can rename createCareer to a more generic name
-      toast({
-        title: "Plan de Estudio Creado",
-        description: `La modalidad ${data.modality} ha sido creada para ${careerName}.`,
+      toast.current?.show({
+        severity: "success",
+        summary: "Plan de Estudio Creado",
+        detail: `La modalidad ${data.modality} ha sido creada para ${careerName}.`,
       });
       form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al crear",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al crear",
+            detail: error.message,
         });
       }
     } finally {
@@ -84,38 +85,41 @@ export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="modality"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre de la Modalidad</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej. INCO, LAET" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="semesters"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Duración en Semestres</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Creando...' : 'Crear Plan de Estudio'}
-        </Button>
-      </form>
-    </Form>
+    <>
+      <Toast ref={toast} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="modality"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre de la Modalidad</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ej. INCO, LAET" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="semesters"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Duración en Semestres</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Creando...' : 'Crear Plan de Estudio'}
+          </Button>
+        </form>
+      </Form>
+    </>
   )
 }

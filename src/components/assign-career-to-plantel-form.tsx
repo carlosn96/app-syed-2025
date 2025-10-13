@@ -20,9 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
+import { Toast } from 'primereact/toast';
 import { assignCarreraToPlantel } from "@/services/api"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { CareerSummary } from "@/lib/modelos"
 
 const assignCareerSchema = z.object({
@@ -38,7 +38,7 @@ interface AssignCareerToPlantelFormProps {
 }
 
 export function AssignCareerToPlantelForm({ plantelId, availableCareers, onSuccess }: AssignCareerToPlantelFormProps) {
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<AssignCareerFormValues>({
@@ -49,18 +49,19 @@ export function AssignCareerToPlantelForm({ plantelId, availableCareers, onSucce
     setIsSubmitting(true);
     try {
       await assignCarreraToPlantel({ id_plantel: plantelId, id_carrera: data.id_carrera });
-      toast({
-        title: "Carrera Asignada",
-        description: `La carrera ha sido asignada al plantel con éxito.`,
+      toast.current?.show({
+        severity: "success",
+        summary: "Carrera Asignada",
+        detail: `La carrera ha sido asignada al plantel con éxito.`,
       });
       form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al asignar",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al asignar",
+            detail: error.message,
         });
       }
     } finally {
@@ -69,40 +70,43 @@ export function AssignCareerToPlantelForm({ plantelId, availableCareers, onSucce
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="id_carrera"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Carrera a Asignar</FormLabel>
-               <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione una carrera" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {availableCareers.length > 0 ? (
-                    availableCareers.map((career) => (
-                        <SelectItem key={career.id} value={String(career.id)}>
-                        {career.name}
-                        </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="none" disabled>No hay más carreras para asignar</SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full" disabled={isSubmitting || availableCareers.length === 0}>
-            {isSubmitting ? 'Asignando...' : 'Asignar Carrera'}
-        </Button>
-      </form>
-    </Form>
+    <>
+      <Toast ref={toast} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="id_carrera"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Carrera a Asignar</FormLabel>
+                 <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione una carrera" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {availableCareers.length > 0 ? (
+                      availableCareers.map((career) => (
+                          <SelectItem key={career.id} value={String(career.id)}>
+                          {career.name}
+                          </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>No hay más carreras para asignar</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full" disabled={isSubmitting || availableCareers.length === 0}>
+              {isSubmitting ? 'Asignando...' : 'Asignar Carrera'}
+          </Button>
+        </form>
+      </Form>
+    </>
   )
 }

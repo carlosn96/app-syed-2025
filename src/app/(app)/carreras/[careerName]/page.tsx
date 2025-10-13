@@ -1,8 +1,9 @@
 
 "use client"
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
+import { Toast } from 'primereact/toast';
 import {
   Card,
   CardContent,
@@ -20,7 +21,6 @@ import { CreateStudyPlanForm } from "@/components/create-study-plan-form"
 import { useAuth } from "@/context/auth-context"
 import { getCareers, getSubjects, deleteCareer } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useToast } from "@/hooks/use-toast"
 import { EditStudyPlanForm } from "@/components/edit-study-plan-form"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
 
@@ -28,7 +28,7 @@ import { FloatingBackButton } from "@/components/ui/floating-back-button"
 export default function CareerPlansPage() {
   const params = useParams();
   const careerName = decodeURIComponent(params.careerName as string);
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
   const router = useRouter();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -105,10 +105,10 @@ export default function CareerPlansPage() {
     if (!modalityToDelete) return;
     try {
       await deleteCareer(modalityToDelete.id);
-      toast({
-        variant: "success",
-        title: "Plan de Estudio Eliminado",
-        description: `La modalidad ${modalityToDelete.modality} ha sido eliminada.`,
+      toast.current?.show({
+        severity: "success",
+        summary: "Plan de Estudio Eliminado",
+        detail: `La modalidad ${modalityToDelete.modality} ha sido eliminada.`,
       });
       setModalityToDelete(null);
       fetchData();
@@ -117,10 +117,10 @@ export default function CareerPlansPage() {
       }
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al eliminar",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al eliminar",
+            detail: error.message,
         });
       }
     }
@@ -190,6 +190,7 @@ export default function CareerPlansPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <Toast ref={toast} />
       <FloatingBackButton />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col">

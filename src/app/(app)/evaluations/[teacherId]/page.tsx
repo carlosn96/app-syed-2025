@@ -5,10 +5,11 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useParams, useRouter } from 'next/navigation';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Teacher } from '@/lib/modelos';
 import { getTeachers, createEvaluation } from '@/services/api';
+import { Toast } from 'primereact/toast';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -22,7 +23,6 @@ import {
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -60,7 +60,7 @@ export default function StudentEvaluationPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
   const teacherId = Number(params.teacherId);
   
   const [teacher, setTeacher] = useState<Teacher | null>(null);
@@ -112,16 +112,17 @@ export default function StudentEvaluationPage() {
 
     try {
         await createEvaluation(newEvaluation);
-        toast({
-            title: "Evaluación Enviada",
-            description: `Gracias por evaluar a ${teacher.name}.`,
+        toast.current?.show({
+            severity: "success",
+            summary: "Evaluación Enviada",
+            detail: `Gracias por evaluar a ${teacher.name}.`,
         });
         router.push('/evaluations');
     } catch (error) {
-        toast({
-            variant: "destructive",
-            title: "Error al enviar",
-            description: "No se pudo guardar la evaluación. Inténtalo de nuevo."
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al enviar",
+            detail: "No se pudo guardar la evaluación. Inténtalo de nuevo."
         })
     }
   };
@@ -165,6 +166,7 @@ export default function StudentEvaluationPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <Toast ref={toast} />
       <Card className="rounded-xl">
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardHeader>

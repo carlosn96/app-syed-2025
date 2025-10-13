@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
+import { Toast } from 'primereact/toast';
 import { updateCareer, getUsers } from "@/services/api"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Career, User } from "@/lib/modelos"
 import {
   Select,
@@ -39,7 +39,7 @@ interface EditStudyPlanFormProps {
 }
 
 export function EditStudyPlanForm({ modality, onSuccess }: EditStudyPlanFormProps) {
-  const { toast } = useToast();
+  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coordinators, setCoordinators] = useState<User[]>([]);
 
@@ -68,17 +68,18 @@ export function EditStudyPlanForm({ modality, onSuccess }: EditStudyPlanFormProp
 
     try {
       await updateCareer(modality.id, updatedData);
-      toast({
-        title: "Plan de Estudio Actualizado",
-        description: `La modalidad ha sido actualizada con éxito.`,
+      toast.current?.show({
+        severity: "success",
+        summary: "Plan de Estudio Actualizado",
+        detail: `La modalidad ha sido actualizada con éxito.`,
       });
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al actualizar",
-            description: error.message,
+        toast.current?.show({
+            severity: "error",
+            summary: "Error al actualizar",
+            detail: error.message,
         });
       }
     } finally {
@@ -87,52 +88,53 @@ export function EditStudyPlanForm({ modality, onSuccess }: EditStudyPlanFormProp
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="coordinator"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Coordinador</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+    <>
+      <Toast ref={toast} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="coordinator"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Coordinador</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un coordinador" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                     <SelectItem value="unassigned">Sin asignar</SelectItem>
+                    {coordinators.map((coordinator) => (
+                      <SelectItem key={coordinator.id} value={`${coordinator.nombre} ${coordinator.apellido_paterno}`.trim()}>
+                         {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="semesters"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Duración en Semestres</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un coordinador" />
-                  </SelectTrigger>
+                  <Input type="number" {...field} />
                 </FormControl>
-                <SelectContent>
-                   <SelectItem value="unassigned">Sin asignar</SelectItem>
-                  {coordinators.map((coordinator) => (
-                    <SelectItem key={coordinator.id} value={`${coordinator.nombre} ${coordinator.apellido_paterno}`.trim()}>
-                       {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="semesters"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Duración en Semestres</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-        </Button>
-      </form>
-    </Form>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+          </Button>
+        </form>
+      </Form>
+    </>
   )
 }
-
-    

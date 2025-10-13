@@ -13,16 +13,16 @@ import {
 } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { CreatePlantelForm } from "@/components/create-plantel-form"
 import { EditPlantelForm } from "@/components/edit-plantel-form"
 import { Plantel } from "@/lib/modelos"
 import { getPlanteles, deletePlantel } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useToast } from "@/hooks/use-toast"
+import { Toast } from 'primereact/toast';
 
 export default function CampusesPage() {
-    const { toast } = useToast();
+    const toast = useRef<Toast>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [plantelToEdit, setPlantelToEdit] = useState<Plantel | null>(null);
@@ -65,19 +65,19 @@ export default function CampusesPage() {
         if (!plantelToDelete) return;
         try {
             await deletePlantel(plantelToDelete.id);
-            toast({
-                variant: "success",
-                title: "Plantel Eliminado",
-                description: `El plantel ${plantelToDelete.name} ha sido eliminado.`,
+            toast.current?.show({
+                severity: "success",
+                summary: "Plantel Eliminado",
+                detail: `El plantel ${plantelToDelete.name} ha sido eliminado.`,
             });
             setPlantelToDelete(null);
             fetchPlanteles();
         } catch (error) {
             if (error instanceof Error) {
-                toast({
-                    variant: "destructive",
-                    title: "Error al eliminar",
-                    description: error.message,
+                toast.current?.show({
+                    severity: "error",
+                    summary: "Error al eliminar",
+                    detail: error.message,
                 });
             }
         }
@@ -86,6 +86,7 @@ export default function CampusesPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <Toast ref={toast} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
             Gestión de Planteles
