@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Career, User, AssignedCareer } from "@/lib/modelos"
+import { Career, User, AssignedCareer, CareerSummary } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -51,7 +51,7 @@ export default function CoordinadorCarrerasPage() {
   
   const [coordinador, setCoordinador] = useState<User | null>(null);
   const [assignedCareers, setAssignedCareers] = useState<AssignedCareer[]>([]);
-  const [allCareers, setAllCareers] = useState<Career[]>([]);
+  const [allCareers, setAllCareers] = useState<CareerSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,7 +70,7 @@ export default function CoordinadorCarrerasPage() {
         ]);
         setCoordinador(coordinadorData);
         setAssignedCareers(assignedCareersData);
-        setAllCareers(allCareersData as Career[]);
+        setAllCareers(allCareersData);
 
       } catch (err: any) {
         setError(err.message || 'Error al cargar los datos');

@@ -23,7 +23,7 @@ import {
 import { Toast } from 'primereact/toast';
 import { assignCarreraToCoordinador } from "@/services/api"
 import { useState, useRef } from "react"
-import { Career } from "@/lib/modelos"
+import { CareerSummary } from "@/lib/modelos"
 
 const assignCareerSchema = z.object({
   id_carrera: z.coerce.number().min(1, "Por favor, seleccione una carrera."),
@@ -33,7 +33,7 @@ type AssignCareerFormValues = z.infer<typeof assignCareerSchema>;
 
 interface AssignCareerToCoordinatorFormProps {
   coordinadorId: number;
-  availableCareers: Career[];
+  availableCareers: CareerSummary[];
   onSuccess?: () => void;
 }
 
