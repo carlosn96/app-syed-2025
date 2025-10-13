@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/context/auth-context"
-import { User, Roles, Docente } from "@/lib/modelos"
+import { User, Docente } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
 import { EditUserForm } from "@/components/edit-user-form"
 import { Input } from "@/components/ui/input"
@@ -65,10 +65,10 @@ export default function UsersPage() {
 
   const roleIdToName = (id: number): RoleFilter => {
     switch (id) {
-        case Roles.Administrador: return 'administrador';
-        case Roles.Coordinador: return 'coordinador';
-        case Roles.Docente: return 'docente';
-        case Roles.Alumno: return 'alumno';
+        case 1: return 'administrador';
+        case 3: return 'coordinador';
+        case 2: return 'docente';
+        case 4: return 'alumno';
         default: return 'all';
     }
   }
@@ -80,6 +80,7 @@ export default function UsersPage() {
       
       const mappedData: User[] = usersData.map(u => ({
         ...u,
+        id_rol: u.id_rol,
         rol: roleIdToName(u.id_rol),
         rol_nombre: u.rol
       }));
@@ -204,7 +205,7 @@ export default function UsersPage() {
             </div>
         </CardHeader>
         <CardContent className="text-sm space-y-2">
-            <p><span className="font-semibold">Grupo:</span> {user.rol === 'alumno' ? user.grupo : 'N/A'}</p>
+            {user.rol === 'alumno' && <p><span className="font-semibold">Grupo:</span> {user.grupo || 'No asignado'}</p>}
             <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
             <div className="flex gap-2 pt-2">
             <Button size="sm" variant="warning" className="flex-1" onClick={() => handleEditClick(user)}>
