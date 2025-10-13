@@ -11,6 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -26,6 +27,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useMemo, useState, useEffect } from "react"
 import { CareerSummary } from "@/lib/modelos"
 import { createUser, getCareers } from "@/services/api"
+
 
 const createUserSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido."),
@@ -44,25 +46,25 @@ const createUserSchema = z.object({
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
 
-const roleDisplayMap: Record<string, string> = {
+type Role = "coordinador" | "docente" | "alumno";
+
+const roleDisplayMap: Record<Role, string> = {
   coordinador: "Coordinador",
   docente: "Docente",
   alumno: "Alumno",
 };
 
-const roleRouteMap: Record<"coordinador" | "docente" | "alumno", string> = {
-  coordinador: "/coordinadores",
-  docente: "/docentes",
-  alumno: "/alumnos",
-};
+interface CreateUserFormProps {
+  onSuccess?: () => void;
+  defaultRole?: Role;
+}
 
-
-export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
+export function CreateUserForm({ onSuccess, defaultRole = "docente" }: CreateUserFormProps) {
   const { user: loggedInUser } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [careers, setCareers] = useState<CareerSummary[]>([]);
-  const [selectedRole, setSelectedRole] = useState<"coordinador" | "docente" | "alumno">("docente");
+  const [selectedRole, setSelectedRole] = useState<Role>(defaultRole);
 
   useEffect(() => {
     const fetchCareers = async () => {
@@ -78,8 +80,10 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
             })
         }
     };
-    fetchCareers();
-  }, [toast]);
+    if (selectedRole === 'alumno') {
+      fetchCareers();
+    }
+  }, [selectedRole, toast]);
 
   const roleDisplayFiltered = useMemo(() => {
     if (loggedInUser?.rol === 'coordinador') {
@@ -105,6 +109,16 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
   
   const onSubmit = async (data: CreateUserFormValues) => {
     setIsSubmitting(true);
+    let roleId;
+    switch(selectedRole) {
+        case 'administrador': roleId = 1; break;
+        case 'docente': roleId = 2; break;
+        case 'coordinador': roleId = 3; break;
+        case 'alumno': roleId = 4; break;
+        default: roleId = 2; // Default to docente
+    }
+    
+    const dataToSend = { ...data, id_rol: roleId };
 
     if (selectedRole === "alumno") {
         if (!data.matricula) {
@@ -125,8 +139,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
     }
 
     try {
-      const endpoint = roleRouteMap[selectedRole];
-      await createUser(data, endpoint);
+      await createUser(dataToSend);
       toast({
         variant: "success",
         title: "Usuario Creado",
@@ -150,6 +163,24 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+         <FormItem>
+            <FormLabel>Rol</FormLabel>
+            <Select onValueChange={(value) => setSelectedRole(value as any)} defaultValue={selectedRole}>
+            <FormControl>
+                <SelectTrigger>
+                <SelectValue placeholder="Seleccione un rol" />
+                </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+                {Object.entries(roleDisplayFiltered).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                    {label}
+                </SelectItem>
+                ))}
+            </SelectContent>
+            </Select>
+            <FormMessage />
+        </FormItem>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
             control={form.control}
@@ -204,25 +235,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
             </FormItem>
           )}
         />
-        <FormItem>
-            <FormLabel>Rol</FormLabel>
-            <Select onValueChange={(value) => setSelectedRole(value as any)} defaultValue={selectedRole}>
-            <FormControl>
-                <SelectTrigger>
-                <SelectValue placeholder="Seleccione un rol" />
-                </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-                {Object.entries(roleDisplayFiltered).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                    {label}
-                </SelectItem>
-                ))}
-            </SelectContent>
-            </Select>
-            <FormMessage />
-        </FormItem>
-
+        
          {selectedRole === "alumno" && (
           <>
             <FormField

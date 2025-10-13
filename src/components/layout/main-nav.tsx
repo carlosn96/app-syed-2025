@@ -14,6 +14,9 @@ import {
   ClipboardList,
   HeartHandshake,
   BookUser,
+  GraduationCap,
+  School,
+  UserCog
 } from "lucide-react"
 
 import {
@@ -27,7 +30,9 @@ import { cn } from "@/lib/utils"
 
 export const allLinks = [
   { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrador', 'coordinador', 'docente', 'alumno'], exact: true },
-  { href: "/users", label: "Usuarios", icon: Users, roles: ['administrador', 'coordinador'], exact: false },
+  { href: "/alumnos", label: "Alumnos", icon: GraduationCap, roles: ['administrador', 'coordinador'], exact: true },
+  { href: "/docentes", label: "Docentes", icon: School, roles: ['administrador', 'coordinador'], exact: true },
+  { href: "/coordinadores", label: "Coordinadores", icon: UserCog, roles: ['administrador'], exact: true },
   { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrador'], exact: true },
   { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrador', 'coordinador'], exact: true },
   { href: "/groups", label: "Grupos", icon: Users, roles: ['administrador', 'coordinador'], exact: true },
@@ -43,7 +48,7 @@ export function MainNav() {
   const pathname = usePathname()
   const { user } = useAuth()
   const { setOpenMobile, state } = useSidebar();
-  const isCollapsed = state === 'collapsed'; // ADDED BY AI
+  const isCollapsed = state === 'collapsed'; 
 
   const links = allLinks.filter(link => user && link.roles.includes(user.rol));
 
