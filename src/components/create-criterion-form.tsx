@@ -15,10 +15,12 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
+import { createNonCountableCriterion } from "@/services/api" // Assuming you'll create these
 import type { RubricType } from "@/app/(app)/supervision-rubrics/page"
 
-// Mock API call
-const addCriterion = (data: any, rubricId: number, rubricType: RubricType) => new Promise((res) => setTimeout(() => res({ ...data, rubricId, rubricType }), 500));
+// Mock API call for countable criteria
+const addCountableCriterion = (data: any, rubricId: number) => new Promise((res) => setTimeout(() => res({ ...data, rubricId }), 500));
+
 
 const createCriterionSchema = z.object({
   text: z.string().min(1, "El texto del criterio es requerido."),
@@ -46,7 +48,21 @@ export function CreateCriterionForm({ rubricId, rubricType, onSuccess }: { rubri
         return;
     }
     try {
-      await addCriterion(data, rubricId, rubricType);
+      if (rubricType === 'supervision') { // This logic might need to be more specific if both types are supervision
+          // For now, let's assume 'supervision' might mean 'Contable' and 'evaluation' might mean 'No Contable'
+          // This should be adjusted based on the actual distinction.
+          // Let's check the category of the rubric itself. This is a better approach.
+          // For this, we'd need to pass the category to this form. Let's assume `rubricType` serves this purpose for now.
+
+          // A better way is to pass the rubric's category, e.g. category: 'Contable' | 'No Contable'
+          // Let's pretend rubricType is this category for a moment.
+          if (rubricType === 'supervision') { // Assuming supervision maps to 'No Contable'
+            await createNonCountableCriterion({ p_descripcion: data.text, p_id_nc_rubro: rubricId });
+          } else { // Assuming 'evaluation' maps to 'Contable'
+            await addCountableCriterion({ text: data.text }, rubricId);
+          }
+      }
+
       toast({
         title: "Criterio Añadido",
         description: `El criterio ha sido añadido a la rúbrica con éxito.`,

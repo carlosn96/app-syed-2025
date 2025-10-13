@@ -168,6 +168,7 @@ export interface SupervisionCriterion {
   id: number;
   text: string;
   rubricId: number;
+  id_nc_rubro?: number;
 }
 
 export interface SupervisionRubric {

@@ -1,4 +1,5 @@
 
+
 import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
@@ -150,6 +151,7 @@ export const getUsers = async (): Promise<User[]> => {
     const result = await apiFetch('/usuario');
     return result.datos.map((user: any) => ({
         ...user,
+        id_rol: user.id_rol,
         rol: user.rol.toLowerCase(), 
     }));
 };
@@ -261,16 +263,19 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
-    const rubricsData = await apiFetch('/supervision/rubros');//Corregir para las 4 Rubricas exisgentes
-    const criteriaData = await apiFetch('/supervision/contable');
+    const [rubricsData, countableCriteriaData, nonCountableCriteriaData] = await Promise.all([
+        apiFetch('/supervision/rubros'),
+        apiFetch('/supervision/contable'),
+        apiFetch('/no-contables')
+    ]);
 
-    const criteriaByRubric = criteriaData.datos.reduce((acc: Record<number, SupervisionCriterion[]>, criterion: any) => {
-        const rubricId = criterion.id_rubro;
+    const criteriaByRubric = [...countableCriteriaData.datos, ...nonCountableCriteriaData.datos].reduce((acc: Record<number, SupervisionCriterion[]>, criterion: any) => {
+        const rubricId = criterion.id_rubro || criterion.id_nc_rubro;
         if (!acc[rubricId]) {
             acc[rubricId] = [];
         }
         acc[rubricId].push({
-            id: criterion.id_supcriterio,
+            id: criterion.id_supcriterio || criterion.id_nc_criterio,
             text: criterion.descripcion,
             rubricId: rubricId,
         });
@@ -281,10 +286,13 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
         id: rubric.id_rubro,
         title: rubric.nombre,
         category: rubric.tipo === 'Contable' ? 'Contable' : 'No Contable',
-        type: rubric.tipo,
+        type: rubric.tipo, // Assuming type is also 'Contable' or 'No Contable'
         criteria: criteriaByRubric[rubric.id_rubro] || [],
     }));
 };
+
+export const createNonCountableCriterion = (data: { p_descripcion: string, p_id_nc_rubro: number }): Promise<SupervisionCriterion> => 
+    apiFetch('/no-contables', { method: 'POST', body: JSON.stringify(data) });
 
 
 // Plantel-Career relationship
