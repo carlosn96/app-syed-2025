@@ -32,7 +32,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { User } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
@@ -123,7 +122,7 @@ export default function CoordinadoresPage() {
             <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
             <div className="flex gap-2 pt-2">
             <Button asChild size="sm" variant="success" className="flex-1">
-              <Link href={`/coordinadores/${user.id}/carreras`}>
+              <Link href={`/carrerasPorCoordinador/${user.id}`}>
                 <BookCopy className="h-4 w-4 mr-2" />
                 <span>Ver Carreras</span>
               </Link>
