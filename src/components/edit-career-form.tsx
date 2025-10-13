@@ -14,21 +14,13 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Toast } from 'primereact/toast';
-import { updateCareer, getCoordinadores } from "@/services/api"
-import { useState, useEffect, useRef } from "react"
-import { CareerSummary, Coordinador } from "@/lib/modelos"
+import { updateCareer } from "@/services/api"
+import { useState, useRef } from "react"
+import { CareerSummary } from "@/lib/modelos"
 
 const editCareerSchema = z.object({
   name: z.string().min(1, "El nombre de la carrera es requerido."),
-  coordinatorId: z.string().optional(),
 });
 
 type EditCareerFormValues = z.infer<typeof editCareerSchema>;
@@ -41,44 +33,18 @@ interface EditCareerFormProps {
 export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [coordinators, setCoordinators] = useState<Coordinador[]>([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-        const coordinatorsData = await getCoordinadores();
-        setCoordinators(coordinatorsData);
-    };
-    fetchData();
-  }, []);
-
-  const initialCoordinator = coordinators.find(c => c.nombre_completo.trim() === career.coordinator);
 
   const form = useForm<EditCareerFormValues>({
     resolver: zodResolver(editCareerSchema),
     defaultValues: {
       name: career.name,
-      coordinatorId: initialCoordinator?.id_coordinador.toString() || "unassigned",
     },
   });
-
-   useEffect(() => {
-    if (coordinators.length > 0) {
-        const initialCoordinator = coordinators.find(c => c.nombre_completo.trim() === career.coordinator);
-        form.reset({
-            name: career.name,
-            coordinatorId: initialCoordinator?.id_coordinador.toString() || "unassigned",
-        });
-    }
-  }, [coordinators, career, form]);
 
   const onSubmit = async (data: EditCareerFormValues) => {
     setIsSubmitting(true);
     try {
-        const careerData = {
-            carrera: data.name,
-            id_coordinador: data.coordinatorId === 'unassigned' ? null : Number(data.coordinatorId),
-        };
-      await updateCareer(career.id, careerData);
+      await updateCareer(career.id, { carrera: data.name });
       toast.current?.show({
         severity: "success",
         summary: "Carrera Actualizada",
@@ -112,31 +78,6 @@ export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
                 <FormControl>
                   <Input placeholder="Ej. Ingeniería en Software" {...field} />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="coordinatorId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Coordinador (Opcional)</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un coordinador" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                     <SelectItem value="unassigned">Sin asignar</SelectItem>
-                    {coordinators.map((coordinator) => (
-                      <SelectItem key={coordinator.id_coordinador} value={coordinator.id_coordinador.toString()}>
-                         {coordinator.nombre_completo}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
                 <FormMessage />
               </FormItem>
             )}

@@ -112,19 +112,9 @@ export const assignCoordinatorToCareer = (data: { id_coordinador: number, id_car
     apiFetch('/asignarCarreraCoordinador', { method: 'POST', body: JSON.stringify(data) });
 
 
-export const updateCareer = async (id_carrera: number, data: {carrera: string, id_coordinador: number | null}): Promise<Career> => {
-    // First, update the career name
+export const updateCareer = async (id_carrera: number, data: {carrera: string}): Promise<Career> => {
     const updatePayload = { carrera: data.carrera };
-    const updatedCareer = await apiFetch(`/carreras/${id_carrera}`, { method: 'PUT', body: JSON.stringify(updatePayload) });
-
-    // Then, if a coordinator is selected, assign them.
-    if (data.id_coordinador) {
-        await assignCoordinatorToCareer({ id_coordinador: data.id_coordinador, id_carrera });
-    }
-    // If coordinator is null, we might need a /de-assign endpoint, or the backend handles this.
-    // For now, we assume assigning a new one overwrites or we can only assign.
-
-    return updatedCareer;
+    return apiFetch(`/carreras/${id_carrera}`, { method: 'PUT', body: JSON.stringify(updatePayload) });
 };
 export const deleteCareer = (id: number): Promise<void> => apiFetch(`/carreras/${id}`, { method: 'DELETE' });
 
@@ -151,7 +141,6 @@ export const getUsers = async (): Promise<User[]> => {
     const result = await apiFetch('/usuario');
     return result.datos.map((user: any) => ({
         ...user,
-        id_rol: user.id_rol,
         rol: user.rol.toLowerCase(), 
     }));
 };
