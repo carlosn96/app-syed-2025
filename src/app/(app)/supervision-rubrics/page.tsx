@@ -30,7 +30,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { SupervisionRubric, EvaluationRubric, SupervisionCriterion } from "@/lib/modelos"
+import { SupervisionRubric, SupervisionCriterion } from "@/lib/modelos"
 import { Badge } from "@/components/ui/badge"
 import { CreateRubricForm } from "@/components/create-rubric-form"
 import { CreateCriterionForm } from "@/components/create-criterion-form"
@@ -56,16 +56,13 @@ export default function SupervisionRubricsPage() {
   const [criterionToDelete, setCriterionToDelete] = useState<SupervisionCriterion | null>(null);
   
   const [supervisionRubrics, setSupervisionRubrics] = useState<SupervisionRubric[]>([]);
-  const [evaluationRubrics, setEvaluationRubrics] = useState<EvaluationRubric[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchRubrics = async () => {
     setIsLoading(true);
     try {
-      const [supervisionData] = await Promise.all([
-        getSupervisionRubrics(),
-      ]);
+      const supervisionData = await getSupervisionRubrics();
       setSupervisionRubrics(supervisionData);
     } catch (err: any) {
       setError(err.message || 'Error al cargar las rúbricas');
@@ -335,5 +332,3 @@ export default function SupervisionRubricsPage() {
     </div>
   )
 }
-
-    

@@ -15,7 +15,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Toast } from 'primereact/toast';
-import { createNonCountableCriterion, createCountableCriterion } from "@/services/api"
+import { createCriterion } from "@/services/api"
 import { SupervisionRubric } from "@/lib/modelos"
 import { useRef, useState } from "react"
 
@@ -47,11 +47,7 @@ export function CreateCriterionForm({ rubric, onSuccess }: { rubric: Supervision
     }
     setIsSubmitting(true);
     try {
-      if (rubric.category === 'No Contable') {
-        await createNonCountableCriterion({ p_descripcion: data.text, p_id_rubro: rubric.id as number });
-      } else {
-        await createCountableCriterion({ p_criterio: data.text, p_id_rubro: rubric.id as number });
-      }
+      await createCriterion(rubric.id as number, rubric.category, data.text);
 
       toast.current?.show({
         severity: "success",

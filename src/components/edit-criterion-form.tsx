@@ -48,12 +48,8 @@ export function EditCriterionForm({ criterion, onSuccess }: EditCriterionFormPro
     }
     setIsSubmitting(true);
     
-    const payload = criterion.rubricCategory === 'Contable'
-        ? { p_criterio: data.text }
-        : { p_descripcion: data.text };
-
     try {
-      await updateCriterion(criterion.id as number, criterion.rubricCategory, payload);
+      await updateCriterion(criterion.id as number, criterion.rubricCategory, data.text);
       toast.current?.show({
         severity: "success",
         summary: "Criterio Actualizado",
@@ -99,5 +95,3 @@ export function EditCriterionForm({ criterion, onSuccess }: EditCriterionFormPro
     </>
   )
 }
-
-    

@@ -325,14 +325,14 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     ]);
 
     const countableRubrics: SupervisionRubric[] = countableData.datos.rubros.map((rubric: any) => ({
-        id: rubric.id_c_rubro,
+        id: rubric.id_rubro,
         title: rubric.nombre,
         category: 'Contable' as const,
         type: 'checkbox',
         criteria: rubric.criterios.map((criterion: any) => ({
-            id: criterion.id_c_criterio,
+            id: criterion.id_criterio,
             text: criterion.criterio,
-            rubricId: rubric.id_c_rubro,
+            rubricId: rubric.id_rubro,
             rubricCategory: 'Contable' as const,
         })),
     }));
@@ -354,28 +354,34 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
 };
 
 export const createRubric = (data: { nombre: string; categoria: 'Contable' | 'No Contable' }): Promise<SupervisionRubric> => {
-    const endpoint = data.categoria === 'Contable' ? '/contables' : '/no-contables';
+    const endpoint = data.categoria === 'Contable' ? '/supervision/contable' : '/supervision/no-contable';
     return apiFetch(endpoint, { method: 'POST', body: JSON.stringify({ p_nombre: data.nombre }) });
 };
 
 export const updateRubric = (id: number, category: 'Contable' | 'No Contable', data: { p_nombre: string }): Promise<SupervisionRubric> => {
-    const endpoint = category === 'Contable' ? `/contables/${id}` : `/no-contables/${id}`;
+    const endpoint = category === 'Contable' ? `/supervision/contable/${id}` : `/supervision/no-contable/${id}`;
     return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(data) });
 };
 
-export const createCountableCriterion = (data: { p_criterio: string, p_id_rubro: number }): Promise<SupervisionCriterion> => 
-    apiFetch('/supervision/contable', { method: 'POST', body: JSON.stringify(data) });
+export const createCriterion = (rubricId: number, category: 'Contable' | 'No Contable', criterionText: string): Promise<SupervisionCriterion> => {
+    const endpoint = category === 'Contable' ? '/supervision/contable' : '/supervision/no-contable';
+    const body = category === 'Contable'
+        ? { p_criterio: criterionText, p_id_rubro: rubricId }
+        : { p_descripcion: criterionText, p_id_nc_rubro: rubricId };
 
-export const createNonCountableCriterion = (data: { p_descripcion: string, p_id_rubro: number }): Promise<SupervisionCriterion> => 
-    apiFetch('/supervision/no-contable', { method: 'POST', body: JSON.stringify(data) });
+    return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(body) });
+};
 
-export const updateCriterion = (id: number, category: 'Contable' | 'No Contable', data: { p_criterio?: string, p_descripcion?: string }): Promise<SupervisionCriterion> => {
-    const endpoint = category === 'Contable' ? `/contables/criterios/${id}` : `/no-contables/criterios/${id}`;
-    return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(data) });
+export const updateCriterion = (id: number, category: 'Contable' | 'No Contable', criterionText: string): Promise<SupervisionCriterion> => {
+    const endpoint = category === 'Contable' ? `/supervision/contable/${id}` : `/supervision/no-contable/${id}`;
+    const body = category === 'Contable'
+        ? { p_criterio: criterionText }
+        : { p_descripcion: criterionText };
+    return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(body) });
 };
 
 export const deleteCriterion = (id: number, category: 'Contable' | 'No Contable'): Promise<void> => {
-    const endpoint = category === 'Contable' ? `/contables/criterios/${id}` : `/no-contables/criterios/${id}`;
+    const endpoint = category === 'Contable' ? `/supervision/contable/${id}` : `/supervision/no-contable/${id}`;
     return apiFetch(endpoint, { method: 'DELETE' });
 };
 
