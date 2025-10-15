@@ -47,12 +47,11 @@ export function CreateCriterionForm({ rubric, onSuccess }: { rubric: Supervision
     }
     setIsSubmitting(true);
     try {
-      const payload = { criterio: data.text, id_rubro: rubric.id as number };
 
       if (rubric.category === 'No Contable') {
-        await createNonCountableCriterion(payload);
+        await createNonCountableCriterion({ p_descripcion: data.text, p_id_rubro: rubric.id as number });
       } else {
-        await createCountableCriterion(payload);
+        await createCountableCriterion({ p_criterio: data.text, p_id_rubro: rubric.id as number });
       }
 
       toast.current?.show({

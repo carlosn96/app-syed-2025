@@ -363,11 +363,11 @@ export const updateRubric = (id: number, category: 'Contable' | 'No Contable', d
     return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(data) });
 };
 
-export const createCountableCriterion = (data: { criterio: string, id_rubro: number }): Promise<SupervisionCriterion> => 
-    apiFetch('/supervision/contable/criterios', { method: 'POST', body: JSON.stringify({ "p_criterio": data.criterio, "p_id_rubro": data.id_rubro }) });
+export const createCountableCriterion = (data: { p_criterio: string, p_id_rubro: number }): Promise<SupervisionCriterion> => 
+    apiFetch('/supervision/contable/criterios', { method: 'POST', body: JSON.stringify(data) });
 
-export const createNonCountableCriterion = (data: { criterio: string, id_rubro: number }): Promise<SupervisionCriterion> => 
-    apiFetch('/supervision/no-contable/criterios', { method: 'POST', body: JSON.stringify({ "p_descripcion": data.criterio, "p_id_rubro": data.id_rubro }) });
+export const createNonCountableCriterion = (data: { p_descripcion: string, p_id_rubro: number }): Promise<SupervisionCriterion> => 
+    apiFetch('/supervision/no-contable/criterios', { method: 'POST', body: JSON.stringify(data) });
 
 export const updateCriterion = (id: number, category: 'Contable' | 'No Contable', data: { p_criterio?: string, p_descripcion?: string }): Promise<SupervisionCriterion> => {
     const endpoint = category === 'Contable' ? `/contables/criterios/${id}` : `/no-contables/criterios/${id}`;
