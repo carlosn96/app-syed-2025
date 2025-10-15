@@ -320,18 +320,19 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     const [countableData, nonCountableData] = await Promise.all([
-        apiFetch('/supervisiones/contables'),
-        apiFetch('/supervisiones/no-contables')
+        apiFetch('/supervision/contable'),
+        apiFetch('/supervision/no-contable')
     ]);
 
     const countableRubrics: SupervisionRubric[] = countableData.datos.rubros.map((rubric: any) => ({
         id: rubric.id_c_rubro,
         title: rubric.nombre,
         category: 'Contable',
-        type: 'checkbox',
+        type: 'checkbox', // Assuming type based on context
         criteria: rubric.criterios.map((criterion: any) => ({
             id: criterion.id_c_criterio,
             text: criterion.criterio,
+            rubricId: rubric.id_c_rubro
         })),
     }));
 
@@ -339,10 +340,11 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
         id: rubric.id_nc_rubro,
         title: rubric.nombre,
         category: 'No Contable',
-        type: 'checkbox',
+        type: 'checkbox', // Assuming type based on context
         criteria: rubric.criterios.map((criterion: any) => ({
             id: criterion.id_nc_criterio,
             text: criterion.criterio,
+            rubricId: rubric.id_nc_rubro
         })),
     }));
 
@@ -369,3 +371,4 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
     
+
