@@ -48,15 +48,24 @@ export default function CareerPlansPage() {
   const fetchData = async () => {
       try {
         setIsLoading(true);
+        // This logic needs to be updated with the new API structure.
+        // For now, let's assume we get the modalities for a specific career.
         const [careersData, subjectsData] = await Promise.all([
-          getCareers(),
+          getCareers(), // This now returns CareerSummary[]
           getSubjects()
         ]);
-        // Since getCareers returns CareerSummary, we need a way to get full Career objects
+
+        const currentCareer = careersData.find(c => c.name === careerName);
+        const careerModalities = currentCareer?.modalities || [];
+
         // This is a temporary solution, API should provide full objects
-        const fullCareers: Career[] = careersData.flatMap(summary => 
-            (summary.modalities as Career[] || []).map(mod => ({...mod, id: mod.id || Math.random()}))
-        );
+        const fullCareers: Career[] = careerModalities.map(mod => ({
+            ...mod,
+            id: mod.id || Math.random(),
+            semesters: mod.semesters || 8, // Default value
+            campus: mod.campus || 'N/A',
+            coordinator: mod.coordinator || 'No Asignado'
+        }));
 
         setAllCareers(fullCareers);
         setSubjects(subjectsData);
@@ -74,8 +83,8 @@ export default function CareerPlansPage() {
   }, []);
 
   const careerModalities = useMemo(() => {
-    return allCareers.filter(c => c.name === careerName);
-  }, [careerName, allCareers]);
+    return allCareers;
+  }, [allCareers]);
 
   const handleTabChange = (key: string, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [key]: value }));
@@ -216,8 +225,8 @@ export default function CareerPlansPage() {
                     <CreateStudyPlanForm 
                         onSuccess={handleCreateSuccess} 
                         careerName={careerName}
-                        campus={firstModality?.campus}
-                        coordinator={firstModality?.coordinator}
+                        campus={firstModality?.campus || 'N/A'}
+                        coordinator={firstModality?.coordinator || 'No Asignado'}
                     />
                 </DialogContent>
             </Dialog>
@@ -330,6 +339,3 @@ export default function CareerPlansPage() {
     </div>
   );
 }
-
-    
-    

@@ -51,12 +51,21 @@ export default function ManageModalitySubjectsPage() {
     const fetchAllData = async () => {
       setIsLoading(true);
       try {
-        const [allCareers, allSubjects] = await Promise.all([getCareers(), getSubjects()]);
-        const currentModality = allCareers.find(c => c.id === modalityId) || null;
-        setModality(currentModality);
+        // This needs to be smarter. We should probably fetch only the relevant career modality.
+        const [allCareersSummary, allSubjects] = await Promise.all([getCareers(), getSubjects()]);
+        
+        let currentModality: Career | undefined;
+        
+        for (const summary of allCareersSummary) {
+          currentModality = summary.modalities?.find(m => m.id === modalityId);
+          if (currentModality) break;
+        }
+
+        setModality(currentModality || null);
+
         if (currentModality) {
           const modalitySubjects = allSubjects
-            .filter(s => s.career === currentModality.name && s.modality === currentModality.modality)
+            .filter(s => s.career === currentModality!.name && s.modality === currentModality!.modality)
             .sort((a, b) => a.semester - b.semester);
           setSubjects(modalitySubjects);
         }
@@ -237,5 +246,3 @@ export default function ManageModalitySubjectsPage() {
         </div>
     )
 }
-
-    

@@ -165,7 +165,7 @@ export interface Schedule {
 }
 
 export interface SupervisionCriterion {
-  id: number;
+  id: string | number;
   text: string;
   rubricId: number;
   id_nc_rubro?: number;
@@ -197,4 +197,16 @@ export interface EvaluationPeriod {
   startDate: Date | null;
   endDate: Date | null;
   careers: string[];
+}
+
+export interface StudyPlanRecord {
+    id_carrera: number;
+    carrera: string;
+    id_materia: number;
+    materia: string;
+    id_cat_nivel: number;
+    nivel: string;
+    nivel_orden: number;
+    id_modalidad: number;
+    modalidad: string;
 }

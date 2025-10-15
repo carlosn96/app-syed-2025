@@ -15,12 +15,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Toast } from 'primereact/toast';
-import { createCareer } from "@/services/api" // Assuming a similar function for study plans
+import { createStudyPlan } from "@/services/api" // Assuming a similar function for study plans
 import { useState, useRef } from "react"
 
 const createStudyPlanSchema = z.object({
   modality: z.string().min(1, "El nombre de la modalidad es requerido."),
-  semesters: z.coerce.number().positive("El número de semestres debe ser positivo.").min(1, "El número de semestres debe ser al menos 1.").max(12, "El número no puede ser mayor a 12."),
+  semesters: z.coerce.number().positive("El número de semestres debe ser positivo.").min(1, "El número no puede ser mayor a 12."),
 });
 
 type CreateStudyPlanFormValues = z.infer<typeof createStudyPlanSchema>;
@@ -63,7 +63,7 @@ export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator
         coordinator,
     };
     try {
-      await createCareer(newPlanData); // We can rename createCareer to a more generic name
+      await createStudyPlan(newPlanData); 
       toast.current?.show({
         severity: "success",
         summary: "Plan de Estudio Creado",

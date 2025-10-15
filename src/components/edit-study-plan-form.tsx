@@ -67,7 +67,7 @@ export function EditStudyPlanForm({ modality, onSuccess }: EditStudyPlanFormProp
     };
 
     try {
-      await updateCareer(modality.id, updatedData);
+      await updateCareer(modality.id, updatedData as Partial<Career>);
       toast.current?.show({
         severity: "success",
         summary: "Plan de Estudio Actualizado",

@@ -1,6 +1,6 @@
 
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -80,56 +80,86 @@ export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles
 
 // Career and Subject Management
 export const getCareers = async (): Promise<CareerSummary[]> => {
-    const data = await apiFetch('/carreras');
-    return data.datos.map((item: any) => ({
-        id: item.id_carrera,
-        name: item.carrera,
-        coordinator: null,
-        totalMaterias: 0,
-        totalPlanteles: 0,
-        totalModalidades: 0,
-    }));
+    const response = await apiFetch('/plan-estudio');
+    const records: StudyPlanRecord[] = response.datos;
+
+    const careersMap = new Map<number, CareerSummary>();
+
+    records.forEach(record => {
+        if (!careersMap.has(record.id_carrera)) {
+            careersMap.set(record.id_carrera, {
+                id: record.id_carrera,
+                name: record.carrera,
+                coordinator: null, // This info is not in the new endpoint
+                totalMaterias: 0,
+                totalPlanteles: 0, // This info is not in the new endpoint
+                totalModalidades: 0,
+                modalities: [],
+            });
+        }
+
+        const career = careersMap.get(record.id_carrera)!;
+        const modalityExists = career.modalities?.some(m => m.modality === record.modalidad);
+
+        if (!modalityExists) {
+            career.modalities?.push({
+                id: record.id_modalidad,
+                name: record.carrera,
+                modality: record.modalidad,
+                campus: 'N/A', // This info is not in the new endpoint
+                semesters: 0, // Will be calculated later if needed
+                coordinator: 'No Asignado', // This info is not in the new endpoint
+            });
+            career.totalModalidades++;
+        }
+    });
+
+    return Array.from(careersMap.values());
 };
 
-export const getCareerModalities = async (): Promise<Career[]> => {
-    // This function might need a more specific endpoint, e.g., /carreras/modalities
-    // For now, it's a placeholder.
-    console.warn("getCareerModalities is using mock data. Implement API endpoint for /carreras/modalities");
-    const data = await apiFetch('/carreras'); // Assuming this returns all career variations
-    return data.datos.map((item:any) => ({
-        id: item.id_carrera, // This might not be unique per modality, adjust if needed
-        name: item.carrera,
-        modality: item.modalidad || 'N/A', // Adjust field name if different
-        campus: item.plantel || 'N/A', // Adjust field name
-        semesters: item.semestres || 0, // Adjust field name
-        coordinator: item.coordinador || 'No Asignado', // Adjust field name
-    }));
+
+export const createStudyPlan = (data: {name: string, modality: string, semesters: number, campus: string, coordinator: string}): Promise<Career> => {
+    console.warn("createStudyPlan is using mock implementation until API is ready.");
+    return Promise.resolve({ ...data, id: Date.now() });
 };
 
-export const createCareer = (data: {nombre: string}): Promise<Career> => apiFetch('/carreras', { method: 'POST', body: JSON.stringify(data) });
 
-export const assignCoordinatorToCareer = (data: { id_coordinador: number, id_carrera: number }): Promise<void> => 
-    apiFetch('/asignarCarreraCoordinador', { method: 'POST', body: JSON.stringify(data) });
-
-
-export const updateCareer = async (id_carrera: number, data: {carrera: string}): Promise<Career> => {
-    const updatePayload = { carrera: data.carrera };
-    return apiFetch(`/carreras/${id_carrera}`, { method: 'PUT', body: JSON.stringify(updatePayload) });
+export const updateCareer = async (id: number, data: Partial<Career>): Promise<Career> => {
+    console.warn("updateCareer is using mock implementation.");
+    return Promise.resolve({
+        id,
+        name: 'Updated Career',
+        modality: 'Updated Modality',
+        campus: 'Updated Campus',
+        semesters: 8,
+        coordinator: 'Updated Coordinator',
+        ...data,
+    });
 };
-export const deleteCareer = (id: number): Promise<void> => apiFetch(`/carreras/${id}`, { method: 'DELETE' });
-
+export const deleteCareer = (id: number): Promise<void> => {
+    console.warn(`deleteCareer for id ${id} is using mock implementation.`);
+    return Promise.resolve();
+};
 
 export const getSubjects = async (): Promise<Subject[]> => {
-    console.warn("getSubjects is using mock data. Implement API endpoint for /materias.");
-    return Promise.resolve([
-        { id: 1, name: 'Cálculo Diferencial', career: 'Ingeniería en Computación', semester: 1, modality: 'INCO' },
-        { id: 2, name: 'Programación Orientada a Objetos', career: 'Ingeniería en Computación', semester: 2, modality: 'INCO' },
-        { id: 3, name: 'Estructura de Datos', career: 'Ingeniería en Computación', semester: 3, modality: 'INCO' },
-        { id: 4, name: 'Contabilidad Básica', career: 'Licenciatura en Administración', semester: 1, modality: 'LAET' },
-        { id: 5, name: 'Microeconomía', career: 'Licenciatura en Administración', semester: 2, modality: 'LAET' },
-        { id: 6, name: 'Derecho Romano', career: 'Derecho', semester: 1, modality: 'LDE' },
-        { id: 7, name: 'Cálculo Diferencial', career: 'Ingeniería en Computación', semester: 1, modality: 'INCO-S' },
-    ]);
+    const response = await apiFetch('/plan-estudio');
+    const records: StudyPlanRecord[] = response.datos;
+
+    const subjectsMap = new Map<number, Subject>();
+
+    records.forEach(record => {
+        if (!subjectsMap.has(record.id_materia)) {
+            subjectsMap.set(record.id_materia, {
+                id: record.id_materia,
+                name: record.materia,
+                career: record.carrera,
+                semester: record.nivel_orden,
+                modality: record.modalidad,
+            });
+        }
+    });
+
+    return Array.from(subjectsMap.values());
 };
 export const createSubject = (data: any): Promise<Subject> => {
     console.warn("createSubject is using mock implementation.");
@@ -289,33 +319,20 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
-    const [rubricsData, countableCriteriaData, nonCountableCriteriaData] = await Promise.all([
-        apiFetch('/rubros'),
-        apiFetch('/supervision/contable'),
-        apiFetch('/supervision/no-contable')
-    ]);
-
-    const criteriaByRubric = [...countableCriteriaData.datos, ...nonCountableCriteriaData.datos].reduce((acc: Record<number, SupervisionCriterion[]>, criterion: any) => {
-        const rubricId = criterion.id_rubro || criterion.id_nc_rubro;
-        if (!acc[rubricId]) {
-            acc[rubricId] = [];
-        }
-        acc[rubricId].push({
-            id: criterion.id_supcriterio || criterion.id_nc_criterio,
-            text: criterion.descripcion,
-            rubricId: rubricId,
-        });
-        return acc;
-    }, {});
-
+    const rubricsData = await apiFetch('/rubros');
     return rubricsData.datos.map((rubric: any) => ({
         id: rubric.id_rubro,
         title: rubric.nombre,
-        category: rubric.tipo === 'Contable' ? 'Contable' : 'No Contable',
-        type: rubric.tipo, // Assuming type is also 'Contable' or 'No Contable'
-        criteria: criteriaByRubric[rubric.id_rubro] || [],
+        category: rubric.tipo, // Assuming 'tipo' is 'Contable' or 'No Contable'
+        type: 'checkbox', // Assuming all are checkboxes for now
+        criteria: rubric.criterios.map((criterion: any) => ({
+            id: criterion.id_criterio,
+            text: criterion.criterio,
+            rubricId: rubric.id_rubro,
+        })),
     }));
 };
+
 
 export const createNonCountableCriterion = (data: { p_descripcion: string, p_id_nc_rubro: number }): Promise<SupervisionCriterion> => 
     apiFetch('/no-contables', { method: 'POST', body: JSON.stringify(data) });
