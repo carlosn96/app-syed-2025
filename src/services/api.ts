@@ -290,9 +290,9 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     const [rubricsData, countableCriteriaData, nonCountableCriteriaData] = await Promise.all([
-        apiFetch('/supervision/rubros'),
+        apiFetch('/rubros'),
         apiFetch('/supervision/contable'),
-        apiFetch('/no-contables')
+        apiFetch('/supervision/no-contable')
     ]);
 
     const criteriaByRubric = [...countableCriteriaData.datos, ...nonCountableCriteriaData.datos].reduce((acc: Record<number, SupervisionCriterion[]>, criterion: any) => {
@@ -336,3 +336,4 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
     
+
