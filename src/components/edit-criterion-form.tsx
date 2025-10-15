@@ -15,61 +15,61 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Toast } from 'primereact/toast';
-import { createNonCountableCriterion, createCountableCriterion } from "@/services/api"
-import { SupervisionRubric } from "@/lib/modelos"
+import { updateCriterion } from "@/services/api"
+import { SupervisionCriterion } from "@/lib/modelos"
 import { useRef, useState } from "react"
 
-const createCriterionSchema = z.object({
+const editCriterionSchema = z.object({
   text: z.string().min(1, "El texto del criterio es requerido."),
 });
 
-type CreateCriterionFormValues = z.infer<typeof createCriterionSchema>;
+type EditCriterionFormValues = z.infer<typeof editCriterionSchema>;
 
-export function CreateCriterionForm({ rubric, onSuccess }: { rubric: SupervisionRubric | null, onSuccess?: () => void }) {
+interface EditCriterionFormProps {
+    criterion: SupervisionCriterion;
+    onSuccess?: () => void;
+}
+
+export function EditCriterionForm({ criterion, onSuccess }: EditCriterionFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<CreateCriterionFormValues>({
-    resolver: zodResolver(createCriterionSchema),
+  const form = useForm<EditCriterionFormValues>({
+    resolver: zodResolver(editCriterionSchema),
     defaultValues: {
-      text: "",
+      text: criterion.text,
     },
   });
 
-  const onSubmit = async (data: CreateCriterionFormValues) => {
-    if (!rubric) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: "No se ha seleccionado una rúbrica.",
-        });
+  const onSubmit = async (data: EditCriterionFormValues) => {
+    if (!criterion || !criterion.rubricCategory) {
+        toast.current?.show({ severity: "error", summary: "Error", detail: "Datos del criterio incompletos." });
         return;
     }
     setIsSubmitting(true);
-    try {
-      if (rubric.category === 'No Contable') {
-        await createNonCountableCriterion({ p_descripcion: data.text, p_id_nc_rubro: rubric.id as number });
-      } else {
-        await createCountableCriterion({ p_criterio: data.text, p_id_c_rubro: rubric.id as number });
-      }
+    
+    const payload = criterion.rubricCategory === 'Contable'
+        ? { p_criterio: data.text }
+        : { p_descripcion: data.text };
 
+    try {
+      await updateCriterion(criterion.id as number, criterion.rubricCategory, payload);
       toast.current?.show({
         severity: "success",
-        summary: "Criterio Añadido",
-        detail: `El criterio ha sido añadido a la rúbrica con éxito.`,
+        summary: "Criterio Actualizado",
+        detail: `El criterio ha sido actualizado correctamente.`,
       });
-      form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
         toast.current?.show({
             severity: "error",
-            summary: "Error al añadir criterio",
+            summary: "Error al actualizar",
             detail: error.message,
         });
       }
     } finally {
-      setIsSubmitting(false);
+        setIsSubmitting(false);
     }
   };
 
@@ -85,14 +85,14 @@ export function CreateCriterionForm({ rubric, onSuccess }: { rubric: Supervision
               <FormItem>
                 <FormLabel>Texto del Criterio</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Ej. El docente utiliza ejemplos relevantes para la vida cotidiana de los alumnos." {...field} />
+                  <Textarea placeholder="Ej. El docente utiliza ejemplos relevantes..." {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Añadiendo..." : "Añadir Criterio"}
+            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
           </Button>
         </form>
       </Form>

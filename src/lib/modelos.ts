@@ -168,11 +168,11 @@ export interface SupervisionCriterion {
   id: string | number;
   text: string;
   rubricId?: number;
-  id_nc_rubro?: number;
+  rubricCategory?: 'Contable' | 'No Contable';
 }
 
 export interface SupervisionRubric {
-  id: number;
+  id: number | string;
   title: string;
   type: string;
   category: 'Contable' | 'No Contable';
@@ -210,3 +210,5 @@ export interface StudyPlanRecord {
     id_modalidad: number;
     modalidad: string;
 }
+
+    

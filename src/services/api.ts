@@ -1,5 +1,4 @@
 
-
 import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
@@ -332,7 +331,8 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
         criteria: rubric.criterios.map((criterion: any) => ({
             id: criterion.id_c_criterio,
             text: criterion.criterio,
-            rubricId: rubric.id_c_rubro
+            rubricId: rubric.id_c_rubro,
+            rubricCategory: 'Contable',
         })),
     }));
 
@@ -344,16 +344,39 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
         criteria: rubric.criterios.map((criterion: any) => ({
             id: criterion.id_nc_criterio,
             text: criterion.criterio,
-            rubricId: rubric.id_nc_rubro
+            rubricId: rubric.id_nc_rubro,
+            rubricCategory: 'No Contable',
         })),
     }));
 
     return [...countableRubrics, ...nonCountableRubrics];
 };
 
+export const createRubric = (data: { nombre: string; categoria: 'Contable' | 'No Contable' }): Promise<SupervisionRubric> => {
+    const endpoint = data.categoria === 'Contable' ? '/contables' : '/no-contables';
+    return apiFetch(endpoint, { method: 'POST', body: JSON.stringify({ p_nombre: data.nombre }) });
+};
+
+export const updateRubric = (id: number, category: 'Contable' | 'No Contable', data: { p_nombre: string }): Promise<SupervisionRubric> => {
+    const endpoint = category === 'Contable' ? `/contables/${id}` : `/no-contables/${id}`;
+    return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(data) });
+};
+
+export const createCountableCriterion = (data: { p_criterio: string, p_id_c_rubro: number }): Promise<SupervisionCriterion> => 
+    apiFetch('/contables/criterios', { method: 'POST', body: JSON.stringify(data) });
 
 export const createNonCountableCriterion = (data: { p_descripcion: string, p_id_nc_rubro: number }): Promise<SupervisionCriterion> => 
-    apiFetch('/no-contables', { method: 'POST', body: JSON.stringify(data) });
+    apiFetch('/no-contables/criterios', { method: 'POST', body: JSON.stringify(data) });
+
+export const updateCriterion = (id: number, category: 'Contable' | 'No Contable', data: { p_criterio?: string, p_descripcion?: string }): Promise<SupervisionCriterion> => {
+    const endpoint = category === 'Contable' ? `/contables/criterios/${id}` : `/no-contables/criterios/${id}`;
+    return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(data) });
+};
+
+export const deleteCriterion = (id: number, category: 'Contable' | 'No Contable'): Promise<void> => {
+    const endpoint = category === 'Contable' ? `/contables/criterios/${id}` : `/no-contables/criterios/${id}`;
+    return apiFetch(endpoint, { method: 'DELETE' });
+};
 
 
 // Plantel-Career relationship
@@ -370,5 +393,5 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
 
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
-    
 
+    

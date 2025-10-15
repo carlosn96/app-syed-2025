@@ -22,10 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Toast } from 'primereact/toast';
-import { useRef } from "react"
-
-// Mock API call - replace with actual API call
-const addRubric = (data: any) => new Promise((res) => setTimeout(() => res(data), 500));
+import { useRef, useState } from "react"
+import { createRubric } from "@/services/api"
 
 const createRubricSchema = z.object({
   title: z.string().min(1, "El título es requerido."),
@@ -38,6 +36,7 @@ type CreateRubricFormValues = z.infer<typeof createRubricSchema>;
 
 export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
   const toast = useRef<Toast>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateRubricFormValues>({
     resolver: zodResolver(createRubricSchema),
@@ -47,8 +46,9 @@ export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
   });
 
   const onSubmit = async (data: CreateRubricFormValues) => {
+    setIsSubmitting(true);
     try {
-      await addRubric({ ...data, type: "checkbox", criteria: [] });
+      await createRubric({ nombre: data.title, categoria: data.category });
       toast.current?.show({
         severity: "success",
         summary: "Rúbrica Creada",
@@ -64,6 +64,8 @@ export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
             detail: error.message,
         });
       }
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -106,9 +108,13 @@ export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full">Crear Rúbrica</Button>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Creando..." : "Crear Rúbrica"}
+          </Button>
         </form>
       </Form>
     </>
   )
 }
+
+    
