@@ -47,7 +47,6 @@ export function CreateCriterionForm({ rubric, onSuccess }: { rubric: Supervision
     }
     setIsSubmitting(true);
     try {
-
       if (rubric.category === 'No Contable') {
         await createNonCountableCriterion({ p_descripcion: data.text, p_id_rubro: rubric.id as number });
       } else {

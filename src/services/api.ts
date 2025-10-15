@@ -142,7 +142,6 @@ export const deleteCareer = (id: number): Promise<void> => {
 };
 
 export const getSubjects = async (): Promise<Subject[]> => {
-    console.warn("getSubjects is using mock data until the API is ready.");
     const response = await apiFetch('/plan-estudio');
     const records: StudyPlanRecord[] = response.datos;
 
