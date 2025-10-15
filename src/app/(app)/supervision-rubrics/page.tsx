@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Pencil, Trash2, PlusCircle, ChevronDown } from "lucide-react"
+import { Pencil, Trash2, PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -100,7 +100,6 @@ export default function SupervisionRubricsPage() {
                   </p>
                 </div>
               </div>
-              <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
               <div className="flex justify-end mb-4 gap-2">
@@ -117,26 +116,30 @@ export default function SupervisionRubricsPage() {
                   Añadir Criterio
                 </Button>
               </div>
-              <ul className="space-y-3">
-                {rubric.criteria.map((criterion) => (
-                  <li
-                    key={criterion.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-black/10"
-                  >
-                    <p className="flex-1 text-sm">{criterion.text}</p>
-                    <div className="flex gap-2 ml-4">
-                      <Button size="icon" variant="warning">
-                        <Pencil className="h-4 w-4" />
-                        <span className="sr-only">Editar criterio</span>
-                      </Button>
-                      <Button size="icon" variant="destructive">
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Eliminar criterio</span>
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+               {rubric.criteria.length > 0 ? (
+                <ul className="space-y-3">
+                    {rubric.criteria.map((criterion) => (
+                    <li
+                        key={criterion.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-black/10"
+                    >
+                        <p className="flex-1 text-sm">{criterion.text}</p>
+                        <div className="flex gap-2 ml-4">
+                        <Button size="icon" variant="warning">
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Editar criterio</span>
+                        </Button>
+                        <Button size="icon" variant="destructive">
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Eliminar criterio</span>
+                        </Button>
+                        </div>
+                    </li>
+                    ))}
+                </ul>
+                ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No hay criterios para este rubro.</p>
+                )}
             </AccordionContent>
           </AccordionItem>
         ))}
@@ -158,7 +161,6 @@ export default function SupervisionRubricsPage() {
                     {rubric.criteria.length} criterios
                 </p>
               </div>
-              <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
               <div className="flex justify-end mb-4 gap-2">
