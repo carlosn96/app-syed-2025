@@ -319,18 +319,34 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
-    const rubricsData = await apiFetch('/rubros');
-    return rubricsData.datos.map((rubric: any) => ({
-        id: rubric.id_rubro,
+    const [countableData, nonCountableData] = await Promise.all([
+        apiFetch('/supervisiones/contables'),
+        apiFetch('/supervisiones/no-contables')
+    ]);
+
+    const countableRubrics: SupervisionRubric[] = countableData.datos.rubros.map((rubric: any) => ({
+        id: rubric.id_c_rubro,
         title: rubric.nombre,
-        category: rubric.tipo, // Assuming 'tipo' is 'Contable' or 'No Contable'
-        type: 'checkbox', // Assuming all are checkboxes for now
+        category: 'Contable',
+        type: 'checkbox',
         criteria: rubric.criterios.map((criterion: any) => ({
-            id: criterion.id_criterio,
+            id: criterion.id_c_criterio,
             text: criterion.criterio,
-            rubricId: rubric.id_rubro,
         })),
     }));
+
+    const nonCountableRubrics: SupervisionRubric[] = nonCountableData.datos.rubros.map((rubric: any) => ({
+        id: rubric.id_nc_rubro,
+        title: rubric.nombre,
+        category: 'No Contable',
+        type: 'checkbox',
+        criteria: rubric.criterios.map((criterion: any) => ({
+            id: criterion.id_nc_criterio,
+            text: criterion.criterio,
+        })),
+    }));
+
+    return [...countableRubrics, ...nonCountableRubrics];
 };
 
 
@@ -353,4 +369,3 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
     
-

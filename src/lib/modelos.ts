@@ -167,7 +167,7 @@ export interface Schedule {
 export interface SupervisionCriterion {
   id: string | number;
   text: string;
-  rubricId: number;
+  rubricId?: number;
   id_nc_rubro?: number;
 }
 
