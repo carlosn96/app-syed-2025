@@ -1,6 +1,6 @@
 
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -319,39 +319,57 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
-    const [countableData, nonCountableData] = await Promise.all([
-        apiFetch('/supervision/rubros/contable'),
-        apiFetch('/supervision/rubros/no-contable')
-    ]);
+  const [rubrosContables, rubrosNoContables, criteriosContables, criteriosNoContables] = await Promise.all([
+    apiFetch('/supervision/rubros/contable').then(res => res.datos),
+    apiFetch('/supervision/rubros/no-contable').then(res => res.datos),
+    apiFetch('/supervision/contable/').then(res => res.datos),
+    apiFetch('/supervision/no-contable/').then(res => res.datos)
+  ]);
 
-    const countableRubrics: SupervisionRubric[] = (countableData.datos && Array.isArray(countableData.datos))
-        ? countableData.datos.map((rubric: any) => ({
-            id: rubric.id_rubro,
-            title: rubric.nombre,
-            category: 'Contable' as const,
-            type: 'checkbox',
-            criteria: (rubric.relacion && Array.isArray(rubric.relacion)) ? rubric.relacion.map((criterion: any) => ({
-                id: criterion.id_criterio,
-                text: criterion.criterio,
-            })) : [],
-        }))
-        : [];
+  const mapCriteria = (rubros: ApiRubric[], allCriterios: any[], category: 'Contable' | 'No Contable'): SupervisionRubric[] => {
+    if (!Array.isArray(rubros)) {
+      console.error(`Expected rubros to be an array for category ${category}, but got:`, rubros);
+      return [];
+    }
+    if (!Array.isArray(allCriterios)) {
+      console.error(`Expected allCriterios to be an array for category ${category}, but got:`, allCriterios);
+      return [];
+    }
 
-    const nonCountableRubrics: SupervisionRubric[] = (nonCountableData.datos && Array.isArray(nonCountableData.datos))
-        ? nonCountableData.datos.map((rubric: any) => ({
-            id: rubric.id_nc_rubro,
-            title: rubric.nombre,
-            category: 'No Contable' as const,
-            type: 'checkbox',
-            criteria: (rubric.relacion && Array.isArray(rubric.relacion)) ? rubric.relacion.map((criterion: any) => ({
-                id: criterion.id_nc_criterio,
-                text: criterion.criterio,
-            })) : [],
-        }))
-        : [];
+    return rubros.map(rubro => {
+      const criteriosForRubro = allCriterios.find(c => c.id_rubro === rubro.id || c.id_nc_rubro === rubro.id);
+      let mappedCriteria: SupervisionCriterion[] = [];
 
-    return [...countableRubrics, ...nonCountableRubrics];
+      if (criteriosForRubro && Array.isArray(criteriosForRubro.criterios)) {
+        if (category === 'Contable') {
+          mappedCriteria = (criteriosForRubro.criterios as ApiCriterion[]).map(c => ({
+            id: c.id_criterio,
+            text: c.criterio,
+          }));
+        } else { // No Contable
+          mappedCriteria = (criteriosForRubro.criterios as ApiNonCountableCriterion[]).map(c => ({
+            id: c.id_nc_criterio,
+            text: c.criterio,
+          }));
+        }
+      }
+      
+      return {
+        id: rubro.id,
+        title: rubro.nombre,
+        category: category,
+        type: 'checkbox',
+        criteria: mappedCriteria,
+      };
+    });
+  };
+
+  const contable = mapCriteria(rubrosContables, criteriosContables, 'Contable');
+  const noContable = mapCriteria(rubrosNoContables, criteriosNoContables, 'No Contable');
+
+  return [...contable, ...noContable];
 };
+
 
 export const getEvaluationRubrics = async (): Promise<EvaluationRubric[]> => {
     console.warn("getEvaluationRubrics is using mock data. Implement API endpoint.");

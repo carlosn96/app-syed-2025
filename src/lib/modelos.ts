@@ -164,6 +164,7 @@ export interface Schedule {
   endTime: string; // "HH:MM"
 }
 
+// Internal Application Model
 export interface SupervisionCriterion {
   id: string | number;
   text: string;
@@ -171,12 +172,42 @@ export interface SupervisionCriterion {
   rubricCategory?: 'Contable' | 'No Contable';
 }
 
+// Internal Application Model
 export interface SupervisionRubric {
   id: number | string;
   title: string;
   type: string;
   category: 'Contable' | 'No Contable';
   criteria: SupervisionCriterion[];
+}
+
+
+// API-specific Models for Supervision Rubrics
+export interface ApiCriterion {
+  id_criterio: number;
+  criterio: string;
+}
+
+export interface ApiRubricWithCriteria {
+  id_rubro: number;
+  nombre: string;
+  criterios: ApiCriterion[];
+}
+
+export interface ApiNonCountableCriterion {
+  id_nc_criterio: number;
+  criterio: string;
+}
+
+export interface ApiNonCountableRubricWithCriteria {
+  id_nc_rubro: number;
+  nombre: string;
+  criterios: ApiNonCountableCriterion[];
+}
+
+export interface ApiRubric {
+    id: number;
+    nombre: string;
 }
 
 
