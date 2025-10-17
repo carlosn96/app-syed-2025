@@ -1,6 +1,6 @@
 
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion, ApiSupervisionRubric, ApiSupervisionCriterion } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -319,53 +319,44 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
-  const [rubrosContables, rubrosNoContables, criteriosContables, criteriosNoContables] = await Promise.all([
+  const [countableRubrics, nonCountableRubrics, countableCriteria, nonCountableCriteria] = await Promise.all([
     apiFetch('/supervision/rubros/contable').then(res => res.datos),
     apiFetch('/supervision/rubros/no-contable').then(res => res.datos),
-    apiFetch('/supervision/contable/').then(res => res.datos),
-    apiFetch('/supervision/no-contable/').then(res => res.datos)
+    apiFetch('/supervision/contable').then(res => res.datos),
+    apiFetch('/supervision/no-contable').then(res => res.datos)
   ]);
 
-  const mapCriteria = (rubros: ApiRubric[], allCriterios: any[], category: 'Contable' | 'No Contable'): SupervisionRubric[] => {
-    if (!Array.isArray(rubros)) {
-      console.error(`Expected rubros to be an array for category ${category}, but got:`, rubros);
-      return [];
-    }
-    if (!Array.isArray(allCriterios)) {
-      console.error(`Expected allCriterios to be an array for category ${category}, but got:`, allCriterios);
+  const mapRubricsWithCriteria = (
+    rubrics: ApiRubric[],
+    criteriaGroups: ApiSupervisionRubric[],
+    category: 'Contable' | 'No Contable'
+  ): SupervisionRubric[] => {
+    if (!Array.isArray(rubrics)) {
+      console.error(`Expected rubrics for category ${category} to be an array, but got:`, rubrics);
       return [];
     }
 
-    return rubros.map(rubro => {
-      const criteriosForRubro = allCriterios.find(c => c.id_rubro === rubro.id || c.id_nc_rubro === rubro.id);
-      let mappedCriteria: SupervisionCriterion[] = [];
-
-      if (criteriosForRubro && Array.isArray(criteriosForRubro.criterios)) {
-        if (category === 'Contable') {
-          mappedCriteria = (criteriosForRubro.criterios as ApiCriterion[]).map(c => ({
+    return rubrics.map(rubric => {
+      const criteriaGroup = criteriaGroups.find(group => group.id_rubro === rubric.id);
+      const criteria = criteriaGroup && Array.isArray(criteriaGroup.criterios)
+        ? criteriaGroup.criterios.map(c => ({
             id: c.id_criterio,
             text: c.criterio,
-          }));
-        } else { // No Contable
-          mappedCriteria = (criteriosForRubro.criterios as ApiNonCountableCriterion[]).map(c => ({
-            id: c.id_nc_criterio,
-            text: c.criterio,
-          }));
-        }
-      }
+          }))
+        : [];
       
       return {
-        id: rubro.id,
-        title: rubro.nombre,
+        id: rubric.id,
+        title: rubric.nombre,
         category: category,
         type: 'checkbox',
-        criteria: mappedCriteria,
+        criteria: criteria,
       };
     });
   };
 
-  const contable = mapCriteria(rubrosContables, criteriosContables, 'Contable');
-  const noContable = mapCriteria(rubrosNoContables, criteriosNoContables, 'No Contable');
+  const contable = mapRubricsWithCriteria(countableRubrics, countableCriteria, 'Contable');
+  const noContable = mapRubricsWithCriteria(nonCountableRubrics, nonCountableCriteria, 'No Contable');
 
   return [...contable, ...noContable];
 };
