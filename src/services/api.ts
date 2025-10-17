@@ -319,48 +319,35 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
-  const [countableRubricsRes, nonCountableRubricsRes, countableCriteriaRes, nonCountableCriteriaRes] = await Promise.all([
-    apiFetch('/supervision/rubros/contable'),
-    apiFetch('/supervision/rubros/no-contable'),
-    apiFetch('/supervision/contable/'),
-    apiFetch('/supervision/no-contable/')
+  const [countableData, nonCountableData] = await Promise.all([
+    apiFetch('/supervision/contable'),
+    apiFetch('/supervision/no-contable'),
   ]);
 
-  const countableRubrics: ApiRubric[] = countableRubricsRes.datos || [];
-  const nonCountableRubrics: ApiRubric[] = nonCountableRubricsRes.datos || [];
-  const countableCriteria: ApiRubricWithCriteria[] = countableCriteriaRes.datos || [];
-  const nonCountableCriteria: ApiNonCountableRubricWithCriteria[] = nonCountableCriteriaRes.datos || [];
-
   const mapRubrics = (
-    rubrics: ApiRubric[],
-    criteriaGroups: (ApiRubricWithCriteria | ApiNonCountableRubricWithCriteria)[],
+    data: any,
     category: 'Contable' | 'No Contable'
   ): SupervisionRubric[] => {
-    if (!Array.isArray(rubrics)) return [];
-    
-    return rubrics.map(rubric => {
-      const criteriaGroup = criteriaGroups.find(group => group.id_rubro === rubric.id);
-      let criteria: SupervisionCriterion[] = [];
-      if (criteriaGroup && 'criterios' in criteriaGroup && Array.isArray(criteriaGroup.criterios)) {
-          criteria = criteriaGroup.criterios.map((c: ApiCriterion | ApiNonCountableCriterion) => ({
-              id: 'id_criterio' in c ? c.id_criterio : c.id_nc_criterio,
-              text: 'criterio' in c ? c.criterio : c.criterio,
-          }));
-      }
+    if (!data || !Array.isArray(data.datos)) {
+      console.warn(`API response for ${category} rubrics is not a valid array.`);
+      return [];
+    }
 
-      return {
-        id: rubric.id,
-        title: rubric.nombre,
-        category: category,
-        type: 'checkbox', // Assuming this is always checkbox for now
-        criteria: criteria,
-      };
-    });
+    return data.datos.map((rubric: ApiRubricWithCriteria) => ({
+      id: rubric.id_rubro,
+      title: rubric.nombre,
+      category: category,
+      type: 'checkbox',
+      criteria: rubric.criterios.map((criterion: ApiCriterion) => ({
+        id: criterion.id_criterio,
+        text: criterion.criterio,
+      })),
+    }));
   };
 
-  const contable = mapRubrics(countableRubrics, countableCriteria, 'Contable');
-  const noContable = mapRubrics(nonCountableRubrics, nonCountableCriteria, 'No Contable');
-  
+  const contable = mapRubrics(countableData, 'Contable');
+  const noContable = mapRubrics(nonCountableData, 'No Contable');
+
   return [...contable, ...noContable];
 };
 
@@ -402,7 +389,7 @@ export const updateRubric = (id: number, category: 'Contable' | 'No Contable', d
 };
 
 export const createCriterion = (data: { id_rubro: number; criterio: string; category: 'Contable' | 'No Contable' }): Promise<SupervisionCriterion> => {
-    const endpoint = data.category === 'Contable' ? '/supervision/contable/' : '/supervision/no-contable/';
+    const endpoint = data.category === 'Contable' ? '/supervision/contable' : '/supervision/no-contable';
     const body = data.category === 'Contable'
       ? { p_criterio: data.criterio, p_id_rubro: data.id_rubro }
       : { p_descripcion: data.criterio, p_id_nc_rubro: data.id_rubro };
@@ -411,9 +398,7 @@ export const createCriterion = (data: { id_rubro: number; criterio: string; cate
   
 export const updateCriterion = (id: number, category: 'Contable' | 'No Contable', criterionText: string): Promise<SupervisionCriterion> => {
     const endpoint = category === 'Contable' ? `/supervision/contable/${id}` : `/supervision/no-contable/${id}`;
-    const body = category === 'Contable'
-      ? { p_criterio: criterionText }
-      : { p_descripcion: criterionText };
+    const body = { p_criterio: criterionText };
     return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(body) });
 };
   
