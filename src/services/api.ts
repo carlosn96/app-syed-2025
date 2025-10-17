@@ -390,13 +390,11 @@ export const updateRubric = (id: number, category: 'Contable' | 'No Contable', d
 };
 
 export const createCriterion = (data: { id_rubro: number; criterio: string; category: 'Contable' | 'No Contable' }): Promise<SupervisionCriterion> => {
-    if (data.category === 'Contable') {
-        const payload = { p_criterio: data.criterio, p_id_rubro: data.id_rubro };
-        return apiFetch('/supervision/contable', { method: 'POST', body: JSON.stringify(payload) });
-    } else {
-        const payload = { p_descripcion: data.criterio, p_id_nc_rubro: data.id_rubro };
-        return apiFetch('/supervision/no-contable', { method: 'POST', body: JSON.stringify(payload) });
-    }
+    const endpoint = data.category === 'Contable' ? '/supervision/contable/' : '/supervision/no-contable/';
+    const body = data.category === 'Contable'
+        ? { p_criterio: data.criterio, p_id_rubro: data.id_rubro }
+        : { p_descripcion: data.criterio, p_id_nc_rubro: data.id_rubro };
+    return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(body) });
 };
 
 export const updateCriterion = (id: number, category: 'Contable' | 'No Contable', criterionText: string): Promise<SupervisionCriterion> => {
