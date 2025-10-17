@@ -320,8 +320,8 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     const [countableData, nonCountableData] = await Promise.all([
-        apiFetch('/supervision/contable'),
-        apiFetch('/supervision/no-contable')
+        apiFetch('/supervision/rubros/contable'),
+        apiFetch('/supervision/rubros/no-contable')
     ]);
 
     const countableRubrics: SupervisionRubric[] = countableData.datos.rubros.map((rubric: any) => ({
@@ -354,20 +354,21 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
 };
 
 export const createRubric = (data: { nombre: string; categoria: 'Contable' | 'No Contable' }): Promise<SupervisionRubric> => {
-    const endpoint = data.categoria === 'Contable' ? '/supervision/contable' : '/supervision/no-contable';
+    const endpoint = data.categoria === 'Contable' ? '/supervision/rubros/contable' : '/supervision/rubros/no-contable';
     return apiFetch(endpoint, { method: 'POST', body: JSON.stringify({ p_nombre: data.nombre }) });
 };
 
 export const updateRubric = (id: number, category: 'Contable' | 'No Contable', data: { p_nombre: string }): Promise<SupervisionRubric> => {
-    const endpoint = category === 'Contable' ? `/supervision/contable/${id}` : `/supervision/no-contable/${id}`;
+    const endpoint = category === 'Contable' ? `/supervision/rubros/contable/${id}` : `/supervision/rubros/no-contable/${id}`;
     return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(data) });
 };
 
 export const createCriterion = (rubricId: number, category: 'Contable' | 'No Contable', criterionText: string): Promise<SupervisionCriterion> => {
     const endpoint = category === 'Contable' ? '/supervision/contable' : '/supervision/no-contable';
+    
     const body = category === 'Contable'
-        ? { p_criterio: criterionText, p_id_rubro: rubricId }
-        : { p_descripcion: criterionText, p_id_nc_rubro: rubricId };
+      ? { p_criterio: criterionText, p_id_rubro: rubricId }
+      : { p_descripcion: criterionText, p_id_nc_rubro: rubricId };
 
     return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(body) });
 };
