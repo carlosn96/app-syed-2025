@@ -137,72 +137,77 @@ export default function SupervisionRubricsPage() {
     (r) => r.category === "No Contable"
   )
 
-  const renderSupervisionRubricAccordion = (rubrics: SupervisionRubric[]) => (
-      <Accordion type="multiple" className="w-full space-y-4">
-        {rubrics.map((rubric) => (
-          <AccordionItem
-            value={`rubric-${rubric.id}`}
-            key={`rubric-item-${rubric.id}`}
-            className="bg-white/10 rounded-xl border-none"
-          >
-            <AccordionTrigger className="p-6 hover:no-underline">
-              <div className="flex-1 text-left">
-                <h3 className="font-semibold text-white">{rubric.title}</h3>
-                <div className="flex gap-2 items-center mt-2">
-                  <Badge variant={rubric.category === 'Contable' ? 'success' : 'warning'}>
-                    {rubric.category}
-                  </Badge>
-                  <p className="text-sm text-muted-foreground">
-                    {rubric.criteria.length} criterios
-                  </p>
-                </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-6 pb-6">
-              <div className="flex justify-end mb-4 gap-2">
-                <Button key={`edit-${rubric.id}`} variant="outline" size="sm" onClick={() => openEditRubricModal(rubric)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Editar Rúbrica
-                </Button>
-                <Button
-                  key={`add-${rubric.id}`}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => openCriterionModal(rubric)}
-                >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Añadir Criterio
-                </Button>
-              </div>
-               {rubric.criteria.length > 0 ? (
-                <ul className="space-y-3">
-                    {rubric.criteria.map((criterion) => (
-                    <li
-                        key={criterion.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-black/10"
+  const renderSupervisionRubricAccordion = (rubrics: SupervisionRubric[]) => {
+      if (rubrics.length === 0) {
+        return <p className="text-sm text-muted-foreground text-center py-4">No hay rubros en esta categoría.</p>
+      }
+      return (
+          <Accordion type="multiple" className="w-full space-y-4">
+            {rubrics.map((rubric) => (
+              <AccordionItem
+                value={`rubric-${rubric.id}`}
+                key={`rubric-item-${rubric.id}`}
+                className="bg-white/10 rounded-xl border-none"
+              >
+                <AccordionTrigger className="p-6 hover:no-underline">
+                  <div className="flex-1 text-left">
+                    <h3 className="font-semibold text-white">{rubric.title}</h3>
+                    <div className="flex gap-2 items-center mt-2">
+                      <Badge variant={rubric.category === 'Contable' ? 'success' : 'warning'}>
+                        {rubric.category}
+                      </Badge>
+                      <p className="text-sm text-muted-foreground">
+                        {rubric.criteria.length} criterios
+                      </p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-6">
+                  <div className="flex justify-end mb-4 gap-2">
+                    <Button key={`edit-${rubric.id}`} variant="outline" size="sm" onClick={() => openEditRubricModal(rubric)}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Editar Rúbrica
+                    </Button>
+                    <Button
+                      key={`add-${rubric.id}`}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openCriterionModal(rubric)}
                     >
-                        <p className="flex-1 text-sm">{criterion.text}</p>
-                        <div className="flex gap-2 ml-4">
-                          <Button size="icon" variant="warning" onClick={() => openEditCriterionModal(criterion, rubric)}>
-                              <Pencil className="h-4 w-4" />
-                              <span className="sr-only">Editar criterio</span>
-                          </Button>
-                          <Button size="icon" variant="destructive" onClick={() => setCriterionToDelete({ ...criterion, rubricCategory: rubric.category })}>
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Eliminar criterio</span>
-                          </Button>
-                        </div>
-                    </li>
-                    ))}
-                </ul>
-                ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No hay criterios para este rubro.</p>
-                )}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
-  );
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Añadir Criterio
+                    </Button>
+                  </div>
+                   {rubric.criteria.length > 0 ? (
+                    <ul className="space-y-3">
+                        {rubric.criteria.map((criterion) => (
+                        <li
+                            key={criterion.id}
+                            className="flex items-center justify-between p-3 rounded-lg bg-black/10"
+                        >
+                            <p className="flex-1 text-sm">{criterion.text}</p>
+                            <div className="flex gap-2 ml-4">
+                              <Button size="icon" variant="warning" onClick={() => openEditCriterionModal(criterion, rubric)}>
+                                  <Pencil className="h-4 w-4" />
+                                  <span className="sr-only">Editar criterio</span>
+                              </Button>
+                              <Button size="icon" variant="destructive" onClick={() => setCriterionToDelete({ ...criterion, rubricCategory: rubric.category })}>
+                                  <Trash2 className="h-4 w-4" />
+                                  <span className="sr-only">Eliminar criterio</span>
+                              </Button>
+                            </div>
+                        </li>
+                        ))}
+                    </ul>
+                    ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No hay criterios para este rubro.</p>
+                    )}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+      )
+  };
 
   const renderEvaluationRubricAccordion = (rubrics: EvaluationRubric[]) => (
      <Accordion type="multiple" className="w-full space-y-4">
@@ -412,3 +417,5 @@ export default function SupervisionRubricsPage() {
     </div>
   )
 }
+
+    

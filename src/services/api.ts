@@ -328,19 +328,20 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     data: any,
     category: 'Contable' | 'No Contable'
   ): SupervisionRubric[] => {
-    const rubricsWithCriteria: ApiRubricWithCriteria[] = data.datos;
+    const rubricsWithCriteria: ApiRubricWithCriteria[] | ApiNonCountableRubricWithCriteria[] = data.datos;
+    
     if (!rubricsWithCriteria || !Array.isArray(rubricsWithCriteria)) {
       console.warn(`API response for ${category} rubrics is not a valid array or is missing.`);
       return [];
     }
 
-    return rubricsWithCriteria.map((rubric) => ({
-      id: rubric.id_rubro,
+    return rubricsWithCriteria.map((rubric: any) => ({
+      id: rubric.id_rubro || rubric.id_nc_rubro,
       title: rubric.nombre,
       category: category,
       type: 'checkbox',
-      criteria: rubric.criterios.map((criterion: ApiCriterion) => ({
-        id: criterion.id_criterio,
+      criteria: (rubric.criterios || []).map((criterion: ApiCriterion | ApiNonCountableCriterion) => ({
+        id: (criterion as ApiCriterion).id_criterio || (criterion as ApiNonCountableCriterion).id_nc_criterio,
         text: criterion.criterio,
       })),
     }));
@@ -423,5 +424,7 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
 
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
+
+    
 
     
