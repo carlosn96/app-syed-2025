@@ -333,8 +333,6 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
             criteria: (rubric.criterios && Array.isArray(rubric.criterios)) ? rubric.criterios.map((criterion: any) => ({
                 id: criterion.id_criterio,
                 text: criterion.criterio,
-                rubricId: rubric.id_rubro,
-                rubricCategory: 'Contable' as const,
             })) : [],
         }))
         : [];
@@ -348,8 +346,6 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
             criteria: (rubric.criterios && Array.isArray(rubric.criterios)) ? rubric.criterios.map((criterion: any) => ({
                 id: criterion.id_nc_criterio,
                 text: criterion.criterio,
-                rubricId: rubric.id_nc_rubro,
-                rubricCategory: 'No Contable' as const,
             })) : [],
         }))
         : [];
@@ -393,12 +389,12 @@ export const updateRubric = (id: number, category: 'Contable' | 'No Contable', d
     return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(data) });
 };
 
-export const createCriterion = (data: { id_rubro: number, criterio: string, category: 'Contable' | 'No Contable' }): Promise<SupervisionCriterion> => {
+export const createCriterion = (data: { id_rubro: number; criterio: string; category: 'Contable' | 'No Contable' }): Promise<SupervisionCriterion> => {
     if (data.category === 'Contable') {
-        const payload = { p_id_rubro: data.id_rubro, p_criterio: data.criterio };
+        const payload = { p_criterio: data.criterio, p_id_rubro: data.id_rubro };
         return apiFetch('/supervision/contable', { method: 'POST', body: JSON.stringify(payload) });
     } else {
-        const payload = { p_id_nc_rubro: data.id_rubro, p_descripcion: data.criterio };
+        const payload = { p_descripcion: data.criterio, p_id_nc_rubro: data.id_rubro };
         return apiFetch('/supervision/no-contable', { method: 'POST', body: JSON.stringify(payload) });
     }
 };

@@ -101,8 +101,8 @@ export default function SupervisionRubricsPage() {
     setIsEditRubricModalOpen(true);
   }
 
-  const openEditCriterionModal = (criterion: SupervisionCriterion) => {
-    setSelectedCriterion(criterion);
+  const openEditCriterionModal = (criterion: SupervisionCriterion, rubric: SupervisionRubric) => {
+    setSelectedCriterion({ ...criterion, rubricCategory: rubric.category });
     setIsEditCriterionModalOpen(true);
   }
   
@@ -182,11 +182,11 @@ export default function SupervisionRubricsPage() {
                     >
                         <p className="flex-1 text-sm">{criterion.text}</p>
                         <div className="flex gap-2 ml-4">
-                          <Button size="icon" variant="warning" onClick={() => openEditCriterionModal(criterion)}>
+                          <Button size="icon" variant="warning" onClick={() => openEditCriterionModal(criterion, rubric)}>
                               <Pencil className="h-4 w-4" />
                               <span className="sr-only">Editar criterio</span>
                           </Button>
-                          <Button size="icon" variant="destructive" onClick={() => setCriterionToDelete(criterion)}>
+                          <Button size="icon" variant="destructive" onClick={() => setCriterionToDelete({ ...criterion, rubricCategory: rubric.category })}>
                               <Trash2 className="h-4 w-4" />
                               <span className="sr-only">Eliminar criterio</span>
                           </Button>
