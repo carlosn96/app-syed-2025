@@ -30,7 +30,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { SupervisionRubric, SupervisionCriterion } from "@/lib/modelos"
+import { SupervisionRubric, SupervisionCriterion, EvaluationRubric } from "@/lib/modelos"
 import { Badge } from "@/components/ui/badge"
 import { CreateRubricForm } from "@/components/create-rubric-form"
 import { CreateCriterionForm } from "@/components/create-criterion-form"
@@ -38,7 +38,7 @@ import { EditCriterionForm } from "@/components/edit-criterion-form"
 import { EditRubricForm } from "@/components/edit-rubric-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getSupervisionRubrics, deleteCriterion } from "@/services/api"
+import { getSupervisionRubrics, getEvaluationRubrics, deleteCriterion } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toast } from "primereact/toast"
 
@@ -46,6 +46,8 @@ type RubricType = 'supervision' | 'evaluation';
 
 export default function SupervisionRubricsPage() {
   const toast = useRef<Toast>(null);
+  const [activeTab, setActiveTab] = useState<RubricType>('supervision');
+
   const [isRubricModalOpen, setIsRubricModalOpen] = useState(false)
   const [isCriterionModalOpen, setIsCriterionModalOpen] = useState(false)
   const [isEditRubricModalOpen, setIsEditRubricModalOpen] = useState(false);
@@ -56,14 +58,20 @@ export default function SupervisionRubricsPage() {
   const [criterionToDelete, setCriterionToDelete] = useState<SupervisionCriterion | null>(null);
   
   const [supervisionRubrics, setSupervisionRubrics] = useState<SupervisionRubric[]>([]);
+  const [evaluationRubrics, setEvaluationRubrics] = useState<EvaluationRubric[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchRubrics = async () => {
     setIsLoading(true);
+    setError(null);
     try {
-      const supervisionData = await getSupervisionRubrics();
+      const [supervisionData, evaluationData] = await Promise.all([
+        getSupervisionRubrics(),
+        getEvaluationRubrics()
+      ]);
       setSupervisionRubrics(supervisionData);
+      setEvaluationRubrics(evaluationData);
     } catch (err: any) {
       setError(err.message || 'Error al cargar las rúbricas');
     } finally {
@@ -99,9 +107,9 @@ export default function SupervisionRubricsPage() {
   }
   
   const handleDeleteCriterion = async () => {
-    if (!criterionToDelete) return;
+    if (!criterionToDelete || !criterionToDelete.rubricCategory) return;
     try {
-        await deleteCriterion(criterionToDelete.id as number, criterionToDelete.rubricCategory || 'Contable' );
+        await deleteCriterion(criterionToDelete.id as number, criterionToDelete.rubricCategory );
         toast.current?.show({
             severity: "success",
             summary: "Criterio Eliminado",
@@ -193,7 +201,48 @@ export default function SupervisionRubricsPage() {
           </AccordionItem>
         ))}
       </Accordion>
+  );
+
+  const renderEvaluationRubricAccordion = (rubrics: EvaluationRubric[]) => (
+     <Accordion type="multiple" className="w-full space-y-4">
+        {rubrics.map((rubric) => (
+          <AccordionItem
+            value={`eval-rubric-${rubric.id}`}
+            key={rubric.id}
+            className="bg-white/10 rounded-xl border-none"
+          >
+            <AccordionTrigger className="p-6 hover:no-underline">
+              <div className="flex-1 text-left">
+                <h3 className="font-semibold text-white">{rubric.category}</h3>
+                 <p className="text-sm text-muted-foreground mt-2">
+                    {rubric.criteria.length} criterios de calificación
+                  </p>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6">
+                <div className="flex justify-end mb-4 gap-2">
+                    {/* Future buttons for evaluation rubrics */}
+                </div>
+                {rubric.criteria.length > 0 ? (
+                    <ul className="space-y-3">
+                        {rubric.criteria.map((criterion) => (
+                        <li
+                            key={criterion.id}
+                            className="flex items-center justify-between p-3 rounded-lg bg-black/10"
+                        >
+                            <p className="flex-1 text-sm">{criterion.text}</p>
+                        </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No hay criterios para esta categoría.</p>
+                )}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
   )
+
 
   if (error) {
     return <p className="text-destructive text-center">{error}</p>
@@ -206,23 +255,25 @@ export default function SupervisionRubricsPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Gestión de Rúbricas
         </h1>
-        <Dialog open={isRubricModalOpen} onOpenChange={setIsRubricModalOpen}>
-          <DialogTrigger asChild>
-            <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Crear Rúbrica
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Crear Nueva Rúbrica</DialogTitle>
-              <DialogDescription>
-                Completa el formulario para registrar una nueva rúbrica.
-              </DialogDescription>
-            </DialogHeader>
-            <CreateRubricForm onSuccess={handleSuccess} />
-          </DialogContent>
-        </Dialog>
+        {activeTab === 'supervision' && (
+            <Dialog open={isRubricModalOpen} onOpenChange={setIsRubricModalOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Crear Rúbrica
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                <DialogTitle>Crear Nueva Rúbrica</DialogTitle>
+                <DialogDescription>
+                    Completa el formulario para registrar una nueva rúbrica.
+                </DialogDescription>
+                </DialogHeader>
+                <CreateRubricForm onSuccess={handleSuccess} />
+            </DialogContent>
+            </Dialog>
+        )}
         
         {/* Add Criterion Modal */}
         <Dialog open={isCriterionModalOpen} onOpenChange={setIsCriterionModalOpen}>
@@ -283,52 +334,80 @@ export default function SupervisionRubricsPage() {
         </AlertDialog>
       </div>
 
-       <Card className="rounded-xl">
-        <CardHeader>
-          <CardTitle>Gestor de Rúbricas de Supervisión</CardTitle>
-          <CardDescription>
-            Administra las rúbricas y los criterios utilizados para las
-            supervisiones de docentes.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-            {isLoading ? (
-                <div className="space-y-4">
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-20 w-full" />
-                </div>
-            ) : (
-                <Tabs defaultValue="contable" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="contable">Rubros Contables</TabsTrigger>
-                    <TabsTrigger value="no-contable">Rubros No Contables</TabsTrigger>
-                </TabsList>
-                <TabsContent value="contable" className="mt-6">
-                    <Card>
+       <Tabs defaultValue="supervision" onValueChange={(value) => setActiveTab(value as RubricType)} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="supervision">Rúbricas de Supervisión</TabsTrigger>
+                <TabsTrigger value="evaluation">Rúbricas de Evaluación</TabsTrigger>
+            </TabsList>
+            <TabsContent value="supervision" className="mt-6">
+                <Card className="rounded-xl">
                     <CardHeader>
-                        <CardTitle>Rubros Contables</CardTitle>
-                        <CardDescription>Criterios cuantitativos para la supervisión.</CardDescription>
+                    <CardTitle>Gestor de Rúbricas de Supervisión</CardTitle>
+                    <CardDescription>
+                        Administra las rúbricas y los criterios utilizados para las
+                        supervisiones de docentes.
+                    </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {renderSupervisionRubricAccordion(supervisionRubricsContable)}
+                        {isLoading ? (
+                            <div className="space-y-4">
+                                <Skeleton className="h-20 w-full" />
+                                <Skeleton className="h-20 w-full" />
+                            </div>
+                        ) : (
+                            <Tabs defaultValue="contable" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="contable">Rubros Contables</TabsTrigger>
+                                <TabsTrigger value="no-contable">Rubros No Contables</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="contable" className="mt-6">
+                                <Card>
+                                <CardHeader>
+                                    <CardTitle>Rubros Contables</CardTitle>
+                                    <CardDescription>Criterios cuantitativos para la supervisión.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    {renderSupervisionRubricAccordion(supervisionRubricsContable)}
+                                </CardContent>
+                                </Card>
+                            </TabsContent>
+                            <TabsContent value="no-contable" className="mt-6">
+                                <Card>
+                                <CardHeader>
+                                    <CardTitle>Rubros No Contables</CardTitle>
+                                    <CardDescription>Criterios cualitativos para la supervisión.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    {renderSupervisionRubricAccordion(supervisionRubricsNoContable)}
+                                </CardContent>
+                                </Card>
+                            </TabsContent>
+                            </Tabs>
+                        )}
                     </CardContent>
-                    </Card>
-                </TabsContent>
-                <TabsContent value="no-contable" className="mt-6">
-                    <Card>
+                </Card>
+            </TabsContent>
+            <TabsContent value="evaluation" className="mt-6">
+                 <Card className="rounded-xl">
                     <CardHeader>
-                        <CardTitle>Rubros No Contables</CardTitle>
-                        <CardDescription>Criterios cualitativos para la supervisión.</CardDescription>
+                    <CardTitle>Gestor de Rúbricas de Evaluación Docente</CardTitle>
+                    <CardDescription>
+                        Administra las categorías y opciones para la evaluación de docentes por parte de los alumnos.
+                    </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {renderSupervisionRubricAccordion(supervisionRubricsNoContable)}
+                         {isLoading ? (
+                            <div className="space-y-4">
+                                <Skeleton className="h-20 w-full" />
+                                <Skeleton className="h-20 w-full" />
+                            </div>
+                        ) : (
+                            renderEvaluationRubricAccordion(evaluationRubrics)
+                        )}
                     </CardContent>
-                    </Card>
-                </TabsContent>
-                </Tabs>
-            )}
-        </CardContent>
-      </Card>
+                </Card>
+            </TabsContent>
+       </Tabs>
     </div>
   )
 }

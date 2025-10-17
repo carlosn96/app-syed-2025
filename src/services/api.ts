@@ -1,6 +1,6 @@
 
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -324,37 +324,63 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
         apiFetch('/supervision/rubros/no-contable')
     ]);
 
-    const countableRubrics: SupervisionRubric[] = (countableData.datos.rubros && Array.isArray(countableData.datos.rubros))
-    ? countableData.datos.rubros.map((rubric: any) => ({
-        id: rubric.id_rubro,
-        title: rubric.nombre,
-        category: 'Contable' as const,
-        type: 'checkbox',
-        criteria: rubric.criterios.map((criterion: any) => ({
-            id: criterion.id_criterio,
-            text: criterion.criterio,
-            rubricId: rubric.id_rubro,
-            rubricCategory: 'Contable' as const,
-        })),
-    }))
-    : [];
+    const countableRubrics: SupervisionRubric[] = (countableData.datos && Array.isArray(countableData.datos))
+        ? countableData.datos.map((rubric: any) => ({
+            id: rubric.id_rubro,
+            title: rubric.nombre,
+            category: 'Contable' as const,
+            type: 'checkbox',
+            criteria: (rubric.criterios && Array.isArray(rubric.criterios)) ? rubric.criterios.map((criterion: any) => ({
+                id: criterion.id_criterio,
+                text: criterion.criterio,
+                rubricId: rubric.id_rubro,
+                rubricCategory: 'Contable' as const,
+            })) : [],
+        }))
+        : [];
 
-    const nonCountableRubrics: SupervisionRubric[] = (nonCountableData.datos.rubros && Array.isArray(nonCountableData.datos.rubros))
-    ? nonCountableData.datos.rubros.map((rubric: any) => ({
-        id: rubric.id_nc_rubro,
-        title: rubric.nombre,
-        category: 'No Contable' as const,
-        type: 'checkbox',
-        criteria: rubric.criterios.map((criterion: any) => ({
-            id: criterion.id_nc_criterio,
-            text: criterion.criterio,
-            rubricId: rubric.id_nc_rubro,
-            rubricCategory: 'No Contable' as const,
-        })),
-    }))
-    : [];
+    const nonCountableRubrics: SupervisionRubric[] = (nonCountableData.datos && Array.isArray(nonCountableData.datos))
+        ? nonCountableData.datos.map((rubric: any) => ({
+            id: rubric.id_nc_rubro,
+            title: rubric.nombre,
+            category: 'No Contable' as const,
+            type: 'checkbox',
+            criteria: (rubric.criterios && Array.isArray(rubric.criterios)) ? rubric.criterios.map((criterion: any) => ({
+                id: criterion.id_nc_criterio,
+                text: criterion.criterio,
+                rubricId: rubric.id_nc_rubro,
+                rubricCategory: 'No Contable' as const,
+            })) : [],
+        }))
+        : [];
 
     return [...countableRubrics, ...nonCountableRubrics];
+};
+
+export const getEvaluationRubrics = async (): Promise<EvaluationRubric[]> => {
+    console.warn("getEvaluationRubrics is using mock data. Implement API endpoint.");
+    return Promise.resolve([
+         {
+            id: 1,
+            category: "Claridad en la Explicación",
+            criteria: [
+                { id: "clarity_1", text: "Excelente" },
+                { id: "clarity_2", text: "Bueno" },
+                { id: "clarity_3", text: "Regular" },
+                { id: "clarity_4", text: "Necesita Mejorar" },
+            ]
+        },
+        {
+            id: 2,
+            category: "Compromiso y Motivación",
+            criteria: [
+                { id: "engagement_1", text: "Excelente" },
+                { id: "engagement_2", text: "Bueno" },
+                { id: "engagement_3", text: "Regular" },
+                { id: "engagement_4", text: "Necesita Mejorar" },
+            ]
+        }
+    ]);
 };
 
 export const createRubric = (data: { nombre: string; categoria: 'Contable' | 'No Contable' }): Promise<SupervisionRubric> => {
@@ -369,9 +395,11 @@ export const updateRubric = (id: number, category: 'Contable' | 'No Contable', d
 
 export const createCriterion = (data: { id_rubro: number, criterio: string, category: 'Contable' | 'No Contable' }): Promise<SupervisionCriterion> => {
     if (data.category === 'Contable') {
-        return apiFetch('/supervision/contable', { method: 'POST', body: JSON.stringify({ p_id_rubro: data.id_rubro, p_criterio: data.criterio }) });
+        const payload = { p_id_rubro: data.id_rubro, p_criterio: data.criterio };
+        return apiFetch('/supervision/contable', { method: 'POST', body: JSON.stringify(payload) });
     } else {
-        return apiFetch('/supervision/no-contable', { method: 'POST', body: JSON.stringify({ p_id_nc_rubro: data.id_rubro, p_descripcion: data.criterio }) });
+        const payload = { p_id_nc_rubro: data.id_rubro, p_descripcion: data.criterio };
+        return apiFetch('/supervision/no-contable', { method: 'POST', body: JSON.stringify(payload) });
     }
 };
 
@@ -403,4 +431,3 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
 
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
-
