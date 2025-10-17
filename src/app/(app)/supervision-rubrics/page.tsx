@@ -44,6 +44,21 @@ import { Toast } from "primereact/toast"
 
 type RubricType = 'supervision' | 'evaluation';
 
+function normalizeItems(arr: any[], scope: string) {
+  return (arr ?? []).map((it, i) => {
+    const id =
+      it.id ??
+      it.id_rubro ??
+      it.uuid ??
+      it.slug ??
+      `idx-${i}`;
+    return {
+      ...it,
+      __key: `${scope}-${id}` // clave única y estable
+    };
+  });
+}
+
 export default function SupervisionRubricsPage() {
   const toast = useRef<Toast>(null);
   const [activeTab, setActiveTab] = useState<RubricType>('supervision');
@@ -137,16 +152,21 @@ export default function SupervisionRubricsPage() {
     (r) => r.category === "No Contable"
   )
 
-  const renderSupervisionRubricAccordion = (rubrics: SupervisionRubric[]) => {
-      if (rubrics.length === 0) {
+  const renderSupervisionRubricAccordion = (rubrics: SupervisionRubric[], category: 'Contable' | 'No Contable') => {
+      const rubricScope = category === 'Contable' ? 'sup-contables-rubros' : 'sup-nocontables-rubros';
+      const criterionScope = category === 'Contable' ? 'sup-contables-criterios' : 'sup-nocontables-criterios';
+      
+      const normalizedRubrics = normalizeItems(rubrics, rubricScope);
+
+      if (normalizedRubrics.length === 0) {
         return <p className="text-sm text-muted-foreground text-center py-4">No hay rubros en esta categoría.</p>
       }
       return (
           <Accordion type="multiple" className="w-full space-y-4">
-            {rubrics.map((rubric) => (
+            {normalizedRubrics.map((rubric) => (
               <AccordionItem
                 value={`rubric-${rubric.id}`}
-                key={`rubric-item-${rubric.id}`}
+                key={rubric.__key}
                 className="bg-white/10 rounded-xl border-none"
               >
                 <AccordionTrigger className="p-6 hover:no-underline">
@@ -180,9 +200,9 @@ export default function SupervisionRubricsPage() {
                   </div>
                    {rubric.criteria.length > 0 ? (
                     <ul className="space-y-3">
-                        {rubric.criteria.map((criterion) => (
+                        {normalizeItems(rubric.criteria, criterionScope).map((criterion) => (
                         <li
-                            key={criterion.id}
+                            key={criterion.__key}
                             className="flex items-center justify-between p-3 rounded-lg bg-black/10"
                         >
                             <p className="flex-1 text-sm">{criterion.text}</p>
@@ -209,12 +229,14 @@ export default function SupervisionRubricsPage() {
       )
   };
 
-  const renderEvaluationRubricAccordion = (rubrics: EvaluationRubric[]) => (
+  const renderEvaluationRubricAccordion = (rubrics: EvaluationRubric[]) => {
+    const normalizedRubrics = normalizeItems(rubrics, 'eval-rubros');
+    return (
      <Accordion type="multiple" className="w-full space-y-4">
-        {rubrics.map((rubric) => (
+        {normalizedRubrics.map((rubric) => (
           <AccordionItem
             value={`eval-rubric-${rubric.id}`}
-            key={`eval-rubric-item-${rubric.id}`}
+            key={rubric.__key}
             className="bg-white/10 rounded-xl border-none"
           >
             <AccordionTrigger className="p-6 hover:no-underline">
@@ -231,9 +253,9 @@ export default function SupervisionRubricsPage() {
                 </div>
                 {rubric.criteria.length > 0 ? (
                     <ul className="space-y-3">
-                        {rubric.criteria.map((criterion) => (
+                        {normalizeItems(rubric.criteria, 'eval-criterios').map((criterion) => (
                         <li
-                            key={criterion.id}
+                            key={criterion.__key}
                             className="flex items-center justify-between p-3 rounded-lg bg-black/10"
                         >
                             <p className="flex-1 text-sm">{criterion.text}</p>
@@ -248,6 +270,7 @@ export default function SupervisionRubricsPage() {
         ))}
       </Accordion>
   )
+  }
 
 
   if (error) {
@@ -373,7 +396,7 @@ export default function SupervisionRubricsPage() {
                                     <CardDescription>Criterios cuantitativos para la supervisión.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    {renderSupervisionRubricAccordion(supervisionRubricsContable)}
+                                    {renderSupervisionRubricAccordion(supervisionRubricsContable, 'Contable')}
                                 </CardContent>
                                 </Card>
                             </TabsContent>
@@ -384,7 +407,7 @@ export default function SupervisionRubricsPage() {
                                     <CardDescription>Criterios cualitativos para la supervisión.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    {renderSupervisionRubricAccordion(supervisionRubricsNoContable)}
+                                    {renderSupervisionRubricAccordion(supervisionRubricsNoContable, 'No Contable')}
                                 </CardContent>
                                 </Card>
                             </TabsContent>
