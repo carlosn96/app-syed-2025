@@ -1,6 +1,6 @@
 
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion, ApiSupervisionRubric, ApiSupervisionCriterion } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -319,73 +319,76 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 
 // Rubrics
 export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
-  const [countableRubrics, nonCountableRubrics, countableCriteria, nonCountableCriteria] = await Promise.all([
-    apiFetch('/supervision/rubros/contable').then(res => res.datos),
-    apiFetch('/supervision/rubros/no-contable').then(res => res.datos),
-    apiFetch('/supervision/contable').then(res => res.datos),
-    apiFetch('/supervision/no-contable').then(res => res.datos)
+  const [countableRubricsRes, nonCountableRubricsRes, countableCriteriaRes, nonCountableCriteriaRes] = await Promise.all([
+    apiFetch('/supervision/rubros/contable'),
+    apiFetch('/supervision/rubros/no-contable'),
+    apiFetch('/supervision/contable/'),
+    apiFetch('/supervision/no-contable/')
   ]);
 
-  const mapRubricsWithCriteria = (
+  const countableRubrics: ApiRubric[] = countableRubricsRes.datos || [];
+  const nonCountableRubrics: ApiRubric[] = nonCountableRubricsRes.datos || [];
+  const countableCriteria: ApiRubricWithCriteria[] = countableCriteriaRes.datos || [];
+  const nonCountableCriteria: ApiNonCountableRubricWithCriteria[] = nonCountableCriteriaRes.datos || [];
+
+  const mapRubrics = (
     rubrics: ApiRubric[],
-    criteriaGroups: ApiSupervisionRubric[],
+    criteriaGroups: (ApiRubricWithCriteria | ApiNonCountableRubricWithCriteria)[],
     category: 'Contable' | 'No Contable'
   ): SupervisionRubric[] => {
-    if (!Array.isArray(rubrics)) {
-      console.error(`Expected rubrics for category ${category} to be an array, but got:`, rubrics);
-      return [];
-    }
-
+    if (!Array.isArray(rubrics)) return [];
+    
     return rubrics.map(rubric => {
       const criteriaGroup = criteriaGroups.find(group => group.id_rubro === rubric.id);
-      const criteria = criteriaGroup && Array.isArray(criteriaGroup.criterios)
-        ? criteriaGroup.criterios.map(c => ({
-            id: c.id_criterio,
-            text: c.criterio,
-          }))
-        : [];
-      
+      let criteria: SupervisionCriterion[] = [];
+      if (criteriaGroup && 'criterios' in criteriaGroup && Array.isArray(criteriaGroup.criterios)) {
+          criteria = criteriaGroup.criterios.map((c: ApiCriterion | ApiNonCountableCriterion) => ({
+              id: 'id_criterio' in c ? c.id_criterio : c.id_nc_criterio,
+              text: 'criterio' in c ? c.criterio : c.criterio,
+          }));
+      }
+
       return {
         id: rubric.id,
         title: rubric.nombre,
         category: category,
-        type: 'checkbox',
+        type: 'checkbox', // Assuming this is always checkbox for now
         criteria: criteria,
       };
     });
   };
 
-  const contable = mapRubricsWithCriteria(countableRubrics, countableCriteria, 'Contable');
-  const noContable = mapRubricsWithCriteria(nonCountableRubrics, nonCountableCriteria, 'No Contable');
-
+  const contable = mapRubrics(countableRubrics, countableCriteria, 'Contable');
+  const noContable = mapRubrics(nonCountableRubrics, nonCountableCriteria, 'No Contable');
+  
   return [...contable, ...noContable];
 };
 
 
 export const getEvaluationRubrics = async (): Promise<EvaluationRubric[]> => {
-    console.warn("getEvaluationRubrics is using mock data. Implement API endpoint.");
-    return Promise.resolve([
-         {
-            id: 1,
-            category: "Claridad en la Explicación",
-            criteria: [
-                { id: "clarity_1", text: "Excelente" },
-                { id: "clarity_2", text: "Bueno" },
-                { id: "clarity_3", text: "Regular" },
-                { id: "clarity_4", text: "Necesita Mejorar" },
-            ]
-        },
-        {
-            id: 2,
-            category: "Compromiso y Motivación",
-            criteria: [
-                { id: "engagement_1", text: "Excelente" },
-                { id: "engagement_2", text: "Bueno" },
-                { id: "engagement_3", text: "Regular" },
-                { id: "engagement_4", text: "Necesita Mejorar" },
-            ]
-        }
-    ]);
+    const rubricsRes = await apiFetch('/rubros');
+    const criteriaRes = await apiFetch('/criterios-evaluacion');
+
+    const apiRubrics: { id_cat_rubro_evaluacion: number, rubro: string }[] = rubricsRes.datos || [];
+    const apiCriteria: { id_cat_criterio_evaluacion: number, criterio: string, id_rubro: number }[] = criteriaRes.datos || [];
+
+    if (!Array.isArray(apiRubrics) || !Array.isArray(apiCriteria)) {
+        console.error("Invalid data structure for evaluation rubrics/criteria");
+        return [];
+    }
+
+    return apiRubrics.map(rubric => {
+        return {
+            id: rubric.id_cat_rubro_evaluacion,
+            category: rubric.rubro,
+            criteria: apiCriteria
+                .filter(criterion => criterion.id_rubro === rubric.id_cat_rubro_evaluacion)
+                .map(criterion => ({
+                    id: String(criterion.id_cat_criterio_evaluacion),
+                    text: criterion.criterio
+                }))
+        };
+    });
 };
 
 export const createRubric = (data: { nombre: string; categoria: 'Contable' | 'No Contable' }): Promise<SupervisionRubric> => {
@@ -434,3 +437,5 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
 
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
+
+    

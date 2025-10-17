@@ -142,7 +142,7 @@ export default function SupervisionRubricsPage() {
         {rubrics.map((rubric) => (
           <AccordionItem
             value={`rubric-${rubric.id}`}
-            key={rubric.id}
+            key={`rubric-item-${rubric.id}`}
             className="bg-white/10 rounded-xl border-none"
           >
             <AccordionTrigger className="p-6 hover:no-underline">
@@ -209,7 +209,7 @@ export default function SupervisionRubricsPage() {
         {rubrics.map((rubric) => (
           <AccordionItem
             value={`eval-rubric-${rubric.id}`}
-            key={`eval-rubric-${rubric.id}`}
+            key={`eval-rubric-item-${rubric.id}`}
             className="bg-white/10 rounded-xl border-none"
           >
             <AccordionTrigger className="p-6 hover:no-underline">
@@ -412,3 +412,5 @@ export default function SupervisionRubricsPage() {
     </div>
   )
 }
+
+    
