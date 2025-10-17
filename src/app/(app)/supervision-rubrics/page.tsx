@@ -38,7 +38,7 @@ import { EditCriterionForm } from "@/components/edit-criterion-form"
 import { EditRubricForm } from "@/components/edit-rubric-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getSupervisionRubrics, getEvaluationRubrics, deleteCriterion } from "@/services/api"
+import { getSupervisionRubrics, getEvaluationRubrics, deleteCriterion, createCriterion, updateCriterion, updateRubric } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toast } from "primereact/toast"
 
@@ -160,11 +160,12 @@ export default function SupervisionRubricsPage() {
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
               <div className="flex justify-end mb-4 gap-2">
-                <Button variant="outline" size="sm" onClick={() => openEditRubricModal(rubric)}>
+                <Button key={`edit-${rubric.id}`} variant="outline" size="sm" onClick={() => openEditRubricModal(rubric)}>
                   <Pencil className="mr-2 h-4 w-4" />
                   Editar Rúbrica
                 </Button>
                 <Button
+                  key={`add-${rubric.id}`}
                   variant="outline"
                   size="sm"
                   onClick={() => openCriterionModal(rubric)}
@@ -208,7 +209,7 @@ export default function SupervisionRubricsPage() {
         {rubrics.map((rubric) => (
           <AccordionItem
             value={`eval-rubric-${rubric.id}`}
-            key={rubric.id}
+            key={`eval-rubric-${rubric.id}`}
             className="bg-white/10 rounded-xl border-none"
           >
             <AccordionTrigger className="p-6 hover:no-underline">
