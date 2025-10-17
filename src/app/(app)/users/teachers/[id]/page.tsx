@@ -1,7 +1,6 @@
 
 "use client"
 
-import { useParams } from "next/navigation"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Dot } from "recharts"
 import { Star, ShieldCheck, BookUser, Library } from "lucide-react"
 import React, { useMemo, useState, useEffect } from "react"
@@ -79,8 +78,7 @@ interface TeacherProfileData {
 }
 
 
-export default function TeacherProfilePage() {
-  const params = useParams();
+export default function TeacherProfilePage({ params }: { params: { id: string } }) {
   const teacherId = Number(params.id);
   const [activeTab, setActiveTab] = useState<'supervisions' | 'evaluations' | 'subjects'>('supervisions');
   const isMobile = useIsMobile();
