@@ -328,7 +328,7 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     data: any,
     category: 'Contable' | 'No Contable'
   ): SupervisionRubric[] => {
-    const rubricsWithCriteria: (ApiRubricWithCriteria | ApiNonCountableRubricWithCriteria)[] = data.datos;
+    const rubricsWithCriteria: ApiRubricWithCriteria[] = data.datos;
     if (!rubricsWithCriteria || !Array.isArray(rubricsWithCriteria)) {
       console.warn(`API response for ${category} rubrics is not a valid array or is missing.`);
       return [];
@@ -339,8 +339,8 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
       title: rubric.nombre,
       category: category,
       type: 'checkbox',
-      criteria: rubric.criterios.map((criterion: ApiCriterion | ApiNonCountableCriterion) => ({
-        id: (criterion as ApiCriterion).id_criterio ?? (criterion as ApiNonCountableCriterion).id_nc_criterio,
+      criteria: rubric.criterios.map((criterion: ApiCriterion) => ({
+        id: criterion.id_criterio,
         text: criterion.criterio,
       })),
     }));
