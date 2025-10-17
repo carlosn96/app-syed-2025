@@ -330,7 +330,7 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
             title: rubric.nombre,
             category: 'Contable' as const,
             type: 'checkbox',
-            criteria: (rubric.criterios && Array.isArray(rubric.criterios)) ? rubric.criterios.map((criterion: any) => ({
+            criteria: (rubric.relacion && Array.isArray(rubric.relacion)) ? rubric.relacion.map((criterion: any) => ({
                 id: criterion.id_criterio,
                 text: criterion.criterio,
             })) : [],
@@ -343,7 +343,7 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
             title: rubric.nombre,
             category: 'No Contable' as const,
             type: 'checkbox',
-            criteria: (rubric.criterios && Array.isArray(rubric.criterios)) ? rubric.criterios.map((criterion: any) => ({
+            criteria: (rubric.relacion && Array.isArray(rubric.relacion)) ? rubric.relacion.map((criterion: any) => ({
                 id: criterion.id_nc_criterio,
                 text: criterion.criterio,
             })) : [],
@@ -392,19 +392,19 @@ export const updateRubric = (id: number, category: 'Contable' | 'No Contable', d
 export const createCriterion = (data: { id_rubro: number; criterio: string; category: 'Contable' | 'No Contable' }): Promise<SupervisionCriterion> => {
     const endpoint = data.category === 'Contable' ? '/supervision/contable/' : '/supervision/no-contable/';
     const body = data.category === 'Contable'
-        ? { p_criterio: data.criterio, p_id_rubro: data.id_rubro }
-        : { p_descripcion: data.criterio, p_id_nc_rubro: data.id_rubro };
+      ? { p_criterio: data.criterio, p_id_rubro: data.id_rubro }
+      : { p_descripcion: data.criterio, p_id_nc_rubro: data.id_rubro };
     return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(body) });
 };
-
+  
 export const updateCriterion = (id: number, category: 'Contable' | 'No Contable', criterionText: string): Promise<SupervisionCriterion> => {
     const endpoint = category === 'Contable' ? `/supervision/contable/${id}` : `/supervision/no-contable/${id}`;
     const body = category === 'Contable'
-        ? { p_criterio: criterionText }
-        : { p_descripcion: criterionText };
+      ? { p_criterio: criterionText }
+      : { p_descripcion: criterionText };
     return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(body) });
 };
-
+  
 export const deleteCriterion = (id: number, category: 'Contable' | 'No Contable'): Promise<void> => {
     const endpoint = category === 'Contable' ? `/supervision/contable/${id}` : `/supervision/no-contable/${id}`;
     return apiFetch(endpoint, { method: 'DELETE' });
