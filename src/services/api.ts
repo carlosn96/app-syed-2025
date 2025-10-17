@@ -328,18 +328,19 @@ export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
     data: any,
     category: 'Contable' | 'No Contable'
   ): SupervisionRubric[] => {
-    if (!data || !Array.isArray(data.datos)) {
-      console.warn(`API response for ${category} rubrics is not a valid array.`);
+    const rubricsWithCriteria: (ApiRubricWithCriteria | ApiNonCountableRubricWithCriteria)[] = data.datos;
+    if (!rubricsWithCriteria || !Array.isArray(rubricsWithCriteria)) {
+      console.warn(`API response for ${category} rubrics is not a valid array or is missing.`);
       return [];
     }
 
-    return data.datos.map((rubric: ApiRubricWithCriteria) => ({
+    return rubricsWithCriteria.map((rubric) => ({
       id: rubric.id_rubro,
       title: rubric.nombre,
       category: category,
       type: 'checkbox',
-      criteria: rubric.criterios.map((criterion: ApiCriterion) => ({
-        id: criterion.id_criterio,
+      criteria: rubric.criterios.map((criterion: ApiCriterion | ApiNonCountableCriterion) => ({
+        id: (criterion as ApiCriterion).id_criterio ?? (criterion as ApiNonCountableCriterion).id_nc_criterio,
         text: criterion.criterio,
       })),
     }));
@@ -388,11 +389,11 @@ export const updateRubric = (id: number, category: 'Contable' | 'No Contable', d
     return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(data) });
 };
 
-export const createCriterion = (data: { id_rubro: number; criterio: string; category: 'Contable' | 'No Contable' }): Promise<SupervisionCriterion> => {
-    const endpoint = data.category === 'Contable' ? '/supervision/contable' : '/supervision/no-contable';
-    const body = data.category === 'Contable'
-      ? { p_criterio: data.criterio, p_id_rubro: data.id_rubro }
-      : { p_descripcion: data.criterio, p_id_nc_rubro: data.id_rubro };
+export const createCriterion = (rubricId: number, category: 'Contable' | 'No Contable', criterionText: string): Promise<SupervisionCriterion> => {
+    const endpoint = category === 'Contable' ? '/supervision/contable' : '/supervision/no-contable';
+    const body = category === 'Contable'
+        ? { p_criterio: criterionText, p_id_rubro: rubricId }
+        : { p_descripcion: criterionText, p_id_nc_rubro: rubricId };
     return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(body) });
 };
   

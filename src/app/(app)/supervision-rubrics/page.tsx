@@ -38,7 +38,7 @@ import { EditCriterionForm } from "@/components/edit-criterion-form"
 import { EditRubricForm } from "@/components/edit-rubric-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getSupervisionRubrics, getEvaluationRubrics, deleteCriterion, createCriterion, updateCriterion, updateRubric } from "@/services/api"
+import { getSupervisionRubrics, getEvaluationRubrics, deleteCriterion } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toast } from "primereact/toast"
 
@@ -412,5 +412,3 @@ export default function SupervisionRubricsPage() {
     </div>
   )
 }
-
-    
