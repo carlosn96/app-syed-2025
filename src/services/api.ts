@@ -21,6 +21,8 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  //console.log(`API Fetch: ${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`);
+
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
@@ -318,48 +320,42 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 };
 
 // Rubrics
-export const getSupervisionRubrics = async (): Promise<SupervisionRubric[]> => {
-  const [countableData, nonCountableData] = await Promise.all([
-    apiFetch('/supervision/contable'),
-    apiFetch('/supervision/no-contable'),
-  ]);
-
-  const mapRubrics = (
-    data: any,
-    category: 'Contable' | 'No Contable'
-  ): SupervisionRubric[] => {
-    const rubricsWithCriteria: ApiRubricWithCriteria[] | ApiNonCountableRubricWithCriteria[] = data.datos;
-    
-    if (!rubricsWithCriteria || !Array.isArray(rubricsWithCriteria)) {
-      console.warn(`API response for ${category} rubrics is not a valid array or is missing.`);
-      return [];
-    }
-
-    return rubricsWithCriteria.map((rubric: any) => ({
-      id: rubric.id_rubro || rubric.id_nc_rubro,
+export const getSupervisionRubrics = async (): Promise<{ contable: SupervisionRubric[], noContable: SupervisionRubric[] }> => {
+    const [countableData, nonCountableData] = await Promise.all([
+      apiFetch('/supervision/contable'),
+      apiFetch('/supervision/no-contable'),
+    ]);
+  
+    const contableRubrics = (countableData?.datos?.rubros || []).map((rubric: ApiRubricWithCriteria) => ({
+      id: rubric.id_rubro,
       title: rubric.nombre,
-      category: category,
-      type: 'checkbox',
-      criteria: (rubric.criterios || []).map((criterion: ApiCriterion | ApiNonCountableCriterion) => ({
-        id: (criterion as ApiCriterion).id_criterio || (criterion as ApiNonCountableCriterion).id_nc_criterio,
+      category: 'Contable',
+      criteria: (rubric.criterios || []).map((criterion: ApiCriterion) => ({
+        id: criterion.id_criterio,
         text: criterion.criterio,
       })),
     }));
+  
+    const noContableRubrics = (nonCountableData?.datos?.rubros || []).map((rubric: ApiNonCountableRubricWithCriteria) => ({
+      id: rubric.id_nc_rubro,
+      title: rubric.nombre,
+      category: 'No Contable',
+      criteria: (rubric.criterios || []).map((criterion: ApiNonCountableCriterion) => ({
+        id: criterion.id_nc_criterio,
+        text: criterion.criterio,
+      })),
+    }));
+  
+    return { contable: contableRubrics, noContable: noContableRubrics };
   };
-
-  const contable = mapRubrics(countableData, 'Contable');
-  const noContable = mapRubrics(nonCountableData, 'No Contable');
-
-  return [...contable, ...noContable];
-};
 
 
 export const getEvaluationRubrics = async (): Promise<EvaluationRubric[]> => {
     const rubricsRes = await apiFetch('/rubros');
     const criteriaRes = await apiFetch('/criterios-evaluacion');
 
-    const apiRubrics: { id_cat_rubro_evaluacion: number, rubro: string }[] = rubricsRes.datos || [];
-    const apiCriteria: { id_cat_criterio_evaluacion: number, criterio: string, id_rubro: number }[] = criteriaRes.datos || [];
+    const apiRubrics: { id: number, nombre: string }[] = rubricsRes.datos || [];
+    const apiCriteria: { id_evacriterio: number, descripcion: string, id_rubro: number }[] = criteriaRes.datos || [];
 
     if (!Array.isArray(apiRubrics) || !Array.isArray(apiCriteria)) {
         console.error("Invalid data structure for evaluation rubrics/criteria");
@@ -368,13 +364,13 @@ export const getEvaluationRubrics = async (): Promise<EvaluationRubric[]> => {
 
     return apiRubrics.map(rubric => {
         return {
-            id: rubric.id_cat_rubro_evaluacion,
-            category: rubric.rubro,
+            id: rubric.id,
+            category: rubric.nombre,
             criteria: apiCriteria
-                .filter(criterion => criterion.id_rubro === rubric.id_cat_rubro_evaluacion)
+                .filter(criterion => criterion.id_rubro === rubric.id)
                 .map(criterion => ({
-                    id: String(criterion.id_cat_criterio_evaluacion),
-                    text: criterion.criterio
+                    id: String(criterion.id_evacriterio),
+                    text: criterion.descripcion
                 }))
         };
     });
@@ -391,7 +387,7 @@ export const updateRubric = (id: number, category: 'Contable' | 'No Contable', d
 };
 
 export const createCriterion = (rubricId: number, category: 'Contable' | 'No Contable', criterionText: string): Promise<SupervisionCriterion> => {
-    const endpoint = category === 'Contable' ? '/supervision/contable' : '/supervision/no-contable';
+    const endpoint = category === 'Contable' ? '/supervision/contable/' : '/supervision/no-contable/';
     const body = category === 'Contable'
         ? { p_criterio: criterionText, p_id_rubro: rubricId }
         : { p_descripcion: criterionText, p_id_nc_rubro: rubricId };

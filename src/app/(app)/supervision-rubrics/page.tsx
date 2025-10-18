@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -41,6 +42,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getSupervisionRubrics, getEvaluationRubrics, deleteCriterion } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toast } from "primereact/toast"
+import { nullable } from "zod"
 
 type RubricType = 'supervision' | 'evaluation';
 
@@ -49,6 +51,9 @@ function normalizeItems(arr: any[], scope: string) {
     const id =
       it.id ??
       it.id_rubro ??
+      it.id_nc_rubro ??
+      it.id_criterio ??
+      it.id_nc_criterio ??
       it.uuid ??
       it.slug ??
       `idx-${i}`;
@@ -72,7 +77,7 @@ export default function SupervisionRubricsPage() {
   const [selectedCriterion, setSelectedCriterion] = useState<SupervisionCriterion | null>(null);
   const [criterionToDelete, setCriterionToDelete] = useState<SupervisionCriterion | null>(null);
   
-  const [supervisionRubrics, setSupervisionRubrics] = useState<SupervisionRubric[]>([]);
+  const [supervisionRubrics, setSupervisionRubrics] = useState<{ contable: SupervisionRubric[], noContable: SupervisionRubric[] }>({ contable: [], noContable: [] });
   const [evaluationRubrics, setEvaluationRubrics] = useState<EvaluationRubric[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -144,13 +149,6 @@ export default function SupervisionRubricsPage() {
     }
   }
 
-
-  const supervisionRubricsContable = supervisionRubrics.filter(
-    (r) => r.category === "Contable"
-  )
-  const supervisionRubricsNoContable = supervisionRubrics.filter(
-    (r) => r.category === "No Contable"
-  )
 
   const renderSupervisionRubricAccordion = (rubrics: SupervisionRubric[], category: 'Contable' | 'No Contable') => {
       const rubricScope = category === 'Contable' ? 'sup-contables-rubros' : 'sup-nocontables-rubros';
@@ -396,7 +394,7 @@ export default function SupervisionRubricsPage() {
                                     <CardDescription>Criterios cuantitativos para la supervisión.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    {renderSupervisionRubricAccordion(supervisionRubricsContable, 'Contable')}
+                                    {renderSupervisionRubricAccordion(supervisionRubrics.contable, 'Contable')}
                                 </CardContent>
                                 </Card>
                             </TabsContent>
@@ -407,7 +405,7 @@ export default function SupervisionRubricsPage() {
                                     <CardDescription>Criterios cualitativos para la supervisión.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    {renderSupervisionRubricAccordion(supervisionRubricsNoContable, 'No Contable')}
+                                    {renderSupervisionRubricAccordion(supervisionRubrics.noContable, 'No Contable')}
                                 </CardContent>
                                 </Card>
                             </TabsContent>
