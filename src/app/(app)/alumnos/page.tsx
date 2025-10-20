@@ -124,16 +124,16 @@ export default function AlumnosPage() {
         <CardContent className="text-sm space-y-2">
             {user.rol === 'alumno' && <p><span className="font-semibold">Grupo:</span> {user.grupo || 'No asignado'}</p>}
             <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
-            <div className="flex gap-2 pt-2">
-            <Button size="sm" variant="warning" className="flex-1" onClick={() => handleEditClick(user)}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Editar
+            <div className="flex justify-end gap-2 pt-2">
+            <Button size="icon" variant="warning" onClick={() => handleEditClick(user)}>
+                <Pencil className="h-4 w-4" />
+                <span className="sr-only">Editar</span>
             </Button>
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button size="sm" variant="destructive" className="flex-1">
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Eliminar
+                    <Button size="icon" variant="destructive">
+                        <Trash2 className="h-4 w-4" />
+                         <span className="sr-only">Eliminar</span>
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -172,9 +172,9 @@ export default function AlumnosPage() {
         <CardContent className="space-y-2">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-4 w-28" />
-            <div className="flex gap-2 pt-2">
-                <Skeleton className="h-9 w-full rounded-full" />
-                <Skeleton className="h-9 w-full rounded-full" />
+            <div className="flex justify-end gap-2 pt-2">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-10 w-10 rounded-full" />
             </div>
         </CardContent>
     </Card>
