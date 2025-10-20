@@ -238,4 +238,12 @@ export interface StudyPlanRecord {
     modalidad: string;
 }
 
+export interface Modality {
+    id_modalidad: number;
+    modalidad: string;
+}
+
+    
+
+
     

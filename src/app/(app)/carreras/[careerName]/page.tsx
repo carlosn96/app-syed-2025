@@ -23,6 +23,7 @@ import { getCareers, getSubjects, deleteCareer } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { EditStudyPlanForm } from "@/components/edit-study-plan-form"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
+import { AssignModalityForm } from "@/components/assign-modality-form";
 
 
 export default function CareerPlansPage() {
@@ -196,6 +197,8 @@ export default function CareerPlansPage() {
   };
   
   const firstModality = careerModalities[0];
+  const careerId = useMemo(() => allCareers.find(c => c.name === careerName)?.id, [allCareers, careerName]);
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -213,21 +216,19 @@ export default function CareerPlansPage() {
         {user?.rol === 'administrador' && (
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
                 <DialogTrigger asChild>
-                    <Button>Crear Plan de Estudio</Button>
+                    <Button>Agregar Modalidad</Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Crear Nuevo Plan de Estudio</DialogTitle>
+                        <DialogTitle>Agregar Modalidad</DialogTitle>
                         <DialogDescription>
-                            Completa el formulario para registrar una nueva modalidad para {careerName}.
+                            Selecciona una modalidad para agregarla a la carrera {careerName}.
                         </DialogDescription>
                     </DialogHeader>
-                    <CreateStudyPlanForm 
+                    {careerId && <AssignModalityForm 
                         onSuccess={handleCreateSuccess} 
-                        careerName={careerName}
-                        campus={firstModality?.campus || 'N/A'}
-                        coordinator={firstModality?.coordinator || 'No Asignado'}
-                    />
+                        careerId={careerId}
+                    />}
                 </DialogContent>
             </Dialog>
         )}
@@ -339,3 +340,5 @@ export default function CareerPlansPage() {
     </div>
   );
 }
+
+    

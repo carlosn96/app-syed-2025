@@ -1,6 +1,6 @@
 
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion, Modality } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -320,32 +320,27 @@ export const getSupervisionRubrics = async (): Promise<{ contable: SupervisionRu
       apiFetch('/supervision/no-contable'),
     ]);
   
-    if (!countableData?.datos?.rubros || !nonCountableData?.datos?.rubros) {
-        console.error("API response for supervision rubrics is not in the expected format.");
-        return { contable: [], noContable: [] };
-    }
-
-    const contableRubrics = (countableData.datos.rubros || []).map((rubric: ApiRubricWithCriteria) => ({
-      id: rubric.id_rubro,
-      title: rubric.nombre,
-      category: 'Contable',
-      criteria: (rubric.criterios || []).map((criterion: ApiCriterion) => ({
-        id: criterion.id_criterio,
-        text: criterion.criterio,
-      })),
-    }));
+    const mapRubrics = (data: any, category: 'Contable' | 'No Contable'): SupervisionRubric[] => {
+      if (!data?.datos?.rubros || !Array.isArray(data.datos.rubros)) {
+        console.error(`API response for ${category} supervision rubrics is not in the expected format.`, data);
+        return [];
+      }
+      
+      return (data.datos.rubros).map((rubric: ApiRubricWithCriteria | ApiNonCountableRubricWithCriteria) => ({
+        id: 'id_rubro' in rubric ? rubric.id_rubro : rubric.id_nc_rubro,
+        title: rubric.nombre,
+        category: category,
+        criteria: (rubric.criterios || []).map((criterion: ApiCriterion | ApiNonCountableCriterion) => ({
+          id: 'id_criterio' in criterion ? criterion.id_criterio : criterion.id_nc_criterio,
+          text: criterion.criterio,
+        })),
+      }));
+    };
   
-    const noContableRubrics = (nonCountableData.datos.rubros || []).map((rubric: ApiNonCountableRubricWithCriteria) => ({
-      id: rubric.id_nc_rubro,
-      title: rubric.nombre,
-      category: 'No Contable',
-      criteria: (rubric.criterios || []).map((criterion: ApiNonCountableCriterion) => ({
-        id: criterion.id_nc_criterio,
-        text: criterion.criterio,
-      })),
-    }));
-  
-    return { contable: contableRubrics, noContable: noContableRubrics };
+    const contable = mapRubrics(countableData, 'Contable');
+    const noContable = mapRubrics(nonCountableData, 'No Contable');
+    
+    return { contable, noContable };
   };
 
 
@@ -420,7 +415,20 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
 
+export const getModalities = async (): Promise<Modality[]> => {
+    const result = await apiFetch('/modalidades');
+    return result.datos;
+};
+
+export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad: number }): Promise<void> => {
+    console.warn("assignModalityToCareer is using mock implementation.");
+    return Promise.resolve();
+};
+
     
+
+    
+
 
     
 
