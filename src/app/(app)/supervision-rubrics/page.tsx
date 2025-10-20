@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -31,7 +30,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { SupervisionRubric, SupervisionCriterion, EvaluationRubric } from "@/lib/modelos"
+import { SupervisionRubric, SupervisionCriterion, EvaluationRubric, EvaluationCriterion } from "@/lib/modelos"
 import { Badge } from "@/components/ui/badge"
 import { CreateRubricForm } from "@/components/create-rubric-form"
 import { CreateCriterionForm } from "@/components/create-criterion-form"
@@ -39,12 +38,13 @@ import { EditCriterionForm } from "@/components/edit-criterion-form"
 import { EditRubricForm } from "@/components/edit-rubric-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getSupervisionRubrics, getEvaluationRubrics, deleteCriterion } from "@/services/api"
+import { getSupervisionRubrics, getEvaluationRubrics, deleteCriterion, deleteEvaluationCriterion, deleteEvaluationRubric } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toast } from "primereact/toast"
 import { nullable } from "zod"
 
 type RubricType = 'supervision' | 'evaluation';
+type RubricCategory = 'Contable' | 'No Contable';
 
 function normalizeItems(arr: any[], scope: string) {
   return (arr ?? []).map((it, i) => {
@@ -73,9 +73,10 @@ export default function SupervisionRubricsPage() {
   const [isEditRubricModalOpen, setIsEditRubricModalOpen] = useState(false);
   const [isEditCriterionModalOpen, setIsEditCriterionModalOpen] = useState(false);
 
-  const [selectedRubric, setSelectedRubric] = useState<SupervisionRubric | null>(null);
-  const [selectedCriterion, setSelectedCriterion] = useState<SupervisionCriterion | null>(null);
-  const [criterionToDelete, setCriterionToDelete] = useState<SupervisionCriterion | null>(null);
+  const [selectedRubric, setSelectedRubric] = useState<SupervisionRubric | EvaluationRubric | null>(null);
+  const [selectedCriterion, setSelectedCriterion] = useState<SupervisionCriterion | EvaluationCriterion | null>(null);
+  const [criterionToDelete, setCriterionToDelete] = useState<SupervisionCriterion | EvaluationCriterion | null>(null);
+  const [rubricToDelete, setRubricToDelete] = useState<EvaluationRubric | null>(null);
   
   const [supervisionRubrics, setSupervisionRubrics] = useState<{ contable: SupervisionRubric[], noContable: SupervisionRubric[] }>({ contable: [], noContable: [] });
   const [evaluationRubrics, setEvaluationRubrics] = useState<EvaluationRubric[]>([]);
@@ -111,25 +112,31 @@ export default function SupervisionRubricsPage() {
     fetchRubrics()
   }
 
-  const openCriterionModal = (rubric: SupervisionRubric) => {
+  const openCriterionModal = (rubric: SupervisionRubric | EvaluationRubric) => {
     setSelectedRubric(rubric)
     setIsCriterionModalOpen(true)
   }
 
-  const openEditRubricModal = (rubric: SupervisionRubric) => {
+  const openEditRubricModal = (rubric: SupervisionRubric | EvaluationRubric) => {
     setSelectedRubric(rubric);
     setIsEditRubricModalOpen(true);
   }
 
-  const openEditCriterionModal = (criterion: SupervisionCriterion, rubric: SupervisionRubric) => {
-    setSelectedCriterion({ ...criterion, rubricCategory: rubric.category });
+  const openEditCriterionModal = (criterion: SupervisionCriterion | EvaluationCriterion, rubric: SupervisionRubric | EvaluationRubric) => {
+    const category = 'category' in rubric ? rubric.category as RubricCategory : undefined;
+    setSelectedCriterion({ ...criterion, rubricCategory: category, rubricId: rubric.id });
     setIsEditCriterionModalOpen(true);
   }
   
   const handleDeleteCriterion = async () => {
-    if (!criterionToDelete || !criterionToDelete.rubricCategory) return;
+    if (!criterionToDelete) return;
+    
     try {
-        await deleteCriterion(criterionToDelete.id as number, criterionToDelete.rubricCategory );
+        if ('rubricCategory' in criterionToDelete && criterionToDelete.rubricCategory) {
+            await deleteCriterion(criterionToDelete.id as number, criterionToDelete.rubricCategory as RubricCategory);
+        } else {
+            await deleteEvaluationCriterion(criterionToDelete.id as number);
+        }
         toast.current?.show({
             severity: "success",
             summary: "Criterio Eliminado",
@@ -149,8 +156,31 @@ export default function SupervisionRubricsPage() {
     }
   }
 
+  const handleDeleteRubric = async () => {
+    if (!rubricToDelete) return;
+    try {
+        await deleteEvaluationRubric(rubricToDelete.id);
+        toast.current?.show({
+            severity: "success",
+            summary: "Rúbrica Eliminada",
+            detail: `La rúbrica ha sido eliminada correctamente.`,
+        });
+        fetchRubrics();
+    } catch (error) {
+        if (error instanceof Error) {
+            toast.current?.show({
+                severity: "error",
+                summary: "Error al eliminar",
+                detail: error.message,
+            });
+        }
+    } finally {
+        setRubricToDelete(null);
+    }
+  };
 
-  const renderSupervisionRubricAccordion = (rubrics: SupervisionRubric[], category: 'Contable' | 'No Contable') => {
+
+  const renderSupervisionRubricAccordion = (rubrics: SupervisionRubric[], category: RubricCategory) => {
       const rubricScope = category === 'Contable' ? 'sup-contables-rubros' : 'sup-nocontables-rubros';
       const criterionScope = category === 'Contable' ? 'sup-contables-criterios' : 'sup-nocontables-criterios';
       
@@ -229,6 +259,9 @@ export default function SupervisionRubricsPage() {
 
   const renderEvaluationRubricAccordion = (rubrics: EvaluationRubric[]) => {
     const normalizedRubrics = normalizeItems(rubrics, 'eval-rubros');
+    if (normalizedRubrics.length === 0) {
+        return <p className="text-sm text-muted-foreground text-center py-4">No hay rúbricas de evaluación.</p>
+    }
     return (
      <Accordion type="multiple" className="w-full space-y-4">
         {normalizedRubrics.map((rubric) => (
@@ -239,7 +272,7 @@ export default function SupervisionRubricsPage() {
           >
             <AccordionTrigger className="p-6 hover:no-underline">
               <div className="flex-1 text-left">
-                <h3 className="font-semibold text-white">{rubric.category}</h3>
+                <h3 className="font-semibold text-white">{rubric.name}</h3>
                  <p className="text-sm text-muted-foreground mt-2">
                     {rubric.criteria.length} criterios de calificación
                   </p>
@@ -247,7 +280,18 @@ export default function SupervisionRubricsPage() {
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
                 <div className="flex justify-end mb-4 gap-2">
-                    {/* Future buttons for evaluation rubrics */}
+                    <Button variant="outline" size="sm" onClick={() => openEditRubricModal(rubric)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Editar Rúbrica
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => setRubricToDelete(rubric)}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Eliminar Rúbrica
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => openCriterionModal(rubric)}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Añadir Criterio
+                    </Button>
                 </div>
                 {rubric.criteria.length > 0 ? (
                     <ul className="space-y-3">
@@ -256,7 +300,17 @@ export default function SupervisionRubricsPage() {
                             key={criterion.__key}
                             className="flex items-center justify-between p-3 rounded-lg bg-black/10"
                         >
-                            <p className="flex-1 text-sm">{criterion.text}</p>
+                            <p className="flex-1 text-sm">{criterion.description}</p>
+                            <div className="flex gap-2 ml-4">
+                                <Button size="icon" variant="warning" onClick={() => openEditCriterionModal(criterion, rubric)}>
+                                    <Pencil className="h-4 w-4" />
+                                    <span className="sr-only">Editar criterio</span>
+                                </Button>
+                                <Button size="icon" variant="destructive" onClick={() => setCriterionToDelete(criterion)}>
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Eliminar criterio</span>
+                                </Button>
+                            </div>
                         </li>
                         ))}
                     </ul>
@@ -275,7 +329,7 @@ export default function SupervisionRubricsPage() {
     return <p className="text-destructive text-center">{error}</p>
   }
   
-  const createRubricButton = (
+  const createSupervisionRubricButton = (
     <Dialog open={isRubricModalOpen} onOpenChange={setIsRubricModalOpen}>
         <DialogTrigger asChild>
             <Button>
@@ -287,10 +341,30 @@ export default function SupervisionRubricsPage() {
             <DialogHeader>
             <DialogTitle>Crear Nueva Rúbrica</DialogTitle>
             <DialogDescription>
-                Completa el formulario para registrar una nueva rúbrica.
+                Completa el formulario para registrar una nueva rúbrica de supervisión.
             </DialogDescription>
             </DialogHeader>
-            <CreateRubricForm onSuccess={handleSuccess} />
+            <CreateRubricForm rubricType="supervision" onSuccess={handleSuccess} />
+        </DialogContent>
+    </Dialog>
+  );
+
+  const createEvaluationRubricButton = (
+    <Dialog open={isRubricModalOpen} onOpenChange={setIsRubricModalOpen}>
+        <DialogTrigger asChild>
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Crear Rúbrica
+            </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+            <DialogTitle>Crear Rúbrica de Evaluación</DialogTitle>
+            <DialogDescription>
+                Completa el formulario para registrar una nueva rúbrica de evaluación docente.
+            </DialogDescription>
+            </DialogHeader>
+            <CreateRubricForm rubricType="evaluation" onSuccess={handleSuccess} />
         </DialogContent>
     </Dialog>
   );
@@ -310,10 +384,10 @@ export default function SupervisionRubricsPage() {
                 <DialogHeader>
                     <DialogTitle>Añadir Nuevo Criterio</DialogTitle>
                     <DialogDescription>
-                       Escribe el texto para el nuevo criterio de evaluación para la rúbrica <strong>{selectedRubric?.title}</strong>.
+                       Escribe el texto para el nuevo criterio de evaluación para la rúbrica <strong>{selectedRubric?.name || selectedRubric?.title}</strong>.
                     </DialogDescription>
                 </DialogHeader>
-                {selectedRubric && <CreateCriterionForm rubric={selectedRubric} onSuccess={handleSuccess} />}
+                {selectedRubric && <CreateCriterionForm rubric={selectedRubric} rubricType={activeTab} onSuccess={handleSuccess} />}
             </DialogContent>
         </Dialog>
 
@@ -325,7 +399,7 @@ export default function SupervisionRubricsPage() {
                        Modifica el nombre de la rúbrica.
                     </DialogDescription>
                 </DialogHeader>
-                {selectedRubric && <EditRubricForm rubric={selectedRubric} onSuccess={handleSuccess} />}
+                {selectedRubric && <EditRubricForm rubric={selectedRubric} rubricType={activeTab} onSuccess={handleSuccess} />}
             </DialogContent>
         </Dialog>
         
@@ -337,7 +411,7 @@ export default function SupervisionRubricsPage() {
                        Modifica el texto del criterio.
                     </DialogDescription>
                 </DialogHeader>
-                {selectedCriterion && <EditCriterionForm criterion={selectedCriterion} onSuccess={handleSuccess} />}
+                {selectedCriterion && <EditCriterionForm criterion={selectedCriterion} rubricType={activeTab} onSuccess={handleSuccess} />}
             </DialogContent>
         </Dialog>
 
@@ -347,12 +421,30 @@ export default function SupervisionRubricsPage() {
                 <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                 <AlertDialogDescription>
                     Esta acción no se puede deshacer. Esto eliminará permanentemente el criterio
-                    <span className="font-bold text-white"> "{criterionToDelete?.text}"</span>.
+                    <span className="font-bold text-white"> "{'text' in (criterionToDelete || {}) ? (criterionToDelete as any).text : (criterionToDelete as any).description}"</span>.
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => setCriterionToDelete(null)}>Cancelar</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDeleteCriterion}>
+                    Confirmar
+                </AlertDialogAction>
+            </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        
+        <AlertDialog open={!!rubricToDelete} onOpenChange={(open) => !open && setRubricToDelete(null)}>
+            <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>¿Estás seguro de eliminar la rúbrica?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Se eliminará permanentemente la rúbrica 
+                    <span className="font-bold text-white"> "{rubricToDelete?.name}"</span> y todos sus criterios asociados.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setRubricToDelete(null)}>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteRubric}>
                     Confirmar
                 </AlertDialogAction>
             </AlertDialogFooter>
@@ -393,7 +485,7 @@ export default function SupervisionRubricsPage() {
                                         <CardTitle>Rubros Contables</CardTitle>
                                         <CardDescription>Criterios cuantitativos para la supervisión.</CardDescription>
                                       </div>
-                                      {createRubricButton}
+                                      {createSupervisionRubricButton}
                                     </div>
                                 </CardHeader>
                                 <CardContent>
@@ -409,7 +501,7 @@ export default function SupervisionRubricsPage() {
                                             <CardTitle>Rubros No Contables</CardTitle>
                                             <CardDescription>Criterios cualitativos para la supervisión.</CardDescription>
                                         </div>
-                                        {createRubricButton}
+                                        {createSupervisionRubricButton}
                                     </div>
                                 </CardHeader>
                                 <CardContent>
@@ -425,10 +517,15 @@ export default function SupervisionRubricsPage() {
             <TabsContent value="evaluation" className="mt-6">
                  <Card className="rounded-xl">
                     <CardHeader>
-                    <CardTitle>Gestor de Rúbricas de Evaluación Docente</CardTitle>
-                    <CardDescription>
-                        Administra las categorías y opciones para la evaluación de docentes por parte de los alumnos.
-                    </CardDescription>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle>Gestor de Rúbricas de Evaluación Docente</CardTitle>
+                            <CardDescription>
+                                Administra las categorías y opciones para la evaluación de docentes por parte de los alumnos.
+                            </CardDescription>
+                        </div>
+                        {createEvaluationRubricButton}
+                    </div>
                     </CardHeader>
                     <CardContent>
                          {isLoading ? (
@@ -446,5 +543,3 @@ export default function SupervisionRubricsPage() {
     </div>
   )
 }
-
-    

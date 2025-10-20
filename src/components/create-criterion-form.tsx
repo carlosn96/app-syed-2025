@@ -15,8 +15,8 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Toast } from 'primereact/toast';
-import { createCriterion } from "@/services/api"
-import { SupervisionRubric } from "@/lib/modelos"
+import { createCriterion, createEvaluationCriterion } from "@/services/api"
+import { SupervisionRubric, EvaluationRubric } from "@/lib/modelos"
 import { useRef, useState } from "react"
 
 const createCriterionSchema = z.object({
@@ -25,7 +25,13 @@ const createCriterionSchema = z.object({
 
 type CreateCriterionFormValues = z.infer<typeof createCriterionSchema>;
 
-export function CreateCriterionForm({ rubric, onSuccess }: { rubric: SupervisionRubric | null, onSuccess?: () => void }) {
+interface CreateCriterionFormProps {
+    rubric: SupervisionRubric | EvaluationRubric;
+    rubricType: 'supervision' | 'evaluation';
+    onSuccess?: () => void;
+}
+
+export function CreateCriterionForm({ rubric, rubricType, onSuccess }: CreateCriterionFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,7 +53,12 @@ export function CreateCriterionForm({ rubric, onSuccess }: { rubric: Supervision
     }
     setIsSubmitting(true);
     try {
-      await createCriterion(rubric.id as number, rubric.category, data.text);
+      if (rubricType === 'supervision') {
+        const supervisionRubric = rubric as SupervisionRubric;
+        await createCriterion(supervisionRubric.id, supervisionRubric.category, data.text);
+      } else {
+        await createEvaluationCriterion({ descripcion: data.text, id_rubro: rubric.id });
+      }
 
       toast.current?.show({
         severity: "success",

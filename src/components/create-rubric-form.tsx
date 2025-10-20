@@ -23,18 +23,21 @@ import {
 } from "@/components/ui/select"
 import { Toast } from 'primereact/toast';
 import { useRef, useState } from "react"
-import { createRubric } from "@/services/api"
+import { createRubric, createEvaluationRubric } from "@/services/api"
 
 const createRubricSchema = z.object({
   title: z.string().min(1, "El título es requerido."),
-  category: z.enum(["Contable", "No Contable"], {
-    required_error: "Por favor, seleccione una categoría.",
-  }),
+  category: z.enum(["Contable", "No Contable"]).optional(),
 });
 
 type CreateRubricFormValues = z.infer<typeof createRubricSchema>;
 
-export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
+interface CreateRubricFormProps {
+    rubricType: 'supervision' | 'evaluation';
+    onSuccess?: () => void;
+}
+
+export function CreateRubricForm({ rubricType, onSuccess }: CreateRubricFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,7 +51,17 @@ export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
   const onSubmit = async (data: CreateRubricFormValues) => {
     setIsSubmitting(true);
     try {
-      await createRubric({ nombre: data.title, categoria: data.category });
+      if (rubricType === 'supervision') {
+        if (!data.category) {
+            form.setError("category", { message: "La categoría es requerida." });
+            setIsSubmitting(false);
+            return;
+        }
+        await createRubric({ nombre: data.title, categoria: data.category });
+      } else {
+        await createEvaluationRubric({ nombre: data.title });
+      }
+      
       toast.current?.show({
         severity: "success",
         summary: "Rúbrica Creada",
@@ -87,27 +100,29 @@ export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Categoría</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione una categoría" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Contable">Contable</SelectItem>
-                    <SelectItem value="No Contable">No Contable</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {rubricType === 'supervision' && (
+            <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Categoría</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Seleccione una categoría" />
+                        </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        <SelectItem value="Contable">Contable</SelectItem>
+                        <SelectItem value="No Contable">No Contable</SelectItem>
+                    </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+          )}
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? "Creando..." : "Crear Rúbrica"}
           </Button>
@@ -116,5 +131,3 @@ export function CreateRubricForm({ onSuccess }: { onSuccess?: () => void }) {
     </>
   )
 }
-
-    

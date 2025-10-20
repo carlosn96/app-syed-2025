@@ -15,8 +15,8 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Toast } from 'primereact/toast';
-import { updateCriterion } from "@/services/api"
-import { SupervisionCriterion } from "@/lib/modelos"
+import { updateCriterion, updateEvaluationCriterion } from "@/services/api"
+import { SupervisionCriterion, EvaluationCriterion } from "@/lib/modelos"
 import { useRef, useState } from "react"
 
 const editCriterionSchema = z.object({
@@ -26,30 +26,35 @@ const editCriterionSchema = z.object({
 type EditCriterionFormValues = z.infer<typeof editCriterionSchema>;
 
 interface EditCriterionFormProps {
-    criterion: SupervisionCriterion;
+    criterion: SupervisionCriterion | EvaluationCriterion;
+    rubricType: 'supervision' | 'evaluation';
     onSuccess?: () => void;
 }
 
-export function EditCriterionForm({ criterion, onSuccess }: EditCriterionFormProps) {
+export function EditCriterionForm({ criterion, rubricType, onSuccess }: EditCriterionFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<EditCriterionFormValues>({
     resolver: zodResolver(editCriterionSchema),
     defaultValues: {
-      text: criterion.text,
+      text: ('text' in criterion ? criterion.text : criterion.description) || '',
     },
   });
 
   const onSubmit = async (data: EditCriterionFormValues) => {
-    if (!criterion || !criterion.rubricCategory) {
+    if (!criterion) {
         toast.current?.show({ severity: "error", summary: "Error", detail: "Datos del criterio incompletos." });
         return;
     }
     setIsSubmitting(true);
     
     try {
-      await updateCriterion(criterion.id as number, criterion.rubricCategory, data.text);
+        if (rubricType === 'supervision' && 'rubricCategory' in criterion && criterion.rubricCategory) {
+             await updateCriterion(criterion.id as number, criterion.rubricCategory, data.text);
+        } else {
+            await updateEvaluationCriterion(criterion.id as number, { descripcion: data.text });
+        }
       toast.current?.show({
         severity: "success",
         summary: "Criterio Actualizado",

@@ -16,8 +16,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Toast } from 'primereact/toast';
 import { useRef, useState } from "react"
-import { SupervisionRubric } from "@/lib/modelos"
-import { updateRubric } from "@/services/api"
+import { SupervisionRubric, EvaluationRubric } from "@/lib/modelos"
+import { updateRubric, updateEvaluationRubric } from "@/services/api"
 
 const editRubricSchema = z.object({
   title: z.string().min(1, "El título es requerido."),
@@ -26,25 +26,30 @@ const editRubricSchema = z.object({
 type EditRubricFormValues = z.infer<typeof editRubricSchema>;
 
 interface EditRubricFormProps {
-  rubric: SupervisionRubric;
+  rubric: SupervisionRubric | EvaluationRubric;
+  rubricType: 'supervision' | 'evaluation';
   onSuccess?: () => void;
 }
 
-export function EditRubricForm({ rubric, onSuccess }: EditRubricFormProps) {
+export function EditRubricForm({ rubric, rubricType, onSuccess }: EditRubricFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<EditRubricFormValues>({
     resolver: zodResolver(editRubricSchema),
     defaultValues: {
-      title: rubric.title,
+      title: rubric.title || rubric.name,
     },
   });
 
   const onSubmit = async (data: EditRubricFormValues) => {
     setIsSubmitting(true);
     try {
-      await updateRubric(rubric.id as number, rubric.category, { p_nombre: data.title });
+      if (rubricType === 'supervision' && 'category' in rubric) {
+        await updateRubric(rubric.id, (rubric as SupervisionRubric).category, { p_nombre: data.title });
+      } else {
+        await updateEvaluationRubric(rubric.id, { nombre: data.title });
+      }
       toast.current?.show({
         severity: "success",
         summary: "Rúbrica Actualizada",
@@ -90,5 +95,3 @@ export function EditRubricForm({ rubric, onSuccess }: EditRubricFormProps) {
     </>
   )
 }
-
-    

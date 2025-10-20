@@ -178,6 +178,7 @@ export interface SupervisionRubric {
   type: 'checkbox';
   category: 'Contable' | 'No Contable';
   criteria: SupervisionCriterion[];
+  name?: string;
 }
 
 
@@ -210,14 +211,19 @@ export interface ApiRubric {
 
 
 export interface EvaluationCriterion {
-    id: string;
-    text: string;
+  id: number;
+  description: string;
+  rubricId: number;
+  text?: string;
+  rubricCategory?: never;
 }
 
 export interface EvaluationRubric {
-    id: number;
-    category: string;
-    criteria: EvaluationCriterion[];
+  id: number;
+  name: string;
+  criteria: EvaluationCriterion[];
+  title?: string;
+  type?: string;
 }
 
 export interface EvaluationPeriod {
@@ -244,11 +250,3 @@ export interface Modality {
     id: number;
     nombre: string;
 }
-
-    
-
-
-    
-
-
-    

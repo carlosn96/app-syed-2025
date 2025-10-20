@@ -1,6 +1,6 @@
 
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion, Modality } from '@/lib/modelos';
+import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion, Modality, EvaluationCriterion } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -333,26 +333,25 @@ export const getEvaluationRubrics = async (): Promise<EvaluationRubric[]> => {
     const rubricsRes = await apiFetch('/rubros');
     const criteriaRes = await apiFetch('/criterios-evaluacion');
 
-    const apiRubrics: { id: number, nombre: string }[] = rubricsRes.datos || [];
-    const apiCriteria: { id_evacriterio: number, descripcion: string, id_rubro: number }[] = criteriaRes.datos || [];
-
+    const apiRubrics: { id: number; nombre: string }[] = rubricsRes.datos || [];
+    const apiCriteria: { id_criterio: number; descripcion: string; id_rubro: number }[] = criteriaRes.datos || [];
+    
     if (!Array.isArray(apiRubrics) || !Array.isArray(apiCriteria)) {
         console.error("Invalid data structure for evaluation rubrics/criteria");
         return [];
     }
-
-    return apiRubrics.map(rubric => {
-        return {
-            id: rubric.id,
-            category: rubric.nombre,
-            criteria: apiCriteria
-                .filter(criterion => criterion.id_rubro === rubric.id)
-                .map(criterion => ({
-                    id: String(criterion.id_evacriterio),
-                    text: criterion.descripcion
-                }))
-        };
-    });
+  
+    return apiRubrics.map(rubric => ({
+        id: rubric.id,
+        name: rubric.nombre,
+        criteria: apiCriteria
+            .filter(criterion => criterion.id_rubro === rubric.id)
+            .map(criterion => ({
+                id: criterion.id_criterio,
+                description: criterion.descripcion,
+                rubricId: rubric.id
+            }))
+    }));
 };
 
 export const createRubric = (data: { nombre: string; categoria: 'Contable' | 'No Contable' }): Promise<SupervisionRubric> => {
@@ -382,6 +381,30 @@ export const updateCriterion = (id: number, category: 'Contable' | 'No Contable'
 export const deleteCriterion = (id: number, category: 'Contable' | 'No Contable'): Promise<void> => {
     const endpoint = category === 'Contable' ? `/supervision/contable/${id}` : `/supervision/no-contable/${id}`;
     return apiFetch(endpoint, { method: 'DELETE' });
+};
+
+export const createEvaluationRubric = (data: { nombre: string }): Promise<EvaluationRubric> => {
+    return apiFetch('/rubros', { method: 'POST', body: JSON.stringify(data) });
+};
+
+export const updateEvaluationRubric = (id: number, data: { nombre: string }): Promise<EvaluationRubric> => {
+    return apiFetch(`/rubros/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+};
+
+export const deleteEvaluationRubric = (id: number): Promise<void> => {
+    return apiFetch(`/rubros/${id}`, { method: 'DELETE' });
+};
+
+export const createEvaluationCriterion = (data: { descripcion: string, id_rubro: number }): Promise<EvaluationCriterion> => {
+    return apiFetch('/criterios-evaluacion', { method: 'POST', body: JSON.stringify(data) });
+};
+
+export const updateEvaluationCriterion = (id: number, data: { descripcion: string }): Promise<EvaluationCriterion> => {
+    return apiFetch(`/criterios-evaluacion/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+};
+
+export const deleteEvaluationCriterion = (id: number): Promise<void> => {
+    return apiFetch(`/criterios-evaluacion/${id}`, { method: 'DELETE' });
 };
 
 
@@ -416,16 +439,3 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
     console.warn("assignModalityToCareer is using mock implementation.");
     return Promise.resolve();
 };
-
-    
-
-    
-
-
-    
-
-
-    
-
-
-
