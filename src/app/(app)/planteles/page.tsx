@@ -1,6 +1,6 @@
 
 "use client"
-import { Pencil, Trash2, BookCopy, PlusCircle } from "lucide-react"
+import { Pencil, Trash2, BookCopy, PlusCircle, Search } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,13 +13,14 @@ import {
 } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { CreatePlantelForm } from "@/components/create-plantel-form"
 import { EditPlantelForm } from "@/components/edit-plantel-form"
 import { Plantel } from "@/lib/modelos"
 import { getPlanteles, deletePlantel } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toast } from 'primereact/toast';
+import { Input } from "@/components/ui/input"
 
 export default function CampusesPage() {
     const toast = useRef<Toast>(null);
@@ -27,6 +28,7 @@ export default function CampusesPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [plantelToEdit, setPlantelToEdit] = useState<Plantel | null>(null);
     const [plantelToDelete, setPlantelToDelete] = useState<Plantel | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
     
     const [planteles, setPlanteles] = useState<Plantel[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +52,16 @@ export default function CampusesPage() {
         fetchPlanteles();
     }, []);
     
+    const filteredPlanteles = useMemo(() => {
+        if (!searchTerm) {
+          return planteles;
+        }
+        return planteles.filter(plantel => 
+          plantel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          plantel.location.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }, [planteles, searchTerm]);
+
     const handleSuccess = () => {
         setIsCreateModalOpen(false);
         setIsEditModalOpen(false);
@@ -143,6 +155,17 @@ export default function CampusesPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+              type="search"
+              placeholder="Buscar planteles..."
+              className="pl-9 w-full"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+          />
+      </div>
+
       {error && <p className="text-destructive text-center">{error}</p>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -159,7 +182,7 @@ export default function CampusesPage() {
                 </Card>
             ))
           ) : (
-            planteles.map((campus) => (
+            filteredPlanteles.map((campus) => (
                 <Card key={campus.id}>
                     <CardHeader className="flex-row items-start justify-between">
                         <div className="flex-grow">
