@@ -34,6 +34,7 @@ import { CreateSubjectForm } from "@/components/create-subject-form"
 import { Input } from "@/components/ui/input"
 import { getSubjects } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
+import { normalizeString } from "@/lib/utils"
 
 export default function SubjectsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -57,10 +58,14 @@ export default function SubjectsPage() {
     fetchSubjects()
   }, [])
 
-  const filteredSubjects = subjects.filter(subject => 
-    subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    subject.career.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSubjects = subjects.filter(subject => {
+    if (!searchTerm) return true;
+    const normalizedSearchTerm = normalizeString(searchTerm);
+    return (
+        normalizeString(subject.name).includes(normalizedSearchTerm) ||
+        normalizeString(subject.career).includes(normalizedSearchTerm)
+    );
+  });
 
   const handleSuccess = async () => {
     setIsModalOpen(false)

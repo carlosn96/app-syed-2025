@@ -21,6 +21,7 @@ import { getPlanteles, deletePlantel } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toast } from 'primereact/toast';
 import { Input } from "@/components/ui/input"
+import { normalizeString } from "@/lib/utils"
 
 export default function CampusesPage() {
     const toast = useRef<Toast>(null);
@@ -56,9 +57,10 @@ export default function CampusesPage() {
         if (!searchTerm) {
           return planteles;
         }
+        const normalizedSearchTerm = normalizeString(searchTerm);
         return planteles.filter(plantel => 
-          plantel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          plantel.location.toLowerCase().includes(searchTerm.toLowerCase())
+          normalizeString(plantel.name).includes(normalizedSearchTerm) ||
+          normalizeString(plantel.location).includes(normalizedSearchTerm)
         );
       }, [planteles, searchTerm]);
 

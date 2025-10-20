@@ -41,6 +41,7 @@ import { EditUserForm } from "@/components/edit-user-form"
 import { Input } from "@/components/ui/input"
 import { getUsers, deleteUser } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
+import { normalizeString } from "@/lib/utils";
 
 export default function AlumnosPage() {
   const toast = useRef<Toast>(null);
@@ -72,15 +73,19 @@ export default function AlumnosPage() {
   }, []);
 
   const filteredUsers = useMemo(() => {
-    let usersToDisplay = allUsers;
-    if (searchTerm) {
-        usersToDisplay = usersToDisplay.filter(user =>
-        `${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (user.grupo && user.grupo.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
+    if (!searchTerm) {
+        return allUsers;
     }
-    return usersToDisplay;
+    const normalizedSearchTerm = normalizeString(searchTerm);
+    return allUsers.filter(user => {
+        const fullName = normalizeString(`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`);
+        const email = normalizeString(user.correo);
+        const group = user.grupo ? normalizeString(user.grupo) : '';
+
+        return fullName.includes(normalizedSearchTerm) ||
+               email.includes(normalizedSearchTerm) ||
+               (group && group.includes(normalizedSearchTerm));
+    });
   }, [allUsers, searchTerm]);
 
 

@@ -42,6 +42,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { CreateCareerForm } from "@/components/create-career-form"
 import { EditCareerForm } from "@/components/edit-career-form"
 import { AssignCareerToCoordinatorForm } from "@/components/assign-career-to-coordinator-form"
+import { normalizeString } from "@/lib/utils";
 
 
 export default function CareersPage() {
@@ -122,12 +123,14 @@ export default function CareersPage() {
 
   const filteredCareers = useMemo(() => {
     if (!searchTerm) {
-      return allCareers;
+        return allCareers;
     }
-    return allCareers.filter(career => 
-      career.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (career.coordinator && career.coordinator.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const normalizedSearchTerm = normalizeString(searchTerm);
+    return allCareers.filter(career => {
+        const name = normalizeString(career.name);
+        const coordinator = career.coordinator ? normalizeString(career.coordinator) : '';
+        return name.includes(normalizedSearchTerm) || coordinator.includes(normalizedSearchTerm);
+    });
   }, [allCareers, searchTerm]);
 
 
@@ -291,5 +294,3 @@ export default function CareersPage() {
     </div>
   )
 }
-
-    

@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input"
 import { Group } from "@/lib/modelos"
 import { getGroups } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
+import { normalizeString } from "@/lib/utils";
 
 export default function GroupsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,12 +60,16 @@ export default function GroupsPage() {
     fetchGroups();
   }, []);
 
-  const filteredGroups = groups.filter(group => 
-    group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    group.career.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    group.cycle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    group.turno.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredGroups = groups.filter(group => {
+    if (!searchTerm) return true;
+    const normalizedSearchTerm = normalizeString(searchTerm);
+    return (
+        normalizeString(group.name).includes(normalizedSearchTerm) ||
+        normalizeString(group.career).includes(normalizedSearchTerm) ||
+        normalizeString(group.cycle).includes(normalizedSearchTerm) ||
+        normalizeString(group.turno).includes(normalizedSearchTerm)
+    );
+  });
 
   const handleSuccess = () => {
     setIsModalOpen(false);
