@@ -16,8 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Toast } from 'primereact/toast';
 import { createCareer } from "@/services/api"
-import { useState, useEffect, useRef } from "react"
-import { User } from "@/lib/modelos"
+import { useState, useRef } from "react"
 
 const createCareerSchema = z.object({
   nombre: z.string().min(1, "El nombre de la carrera es requerido."),
@@ -27,29 +26,28 @@ type CreateCareerFormValues = z.infer<typeof createCareerSchema>;
 
 interface CreateCareerFormProps {
   onSuccess?: () => void;
-  careerName?: string;
 }
 
-export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProps) {
+export function CreateCareerForm({ onSuccess }: CreateCareerFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateCareerFormValues>({
     resolver: zodResolver(createCareerSchema),
     defaultValues: {
-      nombre: careerName || "",
+      nombre: "",
     },
   });
 
   const onSubmit = async (data: CreateCareerFormValues) => {
     setIsSubmitting(true);
     try {
-        await createCareer(data);
+      await createCareer({ nombre: data.nombre });
       
       toast.current?.show({
         severity: "success",
         summary: "Carrera Creada",
-        detail: `La carrera ${data.nombre} ha sido creada. Ahora puedes asignarle planes de estudio.`,
+        detail: `La carrera ${data.nombre} ha sido creada.`,
       });
       form.reset();
       onSuccess?.();
@@ -78,7 +76,7 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
               <FormItem>
                 <FormLabel>Nombre de la Carrera</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej. Ingeniería en Software" {...field} disabled={!!careerName} />
+                  <Input placeholder="Ej. Ingeniería en Software" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -92,3 +90,5 @@ export function CreateCareerForm({ onSuccess, careerName }: CreateCareerFormProp
     </>
   )
 }
+
+    

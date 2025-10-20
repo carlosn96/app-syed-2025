@@ -9,10 +9,10 @@ import { Toast } from 'primereact/toast';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
   CardFooter,
+  CardDescription,
 } from "@/components/ui/card"
 import { CareerSummary } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
@@ -24,17 +24,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/context/auth-context"
-import { getCareers } from "@/services/api"
+import { getCareers, deleteCareer } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
+import { CreateCareerForm } from "@/components/create-career-form"
+import { EditCareerForm } from "@/components/edit-career-form"
+
 
 export default function CareersPage() {
   const { user } = useAuth();
   const toast = useRef<Toast>(null);
   
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [careerToEdit, setCareerToEdit] = useState<CareerSummary | null>(null);
+  const [careerToDelete, setCareerToDelete] = useState<CareerSummary | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   const [allCareers, setAllCareers] = useState<CareerSummary[]>([]);
@@ -59,13 +74,47 @@ export default function CareersPage() {
     fetchCareers();
   }, []);
 
+  const handleSuccess = () => {
+    setIsCreateModalOpen(false);
+    setIsEditModalOpen(false);
+    fetchCareers();
+  };
+
+  const handleEditClick = (career: CareerSummary) => {
+    setCareerToEdit(career);
+    setIsEditModalOpen(true);
+  };
+  
+  const handleDelete = async () => {
+    if (!careerToDelete) return;
+    try {
+        await deleteCareer(careerToDelete.id);
+        toast.current?.show({
+            severity: "success",
+            summary: "Carrera Eliminada",
+            detail: `La carrera ${careerToDelete.name} ha sido eliminada.`,
+        });
+        setCareerToDelete(null);
+        fetchCareers();
+    } catch (error) {
+        if (error instanceof Error) {
+            toast.current?.show({
+                severity: "error",
+                summary: "Error al eliminar",
+                detail: error.message,
+            });
+        }
+    }
+  };
+
 
   const filteredCareers = useMemo(() => {
     if (!searchTerm) {
       return allCareers;
     }
     return allCareers.filter(career => 
-      career.name.toLowerCase().includes(searchTerm.toLowerCase())
+      career.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (career.coordinator && career.coordinator.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [allCareers, searchTerm]);
 
@@ -84,21 +133,44 @@ export default function CareersPage() {
             <Card key={career.id} className="flex flex-col">
               <CardHeader>
                   <CardTitle>{career.name}</CardTitle>
-                  <CardDescription>{career.coordinator || 'No asignado'}</CardDescription>
+                  <CardDescription>{career.coordinator || 'Coordinador no asignado'}</CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Modalidades:</span>
-                    <Badge variant="info">{career.totalModalidades}</Badge>
-                  </div>
-              </CardContent>
-              <CardFooter>
+              <CardFooter className="flex-col items-stretch gap-2 mt-auto">
                  <Button asChild className="w-full" variant="success">
                     <Link href={`/carreras/${encodeURIComponent(career.name)}`}>
                       <BookOpenCheck className="mr-2 h-4 w-4" />
-                      Ver Planes de Estudio
+                      Planes de Estudio
                     </Link>
                   </Button>
+                  <div className="flex gap-2">
+                    <Button variant="warning" className="flex-1" onClick={() => handleEditClick(career)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Editar
+                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" className="flex-1">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Eliminar
+                            </Button>
+                        </AlertDialogTrigger>
+                         <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Esta acción no se puede deshacer. Se eliminará permanentemente la carrera
+                                    <span className="font-bold text-white"> {career.name}</span>.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete}>
+                                    Confirmar
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
               </CardFooter>
             </Card>
           ))}
@@ -114,7 +186,57 @@ export default function CareersPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Carreras
         </h1>
+         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Crear Carrera
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Crear Nueva Carrera</DialogTitle>
+                    <DialogDescription>
+                        Escribe el nombre de la nueva carrera que deseas registrar.
+                    </DialogDescription>
+                </DialogHeader>
+                <CreateCareerForm onSuccess={handleSuccess} />
+            </DialogContent>
+        </Dialog>
       </div>
+      
+       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar Carrera</DialogTitle>
+            <DialogDescription>
+              Modifica el nombre de la carrera.
+            </DialogDescription>
+          </DialogHeader>
+          {careerToEdit && (
+            <EditCareerForm
+              career={careerToEdit}
+              onSuccess={handleSuccess}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+      
+       <AlertDialog open={!!careerToDelete} onOpenChange={(open) => !open && setCareerToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+                Esta acción no se puede deshacer. Esto eliminará permanentemente la carrera 
+                <span className="font-bold text-white"> {careerToDelete?.name}</span>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCareerToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
         <div className="relative w-full sm:max-w-xs flex-grow">
@@ -136,3 +258,5 @@ export default function CareersPage() {
     </div>
   )
 }
+
+    

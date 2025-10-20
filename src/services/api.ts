@@ -119,6 +119,12 @@ export const getCareers = async (): Promise<CareerSummary[]> => {
     return Array.from(careersMap.values());
 };
 
+export const createCareer = (data: { nombre: string }): Promise<any> => {
+    // This should likely post to a more generic endpoint, TBD by backend
+    // Using a mock-like call for now.
+    return apiFetch('/carreras', { method: 'POST', body: JSON.stringify({ carrera: data.nombre }) });
+};
+
 
 export const createStudyPlan = (data: {name: string, modality: string, semesters: number, campus: string, coordinator: string}): Promise<Career> => {
     console.warn("createStudyPlan is using mock implementation until API is ready.");
@@ -126,21 +132,11 @@ export const createStudyPlan = (data: {name: string, modality: string, semesters
 };
 
 
-export const updateCareer = async (id: number, data: Partial<Career>): Promise<Career> => {
-    console.warn("updateCareer is using mock implementation.");
-    return Promise.resolve({
-        id,
-        name: 'Updated Career',
-        modality: 'Updated Modality',
-        campus: 'Updated Campus',
-        semesters: 8,
-        coordinator: 'Updated Coordinator',
-        ...data,
-    });
+export const updateCareer = async (id: number, data: { carrera: string }): Promise<Career> => {
+    return apiFetch(`/carreras/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 };
 export const deleteCareer = (id: number): Promise<void> => {
-    console.warn(`deleteCareer for id ${id} is using mock implementation.`);
-    return Promise.resolve();
+    return apiFetch(`/carreras/${id}`, { method: 'DELETE' });
 };
 
 export const getSubjects = async (): Promise<Subject[]> => {
@@ -422,5 +418,8 @@ export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera:
     apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
 
     
+
+    
+
 
     
