@@ -21,9 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Toast } from 'primereact/toast';
-import { assignCarreraToCoordinador, getUsers } from "@/services/api"
+import { assignCarreraToCoordinador, getCoordinadores } from "@/services/api"
 import { useState, useRef, useEffect } from "react"
-import { CareerSummary, User } from "@/lib/modelos"
+import { CareerSummary, Coordinador } from "@/lib/modelos"
 
 const assignCareerSchema = z.object({
   id_coordinador: z.coerce.number().min(1, "Por favor, seleccione un coordinador."),
@@ -39,12 +39,12 @@ interface AssignCareerToCoordinatorFormProps {
 export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCareerToCoordinatorFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [coordinators, setCoordinators] = useState<User[]>([]);
+  const [coordinators, setCoordinators] = useState<Coordinador[]>([]);
 
   useEffect(() => {
     const fetchCoordinators = async () => {
-      const users = await getUsers();
-      setCoordinators(users.filter(u => u.rol === 'coordinador'));
+      const coordinatorData = await getCoordinadores();
+      setCoordinators(coordinatorData);
     }
     fetchCoordinators();
   }, []);
@@ -97,8 +97,8 @@ export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCaree
                   <SelectContent>
                     {coordinators.length > 0 ? (
                       coordinators.map((coordinator) => (
-                          <SelectItem key={coordinator.id} value={String(coordinator.id)}>
-                          {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
+                          <SelectItem key={coordinator.id_coordinador} value={String(coordinator.id_coordinador)}>
+                          {coordinator.nombre_completo}
                           </SelectItem>
                       ))
                     ) : (
