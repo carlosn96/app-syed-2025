@@ -107,7 +107,7 @@ export const createStudyPlan = (data: {name: string, modality: string, semesters
 };
 
 
-export const updateCareer = async (id: number, data: { carrera: string }): Promise<Career> => {
+export const updateCareer = async (id: number, data: { nombre: string }): Promise<Career> => {
     return apiFetch(`/carreras/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 };
 export const deleteCareer = (id: number): Promise<void> => {
@@ -298,8 +298,7 @@ export const getSupervisionRubrics = async (): Promise<{ contable: SupervisionRu
     ]);
 
     const mapRubrics = (data: any, category: 'Contable' | 'No Contable'): SupervisionRubric[] => {
-        const rubrosKey = category === 'Contable' ? 'contable' : 'noContable';
-        const rubrosList = data?.datos?.[rubrosKey]?.rubros;
+        const rubrosList = data?.datos?.[category.toLowerCase() as 'contable' | 'noContable']?.rubros;
 
         if (!rubrosList || !Array.isArray(rubrosList)) {
             console.error(`API response for supervision rubrics (${category}) is not in the expected format.`, data);
@@ -427,4 +426,5 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
 
 
     
+
 

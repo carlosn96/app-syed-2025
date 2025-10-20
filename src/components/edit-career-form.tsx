@@ -44,7 +44,7 @@ export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
   const onSubmit = async (data: EditCareerFormValues) => {
     setIsSubmitting(true);
     try {
-      await updateCareer(career.id, { carrera: data.name });
+      await updateCareer(career.id, { nombre: data.name });
       toast.current?.show({
         severity: "success",
         summary: "Carrera Actualizada",
