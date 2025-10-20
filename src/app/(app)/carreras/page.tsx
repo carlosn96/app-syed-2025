@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useMemo, useEffect, useRef } from "react"
-import { Pencil, PlusCircle, Trash2, Search, BookOpenCheck } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search, BookOpenCheck, UserPlus } from "lucide-react"
 import Link from "next/link"
 import { Toast } from 'primereact/toast';
 
@@ -137,22 +137,26 @@ export default function CareersPage() {
                   <CardDescription>{career.coordinator || 'Coordinador no asignado'}</CardDescription>
               </CardHeader>
               <CardFooter className="flex-col items-stretch gap-2 mt-auto">
-                 <Button asChild className="w-full" variant="success">
-                    <Link href={`/carreras/${encodeURIComponent(career.name)}`}>
-                      <BookOpenCheck className="mr-2 h-4 w-4" />
-                      Planes de Estudio
-                    </Link>
-                  </Button>
                   <div className="flex gap-2">
+                    <Button asChild className="flex-1" variant="success">
+                        <Link href={`/carreras/${encodeURIComponent(career.name)}`}>
+                        <BookOpenCheck />
+                        <span className="sr-only">Planes de Estudio</span>
+                        </Link>
+                    </Button>
+                    <Button variant="info" className="flex-1">
+                        <UserPlus />
+                        <span className="sr-only">Asignar Coordinador</span>
+                    </Button>
                     <Button variant="warning" className="flex-1" onClick={() => handleEditClick(career)}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Editar
+                        <Pencil />
+                        <span className="sr-only">Editar</span>
                     </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button variant="destructive" className="flex-1">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Eliminar
+                                <Trash2 />
+                                <span className="sr-only">Eliminar</span>
                             </Button>
                         </AlertDialogTrigger>
                          <AlertDialogContent>
@@ -165,7 +169,7 @@ export default function CareersPage() {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete}>
+                                <AlertDialogAction onClick={() => handleDelete(career.id)}>
                                     Confirmar
                                 </AlertDialogAction>
                             </AlertDialogFooter>
@@ -259,5 +263,3 @@ export default function CareersPage() {
     </div>
   )
 }
-
-    
