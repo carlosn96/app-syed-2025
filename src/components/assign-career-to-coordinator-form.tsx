@@ -21,25 +21,33 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Toast } from 'primereact/toast';
-import { assignCarreraToCoordinador } from "@/services/api"
-import { useState, useRef } from "react"
-import { CareerSummary } from "@/lib/modelos"
+import { assignCarreraToCoordinador, getUsers } from "@/services/api"
+import { useState, useRef, useEffect } from "react"
+import { CareerSummary, User } from "@/lib/modelos"
 
 const assignCareerSchema = z.object({
-  id_carrera: z.coerce.number().min(1, "Por favor, seleccione una carrera."),
+  id_coordinador: z.coerce.number().min(1, "Por favor, seleccione un coordinador."),
 });
 
 type AssignCareerFormValues = z.infer<typeof assignCareerSchema>;
 
 interface AssignCareerToCoordinatorFormProps {
-  coordinadorId: number;
-  availableCareers: CareerSummary[];
+  career: CareerSummary;
   onSuccess?: () => void;
 }
 
-export function AssignCareerToCoordinatorForm({ coordinadorId, availableCareers, onSuccess }: AssignCareerToCoordinatorFormProps) {
+export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCareerToCoordinatorFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [coordinators, setCoordinators] = useState<User[]>([]);
+
+  useEffect(() => {
+    const fetchCoordinators = async () => {
+      const users = await getUsers();
+      setCoordinators(users.filter(u => u.rol === 'coordinador'));
+    }
+    fetchCoordinators();
+  }, []);
 
   const form = useForm<AssignCareerFormValues>({
     resolver: zodResolver(assignCareerSchema),
@@ -48,11 +56,11 @@ export function AssignCareerToCoordinatorForm({ coordinadorId, availableCareers,
   const onSubmit = async (data: AssignCareerFormValues) => {
     setIsSubmitting(true);
     try {
-      await assignCarreraToCoordinador({ id_coordinador: coordinadorId, id_carrera: data.id_carrera });
+      await assignCarreraToCoordinador({ id_coordinador: data.id_coordinador, id_carrera: career.id });
       toast.current?.show({
         severity: "success",
-        summary: "Carrera Asignada",
-        detail: `La carrera ha sido asignada al coordinador con éxito.`,
+        summary: "Coordinador Asignado",
+        detail: `El coordinador ha sido asignado a ${career.name} con éxito.`,
       });
       form.reset();
       onSuccess?.();
@@ -76,25 +84,25 @@ export function AssignCareerToCoordinatorForm({ coordinadorId, availableCareers,
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
-            name="id_carrera"
+            name="id_coordinador"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Carrera a Asignar</FormLabel>
+                <FormLabel>Coordinador</FormLabel>
                  <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione una carrera" />
+                      <SelectValue placeholder="Seleccione un coordinador" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {availableCareers.length > 0 ? (
-                      availableCareers.map((career) => (
-                          <SelectItem key={career.id} value={String(career.id)}>
-                          {career.name}
+                    {coordinators.length > 0 ? (
+                      coordinators.map((coordinator) => (
+                          <SelectItem key={coordinator.id} value={String(coordinator.id)}>
+                          {`${coordinator.nombre} ${coordinator.apellido_paterno}`}
                           </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="none" disabled>No hay más carreras para asignar</SelectItem>
+                      <SelectItem value="none" disabled>No hay coordinadores disponibles</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
@@ -102,8 +110,8 @@ export function AssignCareerToCoordinatorForm({ coordinadorId, availableCareers,
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={isSubmitting || availableCareers.length === 0}>
-              {isSubmitting ? 'Asignando...' : 'Asignar Carrera'}
+          <Button type="submit" className="w-full" disabled={isSubmitting || coordinators.length === 0}>
+              {isSubmitting ? 'Asignando...' : 'Asignar Coordinador'}
           </Button>
         </form>
       </Form>

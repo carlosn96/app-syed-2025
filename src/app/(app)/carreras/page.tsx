@@ -41,6 +41,7 @@ import { getCareers, deleteCareer } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CreateCareerForm } from "@/components/create-career-form"
 import { EditCareerForm } from "@/components/edit-career-form"
+import { AssignCareerToCoordinatorForm } from "@/components/assign-career-to-coordinator-form"
 
 
 export default function CareersPage() {
@@ -49,7 +50,10 @@ export default function CareersPage() {
   
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+
   const [careerToEdit, setCareerToEdit] = useState<CareerSummary | null>(null);
+  const [careerToAssign, setCareerToAssign] = useState<CareerSummary | null>(null);
   const [careerToDelete, setCareerToDelete] = useState<CareerSummary | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -78,6 +82,7 @@ export default function CareersPage() {
   const handleSuccess = () => {
     setIsCreateModalOpen(false);
     setIsEditModalOpen(false);
+    setIsAssignModalOpen(false);
     fetchCareers();
   };
 
@@ -86,6 +91,11 @@ export default function CareersPage() {
     setIsEditModalOpen(true);
   };
   
+  const handleAssignClick = (career: CareerSummary) => {
+    setCareerToAssign(career);
+    setIsAssignModalOpen(true);
+  };
+
   const handleDelete = async () => {
     if (!careerToDelete) return;
     try {
@@ -144,7 +154,7 @@ export default function CareersPage() {
                         <span className="sr-only">Planes de Estudio</span>
                         </Link>
                     </Button>
-                    <Button variant="info" className="flex-1">
+                    <Button variant="info" className="flex-1" onClick={() => handleAssignClick(career)}>
                         <UserPlus />
                         <span className="sr-only">Asignar Coordinador</span>
                     </Button>
@@ -169,7 +179,7 @@ export default function CareersPage() {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(career.id)}>
+                                <AlertDialogAction onClick={() => career.id && handleDelete(career.id)}>
                                     Confirmar
                                 </AlertDialogAction>
                             </AlertDialogFooter>
@@ -221,6 +231,23 @@ export default function CareersPage() {
           {careerToEdit && (
             <EditCareerForm
               career={careerToEdit}
+              onSuccess={handleSuccess}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+      
+       <Dialog open={isAssignModalOpen} onOpenChange={setIsAssignModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Asignar Coordinador</DialogTitle>
+            <DialogDescription>
+              Selecciona un coordinador para la carrera <span className="font-bold text-white">{careerToAssign?.name}</span>.
+            </DialogDescription>
+          </DialogHeader>
+          {careerToAssign && (
+            <AssignCareerToCoordinatorForm
+              career={careerToAssign}
               onSuccess={handleSuccess}
             />
           )}

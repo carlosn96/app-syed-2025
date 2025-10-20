@@ -120,8 +120,6 @@ export const getCareers = async (): Promise<CareerSummary[]> => {
 };
 
 export const createCareer = (data: { nombre: string }): Promise<any> => {
-    // This should likely post to a more generic endpoint, TBD by backend
-    // Using a mock-like call for now.
     return apiFetch('/carreras', { method: 'POST', body: JSON.stringify({ carrera: data.nombre }) });
 };
 
@@ -322,7 +320,12 @@ export const getSupervisionRubrics = async (): Promise<{ contable: SupervisionRu
       apiFetch('/supervision/no-contable'),
     ]);
   
-    const contableRubrics = (countableData?.datos?.rubros || []).map((rubric: ApiRubricWithCriteria) => ({
+    if (!countableData?.datos?.rubros || !nonCountableData?.datos?.rubros) {
+        console.error("API response for supervision rubrics is not in the expected format.");
+        return { contable: [], noContable: [] };
+    }
+
+    const contableRubrics = (countableData.datos.rubros || []).map((rubric: ApiRubricWithCriteria) => ({
       id: rubric.id_rubro,
       title: rubric.nombre,
       category: 'Contable',
@@ -332,7 +335,7 @@ export const getSupervisionRubrics = async (): Promise<{ contable: SupervisionRu
       })),
     }));
   
-    const noContableRubrics = (nonCountableData?.datos?.rubros || []).map((rubric: ApiNonCountableRubricWithCriteria) => ({
+    const noContableRubrics = (nonCountableData.datos.rubros || []).map((rubric: ApiNonCountableRubricWithCriteria) => ({
       id: rubric.id_nc_rubro,
       title: rubric.nombre,
       category: 'No Contable',
