@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -97,8 +98,8 @@ export function AssignModalityForm({ careerId, onSuccess }: AssignModalityFormPr
                   <SelectContent>
                     {modalities.length > 0 ? (
                       modalities.map((modality) => (
-                          <SelectItem key={modality.id_modalidad} value={String(modality.id_modalidad)}>
-                          {modality.modalidad}
+                          <SelectItem key={modality.id} value={String(modality.id)}>
+                          {modality.nombre}
                           </SelectItem>
                       ))
                     ) : (

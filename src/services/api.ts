@@ -314,33 +314,24 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 };
 
 // Rubrics
-export const getSupervisionRubrics = async (): Promise<{ contable: SupervisionRubric[], noContable: SupervisionRubric[] }> => {
+export const getSupervisionRubrics = async (): Promise<SupervisionRubric> => {
     const [countableData, nonCountableData] = await Promise.all([
       apiFetch('/supervision/contable'),
       apiFetch('/supervision/no-contable'),
     ]);
   
-    const mapRubrics = (data: any, category: 'Contable' | 'No Contable'): SupervisionRubric[] => {
-      if (!data?.datos?.rubros || !Array.isArray(data.datos.rubros)) {
-        console.error(`API response for ${category} supervision rubrics is not in the expected format.`, data);
-        return [];
-      }
-      
-      return (data.datos.rubros).map((rubric: ApiRubricWithCriteria | ApiNonCountableRubricWithCriteria) => ({
-        id: 'id_rubro' in rubric ? rubric.id_rubro : rubric.id_nc_rubro,
-        title: rubric.nombre,
-        category: category,
-        criteria: (rubric.criterios || []).map((criterion: ApiCriterion | ApiNonCountableCriterion) => ({
-          id: 'id_criterio' in criterion ? criterion.id_criterio : criterion.id_nc_criterio,
-          text: criterion.criterio,
-        })),
-      }));
-    };
+    const mapAndValidate = (data: any, category: string) => {
+        if (!data?.datos?.[category]?.rubros || !Array.isArray(data.datos[category].rubros)) {
+            console.error(`API response for supervision rubrics (${category}) is not in the expected format.`, data);
+            return [];
+        }
+        return data.datos[category].rubros;
+    }
   
-    const contable = mapRubrics(countableData, 'Contable');
-    const noContable = mapRubrics(nonCountableData, 'No Contable');
-    
-    return { contable, noContable };
+    return {
+        contable: mapAndValidate(countableData, 'contable'),
+        noContable: mapAndValidate(nonCountableData, 'noContable'),
+    };
   };
 
 
@@ -417,7 +408,15 @@ export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera:
 
 export const getModalities = async (): Promise<Modality[]> => {
     const result = await apiFetch('/modalidades');
-    return result.datos;
+    // The API returns an object with a 'datos' property which is the array
+    if (result && Array.isArray(result.datos)) {
+      return result.datos.map((item: any) => ({
+        id: item.id,
+        nombre: item.nombre,
+      }));
+    }
+    console.error("API response for modalities is not in the expected format.", result);
+    return [];
 };
 
 export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad: number }): Promise<void> => {

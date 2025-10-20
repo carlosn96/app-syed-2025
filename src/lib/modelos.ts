@@ -173,11 +173,10 @@ export interface SupervisionCriterion {
 }
 
 export interface SupervisionRubric {
-  id: number;
-  title: string;
-  category: 'Contable' | 'No Contable';
-  criteria: SupervisionCriterion[];
+  contable: any[];
+  noContable: any[];
 }
+
 
 
 // API-specific Models for Supervision Rubrics
@@ -239,8 +238,8 @@ export interface StudyPlanRecord {
 }
 
 export interface Modality {
-    id_modalidad: number;
-    modalidad: string;
+    id: number;
+    nombre: string;
 }
 
     
