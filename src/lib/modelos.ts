@@ -173,8 +173,11 @@ export interface SupervisionCriterion {
 }
 
 export interface SupervisionRubric {
-  contable: any[];
-  noContable: any[];
+  id: number;
+  title: string;
+  type: 'checkbox';
+  category: 'Contable' | 'No Contable';
+  criteria: SupervisionCriterion[];
 }
 
 
@@ -247,3 +250,5 @@ export interface Modality {
 
     
 
+
+    

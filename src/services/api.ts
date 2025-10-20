@@ -82,41 +82,18 @@ export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles
 
 // Career and Subject Management
 export const getCareers = async (): Promise<CareerSummary[]> => {
-    const response = await apiFetch('/plan-estudio');
-    const records: StudyPlanRecord[] = response.datos;
+    const response = await apiFetch('/carreras');
+    const records: any[] = response.datos;
 
-    const careersMap = new Map<number, CareerSummary>();
-
-    records.forEach(record => {
-        if (!careersMap.has(record.id_carrera)) {
-            careersMap.set(record.id_carrera, {
-                id: record.id_carrera,
-                name: record.carrera,
-                coordinator: null, // This info is not in the new endpoint
-                totalMaterias: 0,
-                totalPlanteles: 0, // This info is not in the new endpoint
-                totalModalidades: 0,
-                modalities: [],
-            });
-        }
-
-        const career = careersMap.get(record.id_carrera)!;
-        const modalityExists = career.modalities?.some(m => m.modality === record.modalidad);
-
-        if (!modalityExists) {
-            career.modalities?.push({
-                id: record.id_modalidad,
-                name: record.carrera,
-                modality: record.modalidad,
-                campus: 'N/A', // This info is not in the new endpoint
-                semesters: 0, // Will be calculated later if needed
-                coordinator: 'No Asignado', // This info is not in the new endpoint
-            });
-            career.totalModalidades++;
-        }
-    });
-
-    return Array.from(careersMap.values());
+    return records.map(record => ({
+        id: record.id_carrera,
+        name: record.carrera,
+        coordinator: record.coordinador,
+        totalMaterias: record.total_materias,
+        totalPlanteles: record.total_planteles,
+        totalModalidades: record.total_modalidades,
+        modalities: [], // This can be populated later if needed
+    }));
 };
 
 export const createCareer = (data: { nombre: string }): Promise<any> => {
@@ -314,26 +291,42 @@ export const createEvaluation = (data: any): Promise<Evaluation> => {
 };
 
 // Rubrics
-export const getSupervisionRubrics = async (): Promise<SupervisionRubric> => {
+export const getSupervisionRubrics = async (): Promise<{ contable: SupervisionRubric[], noContable: SupervisionRubric[] }> => {
     const [countableData, nonCountableData] = await Promise.all([
-      apiFetch('/supervision/contable'),
-      apiFetch('/supervision/no-contable'),
+        apiFetch('/supervision/contable'),
+        apiFetch('/supervision/no-contable'),
     ]);
-  
-    const mapAndValidate = (data: any, category: string) => {
-        if (!data?.datos?.[category]?.rubros || !Array.isArray(data.datos[category].rubros)) {
+
+    const mapRubrics = (data: any, category: 'Contable' | 'No Contable'): SupervisionRubric[] => {
+        const rubrosKey = category === 'Contable' ? 'contable' : 'noContable';
+        if (!data?.datos?.[rubrosKey]?.rubros || !Array.isArray(data.datos[rubrosKey].rubros)) {
             console.error(`API response for supervision rubrics (${category}) is not in the expected format.`, data);
             return [];
         }
-        return data.datos[category].rubros;
-    }
-  
-    return {
-        contable: mapAndValidate(countableData, 'contable'),
-        noContable: mapAndValidate(nonCountableData, 'noContable'),
-    };
-  };
 
+        return data.datos[rubrosKey].rubros.map((rubro: any) => {
+            const idKey = category === 'Contable' ? 'id_rubro' : 'id_nc_rubro';
+            const criterionIdKey = category === 'Contable' ? 'id_criterio' : 'id_nc_criterio';
+            const criterionTextKey = 'criterio';
+
+            return {
+                id: rubro[idKey],
+                title: rubro.nombre,
+                type: 'checkbox',
+                category: category,
+                criteria: (rubro.criterios || []).map((c: any) => ({
+                    id: c[criterionIdKey],
+                    text: c[criterionTextKey],
+                })),
+            };
+        });
+    };
+
+    return {
+        contable: mapRubrics(countableData, 'Contable'),
+        noContable: mapRubrics(nonCountableData, 'No Contable'),
+    };
+};
 
 export const getEvaluationRubrics = async (): Promise<EvaluationRubric[]> => {
     const rubricsRes = await apiFetch('/rubros');
@@ -408,7 +401,6 @@ export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera:
 
 export const getModalities = async (): Promise<Modality[]> => {
     const result = await apiFetch('/modalidades');
-    // The API returns an object with a 'datos' property which is the array
     if (result && Array.isArray(result.datos)) {
       return result.datos.map((item: any) => ({
         id: item.id,
@@ -433,4 +425,3 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
 
 
     
-
