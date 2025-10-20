@@ -97,7 +97,7 @@ export const getCareers = async (): Promise<CareerSummary[]> => {
 };
 
 export const createCareer = (data: { nombre: string }): Promise<any> => {
-    return apiFetch('/carreras', { method: 'POST', body: JSON.stringify({ carrera: data.nombre }) });
+    return apiFetch('/carreras', { method: 'POST', body: JSON.stringify({ nombre: data.nombre }) });
 };
 
 
@@ -299,12 +299,14 @@ export const getSupervisionRubrics = async (): Promise<{ contable: SupervisionRu
 
     const mapRubrics = (data: any, category: 'Contable' | 'No Contable'): SupervisionRubric[] => {
         const rubrosKey = category === 'Contable' ? 'contable' : 'noContable';
-        if (!data?.datos?.[rubrosKey]?.rubros || !Array.isArray(data.datos[rubrosKey].rubros)) {
+        const rubrosList = data?.datos?.[rubrosKey]?.rubros;
+
+        if (!rubrosList || !Array.isArray(rubrosList)) {
             console.error(`API response for supervision rubrics (${category}) is not in the expected format.`, data);
             return [];
         }
 
-        return data.datos[rubrosKey].rubros.map((rubro: any) => {
+        return rubrosList.map((rubro: any) => {
             const idKey = category === 'Contable' ? 'id_rubro' : 'id_nc_rubro';
             const criterionIdKey = category === 'Contable' ? 'id_criterio' : 'id_nc_criterio';
             const criterionTextKey = 'criterio';
@@ -425,3 +427,4 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
 
 
     
+
