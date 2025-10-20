@@ -25,7 +25,7 @@ const createCareerSchema = z.object({
 type CreateCareerFormValues = z.infer<typeof createCareerSchema>;
 
 interface CreateCareerFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (message: { summary: string, detail: string }) => void;
 }
 
 export function CreateCareerForm({ onSuccess }: CreateCareerFormProps) {
@@ -44,16 +44,14 @@ export function CreateCareerForm({ onSuccess }: CreateCareerFormProps) {
     try {
       await createCareer({ nombre: data.nombre });
       
-      toast.current?.show({
-        severity: "success",
+      onSuccess?.({
         summary: "Carrera Creada",
         detail: `La carrera ${data.nombre} ha sido creada.`,
       });
       form.reset();
-      onSuccess?.();
     } catch (error) {
-      if (error instanceof Error) {
-        toast.current?.show({
+      if (error instanceof Error && toast.current) {
+        toast.current.show({
             severity: "error",
             summary: "Error al crear",
             detail: error.message,

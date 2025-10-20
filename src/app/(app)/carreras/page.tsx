@@ -79,7 +79,8 @@ export default function CareersPage() {
     fetchCareers();
   }, []);
 
-  const handleSuccess = () => {
+  const handleSuccess = (message: { summary: string, detail: string }) => {
+    toast.current?.show({ severity: 'success', ...message });
     setIsCreateModalOpen(false);
     setIsEditModalOpen(false);
     setIsAssignModalOpen(false);
@@ -290,3 +291,5 @@ export default function CareersPage() {
     </div>
   )
 }
+
+    

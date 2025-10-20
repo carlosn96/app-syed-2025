@@ -33,7 +33,7 @@ type AssignCareerFormValues = z.infer<typeof assignCareerSchema>;
 
 interface AssignCareerToCoordinatorFormProps {
   career: CareerSummary;
-  onSuccess?: () => void;
+  onSuccess?: (message: { summary: string, detail: string }) => void;
 }
 
 export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCareerToCoordinatorFormProps) {
@@ -57,16 +57,15 @@ export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCaree
     setIsSubmitting(true);
     try {
       await assignCarreraToCoordinador({ id_coordinador: data.id_coordinador, id_carrera: career.id });
-      toast.current?.show({
-        severity: "success",
+      const coordinatorName = coordinators.find(c => c.id_coordinador === data.id_coordinador)?.nombre_completo || '';
+      onSuccess?.({
         summary: "Coordinador Asignado",
-        detail: `El coordinador ha sido asignado a ${career.name} con éxito.`,
+        detail: `${coordinatorName} ha sido asignado a ${career.name}.`,
       });
       form.reset();
-      onSuccess?.();
     } catch (error) {
-      if (error instanceof Error) {
-        toast.current?.show({
+      if (error instanceof Error && toast.current) {
+        toast.current.show({
             severity: "error",
             summary: "Error al asignar",
             detail: error.message,
@@ -118,3 +117,5 @@ export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCaree
     </>
   )
 }
+
+    

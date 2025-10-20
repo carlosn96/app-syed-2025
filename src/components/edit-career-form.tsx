@@ -27,7 +27,7 @@ type EditCareerFormValues = z.infer<typeof editCareerSchema>;
 
 interface EditCareerFormProps {
   career: CareerSummary;
-  onSuccess?: () => void;
+  onSuccess?: (message: { summary: string, detail: string }) => void;
 }
 
 export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
@@ -45,15 +45,13 @@ export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
     setIsSubmitting(true);
     try {
       await updateCareer(career.id, { nombre: data.name });
-      toast.current?.show({
-        severity: "success",
+      onSuccess?.({
         summary: "Carrera Actualizada",
-        detail: `La carrera ${data.name} ha sido actualizada con éxito.`,
+        detail: `La carrera ha sido actualizada a ${data.name}.`,
       });
-      onSuccess?.();
     } catch (error) {
-      if (error instanceof Error) {
-        toast.current?.show({
+      if (error instanceof Error && toast.current) {
+        toast.current.show({
             severity: "error",
             summary: "Error al actualizar",
             detail: error.message,
