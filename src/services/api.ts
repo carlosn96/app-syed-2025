@@ -356,7 +356,7 @@ export const getEvaluationRubrics = async (): Promise<EvaluationRubric[]> => {
 };
 
 export const createRubric = (data: { nombre: string; categoria: 'Contable' | 'No Contable' }): Promise<SupervisionRubric> => {
-    const endpoint = data.categoria === 'Contable' ? '/supervision/rubros/contable/' : '/supervision/rubros/no-contable/';
+    const endpoint = data.categoria === 'Contable' ? '/supervision/rubros/contable' : '/supervision/rubros/no-contable';
     return apiFetch(endpoint, { method: 'POST', body: JSON.stringify({ p_nombre: data.nombre }) });
 };
 
@@ -366,7 +366,7 @@ export const updateRubric = (id: number, category: 'Contable' | 'No Contable', d
 };
 
 export const createCriterion = (rubricId: number, category: 'Contable' | 'No Contable', criterionText: string): Promise<SupervisionCriterion> => {
-    const endpoint = category === 'Contable' ? '/supervision/contable/' : '/supervision/no-contable/';
+    const endpoint = category === 'Contable' ? '/supervision/contable' : '/supervision/no-contable';
     const body = category === 'Contable'
         ? { p_criterio: criterionText, p_id_rubro: rubricId }
         : { p_descripcion: criterionText, p_id_nc_rubro: rubricId };

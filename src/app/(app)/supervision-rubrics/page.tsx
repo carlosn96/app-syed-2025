@@ -274,6 +274,26 @@ export default function SupervisionRubricsPage() {
   if (error) {
     return <p className="text-destructive text-center">{error}</p>
   }
+  
+  const createRubricButton = (
+    <Dialog open={isRubricModalOpen} onOpenChange={setIsRubricModalOpen}>
+        <DialogTrigger asChild>
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Crear Rúbrica
+            </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+            <DialogTitle>Crear Nueva Rúbrica</DialogTitle>
+            <DialogDescription>
+                Completa el formulario para registrar una nueva rúbrica.
+            </DialogDescription>
+            </DialogHeader>
+            <CreateRubricForm onSuccess={handleSuccess} />
+        </DialogContent>
+    </Dialog>
+  );
 
   return (
     <div className="flex flex-col gap-8">
@@ -282,27 +302,9 @@ export default function SupervisionRubricsPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Gestión de Rúbricas
         </h1>
-        {activeTab === 'supervision' && (
-            <Dialog open={isRubricModalOpen} onOpenChange={setIsRubricModalOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Crear Rúbrica
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                <DialogTitle>Crear Nueva Rúbrica</DialogTitle>
-                <DialogDescription>
-                    Completa el formulario para registrar una nueva rúbrica.
-                </DialogDescription>
-                </DialogHeader>
-                <CreateRubricForm onSuccess={handleSuccess} />
-            </DialogContent>
-            </Dialog>
-        )}
-        
-        {/* Add Criterion Modal */}
+      </div>
+
+       {/* Modals */}
         <Dialog open={isCriterionModalOpen} onOpenChange={setIsCriterionModalOpen}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -315,7 +317,6 @@ export default function SupervisionRubricsPage() {
             </DialogContent>
         </Dialog>
 
-        {/* Edit Rubric Modal */}
         <Dialog open={isEditRubricModalOpen} onOpenChange={setIsEditRubricModalOpen}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -328,7 +329,6 @@ export default function SupervisionRubricsPage() {
             </DialogContent>
         </Dialog>
         
-        {/* Edit Criterion Modal */}
         <Dialog open={isEditCriterionModalOpen} onOpenChange={setIsEditCriterionModalOpen}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -341,7 +341,6 @@ export default function SupervisionRubricsPage() {
             </DialogContent>
         </Dialog>
 
-         {/* Delete Criterion Alert */}
         <AlertDialog open={!!criterionToDelete} onOpenChange={(open) => !open && setCriterionToDelete(null)}>
             <AlertDialogContent>
             <AlertDialogHeader>
@@ -359,7 +358,6 @@ export default function SupervisionRubricsPage() {
             </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
-      </div>
 
        <Tabs defaultValue="supervision" onValueChange={(value) => setActiveTab(value as RubricType)} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -390,8 +388,13 @@ export default function SupervisionRubricsPage() {
                             <TabsContent value="contable" className="mt-6">
                                 <Card>
                                 <CardHeader>
-                                    <CardTitle>Rubros Contables</CardTitle>
-                                    <CardDescription>Criterios cuantitativos para la supervisión.</CardDescription>
+                                    <div className="flex justify-between items-center">
+                                      <div>
+                                        <CardTitle>Rubros Contables</CardTitle>
+                                        <CardDescription>Criterios cuantitativos para la supervisión.</CardDescription>
+                                      </div>
+                                      {createRubricButton}
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                     {renderSupervisionRubricAccordion(supervisionRubrics.contable, 'Contable')}
@@ -401,8 +404,13 @@ export default function SupervisionRubricsPage() {
                             <TabsContent value="no-contable" className="mt-6">
                                 <Card>
                                 <CardHeader>
-                                    <CardTitle>Rubros No Contables</CardTitle>
-                                    <CardDescription>Criterios cualitativos para la supervisión.</CardDescription>
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <CardTitle>Rubros No Contables</CardTitle>
+                                            <CardDescription>Criterios cualitativos para la supervisión.</CardDescription>
+                                        </div>
+                                        {createRubricButton}
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                     {renderSupervisionRubricAccordion(supervisionRubrics.noContable, 'No Contable')}
