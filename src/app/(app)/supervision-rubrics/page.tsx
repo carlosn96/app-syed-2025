@@ -421,7 +421,7 @@ export default function SupervisionRubricsPage() {
                 <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                 <AlertDialogDescription>
                     Esta acción no se puede deshacer. Esto eliminará permanentemente el criterio
-                    <span className="font-bold text-white"> "{'text' in (criterionToDelete || {}) ? (criterionToDelete as any).text : (criterionToDelete as any).description}"</span>.
+                    <span className="font-bold text-white"> "{criterionToDelete && 'text' in criterionToDelete ? criterionToDelete.text : (criterionToDelete && 'description' in criterionToDelete ? criterionToDelete.description : '')}"</span>.
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
