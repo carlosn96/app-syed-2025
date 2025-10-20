@@ -164,7 +164,7 @@ export default function CareersPage() {
                     </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="flex-1">
+                            <Button variant="destructive" className="flex-1" onClick={() => setCareerToDelete(career)}>
                                 <Trash2 />
                                 <span className="sr-only">Eliminar</span>
                             </Button>
@@ -174,12 +174,12 @@ export default function CareersPage() {
                                 <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                                 <AlertDialogDescription>
                                     Esta acción no se puede deshacer. Se eliminará permanentemente la carrera
-                                    <span className="font-bold text-white"> {career.name}</span>.
+                                    <span className="font-bold text-white"> {careerToDelete?.name}</span>.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => career.id && handleDelete(career.id)}>
+                                <AlertDialogCancel onClick={() => setCareerToDelete(null)}>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete}>
                                     Confirmar
                                 </AlertDialogAction>
                             </AlertDialogFooter>

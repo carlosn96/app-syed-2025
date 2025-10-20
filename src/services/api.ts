@@ -298,7 +298,7 @@ export const getSupervisionRubrics = async (): Promise<{ contable: SupervisionRu
     ]);
 
     const mapRubrics = (data: any, category: 'Contable' | 'No Contable'): SupervisionRubric[] => {
-        const rubrosList = data?.datos?.[category.toLowerCase() as 'contable' | 'noContable']?.rubros;
+        const rubrosList = data?.datos?.rubros;
 
         if (!rubrosList || !Array.isArray(rubrosList)) {
             console.error(`API response for supervision rubrics (${category}) is not in the expected format.`, data);
@@ -426,5 +426,6 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
 
 
     
+
 
 
