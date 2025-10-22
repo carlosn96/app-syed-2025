@@ -61,29 +61,29 @@ const SidebarProvider = React.forwardRef<
     ref
   ) => {
     const isMobile = useIsMobile()
-    const [open, setOpen] = React.useState(defaultOpen); // ADDED BY AI
+    const [open, setOpen] = React.useState(defaultOpen);
     const [openMobile, setOpenMobile] = React.useState(false)
 
-    React.useEffect(() => { // ADDED BY AI
-      const storedState = localStorage.getItem("ui.sidebarCollapsed"); // ADDED BY AI
-      if (storedState) { // ADDED BY AI
-        setOpen(storedState === "expanded"); // ADDED BY AI
-      } else if (window.innerWidth <= 1024) { // ADDED BY AI
-        setOpen(false); // ADDED BY AI
-      } // ADDED BY AI
-    }, []); // ADDED BY AI
+    React.useEffect(() => {
+      const storedState = localStorage.getItem("ui.sidebarCollapsed");
+      if (storedState) {
+        setOpen(storedState === "expanded");
+      } else if (window.innerWidth <= 1024) {
+        setOpen(false);
+      }
+    }, []);
 
-    const toggleSidebar = React.useCallback(() => { // ADDED BY AI
-      if (isMobile) { // ADDED BY AI
-        setOpenMobile((open) => !open) // ADDED BY AI
-      } else { // ADDED BY AI
-        setOpen((currentOpen) => { // ADDED BY AI
-          const newState = !currentOpen; // ADDED BY AI
-          localStorage.setItem("ui.sidebarCollapsed", newState ? "expanded" : "collapsed"); // ADDED BY AI
-          return newState; // ADDED BY AI
-        }); // ADDED BY AI
-      } // ADDED BY AI
-    }, [isMobile]) // ADDED BY AI
+    const toggleSidebar = React.useCallback(() => {
+      if (isMobile) {
+        setOpenMobile((open) => !open)
+      } else {
+        setOpen((currentOpen) => {
+          const newState = !currentOpen;
+          localStorage.setItem("ui.sidebarCollapsed", newState ? "expanded" : "collapsed");
+          return newState;
+        });
+      }
+    }, [isMobile])
 
     React.useEffect(() => {
       const handleKeyDown = (event: KeyboardEvent) => {
