@@ -68,11 +68,11 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
   return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
+           <FormField
             control={form.control}
             name="id_modalidades"
-            render={() => (
-               <FormItem>
+            render={({ field }) => (
+              <FormItem>
                 <div className="mb-4">
                   <FormLabel className="text-base">Modalidades Disponibles</FormLabel>
                   <FormDescription>
@@ -81,45 +81,33 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
                 </div>
                 <ScrollArea className="h-48 w-full rounded-md border bg-black/10">
                   <div className="p-4 space-y-2">
-                      {availableModalities.length > 0 ? (
-                        availableModalities.map((modality) => (
-                            <FormField
-                            key={modality.id}
-                            control={form.control}
-                            name="id_modalidades"
-                            render={({ field }) => {
-                                return (
-                                <FormItem
-                                    key={modality.id}
-                                    className="flex flex-row items-start space-x-3 space-y-0"
-                                >
-                                    <FormControl>
-                                    <Checkbox
-                                        checked={field.value?.includes(modality.id)}
-                                        onCheckedChange={(checked) => {
-                                        return checked
-                                            ? field.onChange([...(field.value ?? []), modality.id])
-                                            : field.onChange(
-                                                field.value?.filter(
-                                                (value) => value !== modality.id
-                                                )
-                                            )
-                                        }}
-                                    />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      {modality.nombre}
-                                    </FormLabel>
-                                </FormItem>
-                                )
-                            }}
+                    {availableModalities.length > 0 ? (
+                      availableModalities.map((modality) => (
+                        <FormItem
+                          key={modality.id}
+                          className="flex flex-row items-start space-x-3 space-y-0"
+                        >
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(modality.id)}
+                              onCheckedChange={(checked) => {
+                                const newValue = checked
+                                  ? [...(field.value ?? []), modality.id]
+                                  : field.value?.filter((value) => value !== modality.id);
+                                field.onChange(newValue);
+                              }}
                             />
-                        ))
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                           <p className="text-sm text-muted-foreground">No hay más modalidades para asignar.</p>
-                        </div>
-                      )}
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {modality.nombre}
+                          </FormLabel>
+                        </FormItem>
+                      ))
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-sm text-muted-foreground">No hay más modalidades para asignar.</p>
+                      </div>
+                    )}
                   </div>
                 </ScrollArea>
                 <FormMessage />
@@ -133,5 +121,3 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
       </Form>
   )
 }
-
-    
