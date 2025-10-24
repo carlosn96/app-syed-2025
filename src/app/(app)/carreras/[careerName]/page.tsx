@@ -95,13 +95,13 @@ export default function CareerPlansPage() {
     return `${n}°`;
   };
 
-  const handleCreateSuccess = () => {
+  const handleCreateSuccess = async (modalityName: string) => {
     setIsCreateModalOpen(false);
-    fetchData();
+    await fetchData(); 
     toast.current?.show({
         severity: "success",
         summary: "Modalidad Agregada",
-        detail: `La modalidad se ha agregado a ${careerName} correctamente.`,
+        detail: `La modalidad ${modalityName} se ha agregado a ${careerName} correctamente.`,
     });
   }
 
@@ -345,5 +345,7 @@ export default function CareerPlansPage() {
     </div>
   );
 }
+
+    
 
     

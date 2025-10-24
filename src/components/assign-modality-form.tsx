@@ -34,7 +34,7 @@ type AssignModalityFormValues = z.infer<typeof assignModalitySchema>;
 interface AssignModalityFormProps {
   careerId: number;
   availableModalities: Modality[];
-  onSuccess?: () => void;
+  onSuccess?: (modalityName: string) => void;
 }
 
 export function AssignModalityForm({ careerId, availableModalities, onSuccess }: AssignModalityFormProps) {
@@ -49,11 +49,12 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
     setIsSubmitting(true);
     try {
       await assignModalityToCareer({ id_carrera: careerId, id_modalidad: data.id_modalidad });
+      const modalityName = availableModalities.find(m => m.id === data.id_modalidad)?.nombre || '';
       form.reset();
-      onSuccess?.();
+      onSuccess?.(modalityName);
     } catch (error) {
-      if (error instanceof Error) {
-        toast.current?.show({
+      if (error instanceof Error && toast.current) {
+        toast.current.show({
             severity: "error",
             summary: "Error al asignar",
             detail: error.message,
@@ -105,3 +106,5 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
     </>
   )
 }
+
+    
