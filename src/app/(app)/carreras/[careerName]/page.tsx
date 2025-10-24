@@ -57,6 +57,7 @@ export default function CareerPlansPage() {
         ]);
         setAllCareers(careersData);
         setSubjects(subjectsData);
+        console.log(modalitiesData);
         setAllModalities(modalitiesData);
         
         const currentCareerSummary = careersData.find(c => c.name === careerName);

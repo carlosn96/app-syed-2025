@@ -68,8 +68,8 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
               <FormItem>
                 <FormLabel>Modalidad</FormLabel>
                  <Select
-                    onValueChange={(value) => field.onChange(Number(value))}
-                    value={field.value ? String(field.value) : ""}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value ? String(field.value) : undefined}
                   >
                   <FormControl>
                     <SelectTrigger>

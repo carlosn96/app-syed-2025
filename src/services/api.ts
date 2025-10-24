@@ -426,10 +426,8 @@ export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera:
 export const getModalities = async (): Promise<Modality[]> => {
     const result = await apiFetch('/modalidades');
     if (result && Array.isArray(result.datos)) {
-      return result.datos.map((item: any) => ({
-        id: item.id_modalidad,
-        nombre: item.nombre,
-      }));
+        console.log("API response for modalities:", result.datos);
+      return result.datos;
     }
     console.error("API response for modalities is not in the expected format.", result);
     return [];
