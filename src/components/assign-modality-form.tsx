@@ -20,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Toast } from 'primereact/toast';
 import { assignModalityToCareer } from "@/services/api"
 import { useState, useRef } from "react"
 import { Modality } from "@/lib/modelos"
@@ -38,11 +37,13 @@ interface AssignModalityFormProps {
 }
 
 export function AssignModalityForm({ careerId, availableModalities, onSuccess }: AssignModalityFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<AssignModalityFormValues>({
     resolver: zodResolver(assignModalitySchema),
+    defaultValues: {
+      id_modalidad: undefined
+    }
   });
 
   const onSubmit = async (data: AssignModalityFormValues) => {
@@ -53,21 +54,14 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
       form.reset();
       onSuccess?.(modalityName);
     } catch (error) {
-      if (error instanceof Error && toast.current) {
-        toast.current.show({
-            severity: "error",
-            summary: "Error al asignar",
-            detail: error.message,
-        });
-      }
+      // Error handling is done in the parent component via toast
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -76,7 +70,7 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Modalidad</FormLabel>
-                 <Select onValueChange={field.onChange} value={field.value ? String(field.value) : ''}>
+                 <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value ? String(field.value) : ''}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccione una modalidad" />
@@ -103,8 +97,5 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
           </Button>
         </form>
       </Form>
-    </>
   )
 }
-
-    
