@@ -95,12 +95,12 @@ export default function CareerPlansPage() {
     return `${n}°`;
   };
 
-  const handleCreateSuccess = () => {
+  const handleCreateSuccess = (modalityName: string) => {
     setIsCreateModalOpen(false);
     toast.current?.show({
         severity: "success",
-        summary: "Modalidades Agregadas",
-        detail: `Las modalidades seleccionadas se han agregado a ${careerName} correctamente.`,
+        summary: "Modalidad Agregada",
+        detail: `La modalidad ${modalityName} se ha agregado a ${careerName} correctamente.`,
     });
     fetchData();
   }

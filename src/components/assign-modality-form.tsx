@@ -11,19 +11,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { assignModalityToCareer } from "@/services/api"
 import { useState } from "react"
 import { Modality } from "@/lib/modelos"
-import { Checkbox } from "./ui/checkbox"
-import { ScrollArea } from "./ui/scroll-area"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 
 const assignModalitySchema = z.object({
-  id_modalidades: z.array(z.number()).refine((value) => value.some((item) => item), {
-    message: "Tienes que seleccionar al menos una modalidad.",
-  }),
+  id_modalidad: z.coerce.number().min(1, "Debes seleccionar una modalidad."),
 });
 
 
@@ -32,7 +28,7 @@ type AssignModalityFormValues = z.infer<typeof assignModalitySchema>;
 interface AssignModalityFormProps {
   careerId: number;
   availableModalities: Modality[];
-  onSuccess?: () => void;
+  onSuccess?: (modalityName: string) => void;
 }
 
 export function AssignModalityForm({ careerId, availableModalities, onSuccess }: AssignModalityFormProps) {
@@ -41,22 +37,19 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
   const form = useForm<AssignModalityFormValues>({
     resolver: zodResolver(assignModalitySchema),
     defaultValues: {
-      id_modalidades: [],
+      id_modalidad: undefined,
     },
   });
 
   const onSubmit = async (data: AssignModalityFormValues) => {
     setIsSubmitting(true);
     try {
-      // Create an array of promises for each API call
-      const assignmentPromises = data.id_modalidades.map(modalityId => 
-        assignModalityToCareer({ id_carrera: careerId, id_modalidad: modalityId })
-      );
-      // Wait for all assignments to complete
-      await Promise.all(assignmentPromises);
+      await assignModalityToCareer({ id_carrera: careerId, id_modalidad: data.id_modalidad })
+      
+      const modalityName = availableModalities.find(m => m.id === data.id_modalidad)?.nombre || '';
       
       form.reset();
-      onSuccess?.();
+      onSuccess?.(modalityName);
     } catch (error) {
       // Error handling is done in the parent component via toast
       console.error(error);
@@ -70,61 +63,37 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
            <FormField
             control={form.control}
-            name="id_modalidades"
-            render={() => (
+            name="id_modalidad"
+            render={({ field }) => (
               <FormItem>
-                <FormLabel>Modalidades Disponibles</FormLabel>
-                <FormDescription>
-                  Selecciona las modalidades que deseas agregar a la carrera.
-                </FormDescription>
-                <ScrollArea className="h-48 w-full rounded-md border bg-black/10">
-                  <div className="p-4">
-                     {availableModalities.length > 0 ? (
-                        availableModalities.map((modality) => (
-                           <FormField
-                            key={modality.id}
-                            control={form.control}
-                            name="id_modalidades"
-                            render={({ field }) => {
-                              return (
-                                <FormItem
-                                  className="flex flex-row items-start space-x-3 space-y-0 mb-4"
-                                >
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(modality.id)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([...(field.value || []), modality.id])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== modality.id
-                                              )
-                                            )
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">
-                                    {modality.nombre}
-                                  </FormLabel>
-                                </FormItem>
-                              )
-                            }}
-                          />
-                        ))
-                     ) : (
-                        <div className="flex items-center justify-center h-full">
-                            <p className="text-sm text-muted-foreground">No hay más modalidades para asignar.</p>
-                        </div>
-                     )}
-                  </div>
-                </ScrollArea>
+                <FormLabel>Modalidad</FormLabel>
+                 <Select
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={field.value ? String(field.value) : ""}
+                  >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione una modalidad" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {availableModalities.length > 0 ? (
+                      availableModalities.map((modality) => (
+                          <SelectItem key={modality.id} value={String(modality.id)}>
+                          {modality.nombre}
+                          </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>No hay modalidades para asignar</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={isSubmitting || !availableModalities || availableModalities.length === 0}>
-              {isSubmitting ? 'Asignando...' : 'Asignar Modalidad(es)'}
+          <Button type="submit" className="w-full" disabled={isSubmitting || availableModalities.length === 0}>
+              {isSubmitting ? 'Asignando...' : 'Asignar Modalidad'}
           </Button>
         </form>
       </Form>
