@@ -21,8 +21,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Toast } from 'primereact/toast';
-import { assignModalityToCareer, getModalities } from "@/services/api"
-import { useState, useRef, useEffect } from "react"
+import { assignModalityToCareer } from "@/services/api"
+import { useState, useRef } from "react"
 import { Modality } from "@/lib/modelos"
 
 const assignModalitySchema = z.object({
@@ -33,29 +33,13 @@ type AssignModalityFormValues = z.infer<typeof assignModalitySchema>;
 
 interface AssignModalityFormProps {
   careerId: number;
+  availableModalities: Modality[];
   onSuccess?: () => void;
 }
 
-export function AssignModalityForm({ careerId, onSuccess }: AssignModalityFormProps) {
+export function AssignModalityForm({ careerId, availableModalities, onSuccess }: AssignModalityFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [modalities, setModalities] = useState<Modality[]>([]);
-
-  useEffect(() => {
-    const fetchModalities = async () => {
-      try {
-        const modalitiesData = await getModalities();
-        setModalities(modalitiesData);
-      } catch (error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error al cargar modalidades",
-          detail: "No se pudieron cargar las modalidades disponibles."
-        })
-      }
-    }
-    fetchModalities();
-  }, []);
 
   const form = useForm<AssignModalityFormValues>({
     resolver: zodResolver(assignModalitySchema),
@@ -98,14 +82,14 @@ export function AssignModalityForm({ careerId, onSuccess }: AssignModalityFormPr
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {modalities.length > 0 ? (
-                      modalities.map((modality) => (
+                    {availableModalities.length > 0 ? (
+                      availableModalities.map((modality) => (
                           <SelectItem key={modality.id} value={String(modality.id)}>
                           {modality.nombre}
                           </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="none" disabled>No hay modalidades disponibles</SelectItem>
+                      <SelectItem value="none" disabled>No hay más modalidades para asignar</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
@@ -113,7 +97,7 @@ export function AssignModalityForm({ careerId, onSuccess }: AssignModalityFormPr
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={isSubmitting || modalities.length === 0}>
+          <Button type="submit" className="w-full" disabled={isSubmitting || availableModalities.length === 0}>
               {isSubmitting ? 'Asignando...' : 'Asignar Modalidad'}
           </Button>
         </form>

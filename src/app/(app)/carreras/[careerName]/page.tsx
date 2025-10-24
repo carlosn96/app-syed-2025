@@ -12,13 +12,13 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Career, Subject, CareerSummary } from "@/lib/modelos"
+import { Career, Subject, CareerSummary, Modality } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
 import { Book, Pencil, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { useAuth } from "@/context/auth-context"
-import { getCareers, getSubjects, deleteCareer } from "@/services/api"
+import { getCareers, getSubjects, deleteCareer, getModalities } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { EditStudyPlanForm } from "@/components/edit-study-plan-form"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
@@ -41,6 +41,7 @@ export default function CareerPlansPage() {
   const [allCareers, setAllCareers] = useState<CareerSummary[]>([]);
   const [careerDetails, setCareerDetails] = useState<Career[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [allModalities, setAllModalities] = useState<Modality[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,12 +50,14 @@ export default function CareerPlansPage() {
   const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [careersData, subjectsData] = await Promise.all([
+        const [careersData, subjectsData, modalitiesData] = await Promise.all([
           getCareers(),
-          getSubjects()
+          getSubjects(),
+          getModalities()
         ]);
         setAllCareers(careersData);
         setSubjects(subjectsData);
+        setAllModalities(modalitiesData);
         
         const currentCareerSummary = careersData.find(c => c.name === careerName);
         if (currentCareerSummary?.modalities) {
@@ -77,6 +80,12 @@ export default function CareerPlansPage() {
   const careerModalities = useMemo(() => {
     return careerDetails;
   }, [careerDetails]);
+
+  const availableModalities = useMemo(() => {
+    if (!allModalities || !careerModalities) return [];
+    const assignedModalityNames = new Set(careerModalities.map(m => m.modality));
+    return allModalities.filter(m => !assignedModalityNames.has(m.nombre));
+  }, [allModalities, careerModalities]);
 
   const handleTabChange = (key: string, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [key]: value }));
@@ -223,6 +232,7 @@ export default function CareerPlansPage() {
                     {careerId && <AssignModalityForm 
                         onSuccess={handleCreateSuccess} 
                         careerId={careerId}
+                        availableModalities={availableModalities}
                     />}
                 </DialogContent>
             </Dialog>
