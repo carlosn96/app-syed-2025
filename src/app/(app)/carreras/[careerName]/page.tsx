@@ -95,14 +95,14 @@ export default function CareerPlansPage() {
     return `${n}°`;
   };
 
-  const handleCreateSuccess = (modalityName: string) => {
+  const handleCreateSuccess = () => {
     setIsCreateModalOpen(false);
     toast.current?.show({
         severity: "success",
-        summary: "Modalidad Agregada",
-        detail: `La modalidad ${modalityName} se ha agregado a ${careerName} correctamente.`,
+        summary: "Modalidades Agregadas",
+        detail: `Las modalidades seleccionadas se han agregado a ${careerName} correctamente.`,
     });
-    fetchData(); // Re-fetch all data to show the new modality
+    fetchData();
   }
 
   const handleEditSuccess = () => {
@@ -226,7 +226,7 @@ export default function CareerPlansPage() {
                     <DialogHeader>
                         <DialogTitle>Agregar Modalidad</DialogTitle>
                         <DialogDescription>
-                            Selecciona una modalidad para agregarla a la carrera {careerName}.
+                            Selecciona una o más modalidades para agregarlas a la carrera {careerName}.
                         </DialogDescription>
                     </DialogHeader>
                     {careerId && <AssignModalityForm 
@@ -345,5 +345,7 @@ export default function CareerPlansPage() {
     </div>
   );
 }
+
+    
 
     
