@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -44,8 +43,16 @@ export function AssignModalityForm({ careerId, onSuccess }: AssignModalityFormPr
 
   useEffect(() => {
     const fetchModalities = async () => {
-      const modalitiesData = await getModalities();
-      setModalities(modalitiesData);
+      try {
+        const modalitiesData = await getModalities();
+        setModalities(modalitiesData);
+      } catch (error) {
+        toast.current?.show({
+          severity: "error",
+          summary: "Error al cargar modalidades",
+          detail: "No se pudieron cargar las modalidades disponibles."
+        })
+      }
     }
     fetchModalities();
   }, []);
@@ -58,11 +65,6 @@ export function AssignModalityForm({ careerId, onSuccess }: AssignModalityFormPr
     setIsSubmitting(true);
     try {
       await assignModalityToCareer({ id_carrera: careerId, id_modalidad: data.id_modalidad });
-      toast.current?.show({
-        severity: "success",
-        summary: "Modalidad Asignada",
-        detail: `La modalidad ha sido asignada con éxito.`,
-      });
       form.reset();
       onSuccess?.();
     } catch (error) {

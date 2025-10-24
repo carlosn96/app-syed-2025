@@ -330,8 +330,8 @@ export const getSupervisionRubrics = async (): Promise<{ contable: SupervisionRu
 };
 
 export const getEvaluationRubrics = async (): Promise<EvaluationRubric[]> => {
-    const rubricsRes = await apiFetch('/rubros');
-    const criteriaRes = await apiFetch('/criterios-evaluacion');
+    const rubricsRes = await apiFetch('/evaluacion-docente/rubros');
+    const criteriaRes = await apiFetch('/evaluacion-docente/criterios');
 
     const apiRubrics: { id: number; nombre: string }[] = rubricsRes.datos || [];
     const apiCriteria: { id_criterio: number; descripcion: string; id_rubro: number }[] = criteriaRes.datos || [];
@@ -427,7 +427,7 @@ export const getModalities = async (): Promise<Modality[]> => {
     const result = await apiFetch('/modalidades');
     if (result && Array.isArray(result.datos)) {
       return result.datos.map((item: any) => ({
-        id: item.id,
+        id: item.id_modalidad,
         nombre: item.nombre,
       }));
     }
@@ -436,6 +436,7 @@ export const getModalities = async (): Promise<Modality[]> => {
 };
 
 export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad: number }): Promise<void> => {
-    console.warn("assignModalityToCareer is using mock implementation.");
-    return Promise.resolve();
+    return apiFetch('/carrera-modalidad', { method: 'POST', body: JSON.stringify(data) });
 };
+
+    

@@ -12,12 +12,11 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Career, Subject } from "@/lib/modelos"
+import { Career, Subject, CareerSummary } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
 import { Book, Pencil, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { CreateStudyPlanForm } from "@/components/create-study-plan-form"
 import { useAuth } from "@/context/auth-context"
 import { getCareers, getSubjects, deleteCareer } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -39,7 +38,8 @@ export default function CareerPlansPage() {
   
   const { user } = useAuth();
 
-  const [allCareers, setAllCareers] = useState<Career[]>([]);
+  const [allCareers, setAllCareers] = useState<CareerSummary[]>([]);
+  const [careerDetails, setCareerDetails] = useState<Career[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,27 +49,18 @@ export default function CareerPlansPage() {
   const fetchData = async () => {
       try {
         setIsLoading(true);
-        // This logic needs to be updated with the new API structure.
-        // For now, let's assume we get the modalities for a specific career.
         const [careersData, subjectsData] = await Promise.all([
-          getCareers(), // This now returns CareerSummary[]
+          getCareers(),
           getSubjects()
         ]);
-
-        const currentCareer = careersData.find(c => c.name === careerName);
-        const careerModalities = currentCareer?.modalities || [];
-
-        // This is a temporary solution, API should provide full objects
-        const fullCareers: Career[] = careerModalities.map(mod => ({
-            ...mod,
-            id: mod.id || Math.random(),
-            semesters: mod.semesters || 8, // Default value
-            campus: mod.campus || 'N/A',
-            coordinator: mod.coordinator || 'No Asignado'
-        }));
-
-        setAllCareers(fullCareers);
+        setAllCareers(careersData);
         setSubjects(subjectsData);
+        
+        const currentCareerSummary = careersData.find(c => c.name === careerName);
+        if (currentCareerSummary?.modalities) {
+            setCareerDetails(currentCareerSummary.modalities);
+        }
+
         setError(null);
       } catch (err: any) {
         setError(err.message || 'Error al cargar los datos');
@@ -81,11 +72,11 @@ export default function CareerPlansPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [careerName]);
 
   const careerModalities = useMemo(() => {
-    return allCareers;
-  }, [allCareers]);
+    return careerDetails;
+  }, [careerDetails]);
 
   const handleTabChange = (key: string, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [key]: value }));
@@ -98,6 +89,11 @@ export default function CareerPlansPage() {
   const handleCreateSuccess = () => {
     setIsCreateModalOpen(false);
     fetchData();
+    toast.current?.show({
+        severity: "success",
+        summary: "Modalidad Agregada",
+        detail: `La modalidad se ha agregado a ${careerName} correctamente.`,
+    });
   }
 
   const handleEditSuccess = () => {
@@ -196,7 +192,6 @@ export default function CareerPlansPage() {
     );
   };
   
-  const firstModality = careerModalities[0];
   const careerId = useMemo(() => allCareers.find(c => c.name === careerName)?.id, [allCareers, careerName]);
 
 
