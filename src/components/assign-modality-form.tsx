@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { assignModalityToCareer } from "@/services/api"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { Modality } from "@/lib/modelos"
 
 const assignModalitySchema = z.object({
@@ -99,3 +99,5 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
       </Form>
   )
 }
+
+    
