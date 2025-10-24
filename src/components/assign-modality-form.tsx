@@ -80,7 +80,7 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {availableModalities.length > 0 ? (
+                    {availableModalities && availableModalities.length > 0 ? (
                       availableModalities.map((modality) => (
                           <SelectItem key={modality.id} value={String(modality.id)}>
                           {modality.nombre}
@@ -95,7 +95,7 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={isSubmitting || availableModalities.length === 0}>
+          <Button type="submit" className="w-full" disabled={isSubmitting || !availableModalities || availableModalities.length === 0}>
               {isSubmitting ? 'Asignando...' : 'Asignar Modalidad'}
           </Button>
         </form>
