@@ -36,7 +36,7 @@ interface AssignModalityFormProps {
   onSuccess?: (modalityName: string) => void;
 }
 
-export function AssignModalityForm({ careerId, availableModalities, onSuccess }: AssignModalityFormProps) {
+export function AssignModalityForm({ careerId, availableModalidades, onSuccess }: AssignModalityFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<AssignModalityFormValues>({
@@ -50,7 +50,7 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
     setIsSubmitting(true);
     try {
       await assignModalityToCareer({ id_carrera: careerId, id_modalidad: data.id_modalidad });
-      const modalityName = availableModalities.find(m => m.id === data.id_modalidad)?.nombre || '';
+      const modalityName = availableModalidades.find(m => m.id === data.id_modalidad)?.nombre || '';
       form.reset();
       onSuccess?.(modalityName);
     } catch (error) {
@@ -70,15 +70,18 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Modalidad</FormLabel>
-                 <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value ? String(field.value) : ''}>
+                 <Select 
+                    onValueChange={(value) => field.onChange(parseInt(value))} 
+                    value={field.value ? String(field.value) : ""}
+                  >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccione una modalidad" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {availableModalities.length > 0 ? (
-                      availableModalities.map((modality) => (
+                    {availableModalidades.length > 0 ? (
+                      availableModalidades.map((modality) => (
                           <SelectItem key={modality.id} value={String(modality.id)}>
                           {modality.nombre}
                           </SelectItem>
@@ -92,12 +95,10 @@ export function AssignModalityForm({ careerId, availableModalities, onSuccess }:
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={isSubmitting || availableModalities.length === 0}>
+          <Button type="submit" className="w-full" disabled={isSubmitting || availableModalidades.length === 0}>
               {isSubmitting ? 'Asignando...' : 'Asignar Modalidad'}
           </Button>
         </form>
       </Form>
   )
 }
-
-    
