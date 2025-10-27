@@ -41,7 +41,7 @@ export const allLinks = [
   { href: "/supervisions-management", label: "Supervisiones", icon: ShieldCheck, roles: ['administrador', 'coordinador'], exact: true },
   { href: "/supervision-rubrics", label: "Gestión de Rúbricas", icon: ClipboardCheck, roles: ['administrador'], exact: true },
   { href: "/evaluations", label: "Evaluaciones", icon: BookUser, roles: ['coordinador', 'alumno'], exact: false },
-  { href: "/palpa", label: "Palpa", icon: HeartHandshake, roles: ['docente'], exact: true },
+  { href: "/users/teachers", label: "Registro", icon: HeartHandshake, roles: ['docente'], exact: true },
 ]
 
 export function MainNav() {
