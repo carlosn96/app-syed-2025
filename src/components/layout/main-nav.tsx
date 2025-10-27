@@ -50,7 +50,16 @@ export function MainNav() {
   const { setOpenMobile, state } = useSidebar();
   const isCollapsed = state === 'collapsed'; 
 
-  const links = allLinks.filter(link => user && link.roles.includes(user.rol));
+  const links = allLinks.filter(link => {
+    if (!user || !link.roles.includes(user.rol)) {
+      return false;
+    }
+    // Specific rule for students: only show schedules/evaluations if they are in a group
+    if (user.rol === 'alumno' && (link.href.startsWith('/schedules') || link.href.startsWith('/evaluations'))) {
+      return !!user.grupo;
+    }
+    return true;
+  });
 
   return (
     <SidebarMenu>
@@ -76,3 +85,5 @@ export function MainNav() {
     </SidebarMenu>
   )
 }
+
+    

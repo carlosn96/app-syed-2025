@@ -1,23 +1,94 @@
 
 "use client"
 
-import { useState, useEffect, useMemo } from 'react';
-import { CalendarClock, BookUser } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef, FormEvent } from 'react';
+import { CalendarClock, BookUser, ArrowRight } from 'lucide-react';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { User, Schedule, EvaluationPeriod, Teacher } from '@/lib/modelos';
-import { getSchedules, getEvaluationPeriods, getSubjects, getTeachers } from '@/services/api';
+import { User, Schedule, EvaluationPeriod, Teacher, Group } from '@/lib/modelos';
+import { getSchedules, getEvaluationPeriods, getSubjects, getTeachers, getGroups } from '@/services/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { EmptyState } from './empty-state';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
 import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { useAuth } from '@/context/auth-context';
+import { Toast } from 'primereact/toast';
 
 interface StudentDashboardProps {
   user: User;
 }
 
-export function StudentDashboard({ user }: StudentDashboardProps) {
+function JoinGroupForm({ onGroupJoined }: { onGroupJoined: (groupName: string) => void }) {
+    const [code, setCode] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const toast = useRef<Toast>(null);
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        if (code) {
+             toast.current?.show({
+                severity: "success",
+                summary: "¡Te has unido al grupo!",
+                detail: "Ahora puedes ver tu horario y evaluaciones.",
+            });
+            // Simulate joining a group. In a real app, the API would return the group.
+            onGroupJoined("COMPINCO2024A"); 
+        } else {
+             toast.current?.show({
+                severity: "error",
+                summary: "Código Inválido",
+                detail: "Por favor, ingresa un código de grupo válido.",
+            });
+        }
+
+        setIsLoading(false);
+    }
+
+    return (
+        <>
+            <Toast ref={toast} />
+            <Card className="rounded-xl max-w-md mx-auto">
+                 <form onSubmit={handleSubmit}>
+                    <CardHeader>
+                        <CardTitle>Únete a un Grupo</CardTitle>
+                        <CardDescription>Ingresa el código que te proporcionó tu coordinador para unirte a un grupo y ver tu información académica.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-2">
+                            <Label htmlFor="group-code">Código de Grupo</Label>
+                            <Input 
+                                id="group-code"
+                                placeholder="P. ej. XF86-K4B2"
+                                value={code}
+                                onChange={(e) => setCode(e.target.value)}
+                                disabled={isLoading}
+                                className="text-center font-mono tracking-widest text-lg h-12"
+                            />
+                        </div>
+                    </CardContent>
+                    <CardFooter>
+                        <Button type="submit" className="w-full" disabled={isLoading || !code}>
+                             {isLoading ? "Uniéndote..." : "Unirme al Grupo"}
+                             {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
+                        </Button>
+                    </CardFooter>
+                </form>
+            </Card>
+        </>
+    );
+}
+
+
+export function StudentDashboard({ user: initialUser }: StudentDashboardProps) {
+  const { user, setUser } = useAuth(); // Use setUser from AuthContext
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -26,26 +97,52 @@ export function StudentDashboard({ user }: StudentDashboardProps) {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const [schedulesData, periodsData, subjectsData, teachersData] = await Promise.all([
-          getSchedules(),
-          getEvaluationPeriods(),
-          getSubjects(),
-          getTeachers(),
-        ]);
-        setSchedules(schedulesData);
-        setEvaluationPeriods(periodsData);
-        setSubjects(subjectsData);
-        setTeachers(teachersData);
-      } catch (error) {
-        console.error("Error fetching student dashboard data:", error);
-      } finally {
+      // Fetch data only if the student is in a group
+      if (user?.grupo) {
+        try {
+          setIsLoading(true);
+          const [schedulesData, periodsData, subjectsData, teachersData] = await Promise.all([
+            getSchedules(),
+            getEvaluationPeriods(),
+            getSubjects(),
+            getTeachers(),
+          ]);
+          setSchedules(schedulesData);
+          setEvaluationPeriods(periodsData);
+          setSubjects(subjectsData);
+          setTeachers(teachersData);
+        } catch (error) {
+          console.error("Error fetching student dashboard data:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
         setIsLoading(false);
       }
     };
     fetchData();
-  }, []);
+  }, [user?.grupo]);
+
+  const handleGroupJoined = (groupName: string) => {
+    if (user) {
+        const updatedUser = { ...user, grupo: groupName };
+        setUser(updatedUser); // Update user in context
+        localStorage.setItem('user', JSON.stringify(updatedUser)); // Persist change
+    }
+  }
+
+  if (!user) return null; // Should not happen if this component is rendered
+
+  if (!user.grupo) {
+      return (
+         <div className="flex flex-col gap-8">
+            <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
+                Bienvenido, {user.nombre}
+            </h1>
+            <JoinGroupForm onGroupJoined={handleGroupJoined} />
+        </div>
+      )
+  }
 
   const today = format(new Date(), 'EEEE', { locale: es });
   const studentSchedulesToday = useMemo(() => {
@@ -139,3 +236,5 @@ export function StudentDashboard({ user }: StudentDashboardProps) {
     </div>
   );
 }
+
+    

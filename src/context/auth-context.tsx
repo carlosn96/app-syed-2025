@@ -8,6 +8,7 @@ import { Toast } from 'primereact/toast';
 
 interface AuthContextType {
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
@@ -93,6 +94,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 rol_nombre: apiUser.rol,
                 fecha_registro: apiUser.fecha_registro,
                 ultimo_acceso: apiUser.ultimo_acceso,
+                // The 'grupo' will come from a different endpoint after login,
+                // so it's not set here initially.
+                grupo: apiUser.grupo || undefined, 
             };
             
             localStorage.setItem('user', JSON.stringify(loggedInUser));
@@ -142,7 +146,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setTimeout(() => setIsLoading(false), 50);
   };
 
-  const value = { user, login, logout, isLoading, addUser };
+  const value = { user, setUser, login, logout, isLoading, addUser };
 
   return (
     <AuthContext.Provider value={value}>
@@ -159,3 +163,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+    
