@@ -41,7 +41,7 @@ export const allLinks = [
   { href: "/supervisions-management", label: "Supervisiones", icon: ShieldCheck, roles: ['administrador', 'coordinador'], exact: true },
   { href: "/supervision-rubrics", label: "Gestión de Rúbricas", icon: ClipboardCheck, roles: ['administrador'], exact: true },
   { href: "/evaluations", label: "Evaluaciones", icon: BookUser, roles: ['coordinador', 'alumno'], exact: false },
-  { href: "/users/teachers", label: "Registro", icon: HeartHandshake, roles: ['docente'], exact: true },
+  { href: "/users/teachers", label: "Registro", icon: HeartHandshake, roles: ['docente'], exact: false },
 ]
 
 export function MainNav() {
@@ -66,6 +66,12 @@ export function MainNav() {
       {links.map((link) => {
         const Icon = link.icon
         const isActive = link.exact ? pathname === link.href : pathname.startsWith(link.href)
+        
+        let finalHref = link.href;
+        if (link.label === "Registro" && user?.rol === 'docente' && user.id_docente) {
+            finalHref = `/users/teachers/${user.id_docente}`;
+        }
+        
         return (
           <SidebarMenuItem key={link.href}>
             <SidebarMenuButton
@@ -74,7 +80,7 @@ export function MainNav() {
               tooltip={link.label}
               onClick={() => setOpenMobile(false)}
             >
-              <Link href={link.href} className="gap-3">
+              <Link href={finalHref} className="gap-3">
                 <Icon className="size-5 shrink-0" />
                 <span className={cn("transition-all duration-200", isCollapsed && "opacity-0 w-0")}>{link.label}</span>
               </Link>
@@ -85,5 +91,3 @@ export function MainNav() {
     </SidebarMenu>
   )
 }
-
-    

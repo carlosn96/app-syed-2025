@@ -94,9 +94,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 rol_nombre: apiUser.rol,
                 fecha_registro: apiUser.fecha_registro,
                 ultimo_acceso: apiUser.ultimo_acceso,
-                // The 'grupo' will come from a different endpoint after login,
-                // so it's not set here initially.
                 grupo: apiUser.grupo || undefined, 
+                id_docente: apiUser.id_docente || undefined,
             };
             
             localStorage.setItem('user', JSON.stringify(loggedInUser));
@@ -163,5 +162,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-    

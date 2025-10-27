@@ -1,5 +1,4 @@
 
-
 export interface User {
   id: number;
   nombre: string;
@@ -12,6 +11,7 @@ export interface User {
   ultimo_acceso: string | null;
   grupo?: string;
   rol_nombre?: string;
+  id_docente?: number;
 }
 
 export interface Alumno {
@@ -250,5 +250,3 @@ export interface Modality {
     id: number;
     nombre: string;
 }
-
-    
