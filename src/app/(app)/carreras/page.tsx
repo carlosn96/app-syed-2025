@@ -153,7 +153,7 @@ export default function CareersPage() {
               <CardFooter className="flex-col items-stretch gap-2 mt-auto">
                   <div className="flex gap-2">
                     <Button asChild className="flex-1" variant="success">
-                        <Link href={`/carreras/${career.id}`}>
+                        <Link href={`/plan-estudio/${career.id}`}>
                         <BookOpenCheck />
                         <span className="sr-only">Planes de Estudio</span>
                         </Link>
