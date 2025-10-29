@@ -138,29 +138,60 @@ export const deleteCareer = (id: number): Promise<void> => {
 export const getSubjects = async (careerId?: number): Promise<Subject[]> => {
     const endpoint = careerId ? `/plan-estudio/${careerId}` : '/plan-estudio';
     const response = await apiFetch(endpoint);
-    const records: StudyPlanRecord[] = response.datos;
+    // The new structure is an array of modalities for a given career
+    const records: any[] = response.datos;
 
     if (!Array.isArray(records)) {
         console.error("API response for subjects is not an array:", records);
         return [];
     }
 
-    const subjectsMap = new Map<number, Subject>();
+    const allSubjects: Subject[] = [];
 
-    records.forEach(record => {
-        if (!subjectsMap.has(record.id_materia)) {
-            subjectsMap.set(record.id_materia, {
-                id: record.id_materia,
-                name: record.materia,
-                career: record.carrera,
-                semester: record.nivel_orden,
-                modality: record.modalidad,
-            });
-        }
+    // This data structure has modalities at the top level
+    records.forEach(modality => {
+        const modalityName = modality.modalidad; // Assuming the name is available
+        const careerName = modality.carrera;
+        (modality.materias || []).forEach((materia: any) => {
+             allSubjects.push({
+                id: materia.id_materia,
+                name: "Nombre de materia no disponible en este endpoint", // Placeholder
+                career: careerName,
+                semester: materia.id_cat_nivel, // Assuming this is the semester
+                modality: modalityName,
+             })
+        });
     });
 
-    return Array.from(subjectsMap.values());
+    // To get subject names, we might need to fetch all subjects and map them.
+    // This is inefficient. Ideally, the /plan-estudio/{id} endpoint would provide names.
+    // For now, let's make a second call to get all subjects to map names.
+    const allSubjectsWithName = await getAllSubjectsWithNames();
+    
+    return allSubjects.map(s => {
+        const found = allSubjectsWithName.find(sub => sub.id === s.id);
+        return {
+            ...s,
+            name: found?.name || s.name,
+        }
+    });
 };
+
+// Helper function to get all subjects just to map names
+const getAllSubjectsWithNames = async (): Promise<Subject[]> => {
+    const response = await apiFetch('/materias'); // Assuming a /materias endpoint
+    if (response.datos && Array.isArray(response.datos)) {
+        return response.datos.map((item: any) => ({
+            id: item.id_materia,
+            name: item.nombre,
+            career: "N/A", // This info is not in the /materias endpoint
+            semester: item.id_cat_nivel, // Or however semester is represented
+            modality: "N/A",
+        }));
+    }
+    return [];
+}
+
 
 export const getSubjectsByModality = async (modalityId: number): Promise<Subject[]> => {
     console.warn(`getSubjectsByModality is using mock data for modalityId: ${modalityId}. Implement API endpoint.`);
