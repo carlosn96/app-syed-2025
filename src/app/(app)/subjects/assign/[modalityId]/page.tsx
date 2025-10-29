@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/context/auth-context'
-import { getCareers, getSubjects } from '@/services/api'
+import { getCareers, getSubjectsByModality } from '@/services/api'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FloatingBackButton } from '@/components/ui/floating-back-button'
 
@@ -49,26 +49,30 @@ export default function ManageModalitySubjectsPage() {
     const [error, setError] = useState<string | null>(null);
 
     const fetchAllData = async () => {
+      if (isNaN(modalityId)) {
+        setError("ID de modalidad no válido.");
+        setIsLoading(false);
+        return;
+      }
       setIsLoading(true);
       try {
-        // This needs to be smarter. We should probably fetch only the relevant career modality.
-        const [allCareersSummary, allSubjects] = await Promise.all([getCareers(), getSubjects()]);
+        const allCareersSummary = await getCareers();
         
         let currentModality: Career | undefined;
-        
         for (const summary of allCareersSummary) {
           currentModality = summary.modalities?.find(m => m.id === modalityId);
           if (currentModality) break;
         }
 
-        setModality(currentModality || null);
-
         if (currentModality) {
-          const modalitySubjects = allSubjects
-            .filter(s => s.career === currentModality!.name && s.modality === currentModality!.modality)
-            .sort((a, b) => a.semester - b.semester);
-          setSubjects(modalitySubjects);
+          setModality(currentModality);
+          const modalitySubjects = await getSubjectsByModality(modalityId);
+          setSubjects(modalitySubjects.sort((a, b) => a.semester - b.semester));
+        } else {
+            setModality(null);
+            setError("Modalidad no encontrada.");
         }
+
       } catch (err: any) {
         setError(err.message || "Error al cargar los datos");
       } finally {
@@ -93,7 +97,7 @@ export default function ManageModalitySubjectsPage() {
     const handleSuccess = () => {
         setIsModalOpen(false);
         setSelectedSemester(null);
-        fetchAllData(); // Re-fetch data
+        fetchAllData(); // Re-fetch data to show the new subject
     };
     
     if (isLoading) {

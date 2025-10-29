@@ -134,6 +134,14 @@ export const getSubjects = async (): Promise<Subject[]> => {
 
     return Array.from(subjectsMap.values());
 };
+
+export const getSubjectsByModality = async (modalityId: number): Promise<Subject[]> => {
+    console.warn(`getSubjectsByModality is using mock data for modalityId: ${modalityId}. Implement API endpoint.`);
+    // TODO: Replace with actual API call, e.g., `/plan-estudio/${modalityId}`
+    return Promise.resolve([]);
+};
+
+
 export const createSubject = (data: any): Promise<Subject> => {
     console.warn("createSubject is using mock implementation.");
     return Promise.resolve({ ...data, id: Date.now() });
