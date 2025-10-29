@@ -27,7 +27,7 @@ import { AssignModalityForm } from "@/components/assign-modality-form";
 
 export default function CareerPlansPage() {
   const params = useParams();
-  const careerName = decodeURIComponent(params.careerName as string);
+  const careerId = Number(params.careerId);
   const toast = useRef<Toast>(null);
   const router = useRouter();
 
@@ -44,6 +44,7 @@ export default function CareerPlansPage() {
   const [allModalities, setAllModalities] = useState<Modality[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [careerName, setCareerName] = useState<string>('');
 
   const [activeTabs, setActiveTabs] = useState<Record<string, string>>({});
 
@@ -57,12 +58,14 @@ export default function CareerPlansPage() {
         ]);
         setAllCareers(careersData);
         setSubjects(subjectsData);
-        console.log(modalitiesData);
         setAllModalities(modalitiesData);
         
-        const currentCareerSummary = careersData.find(c => c.name === careerName);
-        if (currentCareerSummary?.modalities) {
-            setCareerDetails(currentCareerSummary.modalities);
+        const currentCareerSummary = careersData.find(c => c.id === careerId);
+        if (currentCareerSummary) {
+            setCareerName(currentCareerSummary.name);
+            if(currentCareerSummary.modalities) {
+                setCareerDetails(currentCareerSummary.modalities);
+            }
         }
 
         setError(null);
@@ -75,8 +78,10 @@ export default function CareerPlansPage() {
     };
 
   useEffect(() => {
-    fetchData();
-  }, [careerName]);
+    if (careerId) {
+      fetchData();
+    }
+  }, [careerId]);
 
   const careerModalities = useMemo(() => {
     return careerDetails;
@@ -202,9 +207,6 @@ export default function CareerPlansPage() {
     );
   };
   
-  const careerId = useMemo(() => allCareers.find(c => c.name === careerName)?.id, [allCareers, careerName]);
-
-
   return (
     <div className="flex flex-col gap-8">
       <Toast ref={toast} />
