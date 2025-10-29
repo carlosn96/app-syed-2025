@@ -1,9 +1,9 @@
 
 "use client"
-import { useState, useMemo, useEffect, useRef } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import { Toast } from 'primereact/toast';
+
+import { useParams, useRouter } from 'next/navigation'
+import { useMemo, useState, useEffect } from 'react'
+import { Subject, Career, StudyPlanRecord } from '@/lib/modelos'
 import {
   Card,
   CardContent,
@@ -11,223 +11,244 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Subject, CareerSummary } from "@/lib/modelos"
-import { Button } from "@/components/ui/button"
-import { Book, Pencil, Trash2, PlusCircle } from "lucide-react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { useAuth } from "@/context/auth-context"
-import { getCareers, getSubjects } from "@/services/api"
-import { Skeleton } from "@/components/ui/skeleton"
-import { FloatingBackButton } from "@/components/ui/floating-back-button"
-import { CreateStudyPlanForm } from "@/components/create-study-plan-form"
+import { Button } from '@/components/ui/button'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { PlusCircle, Pencil, Trash2 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useAuth } from '@/context/auth-context'
+import { getStudyPlanByCareerId, getSubjects, getCareers } from '@/services/api'
+import { Skeleton } from '@/components/ui/skeleton'
+import { FloatingBackButton } from '@/components/ui/floating-back-button'
 
-interface CareerModality {
-    id: number;
-    name: string;
-    modality: string;
-    campus: string;
-    semesters: number;
-    coordinator: string;
+interface EnrichedStudyPlanRecord extends StudyPlanRecord {
+  subjectName: string;
 }
 
+export default function PlanEstudioPage() {
+    const params = useParams()
+    const router = useRouter();
+    const { user } = useAuth()
 
-export default function CareerPlansPage() {
-  const params = useParams();
-  const careerId = Number(params.careerId);
-  const toast = useRef<Toast>(null);
-  const router = useRouter();
+    const careerId = Number(params.careerId);
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  
-  const { user } = useAuth();
+    const [studyPlans, setStudyPlans] = useState<EnrichedStudyPlanRecord[]>([]);
+    const [careerInfo, setCareerInfo] = useState<Career | null>(null);
+    const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-  const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
-  const [careerSummary, setCareerSummary] = useState<CareerSummary | null>(null);
-  const [modalities, setModalities] = useState<CareerModality[]>([]);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = async () => {
-      if (isNaN(careerId)) {
-        setError("ID de carrera no válido.");
-        setIsLoading(false);
-        return;
-      }
-      try {
-        setIsLoading(true);
-        const [careersData, subjectsData] = await Promise.all([
-          getCareers(),
-          getSubjects(careerId),
-        ]);
-        
-        const currentCareerSummary = careersData.find(c => c.id === careerId);
-        if (currentCareerSummary) {
-            setCareerSummary(currentCareerSummary);
-        } else {
-            setError("Carrera no encontrada.");
+    useEffect(() => {
+        if (isNaN(careerId)) {
+            setError("ID de carrera inválido.");
+            setIsLoading(false);
+            return;
         }
 
-        setAllSubjects(subjectsData);
-        
-        // Group subjects by modality to create the modality list
-        const modalitiesMap = new Map<string, CareerModality>();
-        subjectsData.forEach(subject => {
-            if (!modalitiesMap.has(subject.modality)) {
-                // Find semester count from a related career summary if possible, otherwise default
-                const relatedModality = currentCareerSummary?.modalities?.find(m => m.modality === subject.modality);
-                modalitiesMap.set(subject.modality, {
-                    id: relatedModality?.id || Math.random(), // Use a stable ID if possible
-                    name: subject.career,
-                    modality: subject.modality,
-                    campus: relatedModality?.campus || 'Desconocido',
-                    semesters: relatedModality?.semesters || 10,
-                    coordinator: relatedModality?.coordinator || 'No Asignado',
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const [planData, subjectsData, careersData] = await Promise.all([
+                    getStudyPlanByCareerId(careerId),
+                    getSubjects(), // Fetch all subjects to map names
+                    getCareers()
+                ]);
+
+                const currentCareer = careersData.find(c => c.id === careerId) || null;
+                setCareerInfo(currentCareer);
+
+                if (planData.length === 0 && currentCareer === null) {
+                    // This can happen if the career exists but has no study plan yet.
+                    // Or if the career ID is totally invalid.
+                    // The getCareers call helps us differentiate.
+                    setError("No se encontró información para esta carrera o no tiene un plan de estudios asignado.");
+                }
+                
+                const enrichedPlanData = planData.map(plan => {
+                    const subject = subjectsData.find(s => s.id === plan.id_materia);
+                    return {
+                        ...plan,
+                        subjectName: subject?.name || 'Materia Desconocida'
+                    }
                 });
+
+                setStudyPlans(enrichedPlanData);
+
+            } catch (err: any) {
+                setError(err.message || "Error al cargar los datos del plan de estudio.");
+                if (err.message.includes('404')) {
+                    router.push('/carreras');
+                }
+            } finally {
+                setIsLoading(false);
             }
+        };
+
+        fetchData();
+    }, [careerId, router]);
+
+    const modalities = useMemo(() => {
+        const modalityMap = new Map<number, { name: string; subjects: EnrichedStudyPlanRecord[] }>();
+        studyPlans.forEach(plan => {
+            if (!modalityMap.has(plan.id_modalidad)) {
+                modalityMap.set(plan.id_modalidad, { name: plan.modalidad, subjects: [] });
+            }
+            modalityMap.get(plan.id_modalidad)!.subjects.push(plan);
         });
-        setModalities(Array.from(modalitiesMap.values()));
+        return Array.from(modalityMap.entries());
+    }, [studyPlans]);
 
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Error al cargar los datos');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    const getOrdinal = (n: number) => `${n}°`;
 
-  useEffect(() => {
-    if (careerId) {
-      fetchData();
+    if (isLoading) {
+        return (
+            <div className="flex flex-col gap-8">
+                <div className="flex flex-col">
+                    <Skeleton className="h-8 w-1/2 mb-2" />
+                    <Skeleton className="h-4 w-1/3" />
+                </div>
+                <Card className="rounded-xl">
+                    <CardHeader>
+                        <Skeleton className="h-6 w-1/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                        <Skeleton className="h-40 w-full" />
+                    </CardContent>
+                </Card>
+            </div>
+        );
     }
-  }, [careerId]);
-
-
-  const renderSubjectTabs = (modality: CareerModality) => {
-    const filteredSubjects = allSubjects.filter(
-      (subject) => subject.modality === modality.modality
-    );
-
-    const semesters = Array.from(
-      new Set(filteredSubjects.map((s) => s.semester))
-    ).sort((a, b) => a - b);
     
-    const defaultTabValue = semesters.length > 0 ? `sem-${semesters[0]}` : "";
-
-    if (semesters.length === 0) {
-      return (
-        <div className="flex-grow flex items-center justify-center p-6">
-          <p className="text-sm text-muted-foreground">
-            No hay materias asignadas para este plan de estudio aún.
-          </p>
-        </div>
-      );
+    if (error) {
+        return (
+            <div className="flex flex-col gap-8">
+                <FloatingBackButton />
+                 <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
+                    <h3 className="text-lg font-semibold text-white">No se pudo cargar el Plan de Estudio</h3>
+                    <p className="text-muted-foreground mt-2">
+                        {error}
+                    </p>
+                </div>
+            </div>
+        )
     }
 
     return (
-      <Tabs
-        defaultValue={defaultTabValue}
-        className="flex flex-col flex-grow w-full p-6 pt-0"
-      >
-        <div className="flex-grow">
-          {semesters.map((semester) => (
-            <TabsContent key={semester} value={`sem-${semester}`}>
-              <ul className="space-y-3">
-                {filteredSubjects
-                  .filter((s) => s.semester === semester)
-                  .map((subject) => (
-                    <li key={subject.id}>
-                      <p className="font-medium">{subject.name}</p>
-                    </li>
-                  ))}
-              </ul>
-            </TabsContent>
-          ))}
+        <div className="flex flex-col gap-8">
+            <FloatingBackButton />
+            <div className="flex flex-col">
+                <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
+                    Planes de Estudio: {careerInfo?.name || `Carrera #${careerId}`}
+                </h1>
+                <p className="text-muted-foreground">
+                    Gestiona las modalidades y materias de la carrera.
+                </p>
+            </div>
+            
+            {modalities.length > 0 ? (
+                modalities.map(([modalityId, modalityData]) => {
+                     const semesters = [...new Set(modalityData.subjects.map(s => s.nivel_orden))].sort((a,b) => a-b);
+                     
+                     return (
+                        <Card key={modalityId} className="rounded-xl">
+                            <CardHeader>
+                                <CardTitle>Modalidad: {modalityData.name}</CardTitle>
+                                <CardDescription>
+                                    Materias asignadas a esta modalidad, agrupadas por grado.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {semesters.length > 0 ? (
+                                     <Tabs defaultValue={`sem-${semesters[0]}`} className="w-full">
+                                        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${semesters.length}, minmax(0, 1fr))`}}>
+                                            {semesters.map(semester => (
+                                                <TabsTrigger key={semester} value={`sem-${semester}`} className="text-xs">
+                                                    {getOrdinal(semester)}
+                                                </TabsTrigger>
+                                            ))}
+                                        </TabsList>
+                                        {semesters.map(semester => {
+                                            const semesterSubjects = modalityData.subjects.filter(s => s.nivel_orden === semester);
+                                            return (
+                                                <TabsContent key={semester} value={`sem-${semester}`}>
+                                                    <div className="flex justify-end my-4">
+                                                        <Button>
+                                                            <PlusCircle className="mr-2 h-4 w-4" />
+                                                            Añadir Materia al {getOrdinal(semester)} Grado
+                                                        </Button>
+                                                    </div>
+                                                    {semesterSubjects.length > 0 ? (
+                                                         <div className='rounded-xl overflow-hidden'>
+                                                            <Table>
+                                                                <TableHeader>
+                                                                    <TableRow>
+                                                                        <TableHead>Nombre de la Materia</TableHead>
+                                                                        <TableHead>Acciones</TableHead>
+                                                                    </TableRow>
+                                                                </TableHeader>
+                                                                <TableBody>
+                                                                    {semesterSubjects.map(subject => (
+                                                                        <TableRow key={subject.id_materia}>
+                                                                            <TableCell className="font-medium">{subject.subjectName}</TableCell>
+                                                                            <TableCell>
+                                                                                <div className="flex gap-2">
+                                                                                    <Button size="icon" variant="warning">
+                                                                                        <Pencil className="h-4 w-4" />
+                                                                                    </Button>
+                                                                                    <Button size="icon" variant="destructive">
+                                                                                        <Trash2 className="h-4 w-4" />
+                                                                                    </Button>
+                                                                                </div>
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    ))}
+                                                                </TableBody>
+                                                            </Table>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
+                                                            <h3 className="text-lg font-semibold text-white">Grado Vacío</h3>
+                                                            <p className="text-muted-foreground mt-2">Aún no se han asignado materias para este grado.</p>
+                                                        </div>
+                                                    )}
+                                                </TabsContent>
+                                            )
+                                        })}
+                                     </Tabs>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
+                                       <h3 className="text-lg font-semibold text-white">Modalidad Vacía</h3>
+                                       <p className="text-muted-foreground mt-2">Aún no se han asignado materias para esta modalidad.</p>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )
+                })
+            ) : (
+                 <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
+                    <h3 className="text-lg font-semibold text-white">Sin Planes de Estudio</h3>
+                    <p className="text-muted-foreground mt-2">
+                       Esta carrera aún no tiene modalidades o planes de estudio asignados.
+                    </p>
+                </div>
+            )}
         </div>
-        <TabsList
-          className="grid w-full mt-4"
-          style={{ gridTemplateColumns: `repeat(${semesters.length}, minmax(0, 1fr))` }}
-        >
-          {semesters.map((semester) => (
-            <TabsTrigger
-              key={semester}
-              value={`sem-${semester}`}
-              className="text-xs"
-            >
-              {`${semester}°`}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-    );
-  };
-  
-  return (
-    <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
-      <FloatingBackButton />
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-col">
-          <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-            {`Planes de Estudio: ${careerSummary?.name || 'Cargando...'}`}
-          </h1>
-          <p className="text-muted-foreground">
-              Modalidades y planes de estudio disponibles para esta carrera.
-          </p>
-        </div>
-      </div>
-
-      {error && <p className="text-destructive text-center">{error}</p>}
-
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {Array.from({ length: 3 }).map((_, i) => (
-                 <Card key={i} className="flex flex-col rounded-xl">
-                    <CardHeader>
-                      <Skeleton className="h-5 w-2/3 mb-2" />
-                      <Skeleton className="h-4 w-1/3" />
-                      <Skeleton className="h-3 w-1/2 mt-2" />
-                    </CardHeader>
-                    <CardContent className="flex flex-col flex-grow pb-2">
-                      <div className="flex-grow flex items-center justify-center p-6">
-                        <Skeleton className="h-24 w-full" />
-                      </div>
-                    </CardContent>
-                </Card>
-            ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {modalities.length > 0 ? modalities.map(modality => {
-              return (
-                  <Card key={modality.id} className="flex flex-col rounded-xl">
-                      <CardHeader>
-                          <div className="flex items-start justify-between">
-                              <div>
-                                  <CardTitle>{modality.modality}</CardTitle>
-                                  <CardDescription>{modality.campus}</CardDescription>
-                                  <p className="text-xs text-muted-foreground pt-2">{modality.coordinator}</p>
-                              </div>
-                          </div>
-                      </CardHeader>
-                      <CardContent className="flex flex-col flex-grow pb-2">
-                          {renderSubjectTabs(modality)}
-                      </CardContent>
-                  </Card>
-              )
-          }) : (
-              <div className="md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
-                  <h3 className="text-lg font-semibold text-white">No hay planes de estudio</h3>
-                  <p className="text-muted-foreground mt-2">
-                      Aún no se han creado planes de estudio para esta carrera.
-                  </p>
-              </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+    )
 }
+
+    
