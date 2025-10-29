@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useMemo, useEffect, useRef } from "react"
-import { Pencil, PlusCircle, Trash2, Search, BookOpenCheck, UserPlus } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search, BookCopy, UserPlus } from "lucide-react"
 import Link from "next/link"
 import { Toast } from 'primereact/toast';
 
@@ -152,6 +152,12 @@ export default function CareersPage() {
               </CardHeader>
               <CardFooter className="flex-col items-stretch gap-2 mt-auto">
                   <div className="flex gap-2">
+                    <Button asChild variant="success" className="flex-1">
+                      <Link href={`/plan-estudio/${career.id}`}>
+                        <BookCopy />
+                        <span className="sr-only">Planes de Estudio</span>
+                      </Link>
+                    </Button>
                     <Button variant="info" className="flex-1" onClick={() => handleAssignClick(career)}>
                         <UserPlus />
                         <span className="sr-only">Asignar Coordinador</span>
