@@ -85,15 +85,36 @@ export const getCareers = async (): Promise<CareerSummary[]> => {
     const response = await apiFetch('/carreras');
     const records: any[] = response.datos;
 
-    return records.map(record => ({
-        id: record.id_carrera,
-        name: record.carrera,
-        coordinator: record.coordinador,
-        totalMaterias: record.total_materias,
-        totalPlanteles: record.total_planteles,
-        totalModalidades: record.total_modalidades,
-        modalities: [], // This can be populated later if needed
-    }));
+    const careersMap = new Map<number, CareerSummary>();
+
+    records.forEach(record => {
+        const id = record.id_carrera;
+        if (!careersMap.has(id)) {
+            careersMap.set(id, {
+                id: id,
+                name: record.carrera,
+                coordinator: record.coordinador,
+                totalMaterias: record.total_materias,
+                totalPlanteles: record.total_planteles,
+                totalModalidades: record.total_modalidades,
+                modalities: [],
+            });
+        }
+
+        const career = careersMap.get(id)!;
+        if (record.id_modalidad && !career.modalities?.some(m => m.id === record.id_modalidad)) {
+            career.modalities?.push({
+                id: record.id_modalidad,
+                name: record.carrera,
+                modality: record.modalidad,
+                campus: record.plantel,
+                semesters: record.semestres,
+                coordinator: record.coordinador,
+            });
+        }
+    });
+    
+    return Array.from(careersMap.values());
 };
 
 export const createCareer = (data: { nombre: string }): Promise<any> => {
