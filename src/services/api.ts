@@ -135,9 +135,15 @@ export const deleteCareer = (id: number): Promise<void> => {
     return apiFetch(`/carreras/${id}`, { method: 'DELETE' });
 };
 
-export const getSubjects = async (): Promise<Subject[]> => {
-    const response = await apiFetch('/plan-estudio');
+export const getSubjects = async (careerId?: number): Promise<Subject[]> => {
+    const endpoint = careerId ? `/plan-estudio/${careerId}` : '/plan-estudio';
+    const response = await apiFetch(endpoint);
     const records: StudyPlanRecord[] = response.datos;
+
+    if (!Array.isArray(records)) {
+        console.error("API response for subjects is not an array:", records);
+        return [];
+    }
 
     const subjectsMap = new Map<number, Subject>();
 

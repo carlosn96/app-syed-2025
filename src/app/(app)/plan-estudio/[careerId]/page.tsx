@@ -12,17 +12,25 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Career, Subject, CareerSummary, Modality } from "@/lib/modelos"
+import { Subject, CareerSummary } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
-import { Book, Pencil, Trash2 } from "lucide-react"
+import { Book, Pencil, Trash2, PlusCircle } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { useAuth } from "@/context/auth-context"
-import { getCareers, getSubjects, deleteCareer, getModalities } from "@/services/api"
+import { getCareers, getSubjects } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { EditStudyPlanForm } from "@/components/edit-study-plan-form"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
 import { CreateStudyPlanForm } from "@/components/create-study-plan-form"
+
+interface CareerModality {
+    id: number;
+    name: string;
+    modality: string;
+    campus: string;
+    semesters: number;
+    coordinator: string;
+}
 
 
 export default function CareerPlansPage() {
@@ -32,36 +40,56 @@ export default function CareerPlansPage() {
   const router = useRouter();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [modalityToEdit, setModalityToEdit] = useState<Career | null>(null);
-  const [modalityToDelete, setModalityToDelete] = useState<Career | null>(null);
   
   const { user } = useAuth();
 
-  const [careerDetails, setCareerDetails] = useState<Career[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
+  const [careerSummary, setCareerSummary] = useState<CareerSummary | null>(null);
+  const [modalities, setModalities] = useState<CareerModality[]>([]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [careerSummary, setCareerSummary] = useState<CareerSummary | null>(null);
-
-  const [activeTabs, setActiveTabs] = useState<Record<string, string>>({});
 
   const fetchData = async () => {
+      if (isNaN(careerId)) {
+        setError("ID de carrera no válido.");
+        setIsLoading(false);
+        return;
+      }
       try {
         setIsLoading(true);
         const [careersData, subjectsData] = await Promise.all([
           getCareers(),
-          getSubjects(),
+          getSubjects(careerId),
         ]);
         
         const currentCareerSummary = careersData.find(c => c.id === careerId);
         if (currentCareerSummary) {
             setCareerSummary(currentCareerSummary);
-            setCareerDetails(currentCareerSummary.modalities || []);
         } else {
             setError("Carrera no encontrada.");
         }
-        setSubjects(subjectsData);
+
+        setAllSubjects(subjectsData);
+        
+        // Group subjects by modality to create the modality list
+        const modalitiesMap = new Map<string, CareerModality>();
+        subjectsData.forEach(subject => {
+            if (!modalitiesMap.has(subject.modality)) {
+                // Find semester count from a related career summary if possible, otherwise default
+                const relatedModality = currentCareerSummary?.modalities?.find(m => m.modality === subject.modality);
+                modalitiesMap.set(subject.modality, {
+                    id: relatedModality?.id || Math.random(), // Use a stable ID if possible
+                    name: subject.career,
+                    modality: subject.modality,
+                    campus: relatedModality?.campus || 'Desconocido',
+                    semesters: relatedModality?.semesters || 10,
+                    coordinator: relatedModality?.coordinator || 'No Asignado',
+                });
+            }
+        });
+        setModalities(Array.from(modalitiesMap.values()));
+
         setError(null);
       } catch (err: any) {
         setError(err.message || 'Error al cargar los datos');
@@ -78,13 +106,15 @@ export default function CareerPlansPage() {
   }, [careerId]);
 
 
-  const renderSubjectTabs = (career: Career, uniqueKey: string) => {
-    const filteredSubjects = subjects.filter(
-      (subject) => subject.career === career.name && subject.modality === career.modality && subject.semester <= career.semesters
+  const renderSubjectTabs = (modality: CareerModality) => {
+    const filteredSubjects = allSubjects.filter(
+      (subject) => subject.modality === modality.modality
     );
+
     const semesters = Array.from(
       new Set(filteredSubjects.map((s) => s.semester))
     ).sort((a, b) => a - b);
+    
     const defaultTabValue = semesters.length > 0 ? `sem-${semesters[0]}` : "";
 
     if (semesters.length === 0) {
@@ -142,10 +172,10 @@ export default function CareerPlansPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col">
           <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-            {`Planes de Estudio: ${careerSummary?.name}`}
+            {`Planes de Estudio: ${careerSummary?.name || 'Cargando...'}`}
           </h1>
           <p className="text-muted-foreground">
-              Modalidades disponibles para esta carrera.
+              Modalidades y planes de estudio disponibles para esta carrera.
           </p>
         </div>
       </div>
@@ -171,8 +201,7 @@ export default function CareerPlansPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {careerDetails.length > 0 ? careerDetails.map(modality => {
-              const key = `${modality.name}-${modality.campus}-${modality.modality}`;
+          {modalities.length > 0 ? modalities.map(modality => {
               return (
                   <Card key={modality.id} className="flex flex-col rounded-xl">
                       <CardHeader>
@@ -185,7 +214,7 @@ export default function CareerPlansPage() {
                           </div>
                       </CardHeader>
                       <CardContent className="flex flex-col flex-grow pb-2">
-                          {renderSubjectTabs(modality, key)}
+                          {renderSubjectTabs(modality)}
                       </CardContent>
                   </Card>
               )
@@ -202,4 +231,3 @@ export default function CareerPlansPage() {
     </div>
   );
 }
-
