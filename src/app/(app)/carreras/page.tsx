@@ -152,12 +152,6 @@ export default function CareersPage() {
               </CardHeader>
               <CardFooter className="flex-col items-stretch gap-2 mt-auto">
                   <div className="flex gap-2">
-                    <Button asChild className="flex-1" variant="success">
-                        <Link href={`/plan-estudio/${career.id}`}>
-                        <BookOpenCheck />
-                        <span className="sr-only">Planes de Estudio</span>
-                        </Link>
-                    </Button>
                     <Button variant="info" className="flex-1" onClick={() => handleAssignClick(career)}>
                         <UserPlus />
                         <span className="sr-only">Asignar Coordinador</span>
