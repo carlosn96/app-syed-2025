@@ -22,7 +22,7 @@ import { getCareers, getSubjects, deleteCareer, getModalities } from "@/services
 import { Skeleton } from "@/components/ui/skeleton"
 import { EditStudyPlanForm } from "@/components/edit-study-plan-form"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
-import { AssignModalityForm } from "@/components/assign-modality-form";
+import { CreateStudyPlanForm } from "@/components/create-study-plan-form"
 
 
 export default function CareerPlansPage() {
@@ -44,7 +44,7 @@ export default function CareerPlansPage() {
   const [allModalities, setAllModalities] = useState<Modality[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [careerName, setCareerName] = useState<string>('');
+  const [careerSummary, setCareerSummary] = useState<CareerSummary | null>(null);
 
   const [activeTabs, setActiveTabs] = useState<Record<string, string>>({});
 
@@ -62,7 +62,7 @@ export default function CareerPlansPage() {
         
         const currentCareerSummary = careersData.find(c => c.id === careerId);
         if (currentCareerSummary) {
-            setCareerName(currentCareerSummary.name);
+            setCareerSummary(currentCareerSummary);
             if(currentCareerSummary.modalities) {
                 setCareerDetails(currentCareerSummary.modalities);
             }
@@ -87,11 +87,6 @@ export default function CareerPlansPage() {
     return careerDetails;
   }, [careerDetails]);
 
-  const availableModalities = useMemo(() => {
-    if (!allModalities || !careerModalities) return [];
-    const assignedModalityNames = new Set(careerModalities.map(m => m.modality));
-    return allModalities.filter(m => !assignedModalityNames.has(m.nombre));
-  }, [allModalities, careerModalities]);
 
   const handleTabChange = (key: string, value: string) => {
     setActiveTabs((prev) => ({ ...prev, [key]: value }));
@@ -101,12 +96,12 @@ export default function CareerPlansPage() {
     return `${n}°`;
   };
 
-  const handleCreateSuccess = (modalityName: string) => {
+  const handleCreateSuccess = () => {
     setIsCreateModalOpen(false);
     toast.current?.show({
         severity: "success",
-        summary: "Modalidad Agregada",
-        detail: `La modalidad ${modalityName} se ha agregado a ${careerName} correctamente.`,
+        summary: "Plan de Estudio Creado",
+        detail: `El nuevo plan de estudio se ha agregado a ${careerSummary?.name} correctamente.`,
     });
     fetchData();
   }
@@ -214,7 +209,7 @@ export default function CareerPlansPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col">
           <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-            {`Planes de Estudio: ${careerName}`}
+            {`Planes de Estudio: ${careerSummary?.name}`}
           </h1>
           <p className="text-muted-foreground">
               Modalidades disponibles para esta carrera.
@@ -223,19 +218,20 @@ export default function CareerPlansPage() {
         {user?.rol === 'administrador' && (
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
                 <DialogTrigger asChild>
-                    <Button>Agregar Modalidad</Button>
+                    <Button>Crear Plan de Estudio</Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Agregar Modalidad</DialogTitle>
+                        <DialogTitle>Crear Plan de Estudio</DialogTitle>
                         <DialogDescription>
-                            Selecciona una modalidad para agregarla a la carrera {careerName}.
+                            Define una nueva modalidad para la carrera {careerSummary?.name}.
                         </DialogDescription>
                     </DialogHeader>
-                    {careerId && <AssignModalityForm 
+                    {careerSummary && <CreateStudyPlanForm 
                         onSuccess={handleCreateSuccess} 
-                        careerId={careerId}
-                        availableModalities={availableModalities}
+                        careerName={careerSummary.name}
+                        campus={careerDetails[0]?.campus || "Plantel Principal"}
+                        coordinator={careerSummary.coordinator || "No asignado"}
                     />}
                 </DialogContent>
             </Dialog>
