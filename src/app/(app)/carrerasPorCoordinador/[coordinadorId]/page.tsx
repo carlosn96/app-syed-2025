@@ -1,7 +1,7 @@
 
 "use client"
 import { useState, useMemo, useEffect, useRef } from "react"
-import { Pencil, PlusCircle, Trash2, Search, BookCopy } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search, BookCopy, UserPlus } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link";
 import { Toast } from 'primereact/toast';
@@ -10,6 +10,8 @@ import {
   Card,
   CardHeader,
   CardTitle,
+  CardFooter,
+  CardDescription,
 } from "@/components/ui/card"
 import { Career, User, AssignedCareer, CareerSummary } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
@@ -125,28 +127,28 @@ export default function CoordinadorCarrerasPage() {
 
   const renderCareerContent = (career: AssignedCareer) => {
     return (
-         <Card key={career.id_carrera} className="flex flex-col rounded-xl">
+        <Card key={career.id_carrera} className="flex flex-col">
             <CardHeader>
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-left w-full">
-                  <div>
-                      <CardTitle>{career.carrera}</CardTitle>
-                  </div>
-                   {user?.rol === 'administrador' && (
-                    <div className="flex gap-2 shrink-0">
-                        <Button asChild size="icon" variant="success">
+                <CardTitle>{career.carrera}</CardTitle>
+            </CardHeader>
+            <CardFooter className="mt-auto">
+                <div className="flex gap-2 w-full">
+                    {user?.rol === 'administrador' && (
+                        <>
+                        <Button asChild variant="success" className="flex-1">
                             <Link href={`/plan-estudio/${career.id_carrera}`}>
-                                <BookCopy className="h-4 w-4" />
+                                <BookCopy />
                                 <span className="sr-only">Planes de Estudio</span>
                             </Link>
                         </Button>
-                        <Button size="icon" variant="destructive" onClick={() => setCareerToRemove(career)}>
-                            <Trash2 className="h-4 w-4" />
+                        <Button variant="destructive" className="flex-1" onClick={() => setCareerToRemove(career)}>
+                            <Trash2 />
                             <span className="sr-only">Desasignar</span>
                         </Button>
-                    </div>
-                   )}
-              </div>
-            </CardHeader>
+                        </>
+                    )}
+                </div>
+            </CardFooter>
         </Card>
     );
   };
@@ -224,7 +226,7 @@ export default function CoordinadorCarrerasPage() {
       
        {filteredCareers.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {filteredCareers.map(group => renderCareerContent(group))}
+          {filteredCareers.map(career => renderCareerContent(career))}
         </div>
        ) : (
         <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
