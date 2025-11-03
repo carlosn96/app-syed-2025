@@ -1,259 +1,158 @@
 
 "use client"
-import { useState, useMemo, useEffect, useRef } from "react"
-import { Pencil, PlusCircle, Trash2, Search, BookCopy, UserPlus } from "lucide-react"
+
+import { useState, useEffect, useMemo } from "react"
 import { useParams, useRouter } from "next/navigation"
-import Link from "next/link";
-import { Toast } from 'primereact/toast';
+import Link from "next/link"
+import { BookCopy, Search } from "lucide-react"
 
 import {
   Card,
+  CardContent,
   CardHeader,
   CardTitle,
   CardFooter,
   CardDescription,
 } from "@/components/ui/card"
-import { Career, User, AssignedCareer, CareerSummary } from "@/lib/modelos"
+import { Coordinador, AssignedCareer } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-
 import { Input } from "@/components/ui/input"
-import { useAuth } from "@/context/auth-context"
-import { getCarrerasPorCoordinador, getCoordinadorById, removeCarreraFromCoordinador, getCareers } from "@/services/api"
+import { getCoordinadorById, getCarrerasPorCoordinador } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
-import { AssignCareerToCoordinatorForm } from "@/components/assign-career-to-coordinator-form"
+import { normalizeString } from "@/lib/utils"
 
-export default function CoordinadorCarrerasPage() {
+
+export default function CarrerasPorCoordinadorPage() {
   const params = useParams();
   const router = useRouter();
   const coordinadorId = Number(params.coordinadorId);
-  const { user } = useAuth();
-  const toast = useRef<Toast>(null);
 
-  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-  const [careerToRemove, setCareerToRemove] = useState<AssignedCareer | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  
-  const [coordinador, setCoordinador] = useState<User | null>(null);
+  const [coordinator, setCoordinator] = useState<Coordinador | null>(null);
   const [assignedCareers, setAssignedCareers] = useState<AssignedCareer[]>([]);
-  const [allCareers, setAllCareers] = useState<CareerSummary[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
-      if (isNaN(coordinadorId)) {
+  useEffect(() => {
+    if (isNaN(coordinadorId)) {
         setError("ID de coordinador inválido.");
         setIsLoading(false);
         return;
-      }
-      try {
-        setIsLoading(true);
-        const [coordinadorData, assignedCareersData, allCareersData] = await Promise.all([
-          getCoordinadorById(coordinadorId),
-          getCarrerasPorCoordinador(coordinadorId),
-          getCareers()
-        ]);
-        setCoordinador(coordinadorData);
-        setAssignedCareers(assignedCareersData);
-        setAllCareers(allCareersData);
+    }
 
-      } catch (err: any) {
-        setError(err.message || 'Error al cargar los datos');
-        if (err.message.toLowerCase().includes("not found")) {
-            router.push('/coordinadores');
+    const fetchData = async () => {
+        try {
+            setIsLoading(true);
+            const [coordinatorData, careersData] = await Promise.all([
+                getCoordinadorById(coordinadorId),
+                getCarrerasPorCoordinador(coordinadorId)
+            ]);
+            // The API for getCoordinadorById returns a User, so we adapt it
+            const adaptedCoordinator: Coordinador = {
+              id_coordinador: coordinatorData.id, // Assuming user id is coordinator id
+              usuario_id: coordinatorData.id,
+              nombre_completo: `${coordinatorData.nombre} ${coordinatorData.apellido_paterno}`.trim(),
+              correo: coordinatorData.correo,
+              rol: coordinatorData.rol,
+              fecha_registro: coordinatorData.fecha_registro,
+              ultimo_acceso: coordinatorData.ultimo_acceso || ''
+            };
+            setCoordinator(adaptedCoordinator);
+            setAssignedCareers(careersData);
+        } catch (err: any) {
+            setError(err.message || "Error al cargar los datos.");
+            console.error(err);
+        } finally {
+            setIsLoading(false);
         }
-      } finally {
-        setIsLoading(false);
-      }
     };
 
-  useEffect(() => {
     fetchData();
   }, [coordinadorId]);
-  
-  const handleSuccess = () => {
-    setIsAssignModalOpen(false);
-    fetchData();
-  }
-  
-  const handleRemove = async () => {
-    if (!careerToRemove || !coordinador) return;
-    try {
-        await removeCarreraFromCoordinador({ id_coordinador: coordinador.id, id_carrera: careerToRemove.id_carrera });
-        toast.current?.show({
-            severity: "success",
-            summary: "Carrera Desasignada",
-            detail: `La carrera ${careerToRemove.carrera} ha sido desasignada del coordinador.`,
-        });
-        setCareerToRemove(null);
-        fetchData();
-    } catch (error) {
-       if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al desasignar",
-            detail: error.message,
-        });
-      }
+
+  const filteredCareers = useMemo(() => {
+    if (!searchTerm) {
+        return assignedCareers;
     }
-  }
-
-  const filteredCareers = assignedCareers.filter(career => 
-    career.carrera.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  const unassignedCareers = useMemo(() => {
-    const assignedIds = new Set(assignedCareers.map(c => c.id_carrera));
-    return allCareers.filter(c => !assignedIds.has(c.id));
-  }, [assignedCareers, allCareers]);
-
-  const renderCareerContent = (career: AssignedCareer) => {
-    return (
-        <Card key={career.id_carrera} className="flex flex-col">
-            <CardHeader>
-                <CardTitle>{career.carrera}</CardTitle>
-            </CardHeader>
-            <CardFooter className="mt-auto">
-                <div className="flex gap-2 w-full">
-                    {user?.rol === 'administrador' && (
-                        <>
-                        <Button asChild variant="success" className="flex-1">
-                            <Link href={`/plan-estudio/${career.id_carrera}`}>
-                                <BookCopy />
-                                <span className="sr-only">Planes de Estudio</span>
-                            </Link>
-                        </Button>
-                        <Button variant="destructive" className="flex-1" onClick={() => setCareerToRemove(career)}>
-                            <Trash2 />
-                            <span className="sr-only">Desasignar</span>
-                        </Button>
-                        </>
-                    )}
-                </div>
-            </CardFooter>
-        </Card>
+    const normalizedSearchTerm = normalizeString(searchTerm);
+    return assignedCareers.filter(career => 
+        normalizeString(career.carrera).includes(normalizedSearchTerm)
     );
-  };
+  }, [assignedCareers, searchTerm]);
+
 
   if (isLoading) {
     return (
       <div className="flex flex-col gap-8">
-        <div className="flex flex-col">
-            <Skeleton className="h-8 w-1/3" />
-            <Skeleton className="h-4 w-1/4 mt-2" />
+         <FloatingBackButton />
+         <div className="flex flex-col">
+            <Skeleton className="h-8 w-1/2 mb-2" />
+            <Skeleton className="h-4 w-1/3" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+            {Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-xl" />)}
         </div>
       </div>
-    );
+    )
   }
 
   if (error) {
-    return <p className="text-destructive text-center">{error}</p>;
+    return (
+        <div className="flex flex-col gap-8 text-center">
+            <FloatingBackButton />
+            <p className="text-destructive">{error}</p>
+        </div>
+    )
   }
 
-
-  if (!coordinador) {
-    return <div>Coordinador no encontrado.</div>;
-  }
-  
   return (
     <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
       <FloatingBackButton />
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-col">
-            <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-                Carreras de {`${coordinador.nombre} ${coordinador.apellido_paterno}`}
-            </h1>
-            <p className="text-muted-foreground">Lista de carreras asignadas a este coordinador.</p>
-        </div>
-        {user?.rol === 'administrador' && (
-            <Dialog open={isAssignModalOpen} onOpenChange={setIsAssignModalOpen}>
-                <DialogTrigger asChild>
-                    <Button>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Asignar Carrera
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Asignar Carrera al Coordinador</DialogTitle>
-                        <DialogDescription>
-                            Selecciona una carrera para asignarla a {`${coordinador.nombre} ${coordinador.apellido_paterno}`}.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <AssignCareerToCoordinatorForm 
-                      coordinadorId={coordinadorId} 
-                      availableCareers={unassignedCareers} 
-                      onSuccess={handleSuccess} 
-                    />
-                </DialogContent>
-            </Dialog>
-        )}
+       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
+          Carreras de {coordinator?.nombre_completo}
+        </h1>
       </div>
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-        <div className="relative w-full sm:w-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-                type="search"
-                placeholder="Buscar carreras..."
-                className="pl-9 w-full sm:w-full"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
-        </div>
+
+       <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+              type="search"
+              placeholder="Buscar carreras..."
+              className="pl-9 w-full"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+          />
       </div>
-      
-       {filteredCareers.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {filteredCareers.map(career => renderCareerContent(career))}
+
+      {filteredCareers.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCareers.map(career => (
+                <Card key={career.id_carrera} className="flex flex-col">
+                    <CardHeader>
+                        <CardTitle>{career.carrera}</CardTitle>
+                        <CardDescription>ID de Carrera: {career.id_carrera}</CardDescription>
+                    </CardHeader>
+                    <CardFooter className="mt-auto">
+                        <Button asChild variant="success" className="w-full">
+                          <Link href={`/plan-estudio/${career.id_carrera}`}>
+                            <BookCopy className="mr-2" />
+                            Ver Planes de Estudio
+                          </Link>
+                        </Button>
+                    </CardFooter>
+                </Card>
+            ))}
         </div>
-       ) : (
-        <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
-            <h3 className="text-lg font-semibold text-white">No hay carreras asignadas</h3>
+      ) : (
+         <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
+            <h3 className="text-lg font-semibold text-white">Sin Carreras Asignadas</h3>
             <p className="text-muted-foreground mt-2">
-                Aún no se han asignado carreras a este coordinador.
+                Este coordinador no tiene ninguna carrera asignada actualmente.
             </p>
         </div>
-       )}
-
-      <AlertDialog open={!!careerToRemove} onOpenChange={(open) => !open && setCareerToRemove(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-            <AlertDialogDescription>
-                Esta acción no se puede deshacer. Esto desasignará la carrera 
-                <span className="font-bold text-white"> {careerToRemove?.carrera}</span> del coordinador
-                <span className="font-bold text-white"> {`${coordinador.nombre} ${coordinador.apellido_paterno}`}</span>.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setCareerToRemove(null)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRemove}>Confirmar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
+      )}
     </div>
   )
 }

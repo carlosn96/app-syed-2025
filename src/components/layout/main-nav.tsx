@@ -52,6 +52,7 @@ export function MainNav() {
   const isCollapsed = state === 'collapsed'; 
 
   const links = allLinks.filter(link => {
+    if (pathname.startsWith('/carrerasPorCoordinador')) return false;
     if (!user || !link.roles.includes(user.rol)) {
       return false;
     }

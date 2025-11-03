@@ -177,7 +177,17 @@ export const createUser = (data: any, options?: { basePath?: string }): Promise<
     return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(data) });
 };
 
-export const getUserById = (id: number): Promise<User> => apiFetch(`/usuario/${id}`);
+export const getUserById = async (id: number): Promise<User> => {
+    const result = await apiFetch(`/usuario/${id}`);
+    const user = result.datos;
+    if (!user) {
+      throw new Error("User not found in API response");
+    }
+    return {
+        ...user,
+        rol: user.rol.toLowerCase(),
+    };
+};
 
 export const updateUser = (id: number, data: any, options?: { basePath?: string }): Promise<User> => {
     const endpoint = options?.basePath ? `${options.basePath}/${id}` : `/usuario/${id}`;
@@ -204,28 +214,27 @@ export const getCoordinadores = async (): Promise<Coordinador[]> => {
 
 export const getCoordinadorById = async (id: number): Promise<User> => {
     const result = await apiFetch(`/coordinadores/${id}`);
-    const coord = result.datos.coordinador;
-    if (!coord) {
+    const user = result.datos;
+    if (!user) {
       throw new Error("Coordinador not found in API response");
     }
     // Adapt the response to the User interface
     return {
-        id: coord.id,
-        nombre: coord.nombre,
-        apellido_paterno: coord.apellido_paterno,
-        apellido_materno: coord.apellido_materno,
-        correo: coord.correo,
+        id: user.id_usuario_coordinador,
+        nombre: user.coordinador,
+        apellido_paterno: '',
+        apellido_materno: '',
+        correo: user.correo,
         id_rol: 3, // Assuming 3 is the role ID for coordinators
         rol: 'coordinador',
-        fecha_registro: coord.fecha_registro,
-        ultimo_acceso: coord.ultimo_acceso,
-        rol_nombre: coord.rol,
+        fecha_registro: '',
+        ultimo_acceso: null,
     };
 };
 
 export const getCarrerasPorCoordinador = async (coordinadorId: number): Promise<AssignedCareer[]> => {
-    const data = await apiFetch(`/carrerasPorCoordinador/${coordinadorId}`);
-    return data.datos.map((item: any) => ({
+    const response = await apiFetch(`/carrerasPorCoordinador/${coordinadorId}`);
+    return response.datos.map((item: any) => ({
         id_carrera: item.id_carrera,
         carrera: item.carrera,
     }));
