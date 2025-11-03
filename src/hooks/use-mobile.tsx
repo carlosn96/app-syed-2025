@@ -3,7 +3,7 @@ import * as React from "react"
 
 const BREAKPOINTS = {
     sm: 640,
-    md: 768,
+    md: 1024,
     lg: 1024,
     xl: 1280,
     "2xl": 1536,
