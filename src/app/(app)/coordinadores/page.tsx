@@ -34,54 +34,54 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { User } from "@/lib/modelos"
+import { User, Coordinador } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
 import { EditUserForm } from "@/components/edit-user-form"
 import { Input } from "@/components/ui/input"
-import { getUsers, deleteUser } from "@/services/api"
+import { getUsers, deleteUser, getCoordinadores } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { normalizeString } from "@/lib/utils";
 
 export default function CoordinadoresPage() {
   const toast = useRef<Toast>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [isUsersLoading, setIsUsersLoading] = useState(true);
+  const [allCoordinators, setAllCoordinators] = useState<Coordinador[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
-  const fetchUsers = async () => {
+  const fetchCoordinators = async () => {
     try {
-      setIsUsersLoading(true);
-      const usersData = await getUsers();
-      setAllUsers(usersData.filter(u => u.rol === 'coordinador'));
+      setIsLoading(true);
+      const coordinatorsData = await getCoordinadores();
+      setAllCoordinators(coordinatorsData);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Error al cargar los coordinadores');
       console.error(err);
     } finally {
-      setIsUsersLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchCoordinators();
   }, []);
 
-  const filteredUsers = useMemo(() => {
+  const filteredCoordinators = useMemo(() => {
     if (!searchTerm) {
-        return allUsers;
+        return allCoordinators;
     }
     const normalizedSearchTerm = normalizeString(searchTerm);
-    return allUsers.filter(user => {
-        const fullName = normalizeString(`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`);
+    return allCoordinators.filter(user => {
+        const fullName = normalizeString(user.nombre_completo);
         const email = normalizeString(user.correo);
         return fullName.includes(normalizedSearchTerm) || email.includes(normalizedSearchTerm);
     });
-  }, [allUsers, searchTerm]);
+  }, [allCoordinators, searchTerm]);
 
 
   const handleEditClick = (user: User) => {
@@ -97,7 +97,7 @@ export default function CoordinadoresPage() {
             summary: "Usuario Eliminado",
             detail: "El coordinador ha sido eliminado correctamente.",
         });
-        fetchUsers();
+        fetchCoordinators();
     } catch (error) {
         if (error instanceof Error) {
             toast.current?.show({
@@ -109,28 +109,41 @@ export default function CoordinadoresPage() {
     }
   };
 
-  const renderUserCard = (user: User) => {
+  const renderCoordinatorCard = (coordinator: Coordinador) => {
+    // We need to create a `User`-like object for the Edit form if needed
+    const userForEdit: User = {
+        id: coordinator.usuario_id,
+        nombre: coordinator.nombre_completo.split(' ')[0] || '',
+        apellido_paterno: coordinator.nombre_completo.split(' ')[1] || '',
+        apellido_materno: coordinator.nombre_completo.split(' ')[2] || '',
+        correo: coordinator.correo,
+        id_rol: 3, // Coordinator role
+        rol: 'coordinador',
+        fecha_registro: coordinator.fecha_registro,
+        ultimo_acceso: coordinator.ultimo_acceso
+    };
+
     return (
-        <Card key={user.id}>
+        <Card key={coordinator.id_coordinador}>
         <CardHeader>
             <div className="flex items-start justify-between">
             <div>
-                <CardTitle className="text-base">{`${user.nombre} ${user.apellido_paterno}`}</CardTitle>
-                <CardDescription>{user.correo}</CardDescription>
+                <CardTitle className="text-base">{coordinator.nombre_completo}</CardTitle>
+                <CardDescription>{coordinator.correo}</CardDescription>
             </div>
-            <Badge variant="outline">{user.rol_nombre || user.rol}</Badge>
+            <Badge variant="outline">{coordinator.rol}</Badge>
             </div>
         </CardHeader>
         <CardContent className="text-sm space-y-2">
-            <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
+            <p><span className="font-semibold">Registro:</span> {new Date(coordinator.fecha_registro).toLocaleDateString()}</p>
             <div className="flex justify-end gap-2 pt-2">
               <Button asChild size="icon" variant="success">
-                <Link href={`/carrerasPorCoordinador/${user.id}`}>
+                <Link href={`/carrerasPorCoordinador/${coordinator.id_coordinador}`}>
                   <BookCopy className="h-4 w-4" />
                   <span className="sr-only">Ver Carreras</span>
                 </Link>
               </Button>
-              <Button size="icon" variant="warning" onClick={() => handleEditClick(user)}>
+              <Button size="icon" variant="warning" onClick={() => handleEditClick(userForEdit)}>
                   <Pencil className="h-4 w-4" />
                   <span className="sr-only">Editar</span>
               </Button>
@@ -146,12 +159,12 @@ export default function CoordinadoresPage() {
                           <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                           <AlertDialogDescription>
                               Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario
-                              <span className="font-bold text-white"> {`${user.nombre} ${user.apellido_paterno}`}</span>.
+                              <span className="font-bold text-white"> {coordinator.nombre_completo}</span>.
                           </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
+                          <AlertDialogAction onClick={() => handleDeleteUser(coordinator.usuario_id)}>
                               Confirmar
                           </AlertDialogAction>
                       </AlertDialogFooter>
@@ -206,7 +219,7 @@ export default function CoordinadoresPage() {
                     Completa el formulario para registrar una nueva cuenta de coordinador.
                     </DialogDescription>
                 </DialogHeader>
-                <CreateUserForm defaultRole="coordinador" onSuccess={() => { setIsCreateModalOpen(false); fetchUsers(); }} />
+                <CreateUserForm defaultRole="coordinador" onSuccess={() => { setIsCreateModalOpen(false); fetchCoordinators(); }} />
             </DialogContent>
            </Dialog>
       </div>
@@ -222,7 +235,7 @@ export default function CoordinadoresPage() {
             {userToEdit && (
                 <EditUserForm 
                     user={userToEdit} 
-                    onSuccess={() => { setIsEditModalOpen(false); fetchUsers(); }} 
+                    onSuccess={() => { setIsEditModalOpen(false); fetchCoordinators(); }} 
                 />
             )}
         </DialogContent>
@@ -242,9 +255,9 @@ export default function CoordinadoresPage() {
         </div>
 
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isUsersLoading 
+        {isLoading 
             ? Array.from({ length: 3 }).map((_, i) => renderSkeletonCard(i))
-            : filteredUsers.map(renderUserCard)}
+            : filteredCoordinators.map(renderCoordinatorCard)}
       </div>
     </div>
   )
