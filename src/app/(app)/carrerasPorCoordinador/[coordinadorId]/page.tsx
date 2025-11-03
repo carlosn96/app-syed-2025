@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react"
 import { Pencil, PlusCircle, Trash2, Search, BookCopy } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
+import Link from "next/link";
 import { Toast } from 'primereact/toast';
 
 import {
@@ -132,6 +133,12 @@ export default function CoordinadorCarrerasPage() {
                   </div>
                    {user?.rol === 'administrador' && (
                     <div className="flex gap-2 shrink-0">
+                        <Button asChild size="icon" variant="success">
+                            <Link href={`/plan-estudio/${career.id_carrera}`}>
+                                <BookCopy className="h-4 w-4" />
+                                <span className="sr-only">Planes de Estudio</span>
+                            </Link>
+                        </Button>
                         <Button size="icon" variant="destructive" onClick={() => setCareerToRemove(career)}>
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">Desasignar</span>
