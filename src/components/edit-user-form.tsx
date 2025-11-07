@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/select"
 import { useAuth } from "@/context/auth-context"
 import { Toast } from 'primereact/toast';
-import { groups } from "@/lib/data"
 import { useMemo, useState, useRef } from "react"
 import { User } from "@/lib/modelos"
 import { updateUser } from "@/services/api"
@@ -34,7 +33,6 @@ const editUserSchema = z.object({
   apellido_paterno: z.string().min(1, "El apellido paterno es requerido."),
   apellido_materno: z.string().min(1, "El apellido materno es requerido."),
   correo: z.string().email("Correo electrónico inválido."),
-  grupo: z.string().optional(),
   contrasena: z.string().optional(),
   contrasena_confirmation: z.string().optional(),
 }).refine(data => !data.contrasena || data.contrasena === data.contrasena_confirmation, {
@@ -70,7 +68,6 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // The role is now determined by the user prop and is not changeable.
   const selectedRole = user.rol as "coordinador" | "docente" | "alumno";
 
   const form = useForm<EditUserFormValues>({
@@ -80,7 +77,6 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       apellido_paterno: user.apellido_paterno,
       apellido_materno: user.apellido_materno,
       correo: user.correo,
-      grupo: user.grupo || "",
       contrasena: "",
       contrasena_confirmation: "",
     },
@@ -93,12 +89,6 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
     if (!data.contrasena) {
       delete dataToSend.contrasena;
       delete dataToSend.contrasena_confirmation;
-    }
-    
-    if (selectedRole === "alumno" && !dataToSend.grupo) {
-        form.setError("grupo", { type: "manual", message: "Por favor, seleccione un grupo para el alumno." });
-        setIsSubmitting(false);
-        return;
     }
 
     try {
@@ -189,32 +179,6 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
               </FormControl>
           </FormItem>
 
-          {selectedRole === "alumno" && (
-            <FormField
-              control={form.control}
-              name="grupo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Grupo</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccione un grupo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {groups.map((group) => (
-                        <SelectItem key={group.id} value={group.name}>
-                          {group.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
           <FormField
             control={form.control}
             name="contrasena"
@@ -252,5 +216,3 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
     </>
   )
 }
-
-    
