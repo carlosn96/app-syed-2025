@@ -60,12 +60,12 @@ interface CreateUserFormProps {
   defaultRole?: Role;
 }
 
-export function CreateUserForm({ onSuccess, defaultRole = "docente" }: CreateUserFormProps) {
+export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) {
   const { user: loggedInUser } = useAuth();
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [careers, setCareers] = useState<CareerSummary[]>([]);
-  const [selectedRole, setSelectedRole] = useState<Role>(defaultRole);
+  const [selectedRole, setSelectedRole] = useState<Role>(defaultRole || "docente");
 
   useEffect(() => {
     const fetchCareers = async () => {
@@ -166,24 +166,26 @@ export function CreateUserForm({ onSuccess, defaultRole = "docente" }: CreateUse
       <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormItem>
-              <FormLabel>Rol</FormLabel>
-              <Select onValueChange={(value) => setSelectedRole(value as any)} defaultValue={selectedRole}>
-              <FormControl>
-                  <SelectTrigger>
-                  <SelectValue placeholder="Seleccione un rol" />
-                  </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                  {Object.entries(roleDisplayFiltered).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                      {label}
-                  </SelectItem>
-                  ))}
-              </SelectContent>
-              </Select>
-              <FormMessage />
-          </FormItem>
+          {!defaultRole && (
+              <FormItem>
+                <FormLabel>Rol</FormLabel>
+                <Select onValueChange={(value) => setSelectedRole(value as any)} defaultValue={selectedRole}>
+                <FormControl>
+                    <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un rol" />
+                    </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                    {Object.entries(roleDisplayFiltered).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                        {label}
+                    </SelectItem>
+                    ))}
+                </SelectContent>
+                </Select>
+                <FormMessage />
+            </FormItem>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
               control={form.control}
@@ -329,5 +331,3 @@ export function CreateUserForm({ onSuccess, defaultRole = "docente" }: CreateUse
     </>
   )
 }
-
-    
