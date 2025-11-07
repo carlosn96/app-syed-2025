@@ -47,13 +47,21 @@ const createUserSchema = z.object({
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
 
-type Role = "coordinador" | "docente" | "alumno";
+type Role = "administrador" | "coordinador" | "docente" | "alumno";
 
 const roleDisplayMap: Record<Role, string> = {
+  administrador: "Administrador",
   coordinador: "Coordinador",
   docente: "Docente",
   alumno: "Alumno",
 };
+
+const roleRouteMap: Record<"coordinador" | "docente" | "alumno", string> = {
+    coordinador: "/coordinadores",
+    docente: "/docentes",
+    alumno: "/alumnos",
+};
+
 
 interface CreateUserFormProps {
   onSuccess?: () => void;
@@ -88,7 +96,11 @@ export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) 
 
   const roleDisplayFiltered = useMemo(() => {
     if (loggedInUser?.rol === 'coordinador') {
-      const { coordinador, ...rest } = roleDisplayMap;
+      const { coordinador, administrador, ...rest } = roleDisplayMap;
+      return rest;
+    }
+    if (loggedInUser?.rol === 'administrador') {
+      const { administrador, ...rest } = roleDisplayMap;
       return rest;
     }
     return roleDisplayMap;
@@ -140,7 +152,8 @@ export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) 
     }
 
     try {
-      await createUser(dataToSend);
+      const endpoint = selectedRole === 'administrador' ? '/usuario' : roleRouteMap[selectedRole as keyof typeof roleRouteMap];
+      await createUser(dataToSend, { basePath: endpoint });
       toast.current?.show({
         severity: "success",
         summary: "Usuario Creado",

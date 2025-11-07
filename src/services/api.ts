@@ -144,7 +144,36 @@ export const getStudyPlanByCareerId = async (careerId: number): Promise<StudyPla
 }
 
 
-export const getSubjects = async (): Promise<Subject[]> => {
+export const getSubjects = async (careerId?: number): Promise<Subject[]> => {
+    if (careerId) {
+        const response = await apiFetch(`/plan-estudio/${careerId}`);
+        const subjects: Subject[] = [];
+        if (response.datos && Array.isArray(response.datos)) {
+            response.datos.forEach((plan: any) => {
+                plan.materias.forEach((materia: any) => {
+                    subjects.push({
+                        id: materia.id_materia,
+                        name: `Materia ID ${materia.id_materia}`, // Name is not in this response, requires another fetch or join
+                        career: plan.carrera,
+                        semester: materia.id_cat_nivel,
+                        modality: plan.modalidad,
+                    });
+                });
+            });
+        }
+        // This is inefficient, we should have a /materias/{id} endpoint
+        const allSubjectsResponse = await apiFetch('/materias');
+        if (allSubjectsResponse.datos && Array.isArray(allSubjectsResponse.datos)) {
+            subjects.forEach(s => {
+                const found = allSubjectsResponse.datos.find((as: any) => as.id_materia === s.id);
+                if (found) {
+                    s.name = found.nombre;
+                }
+            });
+        }
+        return subjects;
+    }
+
     const response = await apiFetch('/materias');
     if (response.datos && Array.isArray(response.datos)) {
         return response.datos.map((item: any) => ({
