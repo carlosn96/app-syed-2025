@@ -95,14 +95,13 @@ export default function AlumnosPage() {
 
 
   const handleEditClick = (alumno: Alumno) => {
-    // Adapt Alumno to User model for the form
-    const [nombre, apellido_paterno, ...rest] = alumno.nombre_completo.split(' ');
+    const nameParts = alumno.nombre_completo.split(' ');
     const userForEdit: User = {
         id: alumno.id_usuario,
         id_alumno: alumno.id_alumno,
-        nombre: nombre,
-        apellido_paterno: apellido_paterno,
-        apellido_materno: rest.join(' '),
+        nombre: nameParts[0] || '',
+        apellido_paterno: nameParts[1] || '',
+        apellido_materno: nameParts.slice(2).join(' '),
         correo: alumno.correo,
         id_rol: 4, // Alumno role
         rol: 'alumno',

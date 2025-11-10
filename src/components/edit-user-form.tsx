@@ -37,6 +37,7 @@ const editUserSchema = z.object({
   contrasena_confirmation: z.string().optional(),
   matricula: z.string().optional(),
   id_carrera: z.coerce.number().optional(),
+  grado_academico: z.string().optional(),
 }).refine(data => !data.contrasena || data.contrasena === data.contrasena_confirmation, {
   message: "Las contraseñas no coinciden.",
   path: ["contrasena_confirmation"],
@@ -97,18 +98,18 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       contrasena_confirmation: "",
       matricula: user.matricula || "",
       id_carrera: user.id_carrera,
+      grado_academico: user.grado_academico || "",
     },
   });
 
   const onSubmit = async (data: EditUserFormValues) => {
     setIsSubmitting(true);
     
-    const dataToSend: Partial<EditUserFormValues> & { [key: string]: any } = {};
+    const dataToSend: { [key: string]: any } = {};
 
-    // Only include fields that have a value
     Object.entries(data).forEach(([key, value]) => {
         if (value !== undefined && value !== "") {
-            dataToSend[key as keyof EditUserFormValues] = value;
+            dataToSend[key] = value;
         }
     });
 
@@ -116,22 +117,12 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       delete dataToSend.contrasena;
       delete dataToSend.contrasena_confirmation;
     }
-
-    if (selectedRole === "alumno") {
-        if (!data.matricula) {
-            form.setError("matricula", { type: "manual", message: "La matrícula es requerida para los alumnos." });
-            setIsSubmitting(false);
-            return;
-        }
-        if (!data.id_carrera) {
-            form.setError("id_carrera", { type: "manual", message: "La carrera es requerida para los alumnos." });
-            setIsSubmitting(false);
-            return;
-        }
-    } else {
-        delete dataToSend.matricula;
-        delete dataToSend.id_carrera;
+    
+    // Si no se proporcionó un nombre, pero sí apellidos, construimos el nombre completo
+    if (!data.nombre && (data.apellido_paterno || data.apellido_materno)) {
+        dataToSend.nombre = `${user.nombre} ${data.apellido_paterno || user.apellido_paterno} ${data.apellido_materno || user.apellido_materno}`.trim();
     }
+
 
     try {
       const endpoint = roleRouteMap[selectedRole];
@@ -267,6 +258,21 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
                 )}
               />
             </>
+          )}
+          {selectedRole === "docente" && (
+              <FormField
+              control={form.control}
+              name="grado_academico"
+              render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>Grado Académico</FormLabel>
+                  <FormControl>
+                      <Input placeholder="Ej. Maestría en Educación" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+              )}
+              />
           )}
 
           <FormField
