@@ -36,7 +36,7 @@ export const allLinks = [
   { href: "/coordinadores", label: "Coordinadores", icon: UserCog, roles: ['administrador'], exact: true },
   { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrador'], exact: true },
   { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrador', 'coordinador'], exact: true },
-  { href: "/groups", label: "Grupos", icon: Users, roles: ['administrador', 'coordinador'], exact: true },
+  { href: "/groups", label: "Grupos", icon: Users, roles: ['coordinador'], exact: true },
   { href: "/schedules", label: "Horarios", icon: CalendarClock, roles: ['coordinador', 'docente', 'alumno'], exact: true },
   { href: "/supervisions", label: "Agenda", icon: ClipboardList, roles: ['coordinador'], exact: true },
   { href: "/supervisions-management", label: "Supervisiones", icon: ShieldCheck, roles: ['administrador', 'coordinador'], exact: true },
