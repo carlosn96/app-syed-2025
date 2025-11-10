@@ -85,7 +85,8 @@ export default function PlantelCarrerasPage() {
     fetchData();
   }, [plantelId]);
   
-  const handleSuccess = () => {
+  const handleSuccess = (message: { summary: string, detail: string }) => {
+    toast.current?.show({ severity: 'success', ...message });
     setIsAssignModalOpen(false);
     fetchData();
   }

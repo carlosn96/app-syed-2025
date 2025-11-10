@@ -34,7 +34,7 @@ type AssignCareerFormValues = z.infer<typeof assignCareerSchema>;
 interface AssignCareerToPlantelFormProps {
   plantelId: number;
   availableCareers: CareerSummary[];
-  onSuccess?: () => void;
+  onSuccess?: (message: { summary: string, detail: string }) => void;
 }
 
 export function AssignCareerToPlantelForm({ plantelId, availableCareers, onSuccess }: AssignCareerToPlantelFormProps) {
@@ -49,13 +49,12 @@ export function AssignCareerToPlantelForm({ plantelId, availableCareers, onSucce
     setIsSubmitting(true);
     try {
       await assignCarreraToPlantel({ id_plantel: plantelId, id_carrera: data.id_carrera });
-      toast.current?.show({
-        severity: "success",
+      const careerName = availableCareers.find(c => c.id === data.id_carrera)?.name || '';
+      onSuccess?.({
         summary: "Carrera Asignada",
-        detail: `La carrera ha sido asignada al plantel con éxito.`,
+        detail: `La carrera ${careerName} ha sido asignada con éxito.`,
       });
       form.reset();
-      onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
         toast.current?.show({
