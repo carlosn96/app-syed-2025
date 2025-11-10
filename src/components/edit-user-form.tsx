@@ -29,10 +29,10 @@ import { User, CareerSummary } from "@/lib/modelos"
 import { updateUser, getCareers } from "@/services/api"
 
 const editUserSchema = z.object({
-  nombre: z.string().min(1, "El nombre es requerido."),
-  apellido_paterno: z.string().min(1, "El apellido paterno es requerido."),
-  apellido_materno: z.string().min(1, "El apellido materno es requerido."),
-  correo: z.string().email("Correo electrónico inválido."),
+  nombre: z.string().optional(),
+  apellido_paterno: z.string().optional(),
+  apellido_materno: z.string().optional(),
+  correo: z.string().email("Correo electrónico inválido.").optional(),
   contrasena: z.string().optional(),
   contrasena_confirmation: z.string().optional(),
   matricula: z.string().optional(),
@@ -103,7 +103,15 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   const onSubmit = async (data: EditUserFormValues) => {
     setIsSubmitting(true);
     
-    const dataToSend: Partial<EditUserFormValues> = { ...data };
+    const dataToSend: Partial<EditUserFormValues> & { [key: string]: any } = {};
+
+    // Only include fields that have a value
+    Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== "") {
+            dataToSend[key as keyof EditUserFormValues] = value;
+        }
+    });
+
     if (!data.contrasena) {
       delete dataToSend.contrasena;
       delete dataToSend.contrasena_confirmation;
@@ -137,7 +145,7 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       toast.current?.show({
         severity: "success",
         summary: "Usuario Actualizado",
-        detail: `El usuario ${data.nombre} ha sido actualizado con éxito.`,
+        detail: `El usuario ${data.nombre || user.nombre} ha sido actualizado con éxito.`,
       });
       onSuccess?.();
     } catch (error) {
