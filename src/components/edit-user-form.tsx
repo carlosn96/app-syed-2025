@@ -146,7 +146,6 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
     }
     
     if (selectedRole === 'alumno') {
-        dataToSend.matricula = data.matricula || user.matricula;
         dataToSend.id_carrera = data.id_carrera || user.id_carrera;
     }
 
