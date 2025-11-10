@@ -226,7 +226,10 @@ export const updateUser = (id: number, data: any, options?: { basePath?: string 
 export const deleteUser = (id: number): Promise<void> => apiFetch(`/usuario/${id}`, { method: 'DELETE' });
 
 // Student Management
-export const getAlumnos = (): Promise<Alumno[]> => apiFetch('/alumnos');
+export const getAlumnos = async (): Promise<Alumno[]> => {
+    const response = await apiFetch('/alumnos');
+    return response.datos;
+};
 
 // Teacher Management
 export const getDocentes = async (id?: number): Promise<Docente | Docente[]> => {
@@ -502,3 +505,4 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
     
 
     
+
