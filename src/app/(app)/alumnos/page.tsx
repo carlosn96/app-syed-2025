@@ -98,9 +98,10 @@ export default function AlumnosPage() {
     const userForEdit: User = {
         id: alumno.id_usuario,
         id_alumno: alumno.id_alumno,
-        nombre: alumno.nombre_completo,
-        apellido_paterno: '', // These will be managed in the edit form
-        apellido_materno: '', // These will be managed in the edit form
+        nombre_completo: alumno.nombre_completo,
+        nombre: '', // Will be derived in form
+        apellido_paterno: '', // Will be derived in form
+        apellido_materno: '', // Will be derived in form
         correo: alumno.correo,
         id_rol: 4, // Alumno role
         rol: 'alumno',
@@ -135,7 +136,7 @@ export default function AlumnosPage() {
   };
 
   const renderUserCard = (alumno: Alumno) => {
-    const [name, ...restOfName] = alumno.nombre_completo.split(' ');
+    const [name, ...restOfName] = (alumno.nombre_completo || '').split(' ');
     const lastName = restOfName.join(' ');
     
     return (

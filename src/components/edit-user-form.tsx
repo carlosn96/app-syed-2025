@@ -75,9 +75,13 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   const selectedRole = user.rol as "coordinador" | "docente" | "alumno";
 
   const nameParts = useMemo(() => {
-    if (user.nombre_completo) return user.nombre_completo.split(' ');
-    const parts = user.nombre.split(' ');
-    return [parts[0], parts[1], parts.slice(2).join(' ')];
+    const fullName = user.nombre_completo || user.nombre || '';
+    const parts = fullName.split(' ');
+    return {
+        nombre: parts[0] || '',
+        apellido_paterno: parts[1] || '',
+        apellido_materno: parts.slice(2).join(' ') || ''
+    };
   }, [user.nombre, user.nombre_completo]);
 
   useEffect(() => {
@@ -97,9 +101,9 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   const form = useForm<EditUserFormValues>({
     resolver: zodResolver(editUserSchema),
     defaultValues: {
-      nombre: nameParts[0] || '',
-      apellido_paterno: nameParts[1] || '',
-      apellido_materno: nameParts.slice(2).join(' ') || '',
+      nombre: nameParts.nombre,
+      apellido_paterno: nameParts.apellido_paterno,
+      apellido_materno: nameParts.apellido_materno,
       correo: user.correo,
       contrasena: "",
       contrasena_confirmation: "",
@@ -115,21 +119,30 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
     const dataToSend: { [key: string]: any } = {};
 
     // Collect only changed fields
-    Object.entries(data).forEach(([key, value]) => {
-        const initialValue = form.formState.defaultValues?.[key as keyof EditUserFormValues];
-        if (value !== undefined && value !== "" && value !== initialValue) {
-            dataToSend[key] = value;
+    Object.keys(data).forEach((key) => {
+        const formKey = key as keyof EditUserFormValues;
+        const currentValue = data[formKey];
+        const initialValue = form.formState.defaultValues?.[formKey];
+        if (currentValue !== undefined && currentValue !== "" && currentValue !== initialValue) {
+            dataToSend[formKey] = currentValue;
         }
     });
 
     if (data.nombre || data.apellido_paterno || data.apellido_materno) {
-        const nombre = data.nombre || form.getValues('nombre');
-        const ap = data.apellido_paterno || form.getValues('apellido_paterno');
-        const am = data.apellido_materno || form.getValues('apellido_materno');
+        const nombre = data.nombre || nameParts.nombre;
+        const ap = data.apellido_paterno || nameParts.apellido_paterno;
+        const am = data.apellido_materno || nameParts.apellido_materno;
         dataToSend.nombre_completo = `${nombre} ${ap} ${am}`.trim();
+        // The API for students expects nombre, apellido_paterno, and apellido_materno separately
+        if (selectedRole === 'alumno') {
+            dataToSend.nombre = nombre;
+            dataToSend.apellido_paterno = ap;
+            dataToSend.apellido_materno = am;
+            delete dataToSend.nombre_completo; 
+        }
     }
     
-    // Always include these for the alumno endpoint if they are present
+    // Always include these for the alumno endpoint if they are present or required
     if (selectedRole === 'alumno') {
         dataToSend.matricula = data.matricula;
         dataToSend.id_carrera = data.id_carrera;
@@ -146,7 +159,7 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
 
     try {
       const endpoint = roleRouteMap[selectedRole];
-      const idToUpdate = user.id;
+      const idToUpdate = selectedRole === 'alumno' ? user.id_alumno : user.id;
 
       if (idToUpdate === undefined) {
         throw new Error("ID de usuario no válido para la actualización.");
