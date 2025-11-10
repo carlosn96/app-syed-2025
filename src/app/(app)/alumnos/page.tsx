@@ -58,11 +58,16 @@ export default function AlumnosPage() {
     try {
       setIsLoading(true);
       const alumnosData = await getAlumnos();
-      setAllAlumnos(alumnosData);
+      if (Array.isArray(alumnosData)) {
+        setAllAlumnos(alumnosData);
+      } else {
+        setAllAlumnos([]);
+      }
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Error al cargar los alumnos');
       console.error(err);
+      setAllAlumnos([]);
     } finally {
       setIsLoading(false);
     }
