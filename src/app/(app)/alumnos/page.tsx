@@ -35,62 +35,78 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useAuth } from "@/context/auth-context"
-import { User } from "@/lib/modelos"
+import { User, Alumno } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
 import { EditUserForm } from "@/components/edit-user-form"
 import { Input } from "@/components/ui/input"
-import { getUsers, deleteUser } from "@/services/api"
+import { getAlumnos, deleteUser } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { normalizeString } from "@/lib/utils";
 
 export default function AlumnosPage() {
   const toast = useRef<Toast>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [isUsersLoading, setIsUsersLoading] = useState(true);
+  const [allAlumnos, setAllAlumnos] = useState<Alumno[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
-  const fetchUsers = async () => {
+  const fetchAlumnos = async () => {
     try {
-      setIsUsersLoading(true);
-      const usersData = await getUsers();
-      setAllUsers(usersData.filter(u => u.rol === 'alumno'));
+      setIsLoading(true);
+      const alumnosData = await getAlumnos();
+      setAllAlumnos(alumnosData);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Error al cargar los alumnos');
       console.error(err);
     } finally {
-      setIsUsersLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchAlumnos();
   }, []);
 
-  const filteredUsers = useMemo(() => {
+  const filteredAlumnos = useMemo(() => {
     if (!searchTerm) {
-        return allUsers;
+        return allAlumnos;
     }
     const normalizedSearchTerm = normalizeString(searchTerm);
-    return allUsers.filter(user => {
-        const fullName = normalizeString(`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`);
-        const email = normalizeString(user.correo);
-        const group = user.grupo ? normalizeString(user.grupo) : '';
+    return allAlumnos.filter(alumno => {
+        const fullName = normalizeString(alumno.nombre_completo);
+        const email = normalizeString(alumno.correo);
+        const career = alumno.carrera ? normalizeString(alumno.carrera) : '';
 
         return fullName.includes(normalizedSearchTerm) ||
                email.includes(normalizedSearchTerm) ||
-               (group && group.includes(normalizedSearchTerm));
+               (career && career.includes(normalizedSearchTerm));
     });
-  }, [allUsers, searchTerm]);
+  }, [allAlumnos, searchTerm]);
 
 
-  const handleEditClick = (user: User) => {
-    setUserToEdit(user);
+  const handleEditClick = (alumno: Alumno) => {
+    // Adapt Alumno to User model for the form
+    const [nombre, apellido_paterno, ...rest] = alumno.nombre_completo.split(' ');
+    const userForEdit: User = {
+        id: alumno.id_usuario,
+        id_alumno: alumno.id_alumno,
+        nombre: nombre,
+        apellido_paterno: apellido_paterno,
+        apellido_materno: rest.join(' '),
+        correo: alumno.correo,
+        id_rol: 4, // Alumno role
+        rol: 'alumno',
+        matricula: alumno.matricula,
+        id_carrera: alumno.id_carrera,
+        fecha_registro: '', 
+        ultimo_acceso: '',
+    };
+    setUserToEdit(userForEdit);
     setIsEditModalOpen(true);
   };
 
@@ -102,7 +118,7 @@ export default function AlumnosPage() {
             summary: "Usuario Eliminado",
             detail: "El alumno ha sido eliminado correctamente.",
         });
-        fetchUsers();
+        fetchAlumnos();
     } catch (error) {
         if (error instanceof Error) {
             toast.current?.show({
@@ -114,23 +130,26 @@ export default function AlumnosPage() {
     }
   };
 
-  const renderUserCard = (user: User) => {
+  const renderUserCard = (alumno: Alumno) => {
+    const [name, ...restOfName] = alumno.nombre_completo.split(' ');
+    const lastName = restOfName.join(' ');
+    
     return (
-        <Card key={user.id}>
+        <Card key={alumno.id_alumno}>
         <CardHeader>
             <div className="flex items-start justify-between">
             <div>
-                <CardTitle className="text-base">{`${user.nombre} ${user.apellido_paterno}`}</CardTitle>
-                <CardDescription>{user.correo}</CardDescription>
+                <CardTitle className="text-base">{`${name} ${lastName}`}</CardTitle>
+                <CardDescription>{alumno.correo}</CardDescription>
             </div>
-            <Badge variant="outline">{user.rol_nombre || user.rol}</Badge>
+            <Badge variant="outline">Alumno</Badge>
             </div>
         </CardHeader>
         <CardContent className="text-sm space-y-2">
-            {user.rol === 'alumno' && <p><span className="font-semibold">Grupo:</span> {user.grupo || 'No asignado'}</p>}
-            <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
+            <p><span className="font-semibold">Matrícula:</span> {alumno.matricula}</p>
+            <p><span className="font-semibold">Carrera:</span> {alumno.carrera || 'No asignada'}</p>
             <div className="flex justify-end gap-2 pt-2">
-            <Button size="icon" variant="warning" onClick={() => handleEditClick(user)}>
+            <Button size="icon" variant="warning" onClick={() => handleEditClick(alumno)}>
                 <Pencil className="h-4 w-4" />
                 <span className="sr-only">Editar</span>
             </Button>
@@ -146,12 +165,12 @@ export default function AlumnosPage() {
                         <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                         <AlertDialogDescription>
                             Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario
-                            <span className="font-bold text-white"> {`${user.nombre} ${user.apellido_paterno}`}</span>.
+                            <span className="font-bold text-white"> {alumno.nombre_completo}</span>.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
+                        <AlertDialogAction onClick={() => handleDeleteUser(alumno.id_usuario)}>
                             Confirmar
                         </AlertDialogAction>
                     </AlertDialogFooter>
@@ -206,7 +225,7 @@ export default function AlumnosPage() {
                     Completa el formulario para registrar una nueva cuenta de alumno.
                     </DialogDescription>
                 </DialogHeader>
-                <CreateUserForm defaultRole="alumno" onSuccess={() => { setIsCreateModalOpen(false); fetchUsers(); }} />
+                <CreateUserForm defaultRole="alumno" onSuccess={() => { setIsCreateModalOpen(false); fetchAlumnos(); }} />
             </DialogContent>
            </Dialog>
       </div>
@@ -222,7 +241,7 @@ export default function AlumnosPage() {
             {userToEdit && (
                 <EditUserForm 
                     user={userToEdit} 
-                    onSuccess={() => { setIsEditModalOpen(false); fetchUsers(); }} 
+                    onSuccess={() => { setIsEditModalOpen(false); fetchAlumnos(); }} 
                 />
             )}
         </DialogContent>
@@ -242,9 +261,9 @@ export default function AlumnosPage() {
         </div>
 
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isUsersLoading 
+        {isLoading 
             ? Array.from({ length: 6 }).map((_, i) => renderSkeletonCard(i))
-            : filteredUsers.map(renderUserCard)}
+            : filteredAlumnos.map(renderUserCard)}
       </div>
     </div>
   )

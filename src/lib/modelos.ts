@@ -13,6 +13,9 @@ export interface User {
   grupo?: string;
   rol_nombre?: string;
   id_docente?: number;
+  id_alumno?: number;
+  matricula?: string;
+  id_carrera?: number;
 }
 
 export interface Alumno {

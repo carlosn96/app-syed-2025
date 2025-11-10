@@ -24,9 +24,9 @@ import {
 } from "@/components/ui/select"
 import { useAuth } from "@/context/auth-context"
 import { Toast } from 'primereact/toast';
-import { useMemo, useState, useRef } from "react"
-import { User } from "@/lib/modelos"
-import { updateUser } from "@/services/api"
+import { useMemo, useState, useEffect, useRef } from "react"
+import { User, CareerSummary } from "@/lib/modelos"
+import { updateUser, getCareers } from "@/services/api"
 
 const editUserSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido."),
@@ -35,6 +35,8 @@ const editUserSchema = z.object({
   correo: z.string().email("Correo electrónico inválido."),
   contrasena: z.string().optional(),
   contrasena_confirmation: z.string().optional(),
+  matricula: z.string().optional(),
+  id_carrera: z.coerce.number().optional(),
 }).refine(data => !data.contrasena || data.contrasena === data.contrasena_confirmation, {
   message: "Las contraseñas no coinciden.",
   path: ["contrasena_confirmation"],
@@ -64,11 +66,25 @@ interface EditUserFormProps {
 }
 
 export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
-  const { user: loggedInUser } = useAuth();
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [careers, setCareers] = useState<CareerSummary[]>([]);
   
   const selectedRole = user.rol as "coordinador" | "docente" | "alumno";
+
+  useEffect(() => {
+    const fetchCareers = async () => {
+        try {
+            if (selectedRole === 'alumno') {
+                const careersData = await getCareers();
+                setCareers(careersData);
+            }
+        } catch (error) {
+            console.error("Failed to fetch careers", error);
+        }
+    };
+    fetchCareers();
+  }, [selectedRole]);
 
   const form = useForm<EditUserFormValues>({
     resolver: zodResolver(editUserSchema),
@@ -79,6 +95,8 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       correo: user.correo,
       contrasena: "",
       contrasena_confirmation: "",
+      matricula: user.matricula || "",
+      id_carrera: user.id_carrera,
     },
   });
 
@@ -91,9 +109,31 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       delete dataToSend.contrasena_confirmation;
     }
 
+    if (selectedRole === "alumno") {
+        if (!data.matricula) {
+            form.setError("matricula", { type: "manual", message: "La matrícula es requerida para los alumnos." });
+            setIsSubmitting(false);
+            return;
+        }
+        if (!data.id_carrera) {
+            form.setError("id_carrera", { type: "manual", message: "La carrera es requerida para los alumnos." });
+            setIsSubmitting(false);
+            return;
+        }
+    } else {
+        delete dataToSend.matricula;
+        delete dataToSend.id_carrera;
+    }
+
     try {
       const endpoint = roleRouteMap[selectedRole];
-      await updateUser(user.id, dataToSend, { basePath: endpoint });
+      const idToUpdate = selectedRole === 'alumno' ? user.id_alumno : user.id;
+
+      if (idToUpdate === undefined) {
+        throw new Error("ID de usuario no válido para la actualización.");
+      }
+      
+      await updateUser(idToUpdate, dataToSend, { basePath: endpoint });
       toast.current?.show({
         severity: "success",
         summary: "Usuario Actualizado",
@@ -178,6 +218,48 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
                   <Input value={roleDisplayMap[selectedRole] || "Desconocido"} disabled />
               </FormControl>
           </FormItem>
+
+          {selectedRole === 'alumno' && (
+            <>
+              <FormField
+                control={form.control}
+                name="matricula"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Matrícula</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="id_carrera"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Carrera</FormLabel>
+                    <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={String(field.value)}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione una carrera" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {careers.map((career) => (
+                          <SelectItem key={career.id} value={String(career.id)}>
+                            {career.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
 
           <FormField
             control={form.control}
