@@ -95,13 +95,12 @@ export default function AlumnosPage() {
 
 
   const handleEditClick = (alumno: Alumno) => {
-    const nameParts = alumno.nombre_completo.split(' ');
     const userForEdit: User = {
         id: alumno.id_usuario,
         id_alumno: alumno.id_alumno,
-        nombre: nameParts[0] || '',
-        apellido_paterno: nameParts[1] || '',
-        apellido_materno: nameParts.slice(2).join(' '),
+        nombre: alumno.nombre_completo,
+        apellido_paterno: '', // These will be managed in the edit form
+        apellido_materno: '', // These will be managed in the edit form
         correo: alumno.correo,
         id_rol: 4, // Alumno role
         rol: 'alumno',
@@ -109,6 +108,7 @@ export default function AlumnosPage() {
         id_carrera: alumno.id_carrera,
         fecha_registro: '', 
         ultimo_acceso: '',
+        grado_academico: '', // Added to satisfy User type
     };
     setUserToEdit(userForEdit);
     setIsEditModalOpen(true);
