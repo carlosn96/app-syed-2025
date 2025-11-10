@@ -483,7 +483,7 @@ export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: n
     apiFetch('/asignarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
 
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
-    apiFetch('/eliminarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
+    apiFetch('/eliminarCarreraPlantel', { method: 'DELETE', body: JSON.stringify(data) });
 
 export const getModalities = async (): Promise<Modality[]> => {
     const result = await apiFetch('/modalidades');
