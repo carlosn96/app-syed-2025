@@ -28,7 +28,7 @@ type EditPlantelFormValues = z.infer<typeof editPlantelSchema>;
 
 interface EditPlantelFormProps {
   plantel: Plantel;
-  onSuccess?: () => void;
+  onSuccess?: (message: { summary: string, detail: string }) => void;
 }
 
 export function EditPlantelForm({ plantel, onSuccess }: EditPlantelFormProps) {
@@ -47,15 +47,13 @@ export function EditPlantelForm({ plantel, onSuccess }: EditPlantelFormProps) {
     setIsSubmitting(true);
     try {
       await updatePlantel(plantel.id, data);
-      toast.current?.show({
-        severity: "success",
+      onSuccess?.({
         summary: "Plantel Actualizado",
-        detail: `El plantel ${data.nombre} ha sido actualizado con éxito.`,
+        detail: `El plantel ha sido actualizado a ${data.nombre}.`,
       });
-      onSuccess?.();
     } catch (error) {
-      if (error instanceof Error) {
-        toast.current?.show({
+      if (error instanceof Error && toast.current) {
+        toast.current.show({
             severity: "error",
             summary: "Error al actualizar",
             detail: error.message,

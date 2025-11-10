@@ -26,7 +26,11 @@ const createPlantelSchema = z.object({
 
 type CreatePlantelFormValues = z.infer<typeof createPlantelSchema>;
 
-export function CreatePlantelForm({ onSuccess }: { onSuccess?: () => void }) {
+interface CreatePlantelFormProps {
+  onSuccess?: (message: { summary: string, detail: string }) => void;
+}
+
+export function CreatePlantelForm({ onSuccess }: CreatePlantelFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -42,16 +46,14 @@ export function CreatePlantelForm({ onSuccess }: { onSuccess?: () => void }) {
     setIsSubmitting(true);
     try {
       await createPlantel(data);
-      toast.current?.show({
-        severity: "success",
+      onSuccess?.({
         summary: "Plantel Creado",
         detail: `El plantel ${data.nombre} ha sido creado con éxito.`,
       });
       form.reset();
-      onSuccess?.();
     } catch (error) {
-      if (error instanceof Error) {
-        toast.current?.show({
+      if (error instanceof Error && toast.current) {
+        toast.current.show({
             severity: "error",
             summary: "Error al crear plantel",
             detail: error.message,

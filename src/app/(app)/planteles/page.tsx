@@ -64,7 +64,8 @@ export default function CampusesPage() {
         );
       }, [planteles, searchTerm]);
 
-    const handleSuccess = () => {
+    const handleSuccess = (message: { summary: string, detail: string }) => {
+        toast.current?.show({ severity: 'success', ...message });
         setIsCreateModalOpen(false);
         setIsEditModalOpen(false);
         fetchPlanteles();
