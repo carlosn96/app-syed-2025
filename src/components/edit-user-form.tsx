@@ -127,7 +127,7 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
 
     try {
       const endpoint = roleRouteMap[selectedRole];
-      const idToUpdate = selectedRole === 'alumno' ? user.id_alumno : user.id;
+      const idToUpdate = user.id;
 
       if (idToUpdate === undefined) {
         throw new Error("ID de usuario no válido para la actualización.");
