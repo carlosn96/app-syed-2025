@@ -75,14 +75,14 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   const selectedRole = user.rol as "coordinador" | "docente" | "alumno";
 
   const nameParts = useMemo(() => {
-    const fullName = user.nombre_completo || user.nombre || '';
+    const fullName = user.nombre_completo || '';
     const parts = fullName.split(' ');
     return {
-        nombre: parts[0] || '',
-        apellido_paterno: parts[1] || '',
-        apellido_materno: parts.slice(2).join(' ') || ''
+        nombre: user.nombre || parts[0] || '',
+        apellido_paterno: user.apellido_paterno || parts[1] || '',
+        apellido_materno: user.apellido_materno || parts.slice(2).join(' ') || ''
     };
-  }, [user.nombre, user.nombre_completo]);
+  }, [user.nombre, user.apellido_paterno, user.apellido_materno, user.nombre_completo]);
 
   useEffect(() => {
     const fetchCareers = async () => {
@@ -122,7 +122,10 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
     Object.keys(data).forEach((key) => {
         const formKey = key as keyof EditUserFormValues;
         const currentValue = data[formKey];
-        const initialValue = form.formState.defaultValues?.[formKey];
+        
+        // Ensure we have defaultValues to compare against
+        const initialValue = form.formState.defaultValues ? form.formState.defaultValues[formKey] : undefined;
+
         if (currentValue !== undefined && currentValue !== "" && currentValue !== initialValue) {
             dataToSend[formKey] = currentValue;
         }
@@ -142,10 +145,9 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
         }
     }
     
-    // Always include these for the alumno endpoint if they are present or required
     if (selectedRole === 'alumno') {
-        dataToSend.matricula = data.matricula;
-        dataToSend.id_carrera = data.id_carrera;
+        dataToSend.matricula = data.matricula || user.matricula;
+        dataToSend.id_carrera = data.id_carrera || user.id_carrera;
     }
 
 
@@ -156,9 +158,9 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
         dataToSend.contrasena = data.contrasena;
     }
 
-
     try {
       const endpoint = roleRouteMap[selectedRole];
+      // Use id_alumno for student updates, otherwise user.id
       const idToUpdate = selectedRole === 'alumno' ? user.id_alumno : user.id;
 
       if (idToUpdate === undefined) {
@@ -169,7 +171,7 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       toast.current?.show({
         severity: "success",
         summary: "Usuario Actualizado",
-        detail: `El usuario ${data.nombre || user.nombre} ha sido actualizado con éxito.`,
+        detail: `El usuario ha sido actualizado con éxito.`,
       });
       onSuccess?.();
     } catch (error) {
@@ -260,7 +262,7 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
                   <FormItem>
                     <FormLabel>Matrícula</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} disabled />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
