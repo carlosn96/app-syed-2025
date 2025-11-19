@@ -84,8 +84,22 @@ export default function CoordinadoresPage() {
   }, [allCoordinators, searchTerm]);
 
 
-  const handleEditClick = (user: User) => {
-    setUserToEdit(user);
+  const handleEditClick = (coordinator: Coordinador) => {
+    const nameParts = coordinator.nombre_completo.split(' ');
+    const userForEdit: User = {
+        id: coordinator.usuario_id,
+        id_coordinador: coordinator.id_coordinador,
+        nombre: nameParts[0] || '',
+        apellido_paterno: nameParts[1] || '',
+        apellido_materno: nameParts.slice(2).join(' ') || '',
+        nombre_completo: coordinator.nombre_completo,
+        correo: coordinator.correo,
+        id_rol: 3, // Coordinator role
+        rol: 'coordinador',
+        fecha_registro: coordinator.fecha_registro,
+        ultimo_acceso: coordinator.ultimo_acceso
+    };
+    setUserToEdit(userForEdit);
     setIsEditModalOpen(true);
   };
 
@@ -110,19 +124,6 @@ export default function CoordinadoresPage() {
   };
 
   const renderCoordinatorCard = (coordinator: Coordinador) => {
-    // We need to create a `User`-like object for the Edit form if needed
-    const userForEdit: User = {
-        id: coordinator.usuario_id,
-        nombre: coordinator.nombre_completo.split(' ')[0] || '',
-        apellido_paterno: coordinator.nombre_completo.split(' ')[1] || '',
-        apellido_materno: coordinator.nombre_completo.split(' ')[2] || '',
-        correo: coordinator.correo,
-        id_rol: 3, // Coordinator role
-        rol: 'coordinador',
-        fecha_registro: coordinator.fecha_registro,
-        ultimo_acceso: coordinator.ultimo_acceso
-    };
-
     return (
         <Card key={coordinator.id_coordinador}>
         <CardHeader>
@@ -143,7 +144,7 @@ export default function CoordinadoresPage() {
                   <span className="sr-only">Ver Carreras</span>
                 </Link>
               </Button>
-              <Button size="icon" variant="warning" onClick={() => handleEditClick(userForEdit)}>
+              <Button size="icon" variant="warning" onClick={() => handleEditClick(coordinator)}>
                   <Pencil className="h-4 w-4" />
                   <span className="sr-only">Editar</span>
               </Button>

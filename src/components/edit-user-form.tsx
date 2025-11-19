@@ -126,7 +126,6 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
         // Ensure we have defaultValues to compare against
         const initialValue = form.formState.defaultValues ? form.formState.defaultValues[formKey] : undefined;
 
-        // Matricula is special, never send it on update
         if (formKey === 'matricula') {
           return;
         }
@@ -169,6 +168,8 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
         idToUpdate = user.id_alumno;
       } else if (selectedRole === 'docente') {
         idToUpdate = user.id_docente;
+      } else if (selectedRole === 'coordinador') {
+        idToUpdate = user.id_coordinador;
       } else {
         idToUpdate = user.id;
       }

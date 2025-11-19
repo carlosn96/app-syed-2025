@@ -14,6 +14,7 @@ export interface User {
   rol_nombre?: string;
   id_docente?: number;
   id_alumno?: number;
+  id_coordinador?: number;
   matricula?: string;
   id_carrera?: number;
   grado_academico?: string;
