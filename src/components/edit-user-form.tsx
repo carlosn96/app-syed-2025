@@ -126,6 +126,11 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
         // Ensure we have defaultValues to compare against
         const initialValue = form.formState.defaultValues ? form.formState.defaultValues[formKey] : undefined;
 
+        // Matricula is special, never send it on update
+        if (formKey === 'matricula') {
+          return;
+        }
+
         if (currentValue !== undefined && currentValue !== "" && currentValue !== initialValue) {
             dataToSend[formKey] = currentValue;
         }
@@ -136,7 +141,6 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
         const ap = data.apellido_paterno || nameParts.apellido_paterno;
         const am = data.apellido_materno || nameParts.apellido_materno;
         dataToSend.nombre_completo = `${nombre} ${ap} ${am}`.trim();
-        // The API for students expects nombre, apellido_paterno, and apellido_materno separately
         if (selectedRole === 'alumno') {
             dataToSend.nombre = nombre;
             dataToSend.apellido_paterno = ap;
@@ -159,8 +163,15 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
 
     try {
       const endpoint = roleRouteMap[selectedRole];
-      // Use id_alumno for student updates, otherwise user.id
-      const idToUpdate = selectedRole === 'alumno' ? user.id_alumno : user.id;
+      let idToUpdate: number | undefined;
+
+      if (selectedRole === 'alumno') {
+        idToUpdate = user.id_alumno;
+      } else if (selectedRole === 'docente') {
+        idToUpdate = user.id_docente;
+      } else {
+        idToUpdate = user.id;
+      }
 
       if (idToUpdate === undefined) {
         throw new Error("ID de usuario no válido para la actualización.");

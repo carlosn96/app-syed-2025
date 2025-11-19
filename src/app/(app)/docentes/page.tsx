@@ -90,7 +90,13 @@ export default function DocentesPage() {
 
 
   const handleEditClick = (user: User) => {
-    setUserToEdit(user);
+    const docenteInfo = allDocentes.find(d => d.id_usuario === user.id);
+    const userWithDocenteId = {
+      ...user,
+      id_docente: docenteInfo?.id_docente,
+      grado_academico: docenteInfo?.grado_academico,
+    };
+    setUserToEdit(userWithDocenteId);
     setIsEditModalOpen(true);
   };
 

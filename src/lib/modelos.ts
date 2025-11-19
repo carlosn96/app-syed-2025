@@ -17,6 +17,7 @@ export interface User {
   matricula?: string;
   id_carrera?: number;
   grado_academico?: string;
+  nombre_completo?: string;
 }
 
 export interface Alumno {
