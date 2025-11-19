@@ -3,6 +3,7 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useMemo, useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Subject, Career, StudyPlanRecord } from '@/lib/modelos'
 import {
   Card,
@@ -63,34 +64,45 @@ export default function PlanEstudioPage() {
             try {
                 const [planData, subjectsData, careersData] = await Promise.all([
                     getStudyPlanByCareerId(careerId),
-                    getSubjects(), // Fetch all subjects to map names
+                    getSubjects(), 
                     getCareers()
                 ]);
 
                 const currentCareer = careersData.find(c => c.id === careerId) || null;
-                setCareerInfo(currentCareer);
+                setCareerInfo(currentCareer as any);
 
-                if (planData.length === 0 && currentCareer === null) {
-                    // This can happen if the career exists but has no study plan yet.
-                    // Or if the career ID is totally invalid.
-                    // The getCareers call helps us differentiate.
-                    setError("No se encontró información para esta carrera o no tiene un plan de estudios asignado.");
+                if (planData.length === 0 && !currentCareer) {
+                    setError("No se encontró información para esta carrera.");
+                    setStudyPlans([]);
+                } else if (planData.length === 0 && currentCareer) {
+                     // Career exists but has no study plan, which is a valid state
+                    setStudyPlans([]);
+                } else {
+                    const enrichedPlanData = planData.map(plan => {
+                        const subject = subjectsData.find(s => s.id === plan.id_materia);
+                        return {
+                            ...plan,
+                            subjectName: subject?.name || 'Materia Desconocida'
+                        }
+                    });
+                    setStudyPlans(enrichedPlanData);
                 }
-                
-                const enrichedPlanData = planData.map(plan => {
-                    const subject = subjectsData.find(s => s.id === plan.id_materia);
-                    return {
-                        ...plan,
-                        subjectName: subject?.name || 'Materia Desconocida'
-                    }
-                });
-
-                setStudyPlans(enrichedPlanData);
 
             } catch (err: any) {
-                setError(err.message || "Error al cargar los datos del plan de estudio.");
-                if (err.message.includes('404')) {
-                    router.push('/carreras');
+                 if (err.message.includes("Unexpected end of JSON input")) {
+                    // Treat as no data found, which is a valid state
+                    setStudyPlans([]);
+                    setError(null);
+                    // We still need career info if possible
+                    try {
+                        const careersData = await getCareers();
+                        const currentCareer = careersData.find(c => c.id === careerId) || null;
+                        setCareerInfo(currentCareer as any);
+                    } catch (careerError) {
+                        setError("Error al cargar la información de la carrera.");
+                    }
+                } else {
+                    setError(err.message || "Error al cargar los datos del plan de estudio.");
                 }
             } finally {
                 setIsLoading(false);
@@ -116,6 +128,7 @@ export default function PlanEstudioPage() {
     if (isLoading) {
         return (
             <div className="flex flex-col gap-8">
+                <FloatingBackButton />
                 <div className="flex flex-col">
                     <Skeleton className="h-8 w-1/2 mb-2" />
                     <Skeleton className="h-4 w-1/3" />
@@ -150,13 +163,21 @@ export default function PlanEstudioPage() {
     return (
         <div className="flex flex-col gap-8">
             <FloatingBackButton />
-            <div className="flex flex-col">
-                <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-                    Planes de Estudio: {careerInfo?.name || `Carrera #${careerId}`}
-                </h1>
-                <p className="text-muted-foreground">
-                    Gestiona las modalidades y materias de la carrera.
-                </p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className='flex flex-col'>
+                    <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
+                        Planes de Estudio: {careerInfo?.name || `Carrera #${careerId}`}
+                    </h1>
+                    <p className="text-muted-foreground">
+                        Gestiona las modalidades y materias de la carrera.
+                    </p>
+                </div>
+                 <Button asChild>
+                    <Link href={`/plan-estudio/crear/${careerId}`}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Crear Plan de Estudio
+                    </Link>
+                </Button>
             </div>
             
             {modalities.length > 0 ? (
@@ -185,46 +206,33 @@ export default function PlanEstudioPage() {
                                             const semesterSubjects = modalityData.subjects.filter(s => s.nivel_orden === semester);
                                             return (
                                                 <TabsContent key={semester} value={`sem-${semester}`}>
-                                                    <div className="flex justify-end my-4">
-                                                        <Button>
-                                                            <PlusCircle className="mr-2 h-4 w-4" />
-                                                            Añadir Materia al {getOrdinal(semester)} Grado
-                                                        </Button>
-                                                    </div>
-                                                    {semesterSubjects.length > 0 ? (
-                                                         <div className='rounded-xl overflow-hidden'>
-                                                            <Table>
-                                                                <TableHeader>
-                                                                    <TableRow>
-                                                                        <TableHead>Nombre de la Materia</TableHead>
-                                                                        <TableHead>Acciones</TableHead>
+                                                    <div className='rounded-xl overflow-hidden mt-4'>
+                                                        <Table>
+                                                            <TableHeader>
+                                                                <TableRow>
+                                                                    <TableHead>Nombre de la Materia</TableHead>
+                                                                    <TableHead>Acciones</TableHead>
+                                                                </TableRow>
+                                                            </TableHeader>
+                                                            <TableBody>
+                                                                {semesterSubjects.map(subject => (
+                                                                    <TableRow key={subject.id_materia}>
+                                                                        <TableCell className="font-medium">{subject.subjectName}</TableCell>
+                                                                        <TableCell>
+                                                                            <div className="flex gap-2">
+                                                                                <Button size="icon" variant="warning">
+                                                                                    <Pencil className="h-4 w-4" />
+                                                                                </Button>
+                                                                                <Button size="icon" variant="destructive">
+                                                                                    <Trash2 className="h-4 w-4" />
+                                                                                </Button>
+                                                                            </div>
+                                                                        </TableCell>
                                                                     </TableRow>
-                                                                </TableHeader>
-                                                                <TableBody>
-                                                                    {semesterSubjects.map(subject => (
-                                                                        <TableRow key={subject.id_materia}>
-                                                                            <TableCell className="font-medium">{subject.subjectName}</TableCell>
-                                                                            <TableCell>
-                                                                                <div className="flex gap-2">
-                                                                                    <Button size="icon" variant="warning">
-                                                                                        <Pencil className="h-4 w-4" />
-                                                                                    </Button>
-                                                                                    <Button size="icon" variant="destructive">
-                                                                                        <Trash2 className="h-4 w-4" />
-                                                                                    </Button>
-                                                                                </div>
-                                                                            </TableCell>
-                                                                        </TableRow>
-                                                                    ))}
-                                                                </TableBody>
-                                                            </Table>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
-                                                            <h3 className="text-lg font-semibold text-white">Grado Vacío</h3>
-                                                            <p className="text-muted-foreground mt-2">Aún no se han asignado materias para este grado.</p>
-                                                        </div>
-                                                    )}
+                                                                ))}
+                                                            </TableBody>
+                                                        </Table>
+                                                    </div>
                                                 </TabsContent>
                                             )
                                         })}
@@ -250,5 +258,3 @@ export default function PlanEstudioPage() {
         </div>
     )
 }
-
-    

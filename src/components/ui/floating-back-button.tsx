@@ -3,17 +3,19 @@
 
 import { ArrowLeft } from "lucide-react"
 import { useRouter } from 'next/navigation'
+import { Button } from "./button";
 
 export function FloatingBackButton() {
   const router = useRouter();
 
   return (
     <div 
-      className="group fixed bottom-8 right-8 z-50 cursor-pointer"
+      className="group fixed bottom-8 left-8 z-50 cursor-pointer"
       onClick={() => router.back()}
     >
-      <button 
-        className="flex items-center justify-center bg-[#112172] rounded-full h-14 pl-4 pr-4 md:pr-4 group-hover:pr-6 shadow-lg w-auto transition-all duration-300 ease-in-out"
+      <Button 
+        variant="default"
+        className="rounded-full h-14 pl-4 pr-4 md:pr-4 group-hover:pr-6 shadow-lg w-auto transition-all duration-300 ease-in-out"
         aria-label="Go back"
       >
         <ArrowLeft className="h-6 w-6 text-white transition-transform duration-300" />
@@ -22,9 +24,7 @@ export function FloatingBackButton() {
             Regresar
           </span>
         </div>
-      </button>
+      </Button>
     </div>
   )
 }
-
-    
