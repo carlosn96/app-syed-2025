@@ -165,11 +165,11 @@ export const createSubject = (data: { nombre: string }): Promise<Subject> => {
 };
 
 export const updateSubject = (id: number, data: { nombre: string }): Promise<Subject> => {
-    return apiFetch(`/materia/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+    return apiFetch(`/materias/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 };
 
 export const deleteSubject = (id: number): Promise<void> => {
-    return apiFetch(`/materia/${id}`, { method: 'DELETE' });
+    return apiFetch(`/materias/${id}`, { method: 'DELETE' });
 };
 
 
