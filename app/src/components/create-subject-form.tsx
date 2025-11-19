@@ -41,7 +41,7 @@ export function CreateSubjectForm({ onSuccess }: CreateSubjectFormProps) {
   const onSubmit = async (data: CreateSubjectFormValues) => {
     setIsSubmitting(true);
     try {
-      await createSubject({ nombre: data.nombre });
+      await createSubject(data);
       onSuccess?.({
         summary: "Materia Creada",
         detail: `La materia ${data.nombre} ha sido creada con éxito.`,

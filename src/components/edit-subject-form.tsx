@@ -14,49 +14,48 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { createSubject } from "@/services/api"
+import { updateSubject } from "@/services/api"
 import { useState } from "react"
+import { Subject } from "@/lib/modelos"
 
-const createSubjectSchema = z.object({
+const editSubjectSchema = z.object({
   nombre: z.string().min(1, "El nombre de la materia es requerido."),
 });
 
-type CreateSubjectFormValues = z.infer<typeof createSubjectSchema>;
+type EditSubjectFormValues = z.infer<typeof editSubjectSchema>;
 
-interface CreateSubjectFormProps {
+interface EditSubjectFormProps {
+  subject: Subject;
   onSuccess?: (message: { summary: string, detail: string }) => void;
 }
 
-
-export function CreateSubjectForm({ onSuccess }: CreateSubjectFormProps) {
+export function EditSubjectForm({ subject, onSuccess }: EditSubjectFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<CreateSubjectFormValues>({
-    resolver: zodResolver(createSubjectSchema),
+  const form = useForm<EditSubjectFormValues>({
+    resolver: zodResolver(editSubjectSchema),
     defaultValues: {
-      nombre: "",
+      nombre: subject.name,
     },
   });
 
-  const onSubmit = async (data: CreateSubjectFormValues) => {
+  const onSubmit = async (data: EditSubjectFormValues) => {
     setIsSubmitting(true);
     try {
-      await createSubject({ nombre: data.nombre });
+      await updateSubject(subject.id, { nombre: data.nombre });
       onSuccess?.({
-        summary: "Materia Creada",
-        detail: `La materia ${data.nombre} ha sido creada con éxito.`,
+        summary: "Materia Actualizada",
+        detail: `La materia ha sido actualizada a ${data.nombre}.`,
       });
-      form.reset();
     } catch (error) {
-      // Parent component will show toast
-      console.error("Error creating subject:", error);
+        console.error("Error updating subject", error);
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-      <Form {...form}>
+    <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
@@ -72,7 +71,7 @@ export function CreateSubjectForm({ onSuccess }: CreateSubjectFormProps) {
             )}
           />
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Creando...' : 'Crear Materia'}
+              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
           </Button>
         </form>
       </Form>
