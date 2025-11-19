@@ -10,17 +10,17 @@ export function FloatingBackButton() {
 
   return (
     <div 
-      className="group fixed bottom-8 left-8 z-50 cursor-pointer"
+      className="group fixed bottom-8 right-8 z-50 cursor-pointer"
       onClick={() => router.back()}
     >
       <Button 
         variant="default"
-        className="rounded-full h-14 pl-4 pr-4 md:pr-4 group-hover:pr-6 shadow-lg w-auto transition-all duration-300 ease-in-out"
+        className="rounded-full h-14 pl-4 pr-4 md:pl-4 group-hover:pl-6 shadow-lg w-auto transition-all duration-300 ease-in-out flex-row-reverse"
         aria-label="Go back"
       >
         <ArrowLeft className="h-6 w-6 text-white transition-transform duration-300" />
         <div className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 ease-in-out">
-          <span className="whitespace-nowrap text-white text-md font-semibold pl-2">
+          <span className="whitespace-nowrap text-white text-md font-semibold pr-2">
             Regresar
           </span>
         </div>
