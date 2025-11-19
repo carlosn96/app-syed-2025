@@ -89,7 +89,7 @@ export default function PlanEstudioPage() {
                 }
 
             } catch (err: any) {
-                 if (err.message.includes("Unexpected end of JSON input")) {
+                 if (err instanceof Error && err.message.includes("Unexpected end of JSON input")) {
                     // Treat as no data found, which is a valid state
                     setStudyPlans([]);
                     setError(null);
@@ -102,7 +102,7 @@ export default function PlanEstudioPage() {
                         setError("Error al cargar la información de la carrera.");
                     }
                 } else {
-                    setError(err.message || "Error al cargar los datos del plan de estudio.");
+                    setError((err as Error).message || "Error al cargar los datos del plan de estudio.");
                 }
             } finally {
                 setIsLoading(false);
@@ -110,7 +110,7 @@ export default function PlanEstudioPage() {
         };
 
         fetchData();
-    }, [careerId, router]);
+    }, [careerId]);
 
     const modalities = useMemo(() => {
         const modalityMap = new Map<number, { name: string; subjects: EnrichedStudyPlanRecord[] }>();
@@ -173,7 +173,7 @@ export default function PlanEstudioPage() {
                     </p>
                 </div>
                  <Button asChild>
-                    <Link href={`./${careerId}/creacion`}>
+                    <Link href={`/plan-estudio/${careerId}/creacion`}>
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Crear Plan de Estudio
                     </Link>
