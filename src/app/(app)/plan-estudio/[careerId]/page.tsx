@@ -173,7 +173,7 @@ export default function PlanEstudioPage() {
                     </p>
                 </div>
                  <Button asChild>
-                    <Link href={`/plan-estudio/crear/${careerId}`}>
+                    <Link href={`./${careerId}/creacion`}>
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Crear Plan de Estudio
                     </Link>
