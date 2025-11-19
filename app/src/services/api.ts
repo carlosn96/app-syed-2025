@@ -510,3 +510,4 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
     
 
 
+
