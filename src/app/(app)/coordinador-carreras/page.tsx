@@ -86,7 +86,7 @@ export default function CoordinatorCareersPage() {
             <Card key={career.id} className="flex flex-col">
               <CardHeader>
                   <CardTitle>{career.name}</CardTitle>
-                  <CardDescription>{career.coordinator || 'Coordinador no asignado'}</CardDescription>
+                  
               </CardHeader>
               <CardFooter className="flex-col items-stretch gap-2 mt-auto">
                 <Button asChild variant="success" className="w-full">

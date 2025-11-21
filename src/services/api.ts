@@ -187,6 +187,19 @@ export const deleteSubject = (id: number): Promise<void> => {
     return apiFetch(`/materias/${id}`, { method: 'DELETE' });
 };
 
+export const getMateriasForCoordinador = async (): Promise<Subject[]> => {
+    const response = await apiFetch('/coordinador-materias');
+    if (response.datos && Array.isArray(response.datos)) {
+        return response.datos.map((item: any) => ({
+            id: item.id_materia,
+            name: item.materia,
+            offeredLevels: item.niveles_ofertados,
+            careerCount: item.carreras_que_la_usan,
+        }));
+    }
+    return [];
+};
+
 
 // User Management
 export const getUsers = async (): Promise<User[]> => {
@@ -511,6 +524,7 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
     
 
     
+
 
 
 
