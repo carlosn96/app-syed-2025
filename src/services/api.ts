@@ -128,6 +128,12 @@ export const getCareers = async (): Promise<CareerSummary[]> => {
     return Array.from(careersMap.values());
 };
 
+export const getCarrerasForCoordinador = async (): Promise<CareerSummary[]> => {
+    const response = await apiFetch('/coordinador-carreras');
+    return response.datos;
+}
+
+
 export const createCareer = (data: { nombre: string }): Promise<any> => {
     return apiFetch('/carreras', { method: 'POST', body: JSON.stringify({ nombre: data.nombre }) });
 };
@@ -505,6 +511,7 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
     
 
     
+
 
 
 
