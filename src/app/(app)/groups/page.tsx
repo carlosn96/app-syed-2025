@@ -1,8 +1,9 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 import { Pencil, PlusCircle, Trash2, Search } from "lucide-react"
+import { Toast } from 'primereact/toast';
 
 import { Button } from "@/components/ui/button"
 import {
@@ -29,20 +30,35 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 import { CreateGroupForm } from "@/components/create-group-form"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Group } from "@/lib/modelos"
-import { getGroups } from "@/services/api"
+import { getGroups, deleteGroup } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { normalizeString } from "@/lib/utils";
 
 export default function GroupsPage() {
+  const toast = useRef<Toast>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
+
 
   const fetchGroups = async () => {
     setIsLoading(true);
@@ -60,21 +76,45 @@ export default function GroupsPage() {
     fetchGroups();
   }, []);
 
-  const filteredGroups = groups.filter(group => {
-    if (!searchTerm) return true;
+  const filteredGroups = useMemo(() => {
+    if (!searchTerm) return groups;
     const normalizedSearchTerm = normalizeString(searchTerm);
-    return (
+    return groups.filter(group => 
         normalizeString(group.name).includes(normalizedSearchTerm) ||
         normalizeString(group.career).includes(normalizedSearchTerm) ||
-        normalizeString(group.cycle).includes(normalizedSearchTerm) ||
-        normalizeString(group.turno).includes(normalizedSearchTerm)
+        (group.cycle && normalizeString(group.cycle).includes(normalizedSearchTerm)) ||
+        (group.turno && normalizeString(group.turno).includes(normalizedSearchTerm))
     );
-  });
+  }, [groups, searchTerm]);
+
 
   const handleSuccess = () => {
     setIsModalOpen(false);
     fetchGroups();
   };
+  
+  const handleDelete = async () => {
+    if (!groupToDelete) return;
+    try {
+        await deleteGroup(groupToDelete.id);
+        toast.current?.show({
+            severity: "success",
+            summary: "Grupo Eliminado",
+            detail: `El grupo ${groupToDelete.name} ha sido eliminado.`,
+        });
+        setGroupToDelete(null);
+        fetchGroups();
+    } catch (error) {
+        if (error instanceof Error) {
+            toast.current?.show({
+                severity: "error",
+                summary: "Error al eliminar",
+                detail: error.message,
+            });
+        }
+    }
+  }
+
 
   if (error) {
     return <p className="text-destructive text-center">{error}</p>
@@ -82,9 +122,10 @@ export default function GroupsPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <Toast ref={toast} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-          Grupos
+          Gestión de Grupos
         </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
@@ -104,6 +145,22 @@ export default function GroupsPage() {
             </DialogContent>
         </Dialog>
       </div>
+      
+       <AlertDialog open={!!groupToDelete} onOpenChange={(open) => !open && setGroupToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+                Esta acción no se puede deshacer. Se eliminará permanentemente el grupo 
+                <span className="font-bold text-white"> {groupToDelete?.name}</span>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setGroupToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -152,7 +209,7 @@ export default function GroupsPage() {
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Editar</span>
                         </Button>
-                        <Button size="icon" variant="destructive">
+                        <Button size="icon" variant="destructive" onClick={() => setGroupToDelete(group)}>
                           <Trash2 className="h-4 w-4" />
                           <span className="sr-only">Eliminar</span>
                         </Button>
@@ -169,7 +226,7 @@ export default function GroupsPage() {
                         <div className="font-semibold">Turno:</div>
                         <div>{group.turno}</div>
                         <div className="font-semibold">Alumnos:</div>
-                        <div>{group.students.length}</div>
+                        <div>{group.students?.length || 0}</div>
                     </div>
                 </CardContent>
               </Card>
@@ -205,14 +262,14 @@ export default function GroupsPage() {
                       <TableCell>{group.semester}</TableCell>
                       <TableCell>{group.cycle}</TableCell>
                       <TableCell>{group.turno}</TableCell>
-                      <TableCell>{group.students.length}</TableCell>
+                      <TableCell>{group.students?.length || 0}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                             <Button size="icon" variant="warning">
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Editar</span>
                             </Button>
-                            <Button size="icon" variant="destructive">
+                            <Button size="icon" variant="destructive" onClick={() => setGroupToDelete(group)}>
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">Eliminar</span>
                             </Button>
@@ -234,3 +291,5 @@ export default function GroupsPage() {
     </div>
   )
 }
+
+    

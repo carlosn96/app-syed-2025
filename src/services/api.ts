@@ -300,16 +300,25 @@ export const removeCarreraFromCoordinador = (data: { id_coordinador: number, id_
 
 // Group Management
 export const getGroups = async (): Promise<Group[]> => {
-    console.warn("getGroups is using mock data. Implement API endpoint.");
-    return Promise.resolve([
-        { id: 1, name: 'COMPINCO2024A', career: 'Ingeniería en Computación', semester: 2, cycle: '2024-A', turno: 'Matutino', students: [1, 2] },
-        { id: 2, name: 'LAET2024B', career: 'Licenciatura en Administración', semester: 1, cycle: '2024-B', turno: 'Vespertino', students: [7, 8] },
-        { id: 3, name: 'LDE2023A', career: 'Derecho', semester: 4, cycle: '2023-A', turno: 'Matutino', students: [] },
-    ]);
+    const response = await apiFetch('/coordinador-grupos');
+    return response.datos.map((g: any) => ({
+        id: g.id_grupo,
+        name: g.nombre,
+        career: g.carrera,
+        semester: g.nivel,
+        cycle: g.ciclo,
+        turno: g.turno,
+        students: g.alumnos || [],
+    }));
 };
 export const createGroup = (data: any): Promise<Group> => {
-    console.warn("createGroup is using mock implementation.");
-    return Promise.resolve({ ...data, id: Date.now() });
+    return apiFetch('/coordinador-grupos', { method: 'POST', body: JSON.stringify(data) });
+};
+export const updateGroup = (id: number, data: any): Promise<Group> => {
+    return apiFetch(`/coordinador-grupos/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+};
+export const deleteGroup = (id: number): Promise<void> => {
+    return apiFetch(`/coordinador-grupos/${id}`, { method: 'DELETE' });
 };
 
 
@@ -522,13 +531,3 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
 };
 
     
-
-    
-
-
-
-
-
-
-
-

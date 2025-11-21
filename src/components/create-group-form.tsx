@@ -25,28 +25,29 @@ import {
 import { Toast } from 'primereact/toast';
 import { ScrollArea } from "./ui/scroll-area"
 import { Checkbox } from "./ui/checkbox"
-import { useState, useEffect, useRef } from "react"
-import { User, Career } from "@/lib/modelos"
+import { useState, useEffect, useRef, useMemo } from "react"
+import { User, Career, CareerSummary } from "@/lib/modelos"
 import { getCareers, getUsers, createGroup } from "@/services/api"
 
 const createGroupSchema = z.object({
   name: z.string().min(1, "El nombre del grupo es requerido."),
   cycle: z.string().min(1, "Por favor, seleccione un ciclo."),
   turno: z.string().min(1, "Por favor, seleccione un turno."),
-  career: z.string().min(1, "Por favor, seleccione una carrera."),
-  semester: z.coerce.number().min(1, "El grado debe ser al menos 1.").max(12, "El grado no puede ser mayor a 12."),
-  studentIds: z.array(z.number()).optional(),
+  id_carrera: z.coerce.number().min(1, "Por favor, seleccione una carrera."),
+  id_cat_nivel: z.coerce.number().min(1, "El grado debe ser al menos 1.").max(12, "El grado no puede ser mayor a 12."),
+  id_alumnos: z.array(z.number()).optional(),
 });
 
 type CreateGroupFormValues = z.infer<typeof createGroupSchema>;
 
 const availableCycles = ["2024-A", "2024-B", "2025-A", "2025-B"];
 const availableTurnos = ["Matutino", "Vespertino"];
+const availableNiveles = Array.from({length: 12}, (_, i) => ({ id: i + 1, label: `${i+1}°`}));
 
 export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [careers, setCareers] = useState<Career[]>([]);
+  const [careers, setCareers] = useState<CareerSummary[]>([]);
   const [studentUsers, setStudentUsers] = useState<User[]>([]);
 
   useEffect(() => {
@@ -55,8 +56,7 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
             getCareers(),
             getUsers()
         ]);
-        const uniqueCareerNames = [...new Set(careersData.map(c => c.name))];
-        setCareers(uniqueCareerNames.map(name => ({ name } as Career))); // Simplified for the form
+        setCareers(careersData);
         setStudentUsers(usersData.filter(u => u.rol === 'alumno'));
     };
     fetchData();
@@ -66,16 +66,12 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
     resolver: zodResolver(createGroupSchema),
     defaultValues: {
       name: "",
-      career: "",
-      semester: 1,
       cycle: "",
       turno: "",
-      studentIds: [],
+      id_alumnos: [],
     },
   });
   
-  const selectedCycle = form.watch("cycle");
-
   const onSubmit = async (data: CreateGroupFormValues) => {
     setIsSubmitting(true);
     try {
@@ -114,6 +110,54 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
                 <FormControl>
                   <Input placeholder="Ej. COMPINCO2025A" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+           <FormField
+            control={form.control}
+            name="id_carrera"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Carrera</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione una carrera" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {careers.map((career) => (
+                      <SelectItem key={career.id} value={String(career.id)}>
+                        {career.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="id_cat_nivel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Grado</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un grado" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {availableNiveles.map((nivel) => (
+                      <SelectItem key={nivel.id} value={String(nivel.id)}>
+                        {nivel.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -166,46 +210,10 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
               </FormItem>
             )}
           />
+         
           <FormField
             control={form.control}
-            name="career"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Carrera</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCycle}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione una carrera" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {careers.map((career) => (
-                      <SelectItem key={career.name} value={career.name}>
-                        {career.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="semester"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Grado</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="studentIds"
+            name="id_alumnos"
             render={() => (
               <FormItem>
                 <div className="mb-4">
@@ -220,7 +228,7 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
                           <FormField
                           key={student.id}
                           control={form.control}
-                          name="studentIds"
+                          name="id_alumnos"
                           render={({ field }) => {
                               return (
                               <FormItem
@@ -265,3 +273,5 @@ export function CreateGroupForm({ onSuccess }: { onSuccess?: () => void }) {
     </>
   )
 }
+
+    
