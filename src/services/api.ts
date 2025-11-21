@@ -224,6 +224,11 @@ export const getDocentes = async (id?: number): Promise<Docente | Docente[]> => 
     return result.datos;
 }
 
+export const getDocentesForCoordinador = async (): Promise<Docente[]> => {
+    const response = await apiFetch('/coordinador-docentes');
+    return response.datos;
+}
+
 // Coordinator Management
 export const getCoordinadores = async (): Promise<Coordinador[]> => {
     const result = await apiFetch('/coordinadores');
@@ -491,6 +496,7 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
     
 
     
+
 
 
 
