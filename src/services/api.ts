@@ -212,6 +212,11 @@ export const getAlumnos = async (): Promise<Alumno[]> => {
     return response.datos;
 };
 
+export const getAlumnosForCoordinador = async (): Promise<Alumno[]> => {
+    const response = await apiFetch('/coordinador-alumnos');
+    return response.datos;
+}
+
 // Teacher Management
 export const getDocentes = async (id?: number): Promise<Docente | Docente[]> => {
     const endpoint = id ? `/docentes/${id}` : '/docentes';
@@ -486,6 +491,7 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
     
 
     
+
 
 
 
