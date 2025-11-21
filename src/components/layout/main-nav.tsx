@@ -38,6 +38,7 @@ export const allLinks = [
   { href: "/coordinador-docentes", label: "Docentes", icon: School, roles: ['coordinador'], exact: true },
   { href: "/coordinadores", label: "Coordinadores", icon: UserCog, roles: ['administrador'], exact: true },
   { href: "/planteles", label: "Planteles", icon: Building, roles: ['administrador'], exact: true },
+  { href: "/coordinador-planteles", label: "Planteles", icon: Building, roles: ['coordinador'], exact: true },
   { href: "/carreras", label: "Carreras", icon: BookOpenCheck, roles: ['administrador', 'coordinador'], exact: true },
   { href: "/materias", label: "Materias", icon: BookCopy, roles: ['administrador', 'coordinador'], exact: true },
   { href: "/groups", label: "Grupos", icon: Users, roles: ['coordinador'], exact: true },

@@ -82,6 +82,15 @@ export const getPlantelById = async (id: number): Promise<Plantel> => {
 export const updatePlantel = (id: number, data: { nombre: string, ubicacion: string }): Promise<Plantel> => apiFetch(`/planteles/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deletePlantel = (id: number): Promise<void> => apiFetch(`/planteles/${id}`, { method: 'DELETE' });
 
+export const getPlantelesForCoordinador = async (): Promise<Plantel[]> => {
+    const data = await apiFetch('/coordinador-planteles');
+    return data.datos.map((item: any) => ({
+        id: item.id_plantel,
+        name: item.nombre,
+        location: item.ubicacion,
+    }));
+};
+
 // Career and Subject Management
 export const getCareers = async (): Promise<CareerSummary[]> => {
     const response = await apiFetch('/carreras');
@@ -496,6 +505,7 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
     
 
     
+
 
 
 
