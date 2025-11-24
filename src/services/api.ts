@@ -130,7 +130,11 @@ export const getCareers = async (): Promise<CareerSummary[]> => {
 
 export const getCarrerasForCoordinador = async (): Promise<CareerSummary[]> => {
     const response = await apiFetch('/coordinador-carreras');
-    return response.datos;
+    return response.datos.map((c: any) => ({
+        ...c,
+        id: c.id_carrera,
+        name: c.carrera,
+    }));
 }
 
 
