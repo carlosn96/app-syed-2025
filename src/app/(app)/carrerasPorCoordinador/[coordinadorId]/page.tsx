@@ -48,16 +48,18 @@ export default function CarrerasPorCoordinadorPage() {
                 getCoordinadorById(coordinadorId),
                 getCarrerasPorCoordinador(coordinadorId)
             ]);
-            // The API for getCoordinadorById returns a User, so we adapt it
+            
+            // The API for getCoordinadorById returns a User, let's adapt it.
             const adaptedCoordinator: Coordinador = {
-              id_coordinador: coordinatorData.id, // Assuming user id is coordinator id
+              id_coordinador: coordinatorData.id_coordinador || coordinatorData.id,
               usuario_id: coordinatorData.id,
-              nombre_completo: `${coordinatorData.nombre} ${coordinatorData.apellido_paterno}`.trim(),
+              nombre_completo: coordinatorData.nombre_completo || `${coordinatorData.nombre} ${coordinatorData.apellido_paterno}`.trim(),
               correo: coordinatorData.correo,
               rol: coordinatorData.rol,
               fecha_registro: coordinatorData.fecha_registro,
               ultimo_acceso: coordinatorData.ultimo_acceso || ''
             };
+
             setCoordinator(adaptedCoordinator);
             setAssignedCareers(careersData);
         } catch (err: any) {
