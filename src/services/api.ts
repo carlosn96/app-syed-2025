@@ -267,23 +267,20 @@ export const getCoordinadores = async (): Promise<Coordinador[]> => {
     return result.datos;
 };
 
-export const getCoordinadorById = async (id: number): Promise<User> => {
+export const getCoordinadorById = async (id: number): Promise<Coordinador> => {
     const result = await apiFetch(`/coordinadores/${id}`);
     const user = result.datos;
     if (!user) {
       throw new Error("Coordinador not found in API response");
     }
-    // Adapt the response to the User interface
     return {
-        id: user.id_usuario_coordinador,
-        nombre: user.coordinador,
-        apellido_paterno: '',
-        apellido_materno: '',
+        id_coordinador: user.id_coordinador,
+        usuario_id: user.id_usuario,
+        nombre_completo: `${user.nombre} ${user.apellido_paterno}`.trim(),
         correo: user.correo,
-        id_rol: 3, // Assuming 3 is the role ID for coordinators
-        rol: 'coordinador',
-        fecha_registro: '',
-        ultimo_acceso: null,
+        rol: user.rol.toLowerCase(),
+        fecha_registro: user.fecha_registro,
+        ultimo_acceso: user.ultimo_acceso,
     };
 };
 
