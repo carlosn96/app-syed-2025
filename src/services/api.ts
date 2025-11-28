@@ -307,12 +307,9 @@ export const getGroups = async (): Promise<Group[]> => {
     const response = await apiFetch('/coordinador-grupos');
     return response.datos.map((g: any) => ({
         id: g.id_grupo,
-        name: g.nombre,
+        name: g.grupo,
         career: g.carrera,
-        semester: g.nivel,
-        cycle: g.ciclo,
-        turno: g.turno,
-        students: g.alumnos || [],
+        modality: g.modalidad,
     }));
 };
 export const createGroup = (data: any): Promise<Group> => {

@@ -42,7 +42,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-import { CreateGroupForm } from "@/components/create-group-form"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Group } from "@/lib/modelos"
@@ -82,8 +81,7 @@ export default function GroupsPage() {
     return groups.filter(group => 
         normalizeString(group.name).includes(normalizedSearchTerm) ||
         normalizeString(group.career).includes(normalizedSearchTerm) ||
-        (group.cycle && normalizeString(group.cycle).includes(normalizedSearchTerm)) ||
-        (group.turno && normalizeString(group.turno).includes(normalizedSearchTerm))
+        (group.modality && normalizeString(group.modality).includes(normalizedSearchTerm))
     );
   }, [groups, searchTerm]);
 
@@ -141,7 +139,7 @@ export default function GroupsPage() {
                         Completa el formulario para registrar un nuevo grupo.
                     </DialogDescription>
                 </DialogHeader>
-                <CreateGroupForm onSuccess={handleSuccess} />
+                {/*<CreateGroupForm onSuccess={handleSuccess} />*/}
             </DialogContent>
         </Dialog>
       </div>
@@ -219,14 +217,8 @@ export default function GroupsPage() {
                 <CardContent>
                     <Separator className="my-2"/>
                     <div className="grid grid-cols-2 gap-2 text-sm mt-4">
-                        <div className="font-semibold">Grado:</div>
-                        <div>{group.semester}</div>
-                        <div className="font-semibold">Ciclo:</div>
-                        <div>{group.cycle}</div>
-                        <div className="font-semibold">Turno:</div>
-                        <div>{group.turno}</div>
-                        <div className="font-semibold">Alumnos:</div>
-                        <div>{group.students?.length || 0}</div>
+                        <div className="font-semibold">Modalidad:</div>
+                        <div>{group.modality}</div>
                     </div>
                 </CardContent>
               </Card>
@@ -247,10 +239,7 @@ export default function GroupsPage() {
                   <TableRow>
                     <TableHead>Grupo</TableHead>
                     <TableHead>Carrera</TableHead>
-                    <TableHead>Grado</TableHead>
-                    <TableHead>Ciclo</TableHead>
-                    <TableHead>Turno</TableHead>
-                    <TableHead>Alumnos</TableHead>
+                    <TableHead>Modalidad</TableHead>
                     <TableHead>Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -259,10 +248,7 @@ export default function GroupsPage() {
                     <TableRow key={group.id}>
                       <TableCell className="font-medium">{group.name}</TableCell>
                       <TableCell>{group.career}</TableCell>
-                      <TableCell>{group.semester}</TableCell>
-                      <TableCell>{group.cycle}</TableCell>
-                      <TableCell>{group.turno}</TableCell>
-                      <TableCell>{group.students?.length || 0}</TableCell>
+                      <TableCell>{group.modality}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                             <Button size="icon" variant="warning">
@@ -291,5 +277,3 @@ export default function GroupsPage() {
     </div>
   )
 }
-
-    

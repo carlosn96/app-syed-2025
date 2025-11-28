@@ -154,10 +154,11 @@ export interface Group {
   id: number;
   name: string;
   career: string;
-  semester: number;
-  cycle: string;
-  turno: string;
-  students: number[];
+  modality: string;
+  semester?: number;
+  cycle?: string;
+  turno?: string;
+  students?: number[];
 }
 
 export interface Schedule {
@@ -257,4 +258,3 @@ export interface Modality {
     id: number;
     nombre: string;
 }
-
