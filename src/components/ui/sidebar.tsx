@@ -260,7 +260,7 @@ const MobileSidebarCloseButton = React.forwardRef<
       onClick={toggleSidebar}
       aria-label="Cerrar menú"
       className={cn(
-        "fixed right-3 top-3 z-30 h-10 w-10 rounded-full bg-sidebar/90 text-sidebar-foreground backdrop-blur-sm shadow-xl ring-1 ring-white/30 grid place-items-center",
+        "fixed left-3 top-3 z-30 h-10 w-10 rounded-full bg-sidebar/90 text-sidebar-foreground backdrop-blur-sm shadow-xl ring-1 ring-white/30 grid place-items-center",
         className
       )}
       {...props}
