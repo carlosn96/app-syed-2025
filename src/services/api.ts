@@ -147,6 +147,10 @@ export const createStudyPlan = (data: { id_carrera: number, id_modalidad: number
     return apiFetch('/plan-estudio', { method: 'POST', body: JSON.stringify(data) });
 };
 
+export const updateStudyPlan = (planId: number, data: { id_carrera: number, id_modalidad: number, materias: { id_materia: number, id_cat_nivel: number }[] }): Promise<any> => {
+    return apiFetch(`/plan-estudio/${planId}`, { method: 'PUT', body: JSON.stringify(data) });
+};
+
 
 export const updateCareer = async (id: number, data: { nombre: string }): Promise<Career> => {
     return apiFetch(`/carreras/${id}`, { method: 'PUT', body: JSON.stringify(data) });
@@ -162,6 +166,14 @@ export const getStudyPlanByCareerId = async (careerId: number): Promise<StudyPla
     }
     return [];
 }
+
+export const getStudyPlanByModality = async (modalityId: number): Promise<StudyPlanRecord[]> => {
+    const response = await apiFetch(`/plan-estudio/modalidad/${modalityId}`);
+     if (response.datos && Array.isArray(response.datos)) {
+        return response.datos;
+    }
+    return [];
+};
 
 
 export const getSubjects = async (): Promise<Subject[]> => {

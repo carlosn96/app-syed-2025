@@ -187,10 +187,20 @@ export default function PlanEstudioPage() {
                      return (
                         <Card key={modalityId} className="rounded-xl">
                             <CardHeader>
-                                <CardTitle>Modalidad: {modalityData.name}</CardTitle>
-                                <CardDescription>
-                                    Materias asignadas a esta modalidad, agrupadas por grado.
-                                </CardDescription>
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <CardTitle>Modalidad: {modalityData.name}</CardTitle>
+                                        <CardDescription>
+                                            Materias asignadas a esta modalidad, agrupadas por grado.
+                                        </CardDescription>
+                                    </div>
+                                    <Button asChild variant="outline">
+                                        <Link href={`/plan-estudio/${careerId}/editar/${modalityId}`}>
+                                            <Pencil className="mr-2 h-4 w-4" />
+                                            Editar Plan
+                                        </Link>
+                                    </Button>
+                                </div>
                             </CardHeader>
                             <CardContent>
                                 {semesters.length > 0 ? (
@@ -211,20 +221,18 @@ export default function PlanEstudioPage() {
                                                             <TableHeader>
                                                                 <TableRow>
                                                                     <TableHead>Nombre de la Materia</TableHead>
-                                                                    <TableHead>Acciones</TableHead>
+                                                                    <TableHead className="text-right">Acciones</TableHead>
                                                                 </TableRow>
                                                             </TableHeader>
                                                             <TableBody>
                                                                 {semesterSubjects.map(subject => (
                                                                     <TableRow key={subject.id_materia}>
                                                                         <TableCell className="font-medium">{subject.subjectName}</TableCell>
-                                                                        <TableCell>
-                                                                            <div className="flex gap-2">
-                                                                                <Button size="icon" variant="warning">
-                                                                                    <Pencil className="h-4 w-4" />
-                                                                                </Button>
+                                                                        <TableCell className="text-right">
+                                                                            <div className="flex justify-end gap-2">
                                                                                 <Button size="icon" variant="destructive">
                                                                                     <Trash2 className="h-4 w-4" />
+                                                                                    <span className="sr-only">Eliminar materia del plan</span>
                                                                                 </Button>
                                                                             </div>
                                                                         </TableCell>
