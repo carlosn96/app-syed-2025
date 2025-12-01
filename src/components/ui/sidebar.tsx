@@ -17,6 +17,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import Image from "next/image"
+
 
 type SidebarContext = {
   state: "expanded" | "collapsed"
@@ -208,9 +210,6 @@ const SidebarTrigger = React.forwardRef<
 
   return (
     <Button
-      ref={ref}
-      variant="ghost"
-      size="icon"
       className={cn(
         "fixed top-4 left-4 z-50 h-12 w-12 rounded-full bg-black/30 text-white backdrop-blur-sm",
         className
@@ -241,7 +240,23 @@ const MobileSidebarTrigger = React.forwardRef<
       {...props}
     >
       <div className="flex items-center justify-center bg-[#112172] rounded-full h-12 w-12 shadow-lg transition-all duration-300 ease-in-out">
-        <PanelLeft className="h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110" />
+        <div className="relative grid place-items-center">
+            <div
+              aria-hidden
+              className="absolute inset-0 rounded-full blur-md opacity-90 animate-pulse"
+              style={{
+                backgroundImage: `radial-gradient(circle at center, rgba(255,255,255,0.85) 0%, transparent 60%)`,
+              }}
+            />
+            <Image
+              src="/UNELOGO.png"
+              alt="Abrir menu"
+              width={24}
+              height={24}
+              className="relative h-6 w-6 transition-transform duration-300 group-hover:scale-110"
+               style={{ filter: `brightness(1.08) drop-shadow(0 0 12px rgba(255,255,255,0.95))` }}
+            />
+        </div>
       </div>
     </div>
   );
