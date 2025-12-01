@@ -159,6 +159,8 @@ export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) 
       let endpoint: string;
       if (loggedInUser?.rol === 'coordinador' && selectedRole === 'alumno') {
         endpoint = '/coordinador-alumnos';
+      } else if (loggedInUser?.rol === 'coordinador' && selectedRole === 'docente') {
+        endpoint = '/coordinador-docentes';
       } else {
         endpoint = selectedRole === 'administrador' ? '/usuario' : roleRouteMap[selectedRole as keyof typeof roleRouteMap];
       }

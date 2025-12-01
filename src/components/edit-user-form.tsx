@@ -170,7 +170,10 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       let endpoint: string;
       if (loggedInUser?.rol === 'coordinador' && selectedRole === 'alumno') {
         endpoint = '/coordinador-alumnos';
-      } else {
+      } else if (loggedInUser?.rol === 'coordinador' && selectedRole === 'docente') {
+        endpoint = '/coordinador-docentes';
+      }
+      else {
         endpoint = roleRouteMap[selectedRole];
       }
       
@@ -370,5 +373,3 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
     </>
   )
 }
-
-    

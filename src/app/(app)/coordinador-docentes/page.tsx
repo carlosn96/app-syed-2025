@@ -2,8 +2,9 @@
 "use client"
 
 import { useState, useEffect, useMemo, useRef } from "react"
-import { Search, Eye } from "lucide-react"
+import { Search, Eye, PlusCircle, Pencil, Trash2 } from "lucide-react"
 import Link from "next/link"
+import { Toast } from 'primereact/toast';
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -14,17 +15,43 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { User, Docente } from "@/lib/modelos"
 import { Input } from "@/components/ui/input"
-import { getDocentesForCoordinador, getDocentes } from "@/services/api"
+import { getDocentesForCoordinador, deleteUser } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { normalizeString } from "@/lib/utils";
+import { CreateUserForm } from "@/components/create-user-form";
+import { EditUserForm } from "@/components/edit-user-form";
 
 export default function CoordinadorDocentesPage() {
+  const toast = useRef<Toast>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [allDocentes, setAllDocentes] = useState<Docente[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
   const fetchDocentes = async () => {
     try {
@@ -58,6 +85,45 @@ export default function CoordinadorDocentesPage() {
     });
   }, [allDocentes, searchTerm]);
 
+  const handleEditClick = (docente: Docente) => {
+    const userForEdit: User = {
+        id: docente.id_usuario,
+        id_docente: docente.id_docente,
+        nombre_completo: docente.nombre_completo,
+        correo: docente.correo,
+        grado_academico: docente.grado_academico,
+        id_rol: 2, // Docente role
+        rol: 'docente',
+        nombre: '',
+        apellido_paterno: '',
+        apellido_materno: '',
+        fecha_registro: '',
+        ultimo_acceso: '',
+    };
+    setUserToEdit(userForEdit);
+    setIsEditModalOpen(true);
+  };
+
+   const handleDeleteUser = async (docente: Docente) => {
+    try {
+        await deleteUser(docente.id_docente, { basePath: '/coordinador-docentes' });
+        toast.current?.show({
+            severity: "success",
+            summary: "Usuario Eliminado",
+            detail: "El docente ha sido eliminado correctamente.",
+        });
+        fetchDocentes();
+    } catch (error) {
+        if (error instanceof Error) {
+            toast.current?.show({
+                severity: "error",
+                summary: "Error al eliminar",
+                detail: error.message,
+            });
+        }
+    }
+  };
+
   const renderUserCard = (docente: Docente) => {
     return (
         <Card key={docente.id_docente}>
@@ -73,12 +139,33 @@ export default function CoordinadorDocentesPage() {
         <CardContent className="text-sm space-y-2">
             <p><span className="font-semibold">Grado Académico:</span> {docente.grado_academico}</p>
             <div className="flex justify-end gap-2 pt-2">
-                <Button asChild size="icon" variant="outline">
-                    <Link href={`/users/teachers/${docente.id_docente}`}>
-                        <Eye className="h-4 w-4" />
-                        <span className="sr-only">Ver Perfil</span>
-                    </Link>
+                <Button size="icon" variant="warning" onClick={() => handleEditClick(docente)}>
+                    <Pencil className="h-4 w-4" />
+                    <span className="sr-only">Editar</span>
                 </Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button size="icon" variant="destructive">
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Eliminar</span>
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario
+                                <span className="font-bold text-white"> {docente.nombre_completo}</span>.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteUser(docente)}>
+                                Confirmar
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </CardContent>
         </Card>
@@ -99,6 +186,7 @@ export default function CoordinadorDocentesPage() {
         <CardContent className="space-y-2">
             <Skeleton className="h-4 w-28" />
             <div className="flex justify-end gap-2 pt-2">
+                 <Skeleton className="h-10 w-10 rounded-full" />
                 <Skeleton className="h-10 w-10 rounded-full" />
             </div>
         </CardContent>
@@ -107,11 +195,46 @@ export default function CoordinadorDocentesPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <Toast ref={toast} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-          Consulta de Docentes
+          Gestión de Docentes
         </h1>
+         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Crear Docente
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Crear Nuevo Docente</DialogTitle>
+                    <DialogDescription>
+                    Completa el formulario para registrar una nueva cuenta de docente.
+                    </DialogDescription>
+                </DialogHeader>
+                <CreateUserForm defaultRole="docente" onSuccess={() => { setIsCreateModalOpen(false); fetchDocentes(); }} />
+            </DialogContent>
+           </Dialog>
       </div>
+
+       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>Editar Docente</DialogTitle>
+                <DialogDescription>
+                    Modifica los datos del docente. La contraseña solo se actualizará si se ingresa un nuevo valor.
+                </DialogDescription>
+            </DialogHeader>
+            {userToEdit && (
+                <EditUserForm 
+                    user={userToEdit} 
+                    onSuccess={() => { setIsEditModalOpen(false); fetchDocentes(); }} 
+                />
+            )}
+        </DialogContent>
+       </Dialog>
       
       {error && <p className="text-destructive text-center">{error}</p>}
       
