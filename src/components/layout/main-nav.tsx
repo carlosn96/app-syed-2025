@@ -55,8 +55,8 @@ export const allLinks = [
 export function MainNav() {
   const pathname = usePathname()
   const { user } = useAuth()
-  const { setOpenMobile, state } = useSidebar();
-  const isCollapsed = state === 'collapsed'; 
+  const { setOpenMobile, state, isMobile } = useSidebar();
+  const isCollapsed = state === 'collapsed' && !isMobile;
 
   const links = allLinks.filter(link => {
     if (pathname.startsWith('/carrerasPorCoordinador')) return false;
