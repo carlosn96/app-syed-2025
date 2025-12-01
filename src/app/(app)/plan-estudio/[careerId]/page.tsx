@@ -44,6 +44,14 @@ interface EnrichedStudyPlanRecord extends StudyPlanRecord {
   subjectName: string;
 }
 
+interface GroupedPlan {
+    id: number;
+    modalityId: number;
+    modalityName: string;
+    subjects: EnrichedStudyPlanRecord[];
+}
+
+
 export default function PlanEstudioPage() {
     const params = useParams()
     const router = useRouter();
@@ -54,7 +62,6 @@ export default function PlanEstudioPage() {
 
     const [studyPlans, setStudyPlans] = useState<EnrichedStudyPlanRecord[]>([]);
     const [careerInfo, setCareerInfo] = useState<Career | null>(null);
-    const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [planToDelete, setPlanToDelete] = useState<{ id: number, name: string } | null>(null);
@@ -78,13 +85,11 @@ export default function PlanEstudioPage() {
                  // Career exists but has no study plan, which is a valid state
                 setStudyPlans([]);
             } else {
-                const enrichedPlanData = planData.map(plan => {
-                    const subject = subjectsData.find(s => s.id === plan.id_materia);
-                    return {
-                        ...plan,
-                        subjectName: subject?.name || 'Materia Desconocida'
-                    }
-                });
+                 const subjectMap = new Map(subjectsData.map(s => [s.id, s.name]));
+                 const enrichedPlanData = planData.map(plan => ({
+                    ...plan,
+                    subjectName: subjectMap.get(plan.id_materia) || 'Materia Desconocida'
+                }));
                 setStudyPlans(enrichedPlanData);
             }
 
@@ -116,15 +121,20 @@ export default function PlanEstudioPage() {
         fetchData();
     }, [careerId]);
 
-    const modalities = useMemo(() => {
-        const modalityMap = new Map<number, { name: string; subjects: EnrichedStudyPlanRecord[] }>();
+    const groupedPlans = useMemo(() => {
+        const planMap = new Map<number, GroupedPlan>();
         studyPlans.forEach(plan => {
-            if (!modalityMap.has(plan.id_modalidad)) {
-                modalityMap.set(plan.id_modalidad, { name: plan.modalidad, subjects: [] });
+            if (!planMap.has(plan.id)) {
+                planMap.set(plan.id, {
+                    id: plan.id,
+                    modalityId: plan.id_modalidad,
+                    modalityName: plan.modalidad,
+                    subjects: [],
+                });
             }
-            modalityMap.get(plan.id_modalidad)!.subjects.push(plan);
+            planMap.get(plan.id)!.subjects.push(plan);
         });
-        return Array.from(modalityMap.entries());
+        return Array.from(planMap.values());
     }, [studyPlans]);
 
     const handleDeletePlan = async () => {
@@ -225,28 +235,28 @@ export default function PlanEstudioPage() {
                 </Button>
             </div>
             
-            {modalities.length > 0 ? (
-                modalities.map(([modalityId, modalityData]) => {
-                     const semesters = [...new Set(modalityData.subjects.map(s => s.nivel_orden))].sort((a,b) => a-b);
+            {groupedPlans.length > 0 ? (
+                groupedPlans.map((planData) => {
+                     const semesters = [...new Set(planData.subjects.map(s => s.nivel_orden))].sort((a,b) => a-b);
                      
                      return (
-                        <Card key={modalityId} className="rounded-xl">
+                        <Card key={planData.id} className="rounded-xl">
                             <CardHeader>
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <CardTitle>Modalidad: {modalityData.name}</CardTitle>
+                                        <CardTitle>Modalidad: {planData.modalityName}</CardTitle>
                                         <CardDescription>
                                             Materias asignadas a esta modalidad, agrupadas por grado.
                                         </CardDescription>
                                     </div>
                                     <div className="flex gap-2">
                                         <Button asChild variant="outline">
-                                            <Link href={`/plan-estudio/${careerId}/editar/${modalityId}`}>
+                                            <Link href={`/plan-estudio/${careerId}/editar/${planData.id}`}>
                                                 <Pencil className="mr-2 h-4 w-4" />
                                                 Editar Plan
                                             </Link>
                                         </Button>
-                                        <Button variant="destructive" onClick={() => setPlanToDelete({ id: modalityId, name: modalityData.name })}>
+                                        <Button variant="destructive" onClick={() => setPlanToDelete({ id: planData.id, name: planData.modalityName })}>
                                             <Trash2 className="mr-2 h-4 w-4" />
                                             Eliminar Plan
                                         </Button>
@@ -264,7 +274,7 @@ export default function PlanEstudioPage() {
                                             ))}
                                         </TabsList>
                                         {semesters.map(semester => {
-                                            const semesterSubjects = modalityData.subjects.filter(s => s.nivel_orden === semester);
+                                            const semesterSubjects = planData.subjects.filter(s => s.nivel_orden === semester);
                                             return (
                                                 <TabsContent key={semester} value={`sem-${semester}`}>
                                                     <div className='rounded-xl overflow-hidden mt-4'>

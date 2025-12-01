@@ -151,8 +151,8 @@ export const updateStudyPlan = (planId: number, data: { id_carrera: number, id_m
     return apiFetch(`/plan-estudio/${planId}`, { method: 'PUT', body: JSON.stringify(data) });
 };
 
-export const deleteStudyPlan = (modalityId: number): Promise<void> => {
-    return apiFetch(`/plan-estudio/modalidad/${modalityId}`, { method: 'DELETE' });
+export const deleteStudyPlan = (planId: number): Promise<void> => {
+    return apiFetch(`/plan-estudio/${planId}`, { method: 'DELETE' });
 };
 
 
@@ -168,10 +168,11 @@ export const getStudyPlanByCareerId = async (careerId: number): Promise<StudyPla
     if (response.datos && Array.isArray(response.datos)) {
         const flattenedRecords: StudyPlanRecord[] = [];
         response.datos.forEach((modalityPlan: any) => {
-            const { id_carrera, id_modalidad, nombre_modalidad, materias } = modalityPlan;
+            const { id, id_carrera, id_modalidad, nombre_modalidad, materias } = modalityPlan;
             if (Array.isArray(materias)) {
                 materias.forEach((materia: any) => {
                     flattenedRecords.push({
+                        id: id,
                         id_carrera,
                         id_modalidad,
                         modalidad: nombre_modalidad,
@@ -574,4 +575,3 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
     
 
     
-
