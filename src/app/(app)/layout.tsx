@@ -122,7 +122,7 @@ const NeonLogo: React.FC<{ size?: number; glow?: "white" | "violet" | "cyan"; cl
 
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
-    const { state, isMobile, toggleSidebar } = useSidebar();
+    const { state, isMobile, toggleSidebar, openMobile } = useSidebar();
     const isCollapsed = state === "collapsed";
   
     return (
@@ -190,12 +190,12 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             {children}
           </div>
         </main>
-  
-        {/* Trigger flotante:
-           - NO se muestra cuando está colapsado (para eliminar el ícono “abrir”)
-           - SÍ se muestra en móvil cuando está expandido (sirve de X) */}
-        {/* MÓVIL EXPANDIDO: “X” para CERRAR el menú */}
-        {isMobile && !isCollapsed && (
+        
+        {isMobile && !openMobile && (
+          <SidebarTrigger />
+        )}
+        
+        {isMobile && openMobile && (
             <button
                 onClick={toggleSidebar}
                 aria-label="Cerrar menú"
