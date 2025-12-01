@@ -17,6 +17,7 @@ import { Search } from 'lucide-react'
 import { Toast } from 'primereact/toast'
 import { useRef } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface MateriaSeleccionada {
     id_materia: number;
@@ -35,6 +36,7 @@ export default function EditarPlanEstudioPage() {
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const [step, setStep] = useState(1);
     const [numberOfSemesters, setNumberOfSemesters] = useState<number>(1);
     const [selectedSubjects, setSelectedSubjects] = useState<Record<number, number[]>>({});
     const [searchTerm, setSearchTerm] = useState<Record<number, string>>({});
@@ -83,6 +85,14 @@ export default function EditarPlanEstudioPage() {
         };
         fetchInitialData();
     }, [careerId, modalityId]);
+    
+    const handleProceedToSubjects = () => {
+        if (numberOfSemesters < 1) {
+            toast.current?.show({ severity: 'warn', summary: 'Datos incompletos', detail: 'Por favor, define el número de semestres.' });
+            return;
+        }
+        setStep(2);
+    };
 
     const handleSubjectSelection = (semester: number, subjectId: number, isSelected: boolean) => {
         setSelectedSubjects(prev => {
@@ -148,21 +158,51 @@ export default function EditarPlanEstudioPage() {
             }
         }
     };
-
-    const renderContent = () => (
+    
+    const renderStep1 = () => (
         <Card className="rounded-xl">
-             <CardHeader>
-                <CardTitle>Define la estructura del Plan</CardTitle>
+            <CardHeader>
+                <CardTitle>Paso 1: Define la Estructura</CardTitle>
                 <CardDescription>
-                    Modifica la duración y asigna las materias para cada semestre.
+                    Ajusta la duración en semestres para este plan de estudios. La modalidad no se puede cambiar.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+                 {isLoading ? (
+                    <div className="space-y-6">
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                ) : (
+                <>
+                <div className="space-y-2">
+                    <Label htmlFor="modality-select">Modalidad</Label>
+                    <Input id="modality-select" value={modality?.nombre || ''} disabled />
+                </div>
                 <div className="space-y-2">
                     <Label htmlFor="semesters">Duración en Semestres</Label>
                     <Input id="semesters" type="number" min="1" max="12" value={numberOfSemesters} onChange={e => setNumberOfSemesters(Number(e.target.value))} />
                 </div>
-                
+                </>
+                )}
+            </CardContent>
+            <CardFooter>
+                 <Button onClick={handleProceedToSubjects} className="w-full" disabled={isLoading}>
+                    Continuar a la Selección de Materias
+                </Button>
+            </CardFooter>
+        </Card>
+    );
+
+    const renderStep2 = () => (
+        <Card className="rounded-xl">
+             <CardHeader>
+                <CardTitle>Paso 2: Asigna las Materias</CardTitle>
+                <CardDescription>
+                    Selecciona las materias correspondientes para cada semestre del plan.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
                 <Tabs defaultValue="sem-1" className="w-full">
                     <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${numberOfSemesters > 0 ? numberOfSemesters : 1}, minmax(0, 1fr))`}}>
                         {Array.from({ length: numberOfSemesters }, (_, i) => i + 1).map(sem => (
@@ -200,7 +240,8 @@ export default function EditarPlanEstudioPage() {
                     ))}
                 </Tabs>
             </CardContent>
-            <CardFooter className="flex justify-end">
+            <CardFooter className="flex justify-between">
+                <Button variant="outline" onClick={() => setStep(1)}>Regresar</Button>
                 <Button onClick={handleSubmit}>Guardar Cambios</Button>
             </CardFooter>
         </Card>
@@ -215,11 +256,11 @@ export default function EditarPlanEstudioPage() {
                     Editar Plan de Estudio
                 </h1>
                 <p className="text-muted-foreground">
-                    Modificando el plan para la carrera: {isLoading ? "Cargando..." : `${career?.name} - ${modality?.nombre}`}
+                    Modificando el plan para la carrera: {isLoading ? "Cargando..." : `${career?.name || 'Carrera desconocida'} - ${modality?.nombre || 'Modalidad desconocida'}`}
                 </p>
             </div>
             
-            {isLoading ? (
+             {isLoading ? (
                 <div className="space-y-6">
                     <Card className="rounded-xl">
                         <CardHeader>
@@ -231,14 +272,16 @@ export default function EditarPlanEstudioPage() {
                                 <Skeleton className="h-5 w-24" />
                                 <Skeleton className="h-10 w-full" />
                             </div>
-                            <Skeleton className="h-48 w-full" />
+                            <Skeleton className="h-10 w-full" />
                         </CardContent>
                         <CardFooter>
-                            <Skeleton className="h-10 w-32 ml-auto" />
+                            <Skeleton className="h-10 w-full" />
                         </CardFooter>
                     </Card>
                 </div>
-            ) : renderContent()}
+            ) : (
+                step === 1 ? renderStep1() : renderStep2()
+            )}
         </div>
     )
 }
