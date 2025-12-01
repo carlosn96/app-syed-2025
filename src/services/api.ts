@@ -162,10 +162,29 @@ export const deleteCareer = (id: number): Promise<void> => {
 export const getStudyPlanByCareerId = async (careerId: number): Promise<StudyPlanRecord[]> => {
     const response = await apiFetch(`/plan-estudio/${careerId}`);
     if (response.datos && Array.isArray(response.datos)) {
-        return response.datos;
+        const flattenedRecords: StudyPlanRecord[] = [];
+        response.datos.forEach((modalityPlan: any) => {
+            const { id_carrera, id_modalidad, nombre_modalidad, materias } = modalityPlan;
+            if (Array.isArray(materias)) {
+                materias.forEach((materia: any) => {
+                    flattenedRecords.push({
+                        id_carrera,
+                        id_modalidad,
+                        modalidad: nombre_modalidad,
+                        id_materia: materia.id_materia,
+                        materia: materia.nombre_materia,
+                        id_cat_nivel: materia.id_cat_nivel,
+                        nivel: `Semestre ${materia.id_cat_nivel}`, // Assuming this is correct
+                        nivel_orden: materia.id_cat_nivel,
+                    });
+                });
+            }
+        });
+        return flattenedRecords;
     }
     return [];
 }
+
 
 export const getStudyPlanByModality = async (modalityId: number): Promise<StudyPlanRecord[]> => {
     const response = await apiFetch(`/plan-estudio/modalidad/${modalityId}`);
@@ -296,7 +315,7 @@ export const getCoordinadorById = async (id: number): Promise<Coordinador> => {
     }
     return {
         id_coordinador: user.id_coordinador,
-        usuario_id: user.id_usuario,
+        usuario_id: user.id,
         nombre_completo: `${user.nombre} ${user.apellido_paterno}`.trim(),
         correo: user.correo,
         rol: user.rol.toLowerCase(),

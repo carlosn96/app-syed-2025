@@ -244,7 +244,7 @@ export interface EvaluationPeriod {
 
 export interface StudyPlanRecord {
     id_carrera: number;
-    carrera: string;
+    carrera?: string;
     id_materia: number;
     materia: string;
     id_cat_nivel: number;
