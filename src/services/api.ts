@@ -143,9 +143,8 @@ export const createCareer = (data: { nombre: string }): Promise<any> => {
 };
 
 
-export const createStudyPlan = (data: {name: string, modality: string, semesters: number, campus: string, coordinator: string}): Promise<Career> => {
-    console.warn("createStudyPlan is using mock implementation until API is ready.");
-    return Promise.resolve({ ...data, id: Date.now() });
+export const createStudyPlan = (data: { id_carrera: number, id_modalidad: number, materias: { id_materia: number, id_cat_nivel: number }[] }): Promise<any> => {
+    return apiFetch('/plan-estudio', { method: 'POST', body: JSON.stringify(data) });
 };
 
 
@@ -527,7 +526,6 @@ export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera:
 export const getModalities = async (): Promise<Modality[]> => {
     const result = await apiFetch('/modalidades');
     if (result && Array.isArray(result.datos)) {
-        console.log("API response for modalities:", result.datos);
       return result.datos;
     }
     console.error("API response for modalities is not in the expected format.", result);
@@ -537,5 +535,7 @@ export const getModalities = async (): Promise<Modality[]> => {
 export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad: number }): Promise<void> => {
     return apiFetch('/carrera-modalidad', { method: 'POST', body: JSON.stringify(data) });
 };
+
+    
 
     
