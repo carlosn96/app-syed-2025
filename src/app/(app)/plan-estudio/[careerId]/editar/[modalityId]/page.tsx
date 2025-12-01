@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
 import { getCareers, getModalities, getSubjects, getStudyPlanByModality, updateStudyPlan } from '@/services/api'
 import { CareerSummary, Modality, Subject, StudyPlanRecord } from '@/lib/modelos'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -222,7 +221,22 @@ export default function EditarPlanEstudioPage() {
             
             {isLoading ? (
                 <div className="space-y-6">
-                    <Skeleton className="h-96 w-full" />
+                    <Card className="rounded-xl">
+                        <CardHeader>
+                            <Skeleton className="h-7 w-1/3" />
+                            <Skeleton className="h-5 w-2/3 mt-2" />
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Skeleton className="h-5 w-24" />
+                                <Skeleton className="h-10 w-full" />
+                            </div>
+                            <Skeleton className="h-48 w-full" />
+                        </CardContent>
+                        <CardFooter>
+                            <Skeleton className="h-10 w-32 ml-auto" />
+                        </CardFooter>
+                    </Card>
                 </div>
             ) : renderContent()}
         </div>
