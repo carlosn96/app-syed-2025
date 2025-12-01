@@ -113,9 +113,9 @@ export default function CoordinadorAlumnosPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleDeleteUser = async (userId: number) => {
+  const handleDeleteUser = async (alumno: Alumno) => {
     try {
-        await deleteUser(userId);
+        await deleteUser(alumno.id_alumno, { basePath: '/coordinador-alumnos' });
         toast.current?.show({
             severity: "success",
             summary: "Usuario Eliminado",
@@ -173,7 +173,7 @@ export default function CoordinadorAlumnosPage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteUser(alumno.id_usuario)}>
+                        <AlertDialogAction onClick={() => handleDeleteUser(alumno)}>
                             Confirmar
                         </AlertDialogAction>
                     </AlertDialogFooter>
@@ -271,3 +271,5 @@ export default function CoordinadorAlumnosPage() {
     </div>
   )
 }
+
+    

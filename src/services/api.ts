@@ -273,7 +273,10 @@ export const updateUser = (id: number, data: any, options?: { basePath?: string 
     return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(data) });
 };
 
-export const deleteUser = (id: number): Promise<void> => apiFetch(`/usuario/${id}`, { method: 'DELETE' });
+export const deleteUser = (id: number, options?: { basePath?: string }): Promise<void> => {
+    const endpoint = options?.basePath ? `${options.basePath}/${id}` : `/usuario/${id}`;
+    return apiFetch(endpoint, { method: 'DELETE' });
+};
 
 // Student Management
 export const getAlumnos = async (): Promise<Alumno[]> => {
@@ -575,5 +578,8 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
 };
 
     
+
+    
+
 
     
