@@ -4,20 +4,19 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft, PanelRight, X } from "lucide-react"
+import { PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 
 type SidebarContext = {
   state: "expanded" | "collapsed"
@@ -229,6 +228,51 @@ const SidebarTrigger = React.forwardRef<
 })
 SidebarTrigger.displayName = "SidebarTrigger"
 
+
+const MobileSidebarTrigger = React.forwardRef<
+  HTMLButtonElement,
+  React.HTMLAttributes<HTMLButtonElement>
+>(({ className, ...props }, ref) => {
+  const { toggleSidebar } = useSidebar();
+  return (
+    <div
+      className="group fixed bottom-8 right-8 z-50 cursor-pointer"
+      onClick={toggleSidebar}
+      {...props}
+    >
+      <div className="flex items-center justify-center bg-[#112172] rounded-full h-14 w-14 shadow-lg transition-all duration-300 ease-in-out">
+        <PanelLeft className="h-7 w-7 text-white transition-transform duration-300 group-hover:scale-110" />
+      </div>
+    </div>
+  );
+});
+MobileSidebarTrigger.displayName = "MobileSidebarTrigger";
+
+
+const MobileSidebarCloseButton = React.forwardRef<
+  HTMLButtonElement,
+  React.HTMLAttributes<HTMLButtonElement> & { NeonLogoComponent: React.ElementType }
+>(({ className, NeonLogoComponent, ...props }, ref) => {
+  const { toggleSidebar } = useSidebar();
+  return (
+    <button
+      ref={ref}
+      onClick={toggleSidebar}
+      aria-label="Cerrar menú"
+      className={cn(
+        "fixed right-3 top-3 z-30 h-10 w-10 rounded-full bg-sidebar/90 text-sidebar-foreground backdrop-blur-sm shadow-xl ring-1 ring-white/30 grid place-items-center",
+        className
+      )}
+      {...props}
+    >
+      <NeonLogoComponent glow="white" />
+    </button>
+  );
+});
+MobileSidebarCloseButton.displayName = "MobileSidebarCloseButton";
+
+
+
 const SidebarHeader = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
@@ -394,4 +438,6 @@ export {
   SidebarProvider,
   SidebarTrigger,
   useSidebar,
+  MobileSidebarTrigger,
+  MobileSidebarCloseButton,
 }

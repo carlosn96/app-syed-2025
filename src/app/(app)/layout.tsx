@@ -11,71 +11,15 @@ import {
   SidebarHeader,
   SidebarFooter,
   SidebarContent,
-  SidebarTrigger,
+  MobileSidebarTrigger,
+  MobileSidebarCloseButton,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { PageNavigationProvider } from "@/context/page-navigation-context";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { PanelLeft, PanelRight } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 
-{/*function AppLayoutContent({ children }: { children: React.ReactNode }) {
-    const { state, isMobile, toggleSidebar } = useSidebar();
-    const isCollapsed = state === "collapsed";
-
-    return (
-        <>
-            <Sidebar className="fixed inset-y-0 left-0 z-20">
-                <SidebarHeader>
-                    <div className="flex items-center justify-between w-full">
-                        <div onClick={toggleSidebar} className={cn("cursor-pointer flex-grow flex items-center justify-center transition-all duration-300", isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100')}>
-                            <Image
-                                src="/UNELOGO.png"
-                                alt="UNE Logo"
-                                width={112}
-                                height={40}
-                                className={"w-28 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]"}
-                            />
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-10 w-10 text-white/80 hover:text-white"
-                          onClick={toggleSidebar}
-                          aria-label={isCollapsed ? "Expandir sidebar" : "Contraer sidebar"}
-                          aria-pressed={isCollapsed}
-                        >
-                            {isCollapsed ? <PanelRight /> : <PanelLeft />}
-                        </Button>
-                    </div>
-                </SidebarHeader>
-                <SidebarContent>
-                    <MainNav />
-                </SidebarContent>
-                <SidebarFooter className={cn("transition-all duration-300", isCollapsed ? "items-center" : "items-center")}>
-                   <div className={cn("w-full transition-all duration-300", isCollapsed ? "flex justify-center" : "flex justify-center")}>
-                       <UserNav />
-                   </div>
-                </SidebarFooter>
-            </Sidebar>
-
-            <main
-                className={cn(
-                    "transition-all duration-300 ease-in-out",
-                    !isMobile && (state === 'expanded' ? "pl-[280px]" : "pl-[80px]")
-                )}
-            >
-                <div className="w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
-                    {children}
-                </div>
-            </main>
-
-            <SidebarTrigger />
-        </>
-    );
-}*/}
 
 //Modificaciones del Sidebar
 const NeonLogo: React.FC<{ size?: number; glow?: "white" | "violet" | "cyan"; className?: string }> = ({ size = 24, glow = "white",className }) => {
@@ -117,9 +61,6 @@ const NeonLogo: React.FC<{ size?: number; glow?: "white" | "violet" | "cyan"; cl
       </div>
     );
   };
-
-
-
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
     const { state, isMobile, toggleSidebar, openMobile } = useSidebar();
@@ -192,18 +133,11 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         </main>
         
         {isMobile && !openMobile && (
-          <SidebarTrigger />
+          <MobileSidebarTrigger />
         )}
         
         {isMobile && openMobile && (
-            <button
-                onClick={toggleSidebar}
-                aria-label="Cerrar menú"
-                className="fixed right-3 top-3 z-30 h-10 w-10 rounded-full bg-sidebar/90 text-sidebar-foreground backdrop-blur-sm shadow-xl ring-1 ring-white/30 grid place-items-center"
-            >
-                    <NeonLogo glow="white"
-                    />
-            </button>
+            <MobileSidebarCloseButton NeonLogoComponent={NeonLogo} />
         )}
         </>
     );
