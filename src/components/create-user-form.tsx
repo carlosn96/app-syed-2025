@@ -11,7 +11,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -26,7 +25,7 @@ import { useAuth } from "@/context/auth-context"
 import { Toast } from 'primereact/toast';
 import { useMemo, useState, useEffect, useRef } from "react"
 import { CareerSummary } from "@/lib/modelos"
-import { createUser, getCareers } from "@/services/api"
+import { createUser, getCareers, getCarrerasForCoordinador } from "@/services/api"
 import { Roles } from "@/lib/modelos";
 
 
@@ -78,7 +77,12 @@ export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) 
   useEffect(() => {
     const fetchCareers = async () => {
         try {
-            const careersData = await getCareers();
+            let careersData: CareerSummary[];
+            if (loggedInUser?.rol === 'coordinador') {
+                careersData = await getCarrerasForCoordinador();
+            } else {
+                careersData = await getCareers();
+            }
             setCareers(careersData);
         } catch (error) {
             console.error("Failed to fetch careers", error);
@@ -92,7 +96,7 @@ export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) 
     if (selectedRole === 'alumno') {
       fetchCareers();
     }
-  }, [selectedRole, toast]);
+  }, [selectedRole, loggedInUser?.rol]);
 
   const roleDisplayFiltered = useMemo(() => {
     if (loggedInUser?.rol === 'coordinador') {

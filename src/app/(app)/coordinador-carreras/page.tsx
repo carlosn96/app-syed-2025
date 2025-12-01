@@ -10,7 +10,6 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card"
 import { CareerSummary } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"

@@ -1,5 +1,4 @@
 
-
 import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion, Modality, EvaluationCriterion } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
@@ -131,9 +130,12 @@ export const getCareers = async (): Promise<CareerSummary[]> => {
 export const getCarrerasForCoordinador = async (): Promise<CareerSummary[]> => {
     const response = await apiFetch('/coordinador-carreras');
     return response.datos.map((c: any) => ({
-        ...c,
         id: c.id_carrera,
         name: c.carrera,
+        coordinator: c.nombre_coordinador,
+        totalMaterias: c.total_materias,
+        totalPlanteles: c.total_planteles,
+        totalModalidades: c.total_modalidades,
     }));
 }
 

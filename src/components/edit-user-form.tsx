@@ -26,7 +26,7 @@ import { useAuth } from "@/context/auth-context"
 import { Toast } from 'primereact/toast';
 import { useMemo, useState, useEffect, useRef } from "react"
 import { User, CareerSummary } from "@/lib/modelos"
-import { updateUser, getCareers } from "@/services/api"
+import { updateUser, getCareers, getCarrerasForCoordinador } from "@/services/api"
 
 const editUserSchema = z.object({
   nombre_completo: z.string().optional(),
@@ -68,6 +68,7 @@ interface EditUserFormProps {
 }
 
 export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
+  const { user: loggedInUser } = useAuth();
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [careers, setCareers] = useState<CareerSummary[]>([]);
@@ -88,7 +89,12 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
     const fetchCareers = async () => {
         try {
             if (selectedRole === 'alumno') {
-                const careersData = await getCareers();
+                let careersData: CareerSummary[];
+                if (loggedInUser?.rol === 'coordinador') {
+                    careersData = await getCarrerasForCoordinador();
+                } else {
+                    careersData = await getCareers();
+                }
                 setCareers(careersData);
             }
         } catch (error) {
@@ -96,7 +102,7 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
         }
     };
     fetchCareers();
-  }, [selectedRole]);
+  }, [selectedRole, loggedInUser?.rol]);
 
   const form = useForm<EditUserFormValues>({
     resolver: zodResolver(editUserSchema),
