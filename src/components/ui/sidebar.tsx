@@ -240,8 +240,8 @@ const MobileSidebarTrigger = React.forwardRef<
       onClick={toggleSidebar}
       {...props}
     >
-      <div className="flex items-center justify-center bg-[#112172] rounded-full h-14 w-14 shadow-lg transition-all duration-300 ease-in-out">
-        <PanelLeft className="h-7 w-7 text-white transition-transform duration-300 group-hover:scale-110" />
+      <div className="flex items-center justify-center bg-[#112172] rounded-full h-12 w-12 shadow-lg transition-all duration-300 ease-in-out">
+        <PanelLeft className="h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110" />
       </div>
     </div>
   );
