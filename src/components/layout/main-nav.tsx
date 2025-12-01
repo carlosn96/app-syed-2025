@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils"
 export const allLinks = [
   { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ['administrador', 'coordinador', 'docente', 'alumno'], exact: true },
   { href: "/alumnos", label: "Alumnos", icon: GraduationCap, roles: ['administrador'], exact: true },
-  { href: "/coordinador-alumnos", label: "Alumnos", icon: GraduationCap, roles: ['coordinador'], exact: true },
+  { href: "/coordinador-alumnos", label: "Gestión de Alumnos", icon: GraduationCap, roles: ['coordinador'], exact: true },
   { href: "/docentes", label: "Docentes", icon: School, roles: ['administrador'], exact: true },
   { href: "/coordinador-docentes", label: "Docentes", icon: School, roles: ['coordinador'], exact: true },
   { href: "/coordinadores", label: "Coordinadores", icon: UserCog, roles: ['administrador'], exact: true },
