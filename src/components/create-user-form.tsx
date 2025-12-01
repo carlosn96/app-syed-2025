@@ -156,7 +156,13 @@ export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) 
     }
 
     try {
-      const endpoint = selectedRole === 'administrador' ? '/usuario' : roleRouteMap[selectedRole as keyof typeof roleRouteMap];
+      let endpoint: string;
+      if (loggedInUser?.rol === 'coordinador' && selectedRole === 'alumno') {
+        endpoint = '/coordinador-alumnos';
+      } else {
+        endpoint = selectedRole === 'administrador' ? '/usuario' : roleRouteMap[selectedRole as keyof typeof roleRouteMap];
+      }
+      
       await createUser(dataToSend, { basePath: endpoint });
       toast.current?.show({
         severity: "success",
