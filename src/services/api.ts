@@ -253,7 +253,17 @@ export const getAlumnosForCoordinador = async (): Promise<Alumno[]> => {
 export const getDocentes = async (id?: number): Promise<Docente | Docente[]> => {
     const endpoint = id ? `/docentes/${id}` : '/docentes';
     const result = await apiFetch(endpoint);
-    return result.datos;
+    if (Array.isArray(result.datos)) {
+        return result.datos;
+    }
+    // If a single object is returned (for GET by ID), wrap it in an array to be consistent,
+    // or handle it as a single object if the function signature allows.
+    // For this case, we'll return the object directly if an id is passed.
+    if (id && result.datos) {
+        return result.datos;
+    }
+    // If for some reason it's not an array and no id was passed, return empty array.
+    return [];
 }
 
 export const getDocentesForCoordinador = async (): Promise<Docente[]> => {

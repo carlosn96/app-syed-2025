@@ -245,7 +245,7 @@ const MobileSidebarTrigger = React.forwardRef<
               aria-hidden
               className="absolute inset-0 rounded-full blur-md opacity-90 animate-pulse"
               style={{
-                backgroundImage: `radial-gradient(circle at center, rgba(255,255,255,0.85) 0%, transparent 60%)`,
+                backgroundImage: `radial-gradient(circle at center, rgba(255,255,255,0.85) 0%, transparent 40%)`,
               }}
             />
             <Image

@@ -39,64 +39,69 @@ import { User, Docente } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
 import { EditUserForm } from "@/components/edit-user-form"
 import { Input } from "@/components/ui/input"
-import { getUsers, deleteUser, getDocentes } from "@/services/api"
+import { deleteUser, getDocentes } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { normalizeString } from "@/lib/utils";
 
 export default function DocentesPage() {
   const toast = useRef<Toast>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [allDocentes, setAllDocentes] = useState<Docente[]>([]);
-  const [isUsersLoading, setIsUsersLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
-  const fetchUsers = async () => {
+  const fetchDocentes = async () => {
     try {
-      setIsUsersLoading(true);
-      const [usersData, docentesData] = await Promise.all([getUsers(), getDocentes()]);
-      setAllUsers(usersData.filter(u => u.rol === 'docente'));
-      if (Array.isArray(docentesData)) {
-        setAllDocentes(docentesData);
-      }
+      setIsLoading(true);
+      const docentesData = await getDocentes() as Docente[];
+      setAllDocentes(docentesData || []);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Error al cargar los docentes');
       console.error(err);
+      setAllDocentes([]);
     } finally {
-      setIsUsersLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchDocentes();
   }, []);
 
-  const filteredUsers = useMemo(() => {
+  const filteredDocentes = useMemo(() => {
     if (!searchTerm) {
-        return allUsers;
+        return allDocentes;
     }
     const normalizedSearchTerm = normalizeString(searchTerm);
-    return allUsers.filter(user => {
-        const fullName = normalizeString(`${user.nombre} ${user.apellido_paterno} ${user.apellido_materno}`);
-        const email = normalizeString(user.correo);
+    return allDocentes.filter(docente => {
+        const fullName = normalizeString(docente.nombre_completo);
+        const email = normalizeString(docente.correo);
         return fullName.includes(normalizedSearchTerm) || email.includes(normalizedSearchTerm);
     });
-  }, [allUsers, searchTerm]);
+  }, [allDocentes, searchTerm]);
 
 
-  const handleEditClick = (user: User) => {
-    const docenteInfo = allDocentes.find(d => d.id_usuario === user.id);
-    const userWithDocenteId = {
-      ...user,
-      id_docente: docenteInfo?.id_docente,
-      grado_academico: docenteInfo?.grado_academico,
+  const handleEditClick = (docente: Docente) => {
+    const userForEdit: User = {
+        id: docente.id_usuario,
+        id_docente: docente.id_docente,
+        nombre_completo: docente.nombre_completo,
+        correo: docente.correo,
+        grado_academico: docente.grado_academico,
+        id_rol: 2, // Docente role
+        rol: 'docente',
+        nombre: '',
+        apellido_paterno: '',
+        apellido_materno: '',
+        fecha_registro: '',
+        ultimo_acceso: '',
     };
-    setUserToEdit(userWithDocenteId);
+    setUserToEdit(userForEdit);
     setIsEditModalOpen(true);
   };
 
@@ -108,7 +113,7 @@ export default function DocentesPage() {
             summary: "Usuario Eliminado",
             detail: "El docente ha sido eliminado correctamente.",
         });
-        fetchUsers();
+        fetchDocentes();
     } catch (error) {
         if (error instanceof Error) {
             toast.current?.show({
@@ -120,25 +125,22 @@ export default function DocentesPage() {
     }
   };
 
-  const renderUserCard = (user: User) => {
-    const docenteInfo = allDocentes.find(d => d.id_usuario === user.id);
-    const docenteId = docenteInfo?.id_docente;
-
+  const renderUserCard = (docente: Docente) => {
     return (
-        <Card key={user.id}>
+        <Card key={docente.id_docente}>
         <CardHeader>
             <div className="flex items-start justify-between">
             <div>
-                <CardTitle className="text-base">{`${user.nombre} ${user.apellido_paterno}`}</CardTitle>
-                <CardDescription>{user.correo}</CardDescription>
+                <CardTitle className="text-base">{docente.nombre_completo}</CardTitle>
+                <CardDescription>{docente.correo}</CardDescription>
             </div>
-            <Badge variant="outline">{user.rol_nombre || user.rol}</Badge>
+            <Badge variant="outline">Docente</Badge>
             </div>
         </CardHeader>
         <CardContent className="text-sm space-y-2">
-            <p><span className="font-semibold">Registro:</span> {new Date(user.fecha_registro).toLocaleDateString()}</p>
+             <p><span className="font-semibold">Grado Académico:</span> {docente.grado_academico}</p>
             <div className="flex justify-end gap-2 pt-2">
-            <Button size="icon" variant="warning" onClick={() => handleEditClick(user)}>
+            <Button size="icon" variant="warning" onClick={() => handleEditClick(docente)}>
                 <Pencil className="h-4 w-4" />
                 <span className="sr-only">Editar</span>
             </Button>
@@ -154,20 +156,20 @@ export default function DocentesPage() {
                         <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                         <AlertDialogDescription>
                             Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario
-                            <span className="font-bold text-white"> {`${user.nombre} ${user.apellido_paterno}`}</span>.
+                            <span className="font-bold text-white"> {docente.nombre_completo}</span>.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
+                        <AlertDialogAction onClick={() => handleDeleteUser(docente.id_usuario)}>
                             Confirmar
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-            {docenteId && (
+            {docente.id_docente && (
                 <Button asChild size="icon" variant="outline">
-                    <Link href={`/users/teachers/${docenteId}`}>
+                    <Link href={`/users/teachers/${docente.id_docente}`}>
                         <Eye className="h-4 w-4" />
                         <span className="sr-only">Ver Perfil</span>
                     </Link>
@@ -222,7 +224,7 @@ export default function DocentesPage() {
                     Completa el formulario para registrar una nueva cuenta de docente.
                     </DialogDescription>
                 </DialogHeader>
-                <CreateUserForm defaultRole="docente" onSuccess={() => { setIsCreateModalOpen(false); fetchUsers(); }} />
+                <CreateUserForm defaultRole="docente" onSuccess={() => { setIsCreateModalOpen(false); fetchDocentes(); }} />
             </DialogContent>
            </Dialog>
       </div>
@@ -238,7 +240,7 @@ export default function DocentesPage() {
             {userToEdit && (
                 <EditUserForm 
                     user={userToEdit} 
-                    onSuccess={() => { setIsEditModalOpen(false); fetchUsers(); }} 
+                    onSuccess={() => { setIsEditModalOpen(false); fetchDocentes(); }} 
                 />
             )}
         </DialogContent>
@@ -258,9 +260,9 @@ export default function DocentesPage() {
         </div>
 
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isUsersLoading 
+        {isLoading 
             ? Array.from({ length: 6 }).map((_, i) => renderSkeletonCard(i))
-            : filteredUsers.map(renderUserCard)}
+            : filteredDocentes.map(renderUserCard)}
       </div>
     </div>
   )
