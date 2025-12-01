@@ -39,7 +39,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
 import { Separator } from "@/components/ui/separator"
@@ -47,11 +46,17 @@ import { Input } from "@/components/ui/input"
 import { Group } from "@/lib/modelos"
 import { getGroups, deleteGroup } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
+import { CreateGroupForm } from "@/components/create-group-form"
+import { EditGroupForm } from "@/components/edit-group-form"
 import { normalizeString } from "@/lib/utils";
 
 export default function GroupsPage() {
   const toast = useRef<Toast>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [groupToEdit, setGroupToEdit] = useState<Group | null>(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,9 +91,16 @@ export default function GroupsPage() {
   }, [groups, searchTerm]);
 
 
-  const handleSuccess = () => {
-    setIsModalOpen(false);
+  const handleSuccess = (message: { summary: string, detail: string }) => {
+    toast.current?.show({ severity: 'success', ...message });
+    setIsCreateModalOpen(false);
+    setIsEditModalOpen(false);
     fetchGroups();
+  };
+
+  const handleEditClick = (group: Group) => {
+    setGroupToEdit(group);
+    setIsEditModalOpen(true);
   };
   
   const handleDelete = async () => {
@@ -125,7 +137,7 @@ export default function GroupsPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
           Gestión de Grupos
         </h1>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
                 <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -139,10 +151,27 @@ export default function GroupsPage() {
                         Completa el formulario para registrar un nuevo grupo.
                     </DialogDescription>
                 </DialogHeader>
-                {/*<CreateGroupForm onSuccess={handleSuccess} />*/}
+                <CreateGroupForm onSuccess={handleSuccess} />
             </DialogContent>
         </Dialog>
       </div>
+
+       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar Grupo</DialogTitle>
+            <DialogDescription>
+              Modifica los detalles del grupo.
+            </DialogDescription>
+          </DialogHeader>
+          {groupToEdit && (
+            <EditGroupForm
+              group={groupToEdit}
+              onSuccess={handleSuccess}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
       
        <AlertDialog open={!!groupToDelete} onOpenChange={(open) => !open && setGroupToDelete(null)}>
         <AlertDialogContent>
@@ -203,7 +232,7 @@ export default function GroupsPage() {
                       <CardDescription>{group.career}</CardDescription>
                     </div>
                     <div className="flex gap-2">
-                        <Button size="icon" variant="warning">
+                        <Button size="icon" variant="warning" onClick={() => handleEditClick(group)}>
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Editar</span>
                         </Button>
@@ -251,7 +280,7 @@ export default function GroupsPage() {
                       <TableCell>{group.modality}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                            <Button size="icon" variant="warning">
+                            <Button size="icon" variant="warning" onClick={() => handleEditClick(group)}>
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Editar</span>
                             </Button>
