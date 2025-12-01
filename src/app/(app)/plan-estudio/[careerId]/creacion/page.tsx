@@ -86,12 +86,21 @@ export default function CrearPlanEstudioPage() {
 
     const filteredSubjects = useMemo(() => {
         const result: Record<number, Subject[]> = {};
+        const allSelectedIds = new Set(Object.values(selectedSubjects).flat());
+
         for (let i = 1; i <= numberOfSemesters; i++) {
             const term = searchTerm[i]?.toLowerCase() || '';
-            result[i] = subjects.filter(subject => subject.name.toLowerCase().includes(term));
+            const currentSemesterSelectedIds = new Set(selectedSubjects[i] || []);
+
+            result[i] = subjects.filter(subject => {
+                const nameMatches = subject.name.toLowerCase().includes(term);
+                const isSelectedInOtherSemester = allSelectedIds.has(subject.id) && !currentSemesterSelectedIds.has(subject.id);
+                
+                return nameMatches && !isSelectedInOtherSemester;
+            });
         }
         return result;
-    }, [subjects, searchTerm, numberOfSemesters]);
+    }, [subjects, searchTerm, numberOfSemesters, selectedSubjects]);
 
     const handleSubmit = async () => {
         if (!selectedModalityId) return;
@@ -243,5 +252,3 @@ export default function CrearPlanEstudioPage() {
         </div>
     )
 }
-
-    
