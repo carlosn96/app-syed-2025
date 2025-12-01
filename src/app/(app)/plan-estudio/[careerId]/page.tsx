@@ -2,7 +2,7 @@
 "use client"
 
 import { useParams, useRouter } from 'next/navigation'
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Subject, Career, StudyPlanRecord } from '@/lib/modelos'
 import {
@@ -23,17 +23,22 @@ import {
 } from "@/components/ui/table"
 import { PlusCircle, Pencil, Trash2 } from 'lucide-react'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/context/auth-context'
-import { getStudyPlanByCareerId, getSubjects, getCareers } from '@/services/api'
+import { getStudyPlanByCareerId, getSubjects, getCareers, deleteStudyPlan } from '@/services/api'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FloatingBackButton } from '@/components/ui/floating-back-button'
+import { Toast } from 'primereact/toast'
 
 interface EnrichedStudyPlanRecord extends StudyPlanRecord {
   subjectName: string;
@@ -43,6 +48,7 @@ export default function PlanEstudioPage() {
     const params = useParams()
     const router = useRouter();
     const { user } = useAuth()
+    const toast = useRef<Toast>(null);
 
     const careerId = Number(params.careerId);
 
@@ -51,6 +57,55 @@ export default function PlanEstudioPage() {
     const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [planToDelete, setPlanToDelete] = useState<{ id: number, name: string } | null>(null);
+
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            const [planData, subjectsData, careersData] = await Promise.all([
+                getStudyPlanByCareerId(careerId),
+                getSubjects(), 
+                getCareers()
+            ]);
+
+            const currentCareer = careersData.find(c => c.id === careerId) || null;
+            setCareerInfo(currentCareer as any);
+
+            if (planData.length === 0 && !currentCareer) {
+                setError("No se encontró información para esta carrera.");
+                setStudyPlans([]);
+            } else if (planData.length === 0 && currentCareer) {
+                 // Career exists but has no study plan, which is a valid state
+                setStudyPlans([]);
+            } else {
+                const enrichedPlanData = planData.map(plan => {
+                    const subject = subjectsData.find(s => s.id === plan.id_materia);
+                    return {
+                        ...plan,
+                        subjectName: subject?.name || 'Materia Desconocida'
+                    }
+                });
+                setStudyPlans(enrichedPlanData);
+            }
+
+        } catch (err: any) {
+             if (err instanceof Error && err.message.includes("Unexpected end of JSON input")) {
+                setStudyPlans([]);
+                setError(null);
+                try {
+                    const careersData = await getCareers();
+                    const currentCareer = careersData.find(c => c.id === careerId) || null;
+                    setCareerInfo(currentCareer as any);
+                } catch (careerError) {
+                    setError("Error al cargar la información de la carrera.");
+                }
+            } else {
+                setError((err as Error).message || "Error al cargar los datos del plan de estudio.");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (isNaN(careerId)) {
@@ -58,57 +113,6 @@ export default function PlanEstudioPage() {
             setIsLoading(false);
             return;
         }
-
-        const fetchData = async () => {
-            setIsLoading(true);
-            try {
-                const [planData, subjectsData, careersData] = await Promise.all([
-                    getStudyPlanByCareerId(careerId),
-                    getSubjects(), 
-                    getCareers()
-                ]);
-
-                const currentCareer = careersData.find(c => c.id === careerId) || null;
-                setCareerInfo(currentCareer as any);
-
-                if (planData.length === 0 && !currentCareer) {
-                    setError("No se encontró información para esta carrera.");
-                    setStudyPlans([]);
-                } else if (planData.length === 0 && currentCareer) {
-                     // Career exists but has no study plan, which is a valid state
-                    setStudyPlans([]);
-                } else {
-                    const enrichedPlanData = planData.map(plan => {
-                        const subject = subjectsData.find(s => s.id === plan.id_materia);
-                        return {
-                            ...plan,
-                            subjectName: subject?.name || 'Materia Desconocida'
-                        }
-                    });
-                    setStudyPlans(enrichedPlanData);
-                }
-
-            } catch (err: any) {
-                 if (err instanceof Error && err.message.includes("Unexpected end of JSON input")) {
-                    // Treat as no data found, which is a valid state
-                    setStudyPlans([]);
-                    setError(null);
-                    // We still need career info if possible
-                    try {
-                        const careersData = await getCareers();
-                        const currentCareer = careersData.find(c => c.id === careerId) || null;
-                        setCareerInfo(currentCareer as any);
-                    } catch (careerError) {
-                        setError("Error al cargar la información de la carrera.");
-                    }
-                } else {
-                    setError((err as Error).message || "Error al cargar los datos del plan de estudio.");
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchData();
     }, [careerId]);
 
@@ -122,6 +126,29 @@ export default function PlanEstudioPage() {
         });
         return Array.from(modalityMap.entries());
     }, [studyPlans]);
+
+    const handleDeletePlan = async () => {
+        if (!planToDelete) return;
+        try {
+            await deleteStudyPlan(planToDelete.id);
+            toast.current?.show({
+                severity: "success",
+                summary: "Plan de Estudio Eliminado",
+                detail: `El plan de estudios para la modalidad ${planToDelete.name} ha sido eliminado.`,
+            });
+            fetchData();
+        } catch (error) {
+            if (error instanceof Error) {
+                toast.current?.show({
+                    severity: "error",
+                    summary: "Error al eliminar",
+                    detail: error.message,
+                });
+            }
+        } finally {
+            setPlanToDelete(null);
+        }
+    };
 
     const getOrdinal = (n: number) => `${n}°`;
 
@@ -162,7 +189,25 @@ export default function PlanEstudioPage() {
 
     return (
         <div className="flex flex-col gap-8">
+            <Toast ref={toast} />
             <FloatingBackButton />
+             <AlertDialog open={!!planToDelete} onOpenChange={(open) => !open && setPlanToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta acción no se puede deshacer. Se eliminará permanentemente el plan de estudios completo para la modalidad
+                            <span className="font-bold text-white"> {planToDelete?.name}</span>.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setPlanToDelete(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeletePlan}>
+                            Confirmar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className='flex flex-col'>
                     <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
@@ -194,12 +239,18 @@ export default function PlanEstudioPage() {
                                             Materias asignadas a esta modalidad, agrupadas por grado.
                                         </CardDescription>
                                     </div>
-                                    <Button asChild variant="outline">
-                                        <Link href={`/plan-estudio/${careerId}/editar/${modalityId}`}>
-                                            <Pencil className="mr-2 h-4 w-4" />
-                                            Editar Plan
-                                        </Link>
-                                    </Button>
+                                    <div className="flex gap-2">
+                                        <Button asChild variant="outline">
+                                            <Link href={`/plan-estudio/${careerId}/editar/${modalityId}`}>
+                                                <Pencil className="mr-2 h-4 w-4" />
+                                                Editar Plan
+                                            </Link>
+                                        </Button>
+                                        <Button variant="destructive" onClick={() => setPlanToDelete({ id: modalityId, name: modalityData.name })}>
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Eliminar Plan
+                                        </Button>
+                                    </div>
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -221,21 +272,12 @@ export default function PlanEstudioPage() {
                                                             <TableHeader>
                                                                 <TableRow>
                                                                     <TableHead>Nombre de la Materia</TableHead>
-                                                                    <TableHead className="text-right">Acciones</TableHead>
                                                                 </TableRow>
                                                             </TableHeader>
                                                             <TableBody>
                                                                 {semesterSubjects.map(subject => (
                                                                     <TableRow key={subject.id_materia}>
                                                                         <TableCell className="font-medium">{subject.subjectName}</TableCell>
-                                                                        <TableCell className="text-right">
-                                                                            <div className="flex justify-end gap-2">
-                                                                                <Button size="icon" variant="destructive">
-                                                                                    <Trash2 className="h-4 w-4" />
-                                                                                    <span className="sr-only">Eliminar materia del plan</span>
-                                                                                </Button>
-                                                                            </div>
-                                                                        </TableCell>
                                                                     </TableRow>
                                                                 ))}
                                                             </TableBody>

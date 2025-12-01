@@ -151,6 +151,10 @@ export const updateStudyPlan = (planId: number, data: { id_carrera: number, id_m
     return apiFetch(`/plan-estudio/${planId}`, { method: 'PUT', body: JSON.stringify(data) });
 };
 
+export const deleteStudyPlan = (modalityId: number): Promise<void> => {
+    return apiFetch(`/plan-estudio/modalidad/${modalityId}`, { method: 'DELETE' });
+};
+
 
 export const updateCareer = async (id: number, data: { nombre: string }): Promise<Career> => {
     return apiFetch(`/carreras/${id}`, { method: 'PUT', body: JSON.stringify(data) });
@@ -570,3 +574,4 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
     
 
     
+
