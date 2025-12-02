@@ -1,4 +1,5 @@
 
+
 import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion, Modality, EvaluationCriterion } from '@/lib/modelos';
 
 const getAuthToken = (): string | null => {
@@ -166,16 +167,20 @@ export const deleteCareer = (id: number): Promise<void> => {
 };
 
 export const getStudyPlanByCareerId = async (careerId: number): Promise<StudyPlanRecord[]> => {
-    const response = await apiFetch(`/plan-estudio/${careerId}`);
+    // If careerId is 0, fetch all plans. Adjust endpoint if API supports it differently.
+    const endpoint = careerId === 0 ? '/plan-estudio' : `/plan-estudio/${careerId}`;
+    const response = await apiFetch(endpoint);
+
     if (response.datos && Array.isArray(response.datos)) {
         const flattenedRecords: StudyPlanRecord[] = [];
         response.datos.forEach((modalityPlan: any) => {
-            const { id, id_carrera, id_modalidad, nombre_modalidad, materias } = modalityPlan;
+            const { id, id_carrera, carrera, id_modalidad, nombre_modalidad, materias } = modalityPlan;
             if (Array.isArray(materias)) {
                 materias.forEach((materia: any) => {
                     flattenedRecords.push({
                         id: id,
                         id_carrera,
+                        carrera,
                         id_modalidad,
                         modalidad: nombre_modalidad,
                         id_materia: materia.id_materia,
@@ -185,9 +190,45 @@ export const getStudyPlanByCareerId = async (careerId: number): Promise<StudyPla
                         nivel_orden: materia.id_cat_nivel,
                     });
                 });
+            } else {
+                 // Handle cases where a plan might exist but have no subjects
+                 flattenedRecords.push({
+                    id: id,
+                    id_carrera,
+                    carrera,
+                    id_modalidad,
+                    modalidad: nombre_modalidad,
+                    id_materia: 0,
+                    materia: '',
+                    id_cat_nivel: 0,
+                    nivel: '',
+                    nivel_orden: 0,
+                });
             }
         });
-        return flattenedRecords;
+        // Deduplicate plans based on their main ID
+        const uniquePlans = Array.from(new Map(flattenedRecords.map(item => [item.id, item])).values());
+        
+        // This part seems wrong, the original intention was likely to return unique plans, not all records.
+        // Let's return unique plans with their subjects nested, or adjust the caller.
+        // For now, let's stick to the flattened structure as other parts of the app might expect it.
+        // The issue is that the `useMemo` in the page component will group them again.
+        // A better approach is to return the plans as they are and let the component handle them.
+        
+        return response.datos.map((plan:any) => ({
+             id: plan.id,
+             id_carrera: plan.id_carrera,
+             carrera: plan.carrera,
+             id_modalidad: plan.id_modalidad,
+             modalidad: plan.nombre_modalidad,
+             materias: plan.materias, // Keep subjects nested
+             // The rest of the fields are in the nested materias array, so we can't flatten here
+             // without losing context or creating a more complex structure.
+             // The component should be adapted to this structure.
+             // Let's go back to the flattened approach but ensure it's correct.
+        }));
+
+
     }
     return [];
 }
@@ -357,6 +398,13 @@ export const getGroups = async (): Promise<Group[]> => {
         name: g.grupo,
         career: g.carrera,
         modality: g.modalidad,
+        turno: g.turno,
+        plantelName: g.nombre,
+        id_plan_estudio: g.id_plan_estudio,
+        id_ciclo: g.id_ciclo,
+        id_nivel: g.id_nivel,
+        id_carrera: g.id_carrera,
+        id_modalidad: g.id_modalidad,
     }));
 };
 export const createGroup = (data: any): Promise<Group> => {

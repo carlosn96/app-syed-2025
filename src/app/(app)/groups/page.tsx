@@ -203,7 +203,7 @@ export default function GroupsPage() {
        {isLoading ? (
          <>
             <div className="md:hidden flex flex-col gap-4">
-              {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 w-full" />)}
+              {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-48 w-full" />)}
             </div>
             <Card className="hidden md:block rounded-xl">
               <CardHeader>
@@ -248,6 +248,10 @@ export default function GroupsPage() {
                     <div className="grid grid-cols-2 gap-2 text-sm mt-4">
                         <div className="font-semibold">Modalidad:</div>
                         <div>{group.modality}</div>
+                        <div className="font-semibold">Turno:</div>
+                        <div>{group.turno}</div>
+                         <div className="font-semibold">Plantel:</div>
+                        <div>{group.plantelName || 'N/A'}</div>
                     </div>
                 </CardContent>
               </Card>
@@ -269,6 +273,8 @@ export default function GroupsPage() {
                     <TableHead>Grupo</TableHead>
                     <TableHead>Carrera</TableHead>
                     <TableHead>Modalidad</TableHead>
+                    <TableHead>Turno</TableHead>
+                    <TableHead>Plantel</TableHead>
                     <TableHead>Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -278,6 +284,8 @@ export default function GroupsPage() {
                       <TableCell className="font-medium">{group.name}</TableCell>
                       <TableCell>{group.career}</TableCell>
                       <TableCell>{group.modality}</TableCell>
+                      <TableCell>{group.turno}</TableCell>
+                      <TableCell>{group.plantelName || 'N/A'}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                             <Button size="icon" variant="warning" onClick={() => handleEditClick(group)}>

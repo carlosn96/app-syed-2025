@@ -151,14 +151,17 @@ export interface Evaluation {
 
 
 export interface Group {
-  id: number;
-  name: string;
+  id: number; // id_grupo
+  name: string; // grupo
   career: string;
   modality: string;
-  semester?: number;
-  cycle?: string;
-  turno?: string;
-  students?: number[];
+  turno: string;
+  plantelName: string | null;
+  id_plan_estudio: number;
+  id_ciclo: number;
+  id_nivel: number;
+  id_carrera: number;
+  id_modalidad: number;
 }
 
 export interface Schedule {

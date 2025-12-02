@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Toast } from 'primereact/toast';
-import { updateGroup, getCarrerasForCoordinador } from "@/services/api"
+import { updateGroup, getStudyPlanByCareerId } from "@/services/api"
 import { useState, useRef, useEffect } from "react"
 import {
   Select,
@@ -24,12 +24,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { CareerSummary, Group } from "@/lib/modelos"
+import { Group, StudyPlanRecord } from "@/lib/modelos"
 
 const editGroupSchema = z.object({
+  id_plan_estudio: z.coerce.number().min(1, "Debes seleccionar un plan de estudio."),
+  id_ciclo: z.coerce.number().min(1, "Debes seleccionar un ciclo."),
+  id_nivel: z.coerce.number().min(1, "Debes seleccionar un nivel."),
   grupo: z.string().min(1, "El nombre del grupo es requerido."),
-  id_carrera: z.coerce.number().min(1, "Debes seleccionar una carrera."),
-  modalidad: z.string().min(1, "La modalidad es requerida."),
 });
 
 type EditGroupFormValues = z.infer<typeof editGroupSchema>;
@@ -42,37 +43,29 @@ interface EditGroupFormProps {
 export function EditGroupForm({ group, onSuccess }: EditGroupFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [careers, setCareers] = useState<CareerSummary[]>([]);
-
-  const selectedCareer = careers.find(c => c.name === group.career);
+  const [allStudyPlans, setAllStudyPlans] = useState<StudyPlanRecord[]>([]);
 
   useEffect(() => {
-    const fetchCareers = async () => {
+    const fetchPlans = async () => {
       try {
-        const data = await getCarrerasForCoordinador();
-        setCareers(data);
+        const plans = await getStudyPlanByCareerId(0); // Fetch all plans
+        setAllStudyPlans(plans);
       } catch (error) {
-        console.error("Failed to fetch careers for coordinator", error);
+         console.error("Failed to fetch study plans", error);
       }
     };
-    fetchCareers();
+    fetchPlans();
   }, []);
 
   const form = useForm<EditGroupFormValues>({
     resolver: zodResolver(editGroupSchema),
     defaultValues: {
       grupo: group.name,
-      id_carrera: selectedCareer?.id,
-      modalidad: group.modality,
+      id_plan_estudio: group.id_plan_estudio,
+      id_ciclo: group.id_ciclo,
+      id_nivel: group.id_nivel,
     },
   });
-
-  useEffect(() => {
-    if (selectedCareer) {
-      form.setValue('id_carrera', selectedCareer.id);
-    }
-  }, [selectedCareer, form]);
-
 
   const onSubmit = async (data: EditGroupFormValues) => {
     setIsSubmitting(true);
@@ -95,40 +88,78 @@ export function EditGroupForm({ group, onSuccess }: EditGroupFormProps) {
     }
   };
 
+  const cycles = [{id: 1, name: "2025-A"}, {id: 2, name: "2025-B"}];
+  const levels = Array.from({length: 12}, (_, i) => ({ id: i + 1, name: `${i+1}° Semestre`}));
+
   return (
     <>
       <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
+         <FormField
             control={form.control}
-            name="grupo"
+            name="id_plan_estudio"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombre del Grupo</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
+                <FormLabel>Plan de Estudio</FormLabel>
+                <Select onValueChange={field.onChange} value={String(field.value)}>
+                    <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un plan" />
+                        </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        {allStudyPlans.map((plan) => (
+                        <SelectItem key={plan.id} value={String(plan.id)}>
+                            {plan.carrera} - {plan.modalidad}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
            <FormField
             control={form.control}
-            name="id_carrera"
+            name="id_ciclo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Carrera</FormLabel>
+                <FormLabel>Ciclo</FormLabel>
                 <Select onValueChange={field.onChange} value={String(field.value)}>
                     <FormControl>
                         <SelectTrigger>
-                        <SelectValue placeholder="Seleccione una carrera" />
+                        <SelectValue placeholder="Seleccione un ciclo" />
                         </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                        {careers.map((career) => (
-                        <SelectItem key={career.id} value={String(career.id)}>
-                            {career.name}
+                        {cycles.map((cycle) => (
+                        <SelectItem key={cycle.id} value={String(cycle.id)}>
+                            {cycle.name}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+           <FormField
+            control={form.control}
+            name="id_nivel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nivel</FormLabel>
+                <Select onValueChange={field.onChange} value={String(field.value)}>
+                    <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un nivel" />
+                        </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        {levels.map((level) => (
+                        <SelectItem key={level.id} value={String(level.id)}>
+                            {level.name}
                         </SelectItem>
                         ))}
                     </SelectContent>
@@ -139,10 +170,10 @@ export function EditGroupForm({ group, onSuccess }: EditGroupFormProps) {
           />
           <FormField
             control={form.control}
-            name="modalidad"
+            name="grupo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Modalidad</FormLabel>
+                <FormLabel>Nombre del Grupo</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
