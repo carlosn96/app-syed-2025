@@ -59,7 +59,7 @@ export default function LoginPage() {
                 <div className="flex justify-center items-center mb-4">
                      <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]" />
                 </div>
-              <CardTitle className="text-2xl font-headline text-white">Bienvenido a SYED</CardTitle>
+              <CardTitle className="text-2xl font-headline text-white">Sistema de Supervisión y Evaluación Docente</CardTitle>
               <CardDescription className="text-white/80">
                 Ingresa tus credenciales para iniciar sesión.
               </CardDescription>
@@ -71,7 +71,6 @@ export default function LoginPage() {
                   id="email" 
                   type="email" 
                   name="correo"
-                  placeholder="m@ejemplo.com" 
                   required 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
