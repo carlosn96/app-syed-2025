@@ -40,7 +40,11 @@ export default function LoginPage() {
   };
 
   if (isAuthLoading || user) {
-      return null;
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background p-4 login-background">
+        <div className="text-white">Cargando...</div>
+      </div>
+    );
   }
 
   return (
