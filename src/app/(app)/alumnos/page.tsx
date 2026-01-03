@@ -1,20 +1,12 @@
 
 "use client"
 
-import { useState, useEffect, useMemo, useRef } from "react"
-import { Pencil, PlusCircle, Trash2, Search, Eye } from "lucide-react"
-import Link from "next/link"
+import { useState, useEffect, useRef } from "react"
+import { PlusCircle } from "lucide-react"
 import { Toast } from 'primereact/toast';
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { PageTitle } from "@/components/layout/page-title"
 import {
   Dialog,
   DialogContent,
@@ -23,25 +15,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { useAuth } from "@/context/auth-context"
 import { User, Alumno } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
 import { EditUserForm } from "@/components/edit-user-form"
-import { Input } from "@/components/ui/input"
+import { ResetPasswordForm } from "@/components/reset-password-form"
 import { getAlumnos, deleteUser } from "@/services/api"
-import { Skeleton } from "@/components/ui/skeleton"
-import { normalizeString } from "@/lib/utils";
+import { AlumnosList } from "@/components/alumnos/alumnos-list"
 
 export default function AlumnosPage() {
   const toast = useRef<Toast>(null);
@@ -52,7 +31,9 @@ export default function AlumnosPage() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
+  const [selectedUserForReset, setSelectedUserForReset] = useState<{ id: number; name: string } | null>(null);
 
   const fetchAlumnos = async () => {
     try {
@@ -77,23 +58,6 @@ export default function AlumnosPage() {
     fetchAlumnos();
   }, []);
 
-  const filteredAlumnos = useMemo(() => {
-    if (!searchTerm) {
-        return allAlumnos;
-    }
-    const normalizedSearchTerm = normalizeString(searchTerm);
-    return allAlumnos.filter(alumno => {
-        const fullName = normalizeString(alumno.nombre_completo);
-        const email = normalizeString(alumno.correo);
-        const career = alumno.carrera ? normalizeString(alumno.carrera) : '';
-
-        return fullName.includes(normalizedSearchTerm) ||
-               email.includes(normalizedSearchTerm) ||
-               (career && career.includes(normalizedSearchTerm));
-    });
-  }, [allAlumnos, searchTerm]);
-
-
   const handleEditClick = (alumno: Alumno) => {
     const userForEdit: User = {
         id: alumno.id_usuario,
@@ -115,9 +79,9 @@ export default function AlumnosPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleDeleteUser = async (userId: number) => {
+  const handleDeleteUser = async (alumno: Alumno) => {
     try {
-        await deleteUser(userId);
+        await deleteUser(alumno.id_usuario);
         toast.current?.show({
             severity: "success",
             summary: "Usuario Eliminado",
@@ -135,87 +99,15 @@ export default function AlumnosPage() {
     }
   };
 
-  const renderUserCard = (alumno: Alumno) => {
-    const [name, ...restOfName] = (alumno.nombre_completo || '').split(' ');
-    const lastName = restOfName.join(' ');
-    
-    return (
-        <Card key={alumno.id_alumno}>
-        <CardHeader>
-            <div className="flex items-start justify-between">
-            <div>
-                <CardTitle className="text-base">{`${name} ${lastName}`}</CardTitle>
-                <CardDescription>{alumno.correo}</CardDescription>
-            </div>
-            <Badge variant="outline">Alumno</Badge>
-            </div>
-        </CardHeader>
-        <CardContent className="text-sm space-y-2">
-            <p><span className="font-semibold">Matrícula:</span> {alumno.matricula}</p>
-            <p><span className="font-semibold">Carrera:</span> {alumno.carrera || 'No asignada'}</p>
-            <div className="flex justify-end gap-2 pt-2">
-            <Button size="icon" variant="warning" onClick={() => handleEditClick(alumno)}>
-                <Pencil className="h-4 w-4" />
-                <span className="sr-only">Editar</span>
-            </Button>
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button size="icon" variant="destructive">
-                        <Trash2 className="h-4 w-4" />
-                         <span className="sr-only">Eliminar</span>
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario
-                            <span className="font-bold text-white"> {alumno.nombre_completo}</span>.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteUser(alumno.id_usuario)}>
-                            Confirmar
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-            </div>
-        </CardContent>
-        </Card>
-    );
+  const handleResetPassword = (userId: number, userName: string) => {
+    setSelectedUserForReset({ id: userId, name: userName });
   };
-  
-  const renderSkeletonCard = (index: number) => (
-    <Card key={index}>
-        <CardHeader>
-            <div className="flex items-start justify-between">
-                <div>
-                    <Skeleton className="h-5 w-32 mb-2" />
-                    <Skeleton className="h-4 w-40" />
-                </div>
-                <Skeleton className="h-6 w-20 rounded-full" />
-            </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-28" />
-            <div className="flex justify-end gap-2 pt-2">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <Skeleton className="h-10 w-10 rounded-full" />
-            </div>
-        </CardContent>
-    </Card>
-  );
 
   return (
     <div className="flex flex-col gap-8">
       <Toast ref={toast} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-          Gestión de Alumnos
-        </h1>
+        <PageTitle>Gestión de Alumnos</PageTitle>
            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
                 <Button>
@@ -234,6 +126,13 @@ export default function AlumnosPage() {
             </DialogContent>
            </Dialog>
       </div>
+
+      <ResetPasswordForm 
+        isOpen={!!selectedUserForReset}
+        onOpenChange={(open) => !open && setSelectedUserForReset(null)}
+        userId={selectedUserForReset?.id || 0}
+        userName={selectedUserForReset?.name}
+      />
 
        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -254,22 +153,16 @@ export default function AlumnosPage() {
       
       {error && <p className="text-destructive text-center">{error}</p>}
       
-      <div className="relative w-full sm:w-auto sm:max-w-xs flex-grow">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-              type="search"
-              placeholder="Buscar alumnos..."
-              className="pl-9 w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isLoading 
-            ? Array.from({ length: 6 }).map((_, i) => renderSkeletonCard(i))
-            : filteredAlumnos.map(renderUserCard)}
-      </div>
+      <AlumnosList
+        alumnos={allAlumnos}
+        isLoading={isLoading}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onEdit={handleEditClick}
+        onDelete={handleDeleteUser}
+        onResetPassword={handleResetPassword}
+        showResetPassword={true}
+      />
     </div>
   )
 }
