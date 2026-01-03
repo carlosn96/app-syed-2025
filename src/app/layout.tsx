@@ -4,6 +4,7 @@ import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import { AuthProvider } from '@/context/auth-context';
+import ColorProvider from '@/components/ui/color-provider';
 
 export const metadata: Metadata = {
   title: 'Sistema de Gestion Educativa',
@@ -24,9 +25,11 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <ColorProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ColorProvider>
       </body>
     </html>
   );

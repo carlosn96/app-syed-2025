@@ -17,10 +17,11 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, FormEvent } from "react";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('coordi@mailinator.com');
+  const [password, setPassword] = useState('987654');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login, user, isLoading: isAuthLoading } = useAuth();
@@ -40,37 +41,25 @@ export default function LoginPage() {
   };
 
   if (isAuthLoading || user) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background p-4 login-background">
-        <div className="text-white">Cargando...</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-background p-4 login-background">
-      <Card 
-        className="w-full max-w-sm"
-        style={{
-            background: 'linear-gradient(to bottom right, rgba(32, 45, 93, 0.8), rgba(223, 28, 26, 0.8))',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
-        }}
-      >
+    <div className="flex h-screen w-full items-center justify-center p-4 atmospheric-background">
+      <Card className="w-full max-w-sm">
         <form onSubmit={handleLogin}>
             <CardHeader className="text-center">
                 <div className="flex justify-center items-center mb-4">
-                     <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]" />
+                     <Image src="/UNELOGO.png" alt="UNE Logo" width={160} height={57} className="w-40" />
                 </div>
-              <CardTitle className="text-2xl font-headline text-white">Sistema de Supervisión y Evaluación Docente</CardTitle>
-              <CardDescription className="text-white/80">
+              <CardTitle className="text-2xl font-headline">Sistema de Supervisión y Evaluación Docente</CardTitle>
+              <CardDescription>
                 Ingresa tus credenciales para iniciar sesión.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email" className="text-white/90">Correo Electrónico</Label>
+                <Label htmlFor="email">Correo Electrónico</Label>
                 <Input 
                   id="email" 
                   type="email" 
@@ -78,12 +67,11 @@ export default function LoginPage() {
                   required 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/10 text-white placeholder:text-white/60 border-white/20 focus:ring-white/80"
                   disabled={isSubmitting}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password" className="text-white/90">Contraseña</Label>
+                <Label htmlFor="password">Contraseña</Label>
                 <div className="relative">
                    <Input 
                     id="password" 
@@ -92,14 +80,14 @@ export default function LoginPage() {
                     required 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10 bg-white/10 text-white placeholder:text-white/60 border-white/20 focus:ring-white/80"
+                    className="pr-10"
                     disabled={isSubmitting}
                   />
                   <Button 
                     type="button" 
                     variant="ghost" 
                     size="icon" 
-                    className="absolute inset-y-0 right-0 h-full px-3 text-white/60 hover:text-white rounded-full hover:shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all duration-300"
+                    className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isSubmitting}
                   >
@@ -110,7 +98,7 @@ export default function LoginPage() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full bg-[#202d5d] text-white hover:bg-[#df1c1a] shadow-[0_0_15px_rgba(255,255,255,0.8)] hover:shadow-[0_0_25px_rgba(255,255,255,0.8)] transition-all duration-300" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
               </Button>
             </CardFooter>
