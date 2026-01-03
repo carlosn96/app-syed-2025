@@ -1,55 +1,74 @@
 
+import type { DocenteMateria, Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion, Modality, EvaluationCriterion, Horario, Periodo, CicloEscolar } from '@/lib/modelos';
+import { cp } from 'fs';
 
-import type { Plantel, User, Alumno, Docente, Coordinador, Career, CareerSummary, Subject, Group, Schedule, EvaluationPeriod, Teacher, Supervision, Evaluation, SupervisionRubric, AssignedCareer, SupervisionCriterion, StudyPlanRecord, EvaluationRubric, ApiRubric, ApiRubricWithCriteria, ApiNonCountableRubricWithCriteria, ApiCriterion, ApiNonCountableCriterion, Modality, EvaluationCriterion } from '@/lib/modelos';
-
-const getAuthToken = (): string | null => {
-  if (typeof window === 'undefined') {
+export const getAuthToken = (): string | null => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('access_token');
+    }
     return null;
-  }
-  return localStorage.getItem('access_token');
 };
 
-const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-  const token = getAuthToken();
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    ...options.headers,
-  };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+const apiFetch = async (endpoint: string, options: RequestInit = {}, tokenOverride?: string) => {
+    const token = tokenOverride || getAuthToken(); // This function is now synchronous
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...options.headers,
+    };
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-  
-  if (response.status === 204) {
-    return { exito: true, datos: [] };
-  }
-
-  if (!response.ok) {
-    let errorMessage = `Error de servidor: ${response.status} ${response.statusText}`;
-    try {
-      const errorResult = await response.json();
-      errorMessage = errorResult.mensaje || (errorResult.datos?.errors ? Object.values(errorResult.datos.errors).flat().join(' ') : errorMessage);
-    } catch (e) {
-      // The response was not a valid JSON, so we stick with the status text.
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
     }
-    console.error(`API Error on ${endpoint}:`, errorMessage);
-    throw new Error(errorMessage);
-  }
 
-  const result = await response.json();
-  
-  if (result.exito || response.ok) { // Some endpoints might not have 'exito'
-    return result; // Return 'datos' if it exists, otherwise the whole result.
-  } else {
-    const errorMessage = result.mensaje || (result.datos?.errors ? Object.values(result.datos.errors).flat().join(' ') : 'Ocurrió un error desconocido.');
-    throw new Error(errorMessage);
-  }
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+    });
+
+    //console.log(`API Request to ${endpoint} with options:`, options);
+    //console.log(`API Response Status from ${endpoint}:`, response);
+    if (!response.ok) {
+        let errorMessage = `Error de servidor: ${response.status} ${response.statusText}`;
+        try {
+            const errorResult = await response.json();
+            console.log(`API Error Response from ${endpoint}:`, errorResult);
+            errorMessage =
+                (errorResult.datos?.errors
+                    ? Object.values(errorResult.datos.errors).flat().join(' ')
+                    : errorResult.mensaje) || 'Ocurrió un error inesperado';
+        } catch (e) {
+            // The response was not a valid JSON, so we stick with the status text.
+        }
+        //console.error(`API Error on ${endpoint}:`, errorMessage);
+        throw new Error(errorMessage);
+    }
+
+    const result = await response.json();
+    //console.log(`API Response from ${endpoint}:`, result);
+
+    if (result.exito || response.ok) { // Some endpoints might not have 'exito'
+        return result; // Return 'datos' if it exists, otherwise the whole result.
+    } else {
+        const errorMessage = result.mensaje || (result.datos?.errors ? Object.values(result.datos.errors).flat().join(' ') : 'Ocurrió un error desconocido.');
+        throw new Error(errorMessage);
+    }
+};
+
+export type UsersCount = {
+    students: number;
+    teachers: number;
+    coordinators: number;
+};
+
+export const getAdminNumeralia = async (): Promise<{
+    totalUsers: UsersCount;
+    totalCareers: number;
+    totalPlanteles: number;
+}> => {
+    const data = await apiFetch('/admin-numeralia');
+    return data.datos;
 };
 
 // Campus Management
@@ -64,7 +83,7 @@ export const getPlanteles = async (): Promise<Plantel[]> => {
 
 export const createPlantel = async (data: { nombre: string, ubicacion: string }): Promise<Plantel> => {
     const newPlantel = await apiFetch('/planteles', { method: 'POST', body: JSON.stringify(data) });
-     return {
+    return {
         id: newPlantel.datos.id_plantel,
         name: newPlantel.datos.nombre,
         location: newPlantel.datos.ubicacion
@@ -124,12 +143,89 @@ export const getCareers = async (): Promise<CareerSummary[]> => {
             });
         }
     });
-    
+
     return Array.from(careersMap.values());
 };
 
-export const getCarrerasForCoordinador = async (): Promise<CareerSummary[]> => {
-    const response = await apiFetch('/coordinador-carreras');
+export const getCareerByID = async (careerId: number): Promise<CareerSummary | null> => {
+    const response = await apiFetch(`/carreras/${careerId}`);
+    
+    // Validar que la respuesta tenga datos
+    if (!response || !response.datos) {
+        return null;
+    }
+
+    // Asegurar que datos sea un array
+    const records: any[] = Array.isArray(response.datos) 
+        ? response.datos 
+        : [response.datos];
+
+    // Si no hay registros, retornar null
+    if (records.length === 0) {
+        return null;
+    }
+
+    let careerSummary: CareerSummary | null = null;
+
+    records.forEach(record => {
+        // Inicializar careerSummary en la primera iteración
+        if (!careerSummary) {
+            careerSummary = {
+                id: record.id_carrera,
+                name: record.carrera,
+                coordinator: record.coordinador || null,
+                totalMaterias: record.total_materias || 0,
+                totalPlanteles: record.total_planteles || 0,
+                totalModalidades: record.total_modalidades || 0,
+                modalities: [],
+            };
+        }
+
+        // Asegurar que modalities existe
+        if (!careerSummary.modalities) {
+            careerSummary.modalities = [];
+        }
+
+        // Agregar modalidad si existe y no está duplicada
+        if (record.id_modalidad) {
+            const exists = careerSummary.modalities.some(
+                m => m.id === record.id_modalidad
+            );
+
+            if (!exists) {
+                careerSummary.modalities.push({
+                    id: record.id_modalidad,
+                    name: record.carrera,
+                    modality: record.modalidad || '',
+                    campus: record.plantel || '',
+                    semesters: record.semestres || 0,
+                    coordinator: record.coordinador || null,
+                });
+            }
+        }
+    });
+
+    return careerSummary;
+};
+
+export const getCarrerasForCoordinador = async (id?: number): Promise<CareerSummary | CareerSummary[]> => {
+    const endpoint = id ? `/coordinador-carreras/${id}` : '/coordinador-carreras';
+    const response = await apiFetch(endpoint);
+    
+    // Si se solicita una carrera específica por ID
+    if (id && !Array.isArray(response.datos)) {
+        const c = response.datos;
+        return {
+            id: c.id_carrera,
+            name: c.carrera,
+            coordinator: c.nombre_coordinador || null,
+            totalMaterias: c.total_materias,
+            totalPlanteles: c.total_planteles,
+            totalModalidades: c.total_modalidades,
+        };
+    }
+    
+    // Si es un array de carreras
     return response.datos.map((c: any) => ({
         id: c.id_carrera,
         name: c.carrera,
@@ -140,6 +236,17 @@ export const getCarrerasForCoordinador = async (): Promise<CareerSummary[]> => {
     }));
 }
 
+export const getCareersWithoutCoordinator = async (): Promise<CareerSummary[]> => {
+    const response = await apiFetch('/carreras-sin-coordinador');
+    return response.datos.map((c: any) => ({
+        id: c.id_carrera,
+        name: c.carrera,
+        coordinator: null,
+        totalMaterias: c.total_materias || 0,
+        totalPlanteles: c.total_planteles || 0,
+        totalModalidades: c.total_modalidades || 0,
+    }));
+};
 
 export const createCareer = (data: { nombre: string }): Promise<any> => {
     return apiFetch('/carreras', { method: 'POST', body: JSON.stringify({ nombre: data.nombre }) });
@@ -166,82 +273,65 @@ export const deleteCareer = (id: number): Promise<void> => {
     return apiFetch(`/carreras/${id}`, { method: 'DELETE' });
 };
 
-export const getStudyPlanByCareerId = async (careerId: number): Promise<StudyPlanRecord[]> => {
-    // If careerId is 0, fetch all plans. Adjust endpoint if API supports it differently.
-    const endpoint = careerId === 0 ? '/plan-estudio' : `/plan-estudio/${careerId}`;
-    const response = await apiFetch(endpoint);
-
-    if (response.datos && Array.isArray(response.datos)) {
-        const flattenedRecords: StudyPlanRecord[] = [];
-        response.datos.forEach((modalityPlan: any) => {
-            const { id, id_carrera, carrera, id_modalidad, nombre_modalidad, materias } = modalityPlan;
-            if (Array.isArray(materias)) {
-                materias.forEach((materia: any) => {
-                    flattenedRecords.push({
-                        id: id,
-                        id_carrera,
-                        carrera,
-                        id_modalidad,
-                        modalidad: nombre_modalidad,
-                        id_materia: materia.id_materia,
-                        materia: materia.nombre_materia,
-                        id_cat_nivel: materia.id_cat_nivel,
-                        nivel: `Semestre ${materia.id_cat_nivel}`, // Assuming this is correct
-                        nivel_orden: materia.id_cat_nivel,
-                    });
-                });
-            } else {
-                 // Handle cases where a plan might exist but have no subjects
-                 flattenedRecords.push({
-                    id: id,
-                    id_carrera,
-                    carrera,
-                    id_modalidad,
-                    modalidad: nombre_modalidad,
-                    id_materia: 0,
-                    materia: '',
-                    id_cat_nivel: 0,
-                    nivel: '',
-                    nivel_orden: 0,
-                });
-            }
-        });
-        // Deduplicate plans based on their main ID
-        const uniquePlans = Array.from(new Map(flattenedRecords.map(item => [item.id, item])).values());
-        
-        // This part seems wrong, the original intention was likely to return unique plans, not all records.
-        // Let's return unique plans with their subjects nested, or adjust the caller.
-        // For now, let's stick to the flattened structure as other parts of the app might expect it.
-        // The issue is that the `useMemo` in the page component will group them again.
-        // A better approach is to return the plans as they are and let the component handle them.
-        
-        return response.datos.map((plan:any) => ({
-             id: plan.id,
-             id_carrera: plan.id_carrera,
-             carrera: plan.carrera,
-             id_modalidad: plan.id_modalidad,
-             modalidad: plan.nombre_modalidad,
-             materias: plan.materias, // Keep subjects nested
-             // The rest of the fields are in the nested materias array, so we can't flatten here
-             // without losing context or creating a more complex structure.
-             // The component should be adapted to this structure.
-             // Let's go back to the flattened approach but ensure it's correct.
-        }));
-
-
-    }
-    return [];
+function mapearPlanEstudio(plan: any): StudyPlanRecord[] {
+    return plan.map((item: any): StudyPlanRecord => ({
+        id: item.id,
+        id_carrera: item.id_carrera,
+        id_modalidad: item.id_modalidad,
+        nombre_modalidad: item.nombre_modalidad,
+        materias: Array.isArray(item.materias)
+            ? item.materias.map((m: any) => ({
+                id_materia: m.id_materia,
+                nombre_materia: m.nombre_materia,
+                id_cat_nivel: m.id_cat_nivel,
+                nivel: m.nivel,
+            }))
+            : []
+    }));
 }
+
+export const getStudyPlanCoordinatorByCareerId = async (
+    careerId: number
+): Promise<StudyPlanRecord[]> => {
+    const response = await apiFetch(`/coordinador-plan-estudio/${careerId}`);
+    if (!response.datos || !Array.isArray(response.datos)) {
+        return [];
+    }
+    return mapearPlanEstudio(response.datos);
+};
+
+export const getStudyPlanByCareerId = async (
+    careerId: number
+): Promise<StudyPlanRecord[]> => {
+    
+    const response = await apiFetch(`/plan-estudio/${careerId}`);
+    
+    if (!response.datos || !Array.isArray(response.datos) && response.datos.length === 0) {
+        return [];
+    }
+
+    return mapearPlanEstudio(response.datos);
+};
 
 
 export const getStudyPlanByModality = async (modalityId: number): Promise<StudyPlanRecord[]> => {
     const response = await apiFetch(`/plan-estudio/modalidad/${modalityId}`);
-     if (response.datos && Array.isArray(response.datos)) {
+    if (response.datos && Array.isArray(response.datos)) {
         return response.datos;
     }
     return [];
 };
 
+export const getStudyPlanByCareerAndModality = async (
+    careerId: number,
+    modalityId: number
+): Promise<StudyPlanRecord[]> => {
+    const response = await apiFetch(`/coordinador-plan-estudio/${careerId}/modalidad/${modalityId}`);
+    if (!response.datos || !Array.isArray(response.datos)) {
+        return [];
+    }
+    return mapearPlanEstudio(response.datos);
+};
 
 export const getSubjects = async (): Promise<Subject[]> => {
     const response = await apiFetch('/materias');
@@ -255,6 +345,20 @@ export const getSubjects = async (): Promise<Subject[]> => {
     }
     return [];
 };
+
+export const getSubjectsByModality = async (modalityId: number, tokenOverride?: string): Promise<Subject[]> => {
+    const response = await apiFetch(`/materias/modalidad/${modalityId}`, {}, tokenOverride);
+    if (response.datos && Array.isArray(response.datos)) {
+        return response.datos.map((item: any) => ({
+            id: item.id_materia,
+            name: item.materia,
+            offeredLevels: item.niveles_ofertados,
+            careerCount: item.carreras_que_la_usan,
+        }));
+    }
+    return [];
+};
+
 
 
 export const createSubject = (data: { nombre: string }): Promise<Subject> => {
@@ -288,7 +392,7 @@ export const getUsers = async (): Promise<User[]> => {
     const result = await apiFetch('/usuario');
     return result.datos.map((user: any) => ({
         ...user,
-        rol: user.rol.toLowerCase(), 
+        rol: user.rol.toLowerCase(),
     }));
 };
 
@@ -301,7 +405,7 @@ export const getUserById = async (id: number): Promise<User> => {
     const result = await apiFetch(`/usuario/${id}`);
     const user = result.datos;
     if (!user) {
-      throw new Error("User not found in API response");
+        throw new Error("User not found in API response");
     }
     return {
         ...user,
@@ -331,25 +435,31 @@ export const getAlumnosForCoordinador = async (): Promise<Alumno[]> => {
 }
 
 // Teacher Management
-export const getDocentes = async (id?: number): Promise<Docente | Docente[]> => {
-    const endpoint = id ? `/docentes/${id}` : '/docentes';
+const fetchDocentes = async (basePath: string, id?: number): Promise<Docente | Docente[]> => {
+    const endpoint = id ? `${basePath}/${id}` : basePath;
     const result = await apiFetch(endpoint);
     if (Array.isArray(result.datos)) {
         return result.datos;
     }
-    // If a single object is returned (for GET by ID), wrap it in an array to be consistent,
-    // or handle it as a single object if the function signature allows.
-    // For this case, we'll return the object directly if an id is passed.
+    // If a single object is returned (for GET by ID), return it directly
     if (id && result.datos) {
         return result.datos;
     }
-    // If for some reason it's not an array and no id was passed, return empty array.
+    // If for some reason it's not an array and no id was passed, return empty array
     return [];
 }
 
+export const getDocentes = async (id?: number): Promise<Docente | Docente[]> => 
+    fetchDocentes('/docentes', id);
+
 export const getDocentesForCoordinador = async (): Promise<Docente[]> => {
-    const response = await apiFetch('/coordinador-docentes');
-    return response.datos;
+    const result = await apiFetch('/coordinador-docentes');
+    return Array.isArray(result.datos) ? result.datos : [];
+};
+
+export const getDocentesForCoordinadorByDetails = async (careerId: number, cicloEscolarId: number, plantelId: number, turnoId: number): Promise<Docente[]> => {
+    const result = await apiFetch(`/coordinador-docentes/carrera/${careerId}/plantel/${plantelId}/turno/${turnoId}/ciclo/${cicloEscolarId}`);
+    return result.datos;
 }
 
 // Coordinator Management
@@ -360,14 +470,15 @@ export const getCoordinadores = async (): Promise<Coordinador[]> => {
 
 export const getCoordinadorById = async (id: number): Promise<Coordinador> => {
     const result = await apiFetch(`/coordinadores/${id}`);
+    console.log(result);
     const user = result.datos;
     if (!user) {
-      throw new Error("Coordinador not found in API response");
+        throw new Error("Coordinador not found in API response");
     }
     return {
         id_coordinador: user.id_coordinador,
         usuario_id: user.id,
-        nombre_completo: `${user.nombre} ${user.apellido_paterno}`.trim(),
+        nombre_completo: user.nombre_completo,
         correo: user.correo,
         rol: user.rol.toLowerCase(),
         fecha_registro: user.fecha_registro,
@@ -377,34 +488,57 @@ export const getCoordinadorById = async (id: number): Promise<Coordinador> => {
 
 export const getCarrerasPorCoordinador = async (coordinadorId: number): Promise<AssignedCareer[]> => {
     const response = await apiFetch(`/carrerasPorCoordinador/${coordinadorId}`);
+    console.log(response);
     return response.datos.map((item: any) => ({
         id_carrera: item.id_carrera,
         carrera: item.carrera,
     }));
 };
 
-export const assignCarreraToCoordinador = (data: { id_coordinador: number, id_carrera: number }): Promise<void> => 
+export const assignCarreraToCoordinador = (data: { id_coordinador: number, id_carrera: number }): Promise<void> =>
     apiFetch('/asignarCarreraCoordinador', { method: 'POST', body: JSON.stringify(data) });
-    
-export const removeCarreraFromCoordinador = (data: { id_coordinador: number, id_carrera: number }): Promise<void> =>
-    apiFetch('/eliminarCarreraCoordinador', { method: 'POST', body: JSON.stringify(data) });
 
+export const removeCarreraFromCoordinador = (data: { id_coordinador: number, id_carrera: number }): Promise<void> =>
+    apiFetch('/eliminarCarreraCoordinador', { method: 'DELETE', body: JSON.stringify(data) });
+
+export const getGroupsAdmin = async (): Promise<Group[]> => {
+    const response = await apiFetch('/grupos');
+    return response.datos.map((g: any) => ({
+        id_grupo: g.id_grupo,
+        acronimo: g.acronimo || g.grupo,
+        codigo_inscripcion: g.codigo_inscripcion,
+        id_plan_estudio: g.id_plan_estudio,
+        id_nivel: g.id_nivel,
+        nivel: g.nivel,
+        id_carrera: g.id_carrera,
+        carrera: g.carrera,
+        id_modalidad: g.id_modalidad,
+        modalidad: g.modalidad,
+        id_turno: g.id_turno,
+        turno: g.turno,
+        id_plantel: g.id_plantel,
+        plantel: g.plantel || g.nombre,
+    }));
+};
 
 // Group Management
 export const getGroups = async (): Promise<Group[]> => {
     const response = await apiFetch('/coordinador-grupos');
     return response.datos.map((g: any) => ({
-        id: g.id_grupo,
-        name: g.grupo,
-        career: g.carrera,
-        modality: g.modalidad,
-        turno: g.turno,
-        plantelName: g.nombre,
+        id_grupo: g.id_grupo,
+        acronimo: g.acronimo,
+        codigo_inscripcion: g.codigo_inscripcion,
         id_plan_estudio: g.id_plan_estudio,
-        id_ciclo: g.id_ciclo,
         id_nivel: g.id_nivel,
+        nivel: g.nivel,
         id_carrera: g.id_carrera,
+        carrera: g.carrera,
         id_modalidad: g.id_modalidad,
+        modalidad: g.modalidad,
+        id_turno: g.id_turno,
+        turno: g.turno,
+        id_plantel: g.id_plantel,
+        plantel: g.plantel,
     }));
 };
 export const createGroup = (data: any): Promise<Group> => {
@@ -417,6 +551,35 @@ export const deleteGroup = (id: number): Promise<void> => {
     return apiFetch(`/coordinador-grupos/${id}`, { method: 'DELETE' });
 };
 
+export const getGroupsByFilters = async (
+    careerId: number,
+    plantelId: number,
+    turnoId: number
+): Promise<Group[]> => {
+    const response = await apiFetch(
+        `/coordinador-grupos/carrera/${careerId}/plantel/${plantelId}/turno/${turnoId}/`
+    );
+    if (!response.datos || !Array.isArray(response.datos)) {
+        return [];
+    }
+    return response.datos.map((g: any) => ({
+        id_grupo: g.id_grupo,
+        acronimo: g.acronimo,
+        codigo_inscripcion: g.codigo_inscripcion,
+        id_plan_estudio: g.id_plan_estudio,
+        id_nivel: g.id_nivel,
+        nivel: g.nivel,
+        id_carrera: g.id_carrera,
+        carrera: g.carrera,
+        id_modalidad: g.id_modalidad,
+        modalidad: g.modalidad,
+        id_turno: g.id_turno,
+        turno: g.turno,
+        id_plantel: g.id_plantel,
+        plantel: g.plantel,
+    }));
+};
+
 
 // Schedule Management
 export const getSchedules = async (): Promise<Schedule[]> => {
@@ -426,6 +589,33 @@ export const getSchedules = async (): Promise<Schedule[]> => {
         { id: 2, teacherId: 2, subjectId: 1, groupId: 1, groupName: "COMPINCO2024A", dayOfWeek: 'Martes', startTime: '07:00', endTime: '09:00' },
         { id: 3, teacherId: 3, subjectId: 4, groupId: 2, groupName: "LAET2024B", dayOfWeek: 'Lunes', startTime: '16:00', endTime: '18:00' },
     ]);
+};
+
+export const assignDocenteToMateria = (data: DocenteMateria): Promise<void> => {
+    return apiFetch('/coordinador-asignar-docente', { 
+        method: 'POST', 
+        body: JSON.stringify(data) 
+    });
+};
+
+export const getMateriasAsignadas = async (grupoId: number, cicloEscolarId: number): Promise<DocenteMateria[]> => {
+    const response = await apiFetch(`/coordinador-materias-asignadas/${grupoId}/${cicloEscolarId}`);
+    console.log(response);
+    if (!response.datos || !Array.isArray(response.datos)) {
+        return [];
+    }
+    return response.datos/*.map((item: any) => ({
+        id_docente: item.id_docente,
+        id_materia: item.id_materia,
+        id_grupo: item.id_grupo,
+        id_ciclo_escolar: item.id_ciclo_escolar,
+        horarios: Array.isArray(item.horarios) ? item.horarios.map((h: any) => ({
+            id_dia: h.id_dia,
+            dia: h.dia,
+            hora_inicio: h.hora_inicio,
+            hora_fin: h.hora_fin
+        })) : []
+    }));*/
 };
 
 // Teacher data for schedules/evaluations
@@ -524,12 +714,12 @@ export const getEvaluationRubrics = async (): Promise<EvaluationRubric[]> => {
 
     const apiRubrics: { id: number; nombre: string }[] = rubricsRes.datos || [];
     const apiCriteria: { id_criterio: number; descripcion: string; id_rubro: number }[] = criteriaRes.datos || [];
-    
+
     if (!Array.isArray(apiRubrics) || !Array.isArray(apiCriteria)) {
         console.error("Invalid data structure for evaluation rubrics/criteria");
         return [];
     }
-  
+
     return apiRubrics.map(rubric => ({
         id: rubric.id,
         name: rubric.nombre,
@@ -560,13 +750,13 @@ export const createCriterion = (rubricId: number, category: 'Contable' | 'No Con
         : { p_descripcion: criterionText, p_id_nc_rubro: rubricId };
     return apiFetch(endpoint, { method: 'POST', body: JSON.stringify(body) });
 };
-  
+
 export const updateCriterion = (id: number, category: 'Contable' | 'No Contable', criterionText: string): Promise<SupervisionCriterion> => {
     const endpoint = category === 'Contable' ? `/supervision/contable/${id}` : `/supervision/no-contable/${id}`;
     const body = { p_criterio: criterionText };
     return apiFetch(endpoint, { method: 'PUT', body: JSON.stringify(body) });
 };
-  
+
 export const deleteCriterion = (id: number, category: 'Contable' | 'No Contable'): Promise<void> => {
     const endpoint = category === 'Contable' ? `/supervision/contable/${id}` : `/supervision/no-contable/${id}`;
     return apiFetch(endpoint, { method: 'DELETE' });
@@ -606,18 +796,78 @@ export const getCarrerasPorPlantel = async (plantelId: number): Promise<Assigned
     }));
 }
 
-export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> => 
+export const assignCarreraToPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/asignarCarreraPlantel', { method: 'POST', body: JSON.stringify(data) });
 
 export const removeCarreraFromPlantel = (data: { id_plantel: number, id_carrera: number }): Promise<void> =>
     apiFetch('/eliminarCarreraPlantel', { method: 'DELETE', body: JSON.stringify(data) });
 
+// Get Planteles where a specific career is offered
+export const getPlantelesForCareer = async (careerId: number): Promise<Plantel[]> => {
+    const data = await apiFetch(`/plantelesPorCarrera/${careerId}`);
+    return data.datos.map((item: any) => ({
+        id: item.id_plantel,
+        name: item.nombre,
+        location: item.ubicacion,
+    }));
+};
+
+// Turnos (shifts)
+export const getTurnos = async (): Promise<{ id: number; nombre: string }[]> => {
+    const response = await apiFetch('/catalogos/turnos');
+    return response.datos;
+};
+
+// Turnos (shifts)
+export const getTurnosCoordinador = async (): Promise<{ id: number; nombre: string }[]> => {
+    const response = await apiFetch('/coordinador-catalogos/turnos');
+    return response.datos;
+};
+
+// Niveles (levels/semesters)
+export const getNiveles = async (): Promise<{ id: number; nombre: string }[]> => {
+    const response = await apiFetch('/catalogos/niveles');
+    return response.datos;
+};
+
+// Niveles (levels/semesters)
+export const getNivelesCoordinador = async (): Promise<{ id: number; nombre: string }[]> => {
+    const response = await apiFetch('/coordinador-catalogos/niveles');
+    return response.datos;
+};
+
+// Niveles (levels/semesters)
+export const getDiasCoordinador = async (): Promise<{ id: number; nombre: string }[]> => {
+    const response = await apiFetch('/coordinador-catalogos/dias');
+    return response.datos;
+};
+
+// Ciclos escolares para coordinador
+export const getCiclosEscolaresCoordinador = async (): Promise<{
+    id_ciclo: number;
+    anio: number;
+    id_cat_periodo: number;
+    periodo_nombre: string;
+}[]> => {
+    const response = await apiFetch('/coordinador-ciclos-escolares');
+    return response.datos;
+};
+
+
+
 export const getModalities = async (): Promise<Modality[]> => {
     const result = await apiFetch('/modalidades');
     if (result && Array.isArray(result.datos)) {
-      return result.datos;
+        return result.datos;
     }
-    console.error("API response for modalities is not in the expected format.", result);
+    return [];
+};
+
+export const getModalidadesCoordinador = async (): Promise<Modality[]> => {
+    const result = await apiFetch('/coordinador-modalidades');
+    if (result && Array.isArray(result.datos)) {
+        return result.datos;
+    }
     return [];
 };
 
@@ -625,9 +875,69 @@ export const assignModalityToCareer = (data: { id_carrera: number, id_modalidad:
     return apiFetch('/carrera-modalidad', { method: 'POST', body: JSON.stringify(data) });
 };
 
-    
+export const resetPassword = (
+    userId: number,
+    data: { contrasena_nueva: string }
+): Promise<void> => {
+    return apiFetch(`/usuario/${userId}/cambiar-contrasena`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+    });
+};
 
-    
+// Gestión de Periodos
+export const getPeriodos = async (): Promise<Periodo[]> => {
+    const response = await apiFetch('/catalogos/periodos');
+    return response.datos;
+};
 
+export const createPeriodo = async (data: { nombre: string }): Promise<Periodo> => {
+    const response = await apiFetch('/catalogos/periodos', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    return response.datos;
+};
 
-    
+export const updatePeriodo = async (id: number, data: { nombre: string }): Promise<Periodo> => {
+    const response = await apiFetch(`/catalogos/periodos/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+    });
+    return response.datos;
+};
+
+export const deletePeriodo = async (id: number): Promise<void> => {
+    await apiFetch(`/catalogos/periodos/${id}`, { method: 'DELETE' });
+};
+
+// Gestión de Ciclos Escolares
+export const getCiclosEscolares = async (): Promise<CicloEscolar[]> => {
+    const response = await apiFetch('/ciclos-escolares');
+    return response.datos;
+};
+
+export const getCicloEscolarById = async (id: number): Promise<CicloEscolar> => {
+    const response = await apiFetch(`/ciclos-escolares/${id}`);
+    return response.datos;
+};
+
+export const createCicloEscolar = async (data: { anio: number; id_cat_periodo: number }): Promise<CicloEscolar> => {
+    const response = await apiFetch('/ciclos-escolares', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    return response.datos;
+};
+
+export const updateCicloEscolar = async (id: number, data: { anio: number; id_cat_periodo: number }): Promise<CicloEscolar> => {
+    const response = await apiFetch(`/ciclos-escolares/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+    });
+    return response.datos;
+};
+
+export const deleteCicloEscolar = async (id: number): Promise<void> => {
+    await apiFetch(`/ciclos-escolares/${id}`, { method: 'DELETE' });
+};
