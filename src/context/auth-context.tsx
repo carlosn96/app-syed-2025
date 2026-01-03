@@ -101,6 +101,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             
             localStorage.setItem('user', JSON.stringify(loggedInUser));
             localStorage.setItem('access_token', result.datos.access_token);
+            document.cookie = `access_token=${result.datos.access_token}; path=/; max-age=86400`; // Set cookie for 1 day
             setUser(loggedInUser);
             
             toast.current?.show({
@@ -140,6 +141,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     localStorage.removeItem('user');
     localStorage.removeItem('access_token');
+    document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     setUser(null);
     router.replace('/login');
     // We can set isLoading to false after a short delay to allow the redirect to happen smoothly.
