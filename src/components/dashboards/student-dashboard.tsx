@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { PageTitle } from "@/components/layout/page-title";
 import { useAuth } from '@/context/auth-context';
 import { Toast } from 'primereact/toast';
 
@@ -136,9 +137,7 @@ export function StudentDashboard({ user: initialUser }: StudentDashboardProps) {
   if (!user.grupo) {
       return (
          <div className="flex flex-col gap-8">
-            <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-                Bienvenido, {user.nombre}
-            </h1>
+            <PageTitle>Bienvenido, {user.nombre}</PageTitle>
             <JoinGroupForm onGroupJoined={handleGroupJoined} />
         </div>
       )
@@ -162,9 +161,7 @@ export function StudentDashboard({ user: initialUser }: StudentDashboardProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-        Bienvenido, {user.nombre}
-      </h1>
+      <PageTitle>Bienvenido, {user.nombre}</PageTitle>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
             <Card className="rounded-xl">

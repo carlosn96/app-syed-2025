@@ -14,12 +14,12 @@ export function DashboardCard({ title, value, icon: Icon, description }: Dashboa
   return (
     <Card className="rounded-xl">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-white/90" />
+        <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
+        <Icon className="h-4 w-4 text-primary/90" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {description && <p className="text-sm text-muted-foreground">{description}</p>}
+        <div className="text-2xl font-bold text-gray-900">{value}</div>
+        {description && <p className="text-sm text-gray-500">{description}</p>}
       </CardContent>
     </Card>
   );

@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { CalendarClock, Star, ShieldCheck } from 'lucide-react';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { PageTitle } from "@/components/layout/page-title";
 import { User, Schedule, Evaluation, Supervision, Subject, Teacher } from '@/lib/modelos';
 import { getSchedules, getEvaluations, getSupervisions, getSubjects, getTeachers } from '@/services/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -81,9 +82,7 @@ export function TeacherDashboard({ user }: TeacherDashboardProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-        Panel de Docente
-      </h1>
+      <PageTitle>Panel de Docente</PageTitle>
        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
          {isLoading ? (
             <>

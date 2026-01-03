@@ -2,6 +2,7 @@
 "use client"
 
 import { useAuth } from "@/context/auth-context"
+import { PageTitle } from "@/components/layout/page-title"
 import { AdminDashboard } from "@/components/dashboards/admin-dashboard";
 import { CoordinatorDashboard } from "@/components/dashboards/coordinator-dashboard";
 import { TeacherDashboard } from "@/components/dashboards/teacher-dashboard";
@@ -38,9 +39,7 @@ export default function DashboardPage() {
     default:
       return (
         <div>
-          <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-            Panel de Control
-          </h1>
+          <PageTitle>Panel de Control</PageTitle>
           <p className="text-muted-foreground">Rol de usuario no reconocido.</p>
         </div>
       )

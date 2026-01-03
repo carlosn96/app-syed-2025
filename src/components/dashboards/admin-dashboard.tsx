@@ -4,27 +4,30 @@
 import { useState, useEffect } from "react";
 import { BookOpenCheck, Building, Users, UserCog, GraduationCap, School } from "lucide-react";
 import { User, CareerSummary, Plantel } from "@/lib/modelos";
-import { getUsers, getCareers, getPlanteles } from "@/services/api";
+import { PageTitle } from "@/components/layout/page-title";
+//import { getUsers, getCareers, getPlanteles } from "@/services/api";
+import { getAdminNumeralia, UsersCount } from "@/services/api";
 import { DashboardCard, CardSkeleton } from "./dashboard-card";
 
 export function AdminDashboard() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [careers, setCareers] = useState<CareerSummary[]>([]);
-  const [planteles, setPlanteles] = useState<Plantel[]>([]);
+  const [users, setUsers] = useState<UsersCount>({
+    students: 0,
+    teachers: 0,
+    coordinators: 0
+  });
+
+  const [careers, setCareers] = useState<number>(0);
+  const [planteles, setPlanteles] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [usersData, careersData, plantelesData] = await Promise.all([
-          getUsers(),
-          getCareers(),
-          getPlanteles(),
-        ]);
-        setUsers(usersData);
-        setCareers(careersData);
-        setPlanteles(plantelesData);
+        const { totalUsers, totalCareers, totalPlanteles } = await getAdminNumeralia();
+        setUsers(totalUsers);
+        setCareers(totalCareers);
+        setPlanteles(totalPlanteles);
       } catch (error) {
         console.error("Error fetching admin dashboard data:", error);
       } finally {
@@ -35,18 +38,16 @@ export function AdminDashboard() {
   }, []);
 
   const counts = {
-    students: users.filter(u => u.rol === 'alumno').length,
-    teachers: users.filter(u => u.rol === 'docente').length,
-    coordinators: users.filter(u => u.rol === 'coordinador').length,
-    careers: careers.length,
-    planteles: planteles.length,
+    students: users.students,
+    teachers: users.teachers,
+    coordinators: users.coordinators,
+    careers: careers,
+    planteles: planteles,
   };
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-        Panel de Administrador
-      </h1>
+      <PageTitle>Panel de Administrador</PageTitle>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {isLoading ? (
           <>
