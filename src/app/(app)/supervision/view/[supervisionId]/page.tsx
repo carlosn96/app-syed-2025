@@ -18,10 +18,10 @@ import { getSupervisions, getSupervisionRubrics } from '@/services/api'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FloatingBackButton } from '@/components/ui/floating-back-button'
 
-const getScoreColor = (score: number) => {
-    if (score < 60) return 'bg-destructive/80';
-    if (score < 80) return 'bg-yellow-500/80';
-    return 'bg-success/80';
+const getScoreClasses = (score: number) => {
+    if (score < 60) return { bg: 'bg-destructive/80', text: 'text-destructive-foreground' };
+    if (score < 80) return { bg: 'bg-[hsl(var(--warning))]/80', text: 'text-[hsl(var(--warning-foreground))]' };
+    return { bg: 'bg-success/80', text: 'text-[hsl(var(--success-foreground))]' };
 };
 
 export default function ViewSupervisionPage() {
@@ -109,9 +109,16 @@ export default function ViewSupervisionPage() {
                         </div>
                         <div className="text-right">
                              <p className="text-sm text-muted-foreground">Calificación Final</p>
-                             <p className={`text-3xl font-bold rounded-md px-3 py-1 text-white ${getScoreColor(supervision.score || 0)}`}>
-                                {supervision.score}%
-                            </p>
+                                                         {
+                                                             (() => {
+                                                                 const classes = getScoreClasses(supervision.score || 0);
+                                                                 return (
+                                                                     <p className={`text-3xl font-bold rounded-md px-3 py-1 ${classes.bg} ${classes.text}`}>
+                                                                         {supervision.score}%
+                                                                     </p>
+                                                                 )
+                                                             })()
+                                                         }
                         </div>
                     </div>
                 </CardHeader>
@@ -122,7 +129,7 @@ export default function ViewSupervisionPage() {
 
                         return (
                             <div key={rubric.id}>
-                                <h3 className="text-xl font-headline font-semibold text-white mb-2">{rubric.title}</h3>
+                                <h3 className="text-xl font-headline font-semibold text-foreground mb-2">{rubric.title}</h3>
                                 <p className="text-sm text-muted-foreground mb-6">{rubric.type}</p>
                                 
                                 <div className="space-y-4">
@@ -134,7 +141,7 @@ export default function ViewSupervisionPage() {
                                             <div key={criterion.id} className="p-3 bg-black/10 rounded-lg">
                                                 <div className="flex items-start justify-between gap-4">
                                                     <p className="flex-grow text-base">{index + 1}. {criterion.text}</p>
-                                                    <div className={`flex items-center gap-2 font-semibold ${meetsCriteria ? 'text-green-400' : 'text-red-400'}`}>
+                                                    <div className={`flex items-center gap-2 font-semibold ${meetsCriteria ? 'text-success' : 'text-destructive'}`}>
                                                         {meetsCriteria ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
                                                         <span>{meetsCriteria ? 'Cumplió' : 'No Cumplió'}</span>
                                                     </div>

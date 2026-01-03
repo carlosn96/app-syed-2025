@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
+import useToast from "@/hooks/use-toast"
 import { Teacher, User, Career, Group, Schedule } from "@/lib/modelos"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -59,7 +59,7 @@ const timeOptions = Array.from({ length: 15 }, (_, i) => {
 
 
 export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps) {
-  const { toast } = useToast();
+  const { addToast } = useToast();
   const { user } = useAuth();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,8 +105,8 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
         const teacherIdsInCoordinatedCareers = new Set<number>();
         
         allGroups.forEach(group => {
-            if (coordinatedCareers.includes(group.career)) {
-                allSchedules.filter(s => s.groupId === group.id).forEach(schedule => {
+            if (coordinatedCareers.includes(group.carrera)) {
+                allSchedules.filter(s => s.groupId === group.id_grupo).forEach(schedule => {
                     teacherIdsInCoordinatedCareers.add(schedule.teacherId);
                 });
             }
@@ -117,7 +117,7 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
         availableTeachers.forEach(teacher => {
             const teacherSchedules = allSchedules.filter(s => s.teacherId === teacher.id);
             const teacherGroupIds = [...new Set(teacherSchedules.map(s => s.groupId))];
-            const teacherGroups = allGroups.filter(g => teacherGroupIds.includes(g.id));
+            const teacherGroups = allGroups.filter(g => teacherGroupIds.includes(g.id_grupo));
             const teacherCareerName = teacherGroups.length > 0 ? teacherGroups[0].career : "N/A";
             teacherCareers[String(teacher.id)] = teacherCareerName;
         });
@@ -177,19 +177,12 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
 
     try {
       await createSupervision(submissionData);
-      toast({
-        title: "Cita Agendada",
-        description: `La supervisión para el ${format(data.date, "PPP", { locale: es })} ha sido agendada.`,
-      });
+      addToast(`Cita Agendada: La supervisión para el ${format(data.date, "PPP", { locale: es })} ha sido agendada.`, 'success');
       form.reset({ coordinatorId: defaultCoordinator, teacherId: "", careerName: "", date: undefined, startTime: "", endTime: "" });
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-            variant: "destructive",
-            title: "Error al agendar",
-            description: error.message,
-        });
+        addToast(`Error al agendar: ${error.message}`, 'error');
       }
     } finally {
         setIsSubmitting(false);

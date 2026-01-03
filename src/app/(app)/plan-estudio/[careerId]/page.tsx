@@ -1,167 +1,145 @@
-
 "use client"
 
 import { useParams, useRouter } from 'next/navigation'
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { Subject, Career, StudyPlanRecord } from '@/lib/modelos'
+import { CareerSummary, StudyPlanRecord } from '@/lib/modelos'
+import { useAuth } from '@/context/auth-context'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card"
 import { Button } from '@/components/ui/button'
+import { PageTitle } from '@/components/layout/page-title'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table"
 import { PlusCircle, Pencil, Trash2 } from 'lucide-react'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useAuth } from '@/context/auth-context'
-import { getStudyPlanByCareerId, getSubjects, getCareers, deleteStudyPlan } from '@/services/api'
+import {
+    getStudyPlanByCareerId,
+    deleteStudyPlan, getCareerByID,
+    getCarrerasForCoordinador,
+    getStudyPlanCoordinatorByCareerId
+} from '@/services/api'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FloatingBackButton } from '@/components/ui/floating-back-button'
 import { Toast } from 'primereact/toast'
 
-interface EnrichedStudyPlanRecord extends StudyPlanRecord {
-  subjectName: string;
-}
-
-interface GroupedPlan {
-    id: number;
-    modalityId: number;
-    modalityName: string;
-    subjects: EnrichedStudyPlanRecord[];
-}
-
-
 export default function PlanEstudioPage() {
     const params = useParams()
-    const router = useRouter();
+    const router = useRouter()
+    const toast = useRef<Toast>(null)
     const { user } = useAuth()
-    const toast = useRef<Toast>(null);
 
-    const careerId = Number(params.careerId);
+    const careerId = Number(params.careerId)
 
-    const [studyPlans, setStudyPlans] = useState<EnrichedStudyPlanRecord[]>([]);
-    const [careerInfo, setCareerInfo] = useState<Career | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [planToDelete, setPlanToDelete] = useState<{ id: number, name: string } | null>(null);
+    const [studyPlans, setStudyPlans] = useState<StudyPlanRecord[]>([])
+    const [careerInfo, setCareerInfo] = useState<CareerSummary | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [planToDelete, setPlanToDelete] = useState<{ id: number, name: string } | null>(null)
 
     const fetchData = async () => {
-        setIsLoading(true);
+        setIsLoading(true)
+        setError(null)
+
         try {
-            const [planData, subjectsData, careersData] = await Promise.all([
-                getStudyPlanByCareerId(careerId),
-                getSubjects(), 
-                getCareers()
-            ]);
-
-            const currentCareer = careersData.find(c => c.id === careerId) || null;
-            setCareerInfo(currentCareer as any);
-
-            if (planData.length === 0 && !currentCareer) {
-                setError("No se encontró información para esta carrera.");
-                setStudyPlans([]);
-            } else if (planData.length === 0 && currentCareer) {
-                 // Career exists but has no study plan, which is a valid state
-                setStudyPlans([]);
-            } else {
-                 const subjectMap = new Map(subjectsData.map(s => [s.id, s.name]));
-                 const enrichedPlanData = planData.map(plan => ({
-                    ...plan,
-                    subjectName: subjectMap.get(plan.id_materia) || 'Materia Desconocida'
-                }));
-                setStudyPlans(enrichedPlanData);
+            // Validar ID de carrera
+            if (isNaN(careerId) || careerId <= 0) {
+                setError("ID de carrera inválido.")
+                return
             }
 
-        } catch (err: any) {
-             if (err instanceof Error && err.message.includes("Unexpected end of JSON input")) {
-                setStudyPlans([]);
-                setError(null);
-                try {
-                    const careersData = await getCareers();
-                    const currentCareer = careersData.find(c => c.id === careerId) || null;
-                    setCareerInfo(currentCareer as any);
-                } catch (careerError) {
-                    setError("Error al cargar la información de la carrera.");
+            // Determinar qué función usar según el rol del usuario
+            const isCoordinador = user?.rol?.toLowerCase() === 'coordinador'
+
+            // Obtener información de la carrera y planes de estudio en paralelo
+            const [careerData, plansData] = await Promise.all([
+                isCoordinador ? getCarrerasForCoordinador(careerId) : getCareerByID(careerId),
+                isCoordinador ? getStudyPlanCoordinatorByCareerId(careerId) : getStudyPlanByCareerId(careerId)
+            ])
+
+            // Validar que la carrera existe
+            if (!careerData) {
+                setError("La carrera especificada no existe.")
+                return
+            }
+
+            setCareerInfo(careerData)
+            setStudyPlans(plansData)
+
+        } catch (err) {
+            console.error("Error al cargar datos:", err)
+
+            if (err instanceof Error) {
+                // Manejar error 404 específicamente
+                if (err.message.includes("404")) {
+                    setError("La carrera no existe.")
+                } else {
+                    setError(err.message || "Error al cargar los datos.")
                 }
             } else {
-                setError((err as Error).message || "Error al cargar los datos del plan de estudio.");
+                setError("Error inesperado al cargar los datos.")
             }
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
-    };
+    }
 
     useEffect(() => {
-        if (isNaN(careerId)) {
-            setError("ID de carrera inválido.");
-            setIsLoading(false);
-            return;
-        }
-        fetchData();
-    }, [careerId]);
-
-    const groupedPlans = useMemo(() => {
-        const planMap = new Map<number, GroupedPlan>();
-        studyPlans.forEach(plan => {
-            if (!planMap.has(plan.id)) {
-                planMap.set(plan.id, {
-                    id: plan.id,
-                    modalityId: plan.id_modalidad,
-                    modalityName: plan.modalidad,
-                    subjects: [],
-                });
-            }
-            planMap.get(plan.id)!.subjects.push(plan);
-        });
-        return Array.from(planMap.values());
-    }, [studyPlans]);
+        fetchData()
+    }, [careerId])
 
     const handleDeletePlan = async () => {
-        if (!planToDelete) return;
+        if (!planToDelete) return
+
         try {
-            await deleteStudyPlan(planToDelete.id);
+            await deleteStudyPlan(planToDelete.id)
+
             toast.current?.show({
                 severity: "success",
-                summary: "Plan de Estudio Eliminado",
-                detail: `El plan de estudios para la modalidad ${planToDelete.name} ha sido eliminado.`,
-            });
-            fetchData();
+                summary: "Plan Eliminado",
+                detail: `El plan de estudio para la modalidad "${planToDelete.name}" ha sido eliminado exitosamente.`,
+            })
+
+            // Recargar datos después de eliminar
+            await fetchData()
+
         } catch (error) {
-            if (error instanceof Error) {
-                toast.current?.show({
-                    severity: "error",
-                    summary: "Error al eliminar",
-                    detail: error.message,
-                });
-            }
+            console.error("Error al eliminar plan:", error)
+
+            toast.current?.show({
+                severity: "error",
+                summary: "Error al Eliminar",
+                detail: error instanceof Error ? error.message : "No se pudo eliminar el plan de estudio.",
+            })
         } finally {
-            setPlanToDelete(null);
+            setPlanToDelete(null)
         }
-    };
+    }
 
-    const getOrdinal = (n: number) => `${n}°`;
+    const getOrdinal = (n: number) => `${n}°`
 
+    // Estado de carga
     if (isLoading) {
         return (
             <div className="flex flex-col gap-8">
@@ -180,19 +158,27 @@ export default function PlanEstudioPage() {
                     </CardContent>
                 </Card>
             </div>
-        );
+        )
     }
-    
+
+    // Estado de error
     if (error) {
         return (
             <div className="flex flex-col gap-8">
                 <FloatingBackButton />
-                 <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
-                    <h3 className="text-lg font-semibold text-white">No se pudo cargar el Plan de Estudio</h3>
-                    <p className="text-muted-foreground mt-2">
-                        {error}
-                    </p>
-                </div>
+                <Card className="rounded-xl border-destructive">
+                    <CardContent className="flex flex-col items-center justify-center text-center p-10">
+                        <h3 className="text-lg font-semibold text-destructive">Error al Cargar</h3>
+                        <p className="text-muted-foreground mt-2">{error}</p>
+                        <Button
+                            onClick={fetchData}
+                            variant="outline"
+                            className="mt-4"
+                        >
+                            Reintentar
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
         )
     }
@@ -201,106 +187,154 @@ export default function PlanEstudioPage() {
         <div className="flex flex-col gap-8">
             <Toast ref={toast} />
             <FloatingBackButton />
-             <AlertDialog open={!!planToDelete} onOpenChange={(open) => !open && setPlanToDelete(null)}>
+
+            {/* Diálogo de confirmación de eliminación */}
+            <AlertDialog open={!!planToDelete} onOpenChange={(open) => !open && setPlanToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                         <AlertDialogDescription>
                             Esta acción no se puede deshacer. Se eliminará permanentemente el plan de estudios completo para la modalidad
-                            <span className="font-bold text-white"> {planToDelete?.name}</span>.
+                            <span className="font-bold text-primary"> {planToDelete?.name}</span>.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setPlanToDelete(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => setPlanToDelete(null)}>
+                            Cancelar
+                        </AlertDialogCancel>
                         <AlertDialogAction onClick={handleDeletePlan}>
                             Confirmar
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Encabezado */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className='flex flex-col'>
-                    <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
+                    <PageTitle>
                         Planes de Estudio: {careerInfo?.name || `Carrera #${careerId}`}
-                    </h1>
+                    </PageTitle>
                     <p className="text-muted-foreground">
                         Gestiona las modalidades y materias de la carrera.
                     </p>
                 </div>
-                 <Button asChild>
+                <Button asChild>
                     <Link href={`/plan-estudio/${careerId}/creacion`}>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Crear Plan de Estudio
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Crear Plan de Estudio
                     </Link>
                 </Button>
             </div>
-            
-            {groupedPlans.length > 0 ? (
-                groupedPlans.map((planData) => {
-                     const semesters = [...new Set(planData.subjects.map(s => s.nivel_orden))].sort((a,b) => a-b);
-                     
-                     return (
-                        <Card key={planData.id} className="rounded-xl">
+
+            {/* Lista de planes de estudio */}
+            {studyPlans.length > 0 ? (
+                studyPlans.map((plan) => {
+                    // Obtener niveles únicos y ordenarlos
+                    const niveles = [...new Set(plan.materias.map(m => m.id_cat_nivel))]
+                        .sort((a, b) => a - b)
+
+                    return (
+                        <Card key={plan.id} className="rounded-xl">
                             <CardHeader>
-                                <div className="flex justify-between items-start">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                                     <div>
-                                        <CardTitle>Modalidad: {planData.modalityName}</CardTitle>
+                                        <CardTitle>Modalidad: {plan.nombre_modalidad}</CardTitle>
                                         <CardDescription>
-                                            Materias asignadas a esta modalidad, agrupadas por grado.
+                                            {plan.materias.length} {plan.materias.length === 1 ? 'materia' : 'materias'} asignadas en {niveles.length} {niveles.length === 1 ? 'nivel' : 'niveles'}.
                                         </CardDescription>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <Button asChild variant="outline">
-                                            <Link href={`/plan-estudio/${careerId}/editar/${planData.id}`}>
+                                    <div className="flex gap-2 flex-wrap">
+                                        <Button asChild variant="info-outline" size="sm">
+                                            <Link href={`/plan-estudio/${careerId}/editar/${plan.id}`}>
                                                 <Pencil className="mr-2 h-4 w-4" />
-                                                Editar Plan
+                                                Editar
                                             </Link>
                                         </Button>
-                                        <Button variant="destructive" onClick={() => setPlanToDelete({ id: planData.id, name: planData.modalityName })}>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={() => setPlanToDelete({
+                                                id: plan.id,
+                                                name: plan.nombre_modalidad
+                                            })}
+                                        >
                                             <Trash2 className="mr-2 h-4 w-4" />
-                                            Eliminar Plan
+                                            Eliminar
                                         </Button>
                                     </div>
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                {semesters.length > 0 ? (
-                                     <Tabs defaultValue={`sem-${semesters[0]}`} className="w-full">
-                                        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${semesters.length}, minmax(0, 1fr))`}}>
-                                            {semesters.map(semester => (
-                                                <TabsTrigger key={semester} value={`sem-${semester}`} className="text-xs">
-                                                    {getOrdinal(semester)}
+                                {niveles.length > 0 ? (
+                                    <Tabs defaultValue={`nivel-${niveles[0]}`} className="w-full">
+                                        <TabsList
+                                            className="grid w-full"
+                                            style={{
+                                                gridTemplateColumns: `repeat(${Math.min(niveles.length, 6)}, minmax(0, 1fr))`
+                                            }}
+                                        >
+                                            {niveles.map(nivel => (
+                                                <TabsTrigger
+                                                    key={nivel}
+                                                    value={`nivel-${nivel}`}
+                                                    className="text-xs sm:text-sm"
+                                                >
+                                                    {getOrdinal(nivel)}
                                                 </TabsTrigger>
                                             ))}
                                         </TabsList>
-                                        {semesters.map(semester => {
-                                            const semesterSubjects = planData.subjects.filter(s => s.nivel_orden === semester);
+
+                                        {niveles.map(nivel => {
+                                            const nivelMaterias = plan.materias.filter(
+                                                m => m.id_cat_nivel === nivel
+                                            )
+
                                             return (
-                                                <TabsContent key={semester} value={`sem-${semester}`}>
-                                                    <div className='rounded-xl overflow-hidden mt-4'>
+                                                <TabsContent key={nivel} value={`nivel-${nivel}`}>
+                                                    <div className='rounded-xl overflow-hidden mt-4 border'>
                                                         <Table>
                                                             <TableHeader>
                                                                 <TableRow>
+                                                                    <TableHead className="w-12">#</TableHead>
                                                                     <TableHead>Nombre de la Materia</TableHead>
                                                                 </TableRow>
                                                             </TableHeader>
                                                             <TableBody>
-                                                                {semesterSubjects.map(subject => (
-                                                                    <TableRow key={subject.id_materia}>
-                                                                        <TableCell className="font-medium">{subject.subjectName}</TableCell>
+                                                                {nivelMaterias.length > 0 ? (
+                                                                    nivelMaterias.map((materia, index) => (
+                                                                        <TableRow key={materia.id_materia}>
+                                                                            <TableCell className="text-muted-foreground">
+                                                                                {index + 1}
+                                                                            </TableCell>
+                                                                            <TableCell className="font-medium">
+                                                                                {materia.nombre_materia}
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    ))
+                                                                ) : (
+                                                                    <TableRow>
+                                                                        <TableCell
+                                                                            colSpan={2}
+                                                                            className="text-center h-24 text-muted-foreground"
+                                                                        >
+                                                                            No hay materias en este nivel
+                                                                        </TableCell>
                                                                     </TableRow>
-                                                                ))}
+                                                                )}
                                                             </TableBody>
                                                         </Table>
                                                     </div>
                                                 </TabsContent>
                                             )
                                         })}
-                                     </Tabs>
+                                    </Tabs>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
-                                       <h3 className="text-lg font-semibold text-white">Modalidad Vacía</h3>
-                                       <p className="text-muted-foreground mt-2">Aún no se han asignado materias para esta modalidad.</p>
+                                        <h3 className="text-lg font-semibold">Modalidad Vacía</h3>
+                                        <p className="text-muted-foreground mt-2">
+                                            Aún no se han asignado materias para esta modalidad.
+                                        </p>
                                     </div>
                                 )}
                             </CardContent>
@@ -308,12 +342,20 @@ export default function PlanEstudioPage() {
                     )
                 })
             ) : (
-                 <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed border-muted rounded-xl">
-                    <h3 className="text-lg font-semibold text-white">Sin Planes de Estudio</h3>
-                    <p className="text-muted-foreground mt-2">
-                       Esta carrera aún no tiene modalidades o planes de estudio asignados.
-                    </p>
-                </div>
+                <Card className="rounded-xl">
+                    <CardContent className="flex flex-col items-center justify-center text-center p-10">
+                        <h3 className="text-lg font-semibold">Sin Planes de Estudio</h3>
+                        <p className="text-muted-foreground mt-2">
+                            Esta carrera aún no tiene planes de estudio asignados.
+                        </p>
+                        <Button asChild className="mt-4">
+                            <Link href={`/plan-estudio/${careerId}/creacion`}>
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Crear Primer Plan
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
             )}
         </div>
     )

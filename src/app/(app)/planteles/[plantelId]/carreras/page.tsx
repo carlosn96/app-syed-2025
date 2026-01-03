@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card"
 import { Career, Plantel, CareerSummary } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
+import { PageTitle } from "@/components/layout/page-title"
 import {
   Dialog,
   DialogContent,
@@ -173,9 +174,7 @@ export default function PlantelCarrerasPage() {
       <FloatingBackButton />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col">
-            <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-                Carreras en {plantel.name}
-            </h1>
+            <PageTitle>Carreras en {plantel.name}</PageTitle>
             <p className="text-muted-foreground">Lista de carreras disponibles en este plantel.</p>
         </div>
         {user?.rol === 'administrador' && (

@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { PageTitle } from "@/components/layout/page-title"
 import {
   Card,
   CardContent,
@@ -136,9 +137,7 @@ export default function EvaluationsPage() {
   if (user?.rol === 'alumno') {
     return (
         <div className="flex flex-col gap-8">
-            <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-              Evaluación Docente
-            </h1>
+            <PageTitle>Evaluación Docente</PageTitle>
             <Card className="rounded-xl">
                 <CardHeader>
                     <CardTitle>Evalúa a tus Docentes</CardTitle>
@@ -189,9 +188,7 @@ export default function EvaluationsPage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-          Agenda de Evaluaciones
-        </h1>
+        <PageTitle>Agenda de Evaluaciones</PageTitle>
         {user?.rol === 'coordinador' && (
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>

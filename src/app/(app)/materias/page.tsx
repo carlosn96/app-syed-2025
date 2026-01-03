@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useMemo, useEffect, useRef } from "react"
-import { Pencil, PlusCircle, Trash2, Search } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Toast } from 'primereact/toast';
 
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card"
 import { Subject } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
+import { PageTitle } from "@/components/layout/page-title"
 import {
   Dialog,
   DialogContent,
@@ -46,7 +47,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 
 export default function SubjectsPage() {
@@ -62,6 +70,9 @@ export default function SubjectsPage() {
   const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const [currentPage, setCurrentPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const fetchSubjects = async () => {
     try {
@@ -126,14 +137,16 @@ export default function SubjectsPage() {
     );
   }, [allSubjects, searchTerm]);
 
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchTerm]);
+
 
   return (
     <div className="flex flex-col gap-8">
       <Toast ref={toast} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-          Gestión de Materias
-        </h1>
+        <PageTitle>Gestión de Materias</PageTitle>
          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
                 <Button>
@@ -176,7 +189,7 @@ export default function SubjectsPage() {
             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription>
                 Esta acción no se puede deshacer. Esto eliminará permanentemente la materia
-                <span className="font-bold text-white"> {subjectToDelete?.name}</span>.
+                <span className="font-bold text-primary"> {subjectToDelete?.name}</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -206,7 +219,7 @@ export default function SubjectsPage() {
                 Materias disponibles en el sistema.
             </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
              {isLoading ? (
                 <div className="space-y-4">
                     <Skeleton className="h-12 w-full" />
@@ -215,37 +228,121 @@ export default function SubjectsPage() {
                     <Skeleton className="h-12 w-full" />
                 </div>
             ) : (
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Nombre de la Materia</TableHead>
-                            <TableHead>Niveles Ofertados</TableHead>
-                            <TableHead>Usada en Carreras</TableHead>
-                            <TableHead className="text-right">Acciones</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredSubjects.map(subject => (
-                            <TableRow key={subject.id}>
-                                <TableCell className="font-medium">{subject.name}</TableCell>
-                                <TableCell>{subject.offeredLevels}</TableCell>
-                                <TableCell>{subject.careerCount}</TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex justify-end gap-2">
-                                        <Button variant="warning" size="icon" onClick={() => handleEditClick(subject)}>
-                                            <Pencil className="h-4 w-4" />
-                                            <span className="sr-only">Editar</span>
-                                        </Button>
-                                        <Button variant="destructive" size="icon" onClick={() => setSubjectToDelete(subject)}>
-                                            <Trash2 className="h-4 w-4" />
-                                            <span className="sr-only">Eliminar</span>
-                                        </Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                <>
+                    <div className="flex items-center justify-between gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">Mostrar</span>
+                            <Select value={String(rowsPerPage)} onValueChange={(value) => {
+                                setRowsPerPage(Number(value));
+                                setCurrentPage(0);
+                            }}>
+                                <SelectTrigger className="w-20">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="10">10</SelectItem>
+                                    <SelectItem value="15">15</SelectItem>
+                                    <SelectItem value="20">20</SelectItem>
+                                    <SelectItem value="50">50</SelectItem>
+                                    <SelectItem value="100">100</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <span className="text-sm text-muted-foreground">elementos por página</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                            {filteredSubjects.length > 0 
+                                ? `${currentPage * rowsPerPage + 1} a ${Math.min((currentPage + 1) * rowsPerPage, filteredSubjects.length)} de ${filteredSubjects.length} materias`
+                                : "0 materias"
+                            }
+                        </div>
+                    </div>
+
+                    {filteredSubjects.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                            No se encontraron materias.
+                        </div>
+                    ) : (
+                        <>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Nombre de la Materia</TableHead>
+                                        <TableHead>Niveles Ofertados</TableHead>
+                                        <TableHead>Usada en Carreras</TableHead>
+                                        <TableHead className="text-right">Acciones</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredSubjects
+                                        .slice(currentPage * rowsPerPage, (currentPage + 1) * rowsPerPage)
+                                        .map(subject => (
+                                            <TableRow key={subject.id}>
+                                                <TableCell className="font-medium">{subject.name}</TableCell>
+                                                <TableCell>{subject.offeredLevels}</TableCell>
+                                                <TableCell>{subject.careerCount}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex justify-end gap-2">
+                                                        <Button variant="info" size="icon" onClick={() => handleEditClick(subject)}>
+                                                            <Pencil className="h-4 w-4" />
+                                                            <span className="sr-only">Editar</span>
+                                                        </Button>
+                                                        <Button variant="destructive" size="icon" onClick={() => setSubjectToDelete(subject)}>
+                                                            <Trash2 className="h-4 w-4" />
+                                                            <span className="sr-only">Eliminar</span>
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </Table>
+
+                            <div className="flex items-center justify-between gap-4 mt-4">
+                                <div className="text-sm text-muted-foreground">
+                                    Página {currentPage + 1} de {Math.ceil(filteredSubjects.length / rowsPerPage)}
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setCurrentPage(0)}
+                                        disabled={currentPage === 0}
+                                    >
+                                        <span className="sr-only">Primera página</span>
+                                        <span>«</span>
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                                        disabled={currentPage === 0}
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setCurrentPage(prev => 
+                                            Math.min(Math.ceil(filteredSubjects.length / rowsPerPage) - 1, prev + 1)
+                                        )}
+                                        disabled={currentPage >= Math.ceil(filteredSubjects.length / rowsPerPage) - 1}
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setCurrentPage(Math.ceil(filteredSubjects.length / rowsPerPage) - 1)}
+                                        disabled={currentPage >= Math.ceil(filteredSubjects.length / rowsPerPage) - 1}
+                                    >
+                                        <span className="sr-only">Última página</span>
+                                        <span>»</span>
+                                    </Button>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </>
             )}
         </CardContent>
       </Card>

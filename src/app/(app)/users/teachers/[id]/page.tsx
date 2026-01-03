@@ -1,11 +1,14 @@
-
 "use client"
 
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Dot } from "recharts"
-import { Star, ShieldCheck, BookUser, Library } from "lucide-react"
-import React, { useMemo, useState, useEffect } from "react"
+import { getTeacherProfileData } from "@/lib/teacher-data";
 
-import { Evaluation, User, Supervision, Schedule, Subject, Group, Docente } from "@/lib/modelos"
+import { useParams } from "next/navigation";
+
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Dot } from "recharts"
+import { ShieldCheck, BookUser, Library } from "lucide-react"
+import React, { useState, useEffect } from "react"
+import { Badge } from "@/components/ui/badge"
+import { PageTitle } from "@/components/layout/page-title"
 import {
   Card,
   CardContent,
@@ -21,8 +24,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -30,9 +31,9 @@ import { ProgressRing } from "@/components/ui/progress-ring"
 import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getUserById, getSupervisions, getEvaluations, getSubjects, getSchedules, getGroups, getDocentes } from "@/services/api"
-import { Skeleton } from "@/components/ui/skeleton"
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
+import type { TeacherProfileData } from "@/lib/teacher-data"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const getScoreColor = (score: number) => {
   if (score < 60) return 'hsl(var(--destructive))';
@@ -43,190 +44,96 @@ const getScoreColor = (score: number) => {
 const CustomDot = (props: any) => {
     const { cx, cy, payload } = props;
     if (!payload) return null;
-
     const color = getScoreColor(payload.Calificación);
-
-    return (
-        <Dot
-            cx={cx}
-            cy={cy}
-            r={5}
-            strokeWidth={2}
-            fill="#fff"
-            stroke={color}
-        />
-    );
+    return <Dot cx={cx} cy={cy} r={5} strokeWidth={2} fill="#fff" stroke={color} />;
 };
 
-interface GroupEvaluationData {
-  groupName: string;
-  careerName: string;
-  latestAverageRating: number;
-  performanceData: { date: string; Calificación: number }[];
-}
-
-interface TeacherProfileData {
-  teacher: Docente;
-  teacherFullName: string;
-  teacherSupervisions: Supervision[];
-  teacherEvaluations: Evaluation[];
-  teacherSubjects: Subject[];
-  supervisionPerformanceData: { date: string; Calificación: number }[];
-  averageSupervisionScore: number;
-  averageEvaluationScore: number;
-  groupPerformance: GroupEvaluationData[];
-}
-
-
-export default function TeacherProfilePage({ params }: { params: { id: string } }) {
-  const teacherId = Number(params.id);
+export default function TeacherProfileClientPage() {
   const [activeTab, setActiveTab] = useState<'supervisions' | 'evaluations' | 'subjects'>('supervisions');
+  const [profileData, setProfileData] = useState<TeacherProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
-  
-  const [teacherData, setTeacherData] = useState<TeacherProfileData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const teacherId = Number(useParams().id);
 
   useEffect(() => {
-    const fetchData = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const teacherUserResult = await getDocentes(teacherId);
-
-            if (!teacherUserResult || Array.isArray(teacherUserResult)) {
-                throw new Error("Docente no encontrado.");
-            }
-            
-            const currentTeacher: Docente = teacherUserResult;
-
-            const [
-                allSupervisions,
-                allEvaluations,
-                allSubjects,
-                allSchedules,
-                allGroups,
-            ] = await Promise.all([
-                getSupervisions(),
-                getEvaluations(),
-                getSubjects(),
-                getSchedules(),
-                getGroups(),
-            ]);
-            
-            const teacherFullName = currentTeacher.nombre_completo;
-
-            const teacherSupervisions = allSupervisions.filter(s => s.teacher === teacherFullName);
-            const teacherEvaluations = allEvaluations.filter(e => e.teacherName === teacherFullName);
-            
-            const teacherSchedules = allSchedules.filter(s => s.teacherId === currentTeacher.id_usuario);
-            const subjectIds = [...new Set(teacherSchedules.map(s => s.subjectId))];
-            const teacherSubjects = allSubjects.filter(s => subjectIds.includes(s.id));
-            
-            const completedSupervisions = teacherSupervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
-
-            const supervisionPerformanceData = completedSupervisions
-              .sort((a, b) => (new Date(a.date!).getTime() || 0) - (new Date(b.date!).getTime() || 0))
-              .map(s => ({
-                date: s.date ? format(new Date(s.date), "dd/MM/yy") : 'N/A',
-                Calificación: s.score!,
-              }));
-
-            const averageSupervisionScore = completedSupervisions.length > 0 
-              ? Math.round(completedSupervisions.reduce((acc, s) => acc + s.score!, 0) / completedSupervisions.length)
-              : 0;
-
-            const averageEvaluationScore = teacherEvaluations.length > 0
-                ? Math.round(teacherEvaluations.reduce((acc, e) => acc + e.overallRating, 0) / teacherEvaluations.length)
-                : 0;
-
-            const evaluationsByGroup = teacherEvaluations.reduce((acc, evaluation) => {
-                const groupName = evaluation.groupName || 'Grupo Desconocido';
-                if (!acc[groupName]) {
-                    acc[groupName] = [];
-                }
-                acc[groupName].push(evaluation);
-                return acc;
-            }, {} as Record<string, Evaluation[]>);
-
-            const groupPerformance: GroupEvaluationData[] = Object.entries(evaluationsByGroup).map(([groupName, groupEvaluations]) => {
-                const groupDetails = allGroups.find(g => g.name === groupName);
-                
-                const evaluationsByBatch = groupEvaluations.reduce((acc, ev) => {
-                    const batchId = ev.evaluationBatchId || new Date(ev.date).toISOString().split('T')[0];
-                    if (!acc[batchId]) {
-                        acc[batchId] = { date: new Date(ev.date), ratings: [] };
-                    }
-                    acc[batchId].ratings.push(ev.overallRating);
-                    return acc;
-                }, {} as Record<string, { date: Date, ratings: number[] }>);
-
-                const performanceData = Object.values(evaluationsByBatch)
-                    .sort((a, b) => a.date.getTime() - b.date.getTime())
-                    .map(batch => ({
-                        date: format(batch.date, "dd/MM/yy"),
-                        Calificación: Math.round(batch.ratings.reduce((sum, r) => sum + r, 0) / batch.ratings.length),
-                    }));
-
-                const latestAverageRating = performanceData.length > 0 ? performanceData[performanceData.length - 1].Calificación : 0;
-                
-                return {
-                    groupName,
-                    careerName: groupDetails?.career || 'Carrera Desconocida',
-                    latestAverageRating,
-                    performanceData
-                };
-            });
-
-            setTeacherData({
-              teacher: currentTeacher,
-              teacherFullName,
-              teacherSupervisions,
-              teacherEvaluations,
-              teacherSubjects,
-              supervisionPerformanceData,
-              averageSupervisionScore,
-              averageEvaluationScore,
-              groupPerformance,
-            });
-
-        } catch (err) {
-            setError((err as Error).message || "Error al cargar el perfil del docente.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    fetchData();
+    async function loadData() {
+      if (isNaN(teacherId)) {
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        const data = await getTeacherProfileData(teacherId);
+        setProfileData(data);
+      } catch (error) {
+        console.error('Error loading teacher data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    loadData();
   }, [teacherId]);
 
-  if (isLoading) {
-      return (
-          <div className="flex flex-col gap-8">
-              <div className="flex items-center gap-4">
-                  <Skeleton className="h-20 w-20 rounded-full" />
-                  <div>
-                      <Skeleton className="h-8 w-64 mb-2" />
-                      <Skeleton className="h-4 w-48" />
-                      <Skeleton className="h-3 w-32 mt-2" />
-                  </div>
-              </div>
-              <Skeleton className="h-96 w-full" />
-              <Skeleton className="h-64 w-full" />
-          </div>
-      );
+  if (isNaN(teacherId)) {
+    return <div className="flex items-center justify-center h-full"><p className="text-destructive">ID de docente inválido.</p></div>;
   }
 
-  if (error || !teacherData) {
+  const TeacherProfileSkeleton = () => (
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-20 w-20 rounded-full" />
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+            <Skeleton className="h-3 w-40 mt-2" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-3">
+          <Card className="rounded-xl">
+            <CardHeader>
+              <Skeleton className="h-6 w-1/2 mb-2" />
+              <Skeleton className="h-4 w-3/4" />
+            </CardHeader>
+            <CardContent className="h-80 w-full pr-8">
+              <Skeleton className="h-full w-full" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return <TeacherProfileSkeleton />;
+  }
+
+  if (!profileData) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-destructive">{error || "Docente no encontrado."}</p>
+        <p className="text-destructive">Docente no encontrado.</p>
       </div>
-    )
+    );
   }
 
-  const { teacher, teacherFullName, teacherSupervisions, teacherSubjects, supervisionPerformanceData, averageSupervisionScore, averageEvaluationScore, groupPerformance } = teacherData;
-  
+  const {
+    teacher,
+    teacherFullName,
+    teacherSupervisions,
+    teacherSubjects,
+    supervisionPerformanceData,
+    averageSupervisionScore,
+    groupPerformance
+  } = profileData;
+
   const renderNav = () => {
     const navOptions = [
       { value: 'supervisions', label: 'Supervisiones', icon: ShieldCheck },
@@ -237,9 +144,7 @@ export default function TeacherProfilePage({ params }: { params: { id: string } 
     if (isMobile) {
       return (
         <Select onValueChange={(value) => setActiveTab(value as any)} defaultValue={activeTab}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Seleccionar sección" />
-          </SelectTrigger>
+          <SelectTrigger className="w-full"><SelectValue placeholder="Seleccionar sección" /></SelectTrigger>
           <SelectContent>
             {navOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
           </SelectContent>
@@ -272,16 +177,14 @@ export default function TeacherProfilePage({ params }: { params: { id: string } 
       <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20">
-                <AvatarImage src={`https://placehold.co/100x100.png?text=${teacher.nombre_completo.charAt(0)}`} alt={teacherFullName} data-ai-hint="person avatar" />
+                <AvatarImage src={`https://placehold.co/100x100.png?text=${teacher.nombre_completo.charAt(0)}`} alt={teacherFullName} />
                 <AvatarFallback>{teacher.nombre_completo.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
-                <h1 className="font-headline text-3xl font-bold tracking-tight text-white">
-                    {teacherFullName}
-                </h1>
+                <PageTitle>{teacherFullName}</PageTitle>
                 <p className="text-muted-foreground">{teacher.correo}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                Grado Académico: {teacher.grado_academico}
+                  Grado Académico: {teacher.grado_academico}
                 </p>
             </div>
         </div>
@@ -306,34 +209,13 @@ export default function TeacherProfilePage({ params }: { params: { id: string } 
                     <CardContent className="h-80 w-full pr-8">
                         {supervisionPerformanceData.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart
-                                    data={supervisionPerformanceData}
-                                    margin={{
-                                        top: 10,
-                                        right: 30,
-                                        left: 0,
-                                        bottom: 0,
-                                    }}
-                                >
+                                <AreaChart data={supervisionPerformanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
                                     <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
                                     <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={12} tickLine={false} axisLine={false} />
-                                    <Tooltip
-                                        contentStyle={{
-                                            backgroundColor: 'hsl(var(--background) / 0.8)',
-                                            borderColor: 'hsl(var(--border))',
-                                            color: 'hsl(var(--foreground))',
-                                            borderRadius: 'var(--radius)'
-                                        }}
-                                    />
+                                    <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--background) / 0.8)', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', borderRadius: 'var(--radius)' }} />
                                     <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeWidth={2} />
-                                    <Area 
-                                        type="monotone" 
-                                        dataKey="Calificación" 
-                                        stroke="hsl(var(--primary))" 
-                                        fill="hsl(var(--primary) / 0.2)"
-                                        dot={<CustomDot />}
-                                    />
+                                    <Area type="monotone" dataKey="Calificación" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" dot={<CustomDot />} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
@@ -349,9 +231,7 @@ export default function TeacherProfilePage({ params }: { params: { id: string } 
             <Card className="rounded-xl">
                 <CardHeader>
                 <CardTitle>Historial de Supervisión</CardTitle>
-                <CardDescription>
-                    Supervisiones programadas y completadas para este docente.
-                </CardDescription>
+                <CardDescription>Supervisiones programadas y completadas para este docente.</CardDescription>
                 </CardHeader>
                 <CardContent>
                 <Table>
@@ -367,32 +247,14 @@ export default function TeacherProfilePage({ params }: { params: { id: string } 
                     <TableBody>
                     {teacherSupervisions.length > 0 ? teacherSupervisions.map((supervision) => (
                         <TableRow key={supervision.id}>
-                        <TableCell className="font-medium">
-                            {supervision.career}
-                        </TableCell>
+                        <TableCell className="font-medium">{supervision.career}</TableCell>
                         <TableCell>{supervision.coordinator}</TableCell>
-                        <TableCell>
-                            {supervision.date ? format(new Date(supervision.date), "P", { locale: es }) : 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                            <Badge
-                            variant={
-                                supervision.status === "Programada"
-                                ? "warning"
-                                : "success"
-                            }
-                            >
-                            {supervision.status}
-                            </Badge>
-                        </TableCell>
-                        <TableCell className="text-right font-mono">
-                            {supervision.score !== undefined ? `${supervision.score}%` : "N/A"}
-                        </TableCell>
+                        <TableCell>{supervision.date ? format(new Date(supervision.date), "P", { locale: es }) : 'N/A'}</TableCell>
+                        <TableCell><Badge variant={supervision.status === "Programada" ? "warning" : "success"}>{supervision.status}</Badge></TableCell>
+                        <TableCell className="text-right font-mono">{supervision.score !== undefined ? `${supervision.score}%` : "N/A"}</TableCell>
                         </TableRow>
                     )) : (
-                        <TableRow>
-                            <TableCell colSpan={5} className="text-center h-24">No hay supervisiones registradas.</TableCell>
-                        </TableRow>
+                        <TableRow><TableCell colSpan={5} className="text-center h-24">No hay supervisiones registradas.</TableCell></TableRow>
                     )}
                     </TableBody>
                 </Table>
@@ -421,21 +283,11 @@ export default function TeacherProfilePage({ params }: { params: { id: string } 
                         <CardContent className="h-80 w-full pr-8">
                              {groupData.performanceData.length > 0 ? (
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart
-                                        data={groupData.performanceData}
-                                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                                    >
+                                    <AreaChart data={groupData.performanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
                                         <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
                                         <YAxis stroke="hsl(var(--foreground))" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={12} tickLine={false} axisLine={false} />
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: 'hsl(var(--background) / 0.8)',
-                                                borderColor: 'hsl(var(--border))',
-                                                color: 'hsl(var(--foreground))',
-                                                borderRadius: 'var(--radius)'
-                                            }}
-                                        />
+                                        <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--background) / 0.8)', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', borderRadius: 'var(--radius)'}} />
                                         <ReferenceLine y={60} stroke="hsl(var(--destructive))" strokeWidth={2} />
                                         <Area type="monotone" dataKey="Calificación" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" dot={<CustomDot />} />
                                     </AreaChart>
@@ -450,9 +302,7 @@ export default function TeacherProfilePage({ params }: { params: { id: string } 
                 ))
             ) : (
                  <Card className="rounded-xl">
-                    <CardHeader>
-                        <CardTitle>Rendimiento de Evaluaciones</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle>Rendimiento de Evaluaciones</CardTitle></CardHeader>
                     <CardContent>
                         <div className="flex items-center justify-center h-24 border-2 border-dashed border-muted rounded-xl">
                             <p className="text-muted-foreground">No hay evaluaciones de alumnos todavía.</p>
@@ -468,9 +318,7 @@ export default function TeacherProfilePage({ params }: { params: { id: string } 
             <Card className="rounded-xl">
                 <CardHeader>
                     <CardTitle>Materias Impartidas</CardTitle>
-                    <CardDescription>
-                        Lista de materias que este docente imparte actualmente.
-                    </CardDescription>
+                    <CardDescription>Lista de materias que este docente imparte actualmente.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -482,22 +330,21 @@ export default function TeacherProfilePage({ params }: { params: { id: string } 
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {teacherSubjects.map((subject) => (
+                            {teacherSubjects.length > 0 ? teacherSubjects.map((subject) => (
                                 <TableRow key={subject.id}>
                                     <TableCell className="font-medium">{subject.name}</TableCell>
-                                    <TableCell>{subject.career}</TableCell>
-                                    <TableCell>{subject.semester}°</TableCell>
+                                    <TableCell>{subject.name}</TableCell>
+                                    <TableCell>{subject.name}°</TableCell>
                                 </TableRow>
-                            ))}
+                            )) : (
+                                <TableRow><TableCell colSpan={3} className="text-center h-24">No hay materias registradas.</TableCell></TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
             </Card>
         </div>
       )}
-
     </div>
   )
 }
-
-    
