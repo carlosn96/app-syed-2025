@@ -15,7 +15,7 @@ export function FloatingButton({ text, ...props }: FloatingButtonProps) {
     >
       <button 
         {...props}
-        className="flex items-center justify-center bg-[#112172] rounded-full h-14 pl-4 pr-4 md:pr-4 group-hover:pr-6 shadow-lg w-auto transition-all duration-300 ease-in-out"
+        className="flex items-center justify-center bg-[var(--floating-button-bg)] rounded-full h-14 pl-4 pr-4 md:pr-4 group-hover:pr-6 shadow-md border border-slate-200 w-auto transition-all duration-300 ease-in-out hover:shadow-lg"
       >
         <Plus className="h-7 w-7 text-white transition-transform duration-300 group-hover:rotate-90" />
         <div className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 ease-in-out">

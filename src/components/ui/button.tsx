@@ -16,20 +16,20 @@ const buttonVariants = cva(
         "destructive-outline":
           "border border-destructive bg-transparent text-destructive hover:bg-destructive/10",
         outline:
-          "border border-input bg-transparent hover:bg-white/10 hover:text-accent-foreground",
+          "border border-input bg-transparent text-foreground hover:bg-neutral-100 hover:text-foreground",
         "outline-filter":
-           "border border-input bg-transparent hover:bg-white/10 hover:text-muted-foreground",
+           "border border-input bg-transparent hover:bg-neutral-100 hover:text-muted-foreground",
         secondary:
-          "bg-secondary/50 text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          "border border-accent text-accent hover:bg-accent/10",
+        ghost: "bg-transparent text-foreground hover:bg-neutral-100",
         warning:
-          "bg-yellow-500 text-white hover:bg-yellow-600",
+          "bg-[hsl(var(--warning))] text-[hsl(var(--warning-foreground))] hover:bg-[hsl(var(--warning))]/90",
         success:
-          "bg-[hsl(var(--success))] text-white hover:bg-[hsl(var(--success))]/90",
+          "bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))] hover:bg-[hsl(var(--success))]/90",
         info:
-          "border-transparent bg-blue-500/80 text-white",
+          "border-transparent bg-[hsl(var(--info))]/80 text-[hsl(var(--info-foreground))] hover:bg-[hsl(var(--info))]/90",
         "info-outline":
-          "border border-blue-500/80 bg-transparent text-blue-400 hover:bg-blue-500/20 hover:text-blue-300"
+          "border border-[hsl(var(--info))]/80 bg-transparent text-[hsl(var(--info))] hover:bg-[hsl(var(--info))]/20 hover:text-[hsl(var(--info))]"
       },
       size: {
         default: "h-10 px-4 py-2",

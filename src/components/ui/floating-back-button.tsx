@@ -15,7 +15,7 @@ export function FloatingBackButton() {
     >
       <Button 
         variant="default"
-        className="rounded-full h-14 pl-4 pr-4 md:pl-4 group-hover:pl-6 shadow-lg w-auto transition-all duration-300 ease-in-out flex-row-reverse"
+        className="rounded-full h-14 pl-4 pr-4 md:pl-4 group-hover:pl-6 shadow-md border border-slate-200 w-auto transition-all duration-300 ease-in-out flex-row-reverse hover:shadow-lg"
         aria-label="Go back"
       >
         <ArrowLeft className="h-6 w-6 text-white transition-transform duration-300" />
