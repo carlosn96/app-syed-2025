@@ -21,9 +21,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Toast } from 'primereact/toast';
-import { assignCarreraToCoordinador, getCoordinadores } from "@/services/api"
+import { assignCarreraToCoordinador, getCoordinadores, removeCarreraFromCoordinador } from "@/services/api"
 import { useState, useRef, useEffect } from "react"
 import { CareerSummary, Coordinador } from "@/lib/modelos"
+import { Loader, Trash2 } from "lucide-react"
 
 const assignCareerSchema = z.object({
   id_coordinador: z.coerce.number().min(1, "Por favor, seleccione un coordinador."),
@@ -40,18 +41,77 @@ export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCaree
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coordinators, setCoordinators] = useState<Coordinador[]>([]);
+  const [isLoadingCoordinators, setIsLoadingCoordinators] = useState(true);
+  const [isRemoving, setIsRemoving] = useState(false);
+
+  const form = useForm<AssignCareerFormValues>({
+    resolver: zodResolver(assignCareerSchema),
+    defaultValues: {
+      id_coordinador: undefined
+    }
+  });
 
   useEffect(() => {
     const fetchCoordinators = async () => {
-      const coordinatorData = await getCoordinadores();
-      setCoordinators(coordinatorData);
+      setIsLoadingCoordinators(true);
+      try {
+        const coordinatorData = await getCoordinadores();
+        setCoordinators(coordinatorData);
+      } catch (error) {
+        console.error("Failed to fetch coordinators:", error);
+      } finally {
+        setIsLoadingCoordinators(false);
+      }
     }
     fetchCoordinators();
   }, []);
 
-  const form = useForm<AssignCareerFormValues>({
-    resolver: zodResolver(assignCareerSchema),
-  });
+  useEffect(() => {
+    if (career.coordinator && coordinators.length > 0) {
+      const currentCoordinator = coordinators.find(c => c.nombre_completo === career.coordinator);
+      if (currentCoordinator) {
+        form.setValue('id_coordinador', currentCoordinator.id_coordinador);
+      } else {
+        form.setValue('id_coordinador', undefined);
+      }
+    } else {
+      form.setValue('id_coordinador', undefined);
+    }
+  }, [career, coordinators, form]);
+
+  const handleRemove = async () => {
+    if (!career.coordinator) return;
+
+    const currentCoordinator = coordinators.find(c => c.nombre_completo === career.coordinator);
+    if (!currentCoordinator) {
+      toast.current?.show({
+        severity: "warn",
+        summary: "No se puede remover",
+        detail: "No se pudo encontrar el coordinador asignado actualmente.",
+      });
+      return;
+    }
+
+    setIsRemoving(true);
+    try {
+      await removeCarreraFromCoordinador({ id_coordinador: currentCoordinator.id_coordinador, id_carrera: career.id });
+      onSuccess?.({
+        summary: "Coordinador Removido",
+        detail: `Se ha removido la asignación de ${currentCoordinator.nombre_completo} de ${career.name}.`,
+      });
+      form.reset({ id_coordinador: undefined });
+    } catch (error) {
+      if (error instanceof Error && toast.current) {
+        toast.current.show({
+          severity: "error",
+          summary: "Error al remover",
+          detail: error.message,
+        });
+      }
+    } finally {
+      setIsRemoving(false);
+    }
+  };
 
   const onSubmit = async (data: AssignCareerFormValues) => {
     setIsSubmitting(true);
@@ -62,7 +122,6 @@ export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCaree
         summary: "Coordinador Asignado",
         detail: `${coordinatorName} ha sido asignado a ${career.name}.`,
       });
-      form.reset();
     } catch (error) {
       if (error instanceof Error && toast.current) {
         toast.current.show({
@@ -86,19 +145,42 @@ export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCaree
             name="id_coordinador"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Coordinador</FormLabel>
-                 <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                <div className="flex justify-between items-center">
+                  <FormLabel>Coordinador</FormLabel>
+                  {career.coordinator && !isLoadingCoordinators && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-destructive hover:text-destructive-foreground hover:bg-destructive"
+                      onClick={handleRemove}
+                      disabled={isRemoving || isSubmitting}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {isRemoving ? "Removiendo..." : "Remover"}
+                    </Button>
+                  )}
+                </div>
+                 <Select
+                  onValueChange={field.onChange}
+                  value={field.value ? String(field.value) : ""}
+                  disabled={isLoadingCoordinators || isRemoving || isSubmitting}
+                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un coordinador" />
+                      <SelectValue placeholder={isLoadingCoordinators ? "Cargando..." : "Seleccione un coordinador"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {coordinators.length > 0 ? (
+                    {isLoadingCoordinators ? (
+                      <div className="flex items-center justify-center p-2">
+                        <Loader className="h-4 w-4 animate-spin" />
+                      </div>
+                    ) : coordinators.length > 0 ? (
                       coordinators.map((coordinator) => (
-                          <SelectItem key={coordinator.id_coordinador} value={String(coordinator.id_coordinador)}>
+                        <SelectItem key={coordinator.id_coordinador} value={String(coordinator.id_coordinador)}>
                           {coordinator.nombre_completo}
-                          </SelectItem>
+                        </SelectItem>
                       ))
                     ) : (
                       <SelectItem value="none" disabled>No hay coordinadores disponibles</SelectItem>
@@ -109,7 +191,7 @@ export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCaree
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={isSubmitting || coordinators.length === 0}>
+          <Button type="submit" className="w-full" disabled={isSubmitting || isLoadingCoordinators || isRemoving || coordinators.length === 0}>
               {isSubmitting ? 'Asignando...' : 'Asignar Coordinador'}
           </Button>
         </form>

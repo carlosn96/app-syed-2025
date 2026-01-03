@@ -37,6 +37,23 @@ export interface Docente {
   nombre_completo: string;
   correo: string;
   grado_academico: string;
+  materias?: MateriaRecord[];
+}
+
+export interface Horario {
+  dia?: string;
+  id_dia: number;
+  hora_inicio: string;
+  hora_fin: string;
+}
+
+export interface DocenteMateria {
+  nombre_docente?: string;
+  id_docente: number;
+  id_materia: number;
+  id_grupo: number;
+  id_ciclo_escolar: number;
+  horarios: Horario[];
 }
 
 export interface Coordinador {
@@ -151,17 +168,20 @@ export interface Evaluation {
 
 
 export interface Group {
-  id: number; // id_grupo
-  name: string; // grupo
-  career: string;
-  modality: string;
-  turno: string;
-  plantelName: string | null;
+  id_grupo: number;
+  acronimo: string;
+  codigo_inscripcion: string;
   id_plan_estudio: number;
-  id_ciclo: number;
   id_nivel: number;
+  nivel: string;
   id_carrera: number;
+  carrera: string;
   id_modalidad: number;
+  modalidad: string;
+  id_turno: number;
+  turno: string;
+  id_plantel: number;
+  plantel: string | null;
 }
 
 export interface Schedule {
@@ -246,16 +266,18 @@ export interface EvaluationPeriod {
 }
 
 export interface StudyPlanRecord {
-    id: number;
-    id_carrera: number;
-    carrera?: string;
-    id_materia: number;
-    materia: string;
-    id_cat_nivel: number;
-    nivel: string;
-    nivel_orden: number;
-    id_modalidad: number;
-    modalidad: string;
+  id: number;
+  id_carrera: number;
+  id_modalidad: number;
+  nombre_modalidad: string;
+  materias: MateriaRecord[];
+}
+
+export interface MateriaRecord {
+  id_materia: number;
+  nombre_materia: string;
+  id_cat_nivel: number;
+  nivel: string;
 }
 
 export interface Modality {
@@ -263,4 +285,14 @@ export interface Modality {
     nombre: string;
 }
 
-    
+export interface Periodo {
+    id: number;
+    nombre: string;
+}
+
+export interface CicloEscolar {
+    id_ciclo: number;
+    anio: number;
+    id_cat_periodo: number;
+    periodo_nombre?: string;
+}

@@ -15,7 +15,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Toast } from 'primereact/toast';
-import { updateGroup, getStudyPlanByCareerId } from "@/services/api"
+import { 
+  updateGroup, 
+  getNivelesCoordinador
+} from "@/services/api"
 import { useState, useRef, useEffect } from "react"
 import {
   Select,
@@ -24,13 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Group, StudyPlanRecord } from "@/lib/modelos"
+import { Group } from "@/lib/modelos"
 
 const editGroupSchema = z.object({
-  id_plan_estudio: z.coerce.number().min(1, "Debes seleccionar un plan de estudio."),
-  id_ciclo: z.coerce.number().min(1, "Debes seleccionar un ciclo."),
+  acronimo: z.string().min(1, "El acrónimo es requerido.").max(15, "El acrónimo no puede exceder 15 caracteres."),
+  codigo_inscripcion: z.string().min(1, "El código de inscripción es requerido."),
   id_nivel: z.coerce.number().min(1, "Debes seleccionar un nivel."),
-  grupo: z.string().min(1, "El nombre del grupo es requerido."),
 });
 
 type EditGroupFormValues = z.infer<typeof editGroupSchema>;
@@ -43,37 +45,46 @@ interface EditGroupFormProps {
 export function EditGroupForm({ group, onSuccess }: EditGroupFormProps) {
   const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [allStudyPlans, setAllStudyPlans] = useState<StudyPlanRecord[]>([]);
-
-  useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const plans = await getStudyPlanByCareerId(0); // Fetch all plans
-        setAllStudyPlans(plans);
-      } catch (error) {
-         console.error("Failed to fetch study plans", error);
-      }
-    };
-    fetchPlans();
-  }, []);
+  const [niveles, setNiveles] = useState<{ id: number; nombre: string }[]>([]);
+  const [loadingNiveles, setLoadingNiveles] = useState(true);
 
   const form = useForm<EditGroupFormValues>({
     resolver: zodResolver(editGroupSchema),
     defaultValues: {
-      grupo: group.name,
-      id_plan_estudio: group.id_plan_estudio,
-      id_ciclo: group.id_ciclo,
+      acronimo: group.acronimo,
+      codigo_inscripcion: group.codigo_inscripcion,
       id_nivel: group.id_nivel,
     },
   });
 
+  // Cargar niveles
+  useEffect(() => {
+    const fetchNiveles = async () => {
+      try {
+        const nivelesData = await getNivelesCoordinador();
+        setNiveles(nivelesData);
+      } catch (error) {
+        console.error("Error al cargar niveles:", error);
+        toast.current?.show({
+          severity: "error",
+          summary: "Error",
+          detail: "No se pudieron cargar los niveles.",
+        });
+      } finally {
+        setLoadingNiveles(false);
+      }
+    };
+    
+    fetchNiveles();
+  }, []);
+
   const onSubmit = async (data: EditGroupFormValues) => {
     setIsSubmitting(true);
     try {
-      await updateGroup(group.id, data);
+      await updateGroup(group.id_grupo, data);
       onSuccess?.({
         summary: "Grupo Actualizado",
-        detail: `El grupo ${data.grupo} ha sido actualizado.`,
+        detail: `El grupo ${data.acronimo} ha sido actualizado.`,
       });
     } catch (error) {
       if (error instanceof Error && toast.current) {
@@ -88,101 +99,70 @@ export function EditGroupForm({ group, onSuccess }: EditGroupFormProps) {
     }
   };
 
-  const cycles = [{id: 1, name: "2025-A"}, {id: 2, name: "2025-B"}];
-  const levels = Array.from({length: 12}, (_, i) => ({ id: i + 1, name: `${i+1}° Semestre`}));
-
   return (
     <>
       <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-         <FormField
-            control={form.control}
-            name="id_plan_estudio"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Plan de Estudio</FormLabel>
-                <Select onValueChange={field.onChange} value={String(field.value)}>
-                    <FormControl>
-                        <SelectTrigger>
-                        <SelectValue placeholder="Seleccione un plan" />
-                        </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                        {allStudyPlans.map((plan) => (
-                        <SelectItem key={plan.id} value={String(plan.id)}>
-                            {plan.carrera} - {plan.modalidad}
-                        </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-           <FormField
-            control={form.control}
-            name="id_ciclo"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ciclo</FormLabel>
-                <Select onValueChange={field.onChange} value={String(field.value)}>
-                    <FormControl>
-                        <SelectTrigger>
-                        <SelectValue placeholder="Seleccione un ciclo" />
-                        </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                        {cycles.map((cycle) => (
-                        <SelectItem key={cycle.id} value={String(cycle.id)}>
-                            {cycle.name}
-                        </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-           <FormField
-            control={form.control}
-            name="id_nivel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nivel</FormLabel>
-                <Select onValueChange={field.onChange} value={String(field.value)}>
-                    <FormControl>
-                        <SelectTrigger>
-                        <SelectValue placeholder="Seleccione un nivel" />
-                        </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                        {levels.map((level) => (
-                        <SelectItem key={level.id} value={String(level.id)}>
-                            {level.name}
-                        </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
-            name="grupo"
+            name="acronimo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombre del Grupo</FormLabel>
+                <FormLabel>Acrónimo del Grupo</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} maxLength={15} placeholder="Ej: 1A, 2B, 3C" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+          
+          <FormField
+            control={form.control}
+            name="codigo_inscripcion"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Código de Inscripción</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Código único del grupo" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="id_nivel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nivel</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  value={String(field.value)}
+                  disabled={loadingNiveles}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingNiveles ? "Cargando niveles..." : "Seleccione un nivel"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {niveles.map((nivel) => (
+                      <SelectItem key={nivel.id} value={String(nivel.id)}>
+                        {nivel.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
           </Button>
         </form>
       </Form>

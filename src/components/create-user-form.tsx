@@ -259,7 +259,7 @@ export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) 
               <FormItem>
                 <FormLabel>Correo Electrónico</FormLabel>
                 <FormControl>
-                  <Input placeholder="usuario@ejemplo.com" {...field} />
+                  <Input type="email" placeholder="usuario@ejemplo.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -275,7 +275,7 @@ export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) 
                   <FormItem>
                     <FormLabel>Matrícula</FormLabel>
                     <FormControl>
-                      <Input placeholder="1234567" {...field} />
+                      <Input placeholder="a12345" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

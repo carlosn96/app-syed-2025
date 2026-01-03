@@ -7,5 +7,6 @@ export {
     ClipboardList,
     Eye,
     BookCopy,
-    UserPlus
+    UserPlus,
+    Settings
 } from "lucide-react";
