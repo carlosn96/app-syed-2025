@@ -34,7 +34,8 @@ import {
     assignDocenteToMateria,
     getGroupsByFilters,
     getMateriasAsignadas,
-    getDiasCoordinador
+    getDiasCoordinador,
+    getPlantelesForCareer
 } from "@/services/api"
 import { useAuth } from "@/context/auth-context"
 import { LoadingSpinner } from "@/components/loading-spinner"
@@ -80,6 +81,32 @@ export default function DocentesPorCicloPage() {
     const [hasMore, setHasMore] = useState(false)
     const [isLoadingMore, setIsLoadingMore] = useState(false)
     const ITEMS_PER_PAGE = 20
+
+    // Update planteles when selectedCarrera changes
+    useEffect(() => {
+        const updatePlantelesForCarrera = async () => {
+            if (!selectedCarrera) return
+
+            try {
+                const plantelesData = await getPlantelesForCareer(parseInt(selectedCarrera))
+                setPlanteles(plantelesData)
+                
+                // Check if selectedPlantel is still valid
+                if (selectedPlantel && !plantelesData.find(p => p.id.toString() === selectedPlantel)) {
+                    setSelectedPlantel("")
+                }
+            } catch (error) {
+                console.error("Error updating planteles for carrera:", error)
+                toast.current?.show({
+                    severity: "error",
+                    summary: "Error",
+                    detail: "No se pudieron actualizar los planteles para la carrera seleccionada"
+                })
+            }
+        }
+
+        updatePlantelesForCarrera()
+    }, [selectedCarrera, toast, selectedPlantel])
 
     // Assignment dialog
     const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
