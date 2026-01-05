@@ -19,8 +19,8 @@ export default {
     extend: {
       // 1. Integración de Fuentes Institucionales
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['Space Grotesk', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       screens: {
         // Manteniendo tus breakpoints personalizados, aunque se recomienda revisar 'md' en el futuro

@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 /* Estrategia de Fuentes:
-  - 'Inter': Para todo el texto de lectura, inputs y datos.
-  - 'Space Grotesk': Exclusivo para Títulos y numerología destacada.
+  - 'Montserrat': Para todo el texto de lectura, inputs y datos.
+  - 'Poppins': Exclusivo para Títulos y numerología destacada.
 */
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Montserrat', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
