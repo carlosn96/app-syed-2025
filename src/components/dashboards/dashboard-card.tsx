@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface DashboardCardProps {
   title: string;
@@ -10,27 +11,55 @@ interface DashboardCardProps {
   icon: LucideIcon;
   description?: string;
   href?: string;
+  trend?: {
+    value: number;
+    isPositive: boolean;
+  };
+  gradient?: boolean;
 }
 
-export function DashboardCard({ title, value, icon: Icon, description, href }: DashboardCardProps) {
+export function DashboardCard({ title, value, icon: Icon, description, href, trend, gradient = false }: DashboardCardProps) {
   const cardContent = (
-    <Card className={`rounded-xl ${href ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}>
+    <Card className={cn(
+      "rounded-xl relative overflow-hidden transition-all duration-300",
+      href && "cursor-pointer hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-1",
+      gradient && "bg-gradient-to-br from-primary/10 via-background to-background border-primary/30"
+    )}>
+      {/* Efecto de brillo sutil en hover */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-primary/90" />
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <div className={cn(
+          "p-2 rounded-lg transition-all duration-300",
+          gradient ? "bg-primary/20" : "bg-muted",
+          href && "group-hover:scale-110"
+        )}>
+          <Icon className="h-4 w-4 text-primary" />
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-gray-900">{value}</div>
-        {description && <p className="text-sm text-gray-500">{description}</p>}
+        <div className="flex items-end justify-between">
+          <div className="text-3xl font-bold tracking-tight">{value}</div>
+          {trend && (
+            <div className={cn(
+              "text-xs font-semibold px-2 py-1 rounded-full",
+              trend.isPositive ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
+            )}>
+              {trend.isPositive ? "↗" : "↘"} {Math.abs(trend.value)}%
+            </div>
+          )}
+        </div>
+        {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
       </CardContent>
     </Card>
   );
 
   if (href) {
-    return <Link href={href}>{cardContent}</Link>;
+    return <Link href={href} className="group block">{cardContent}</Link>;
   }
 
-  return cardContent;
+  return <div className="group">{cardContent}</div>;
 }
 
 export function CardSkeleton() {

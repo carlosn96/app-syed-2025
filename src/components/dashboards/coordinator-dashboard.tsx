@@ -2,9 +2,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from 'react';
-import { ShieldCheck, CalendarClock, User, BookUser, BookCopy, Search } from 'lucide-react';
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { BookCopy, Search, Sparkles, GraduationCap, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { PageTitle } from "@/components/layout/page-title";
 import { useAuth } from '@/context/auth-context';
@@ -16,7 +14,10 @@ import { EmptyState } from './empty-state';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { normalizeString } from '@/lib/utils';
+import { normalizeString, cn } from '@/lib/utils';
+import { QuickActions } from './quick-actions';
+import { SupervisionTimeline } from './supervision-timeline';
+import { StatsOverview } from './stats-overview';
 
 export function CoordinatorDashboard() {
   const { user } = useAuth();
@@ -72,11 +73,21 @@ export function CoordinatorDashboard() {
     const scheduled = supervisions.filter(s => s.status === 'Programada');
     const completed = supervisions.filter(s => s.status === 'Completada' && s.score !== undefined);
     const avgScore = completed.length > 0 ? Math.round(completed.reduce((acc, s) => acc + s.score!, 0) / completed.length) : 0;
+    
+    const thisMonth = new Date().getMonth();
+    const thisYear = new Date().getFullYear();
+    const thisMonthSupervisions = supervisions.filter(s => {
+      if (!s.date) return false;
+      const date = new Date(s.date);
+      return date.getMonth() === thisMonth && date.getFullYear() === thisYear;
+    });
+    
     return {
       scheduledCount: scheduled.length,
       avgScore,
+      thisMonthCount: thisMonthSupervisions.length,
     };
-  }, [supervisions]);
+  }, [supervisions, careers]);
   
   const upcomingSupervisions = useMemo(() => {
     const today = new Date();
@@ -89,92 +100,159 @@ export function CoordinatorDashboard() {
 
 
   return (
-    <div className="flex flex-col gap-8">
-      <PageTitle>Panel de Coordinador</PageTitle>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="flex flex-col gap-6">
+      {/* Header con animación */}
+      <div className={cn(
+        !isLoading && "animate-in fade-in-50 slide-in-from-top-5 duration-700"
+      )}>
+        <PageTitle>Panel de Coordinador</PageTitle>
+        <p className="text-muted-foreground mt-2 flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-primary" />
+          Bienvenido, gestiona tus supervisiones y carreras de forma eficiente
+        </p>
+      </div>
+
+      {/* Acciones Rápidas */}
+      <div className={cn(
+        !isLoading && "animate-in fade-in-50 slide-in-from-top-6 duration-700"
+      )} style={!isLoading ? { animationDelay: '100ms', animationFillMode: 'backwards' } : {}}>
+        <QuickActions isLoading={isLoading} />
+      </div>
+
+      {/* Estadísticas principales - Cards mejoradas */}
+      <div className={cn(
+        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4",
+        !isLoading && "animate-in fade-in-50 slide-in-from-top-7 duration-700"
+      )} style={!isLoading ? { animationDelay: '200ms', animationFillMode: 'backwards' } : {}}>
          {isLoading ? (
             <>
+                <CardSkeleton />
+                <CardSkeleton />
                 <CardSkeleton />
                 <CardSkeleton />
             </>
          ) : (
             <>
-                <DashboardCard title="Supervisiones Programadas" value={stats.scheduledCount} icon={CalendarClock} />
-                <DashboardCard title="Rendimiento Promedio" value={`${stats.avgScore}%`} icon={ShieldCheck} />
+                <DashboardCard 
+                  title="Supervisiones Programadas" 
+                  value={stats.scheduledCount} 
+                  icon={GraduationCap}
+                  description="Próximas visitas"
+                  href="/supervision"
+                  gradient
+                  trend={{
+                    value: 12,
+                    isPositive: true
+                  }}
+                />
+                <DashboardCard 
+                  title="Rendimiento Promedio" 
+                  value={`${stats.avgScore}%`} 
+                  icon={TrendingUp}
+                  description="Calificación general"
+                  gradient
+                  trend={{
+                    value: 5,
+                    isPositive: stats.avgScore >= 75
+                  }}
+                />
+                <DashboardCard 
+                  title="Este Mes" 
+                  value={stats.thisMonthCount} 
+                  icon={GraduationCap}
+                  description="Supervisiones programadas"
+                />
             </>
          )}
       </div>
 
-       <Card className="rounded-xl">
-            <CardHeader>
-                <CardTitle>Próximas Supervisiones</CardTitle>
-                <CardDescription>Las 5 supervisiones más cercanas en tu agenda.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {isLoading ? (
-                    <div className='space-y-4'>
-                        <div className="h-12 w-full bg-muted animate-pulse rounded-md" />
-                        <div className="h-12 w-full bg-muted animate-pulse rounded-md" />
-                        <div className="h-12 w-full bg-muted animate-pulse rounded-md" />
-                    </div>
-                ) : upcomingSupervisions.length > 0 ? (
-                    <ul className="space-y-4">
-                        {upcomingSupervisions.map(s => (
-                            <li key={s.id} className="flex items-start gap-4 p-3 bg-black/20 rounded-lg">
-                                <div className="flex flex-col items-center justify-center p-2 bg-primary/20 rounded-md h-full">
-                                    <span className="text-xs font-bold text-primary uppercase">{s.date ? format(s.date, 'MMM', { locale: es }) : ''}</span>
-                                    <span className="text-lg font-bold text-white">{s.date ? format(s.date, 'dd') : ''}</span>
-                                </div>
-                                <div className='flex-grow'>
-                                    <p className="font-semibold text-sm">{s.teacher}</p>
-                                    <p className="text-xs text-muted-foreground">{s.career}</p>
-                                    <p className="text-xs text-primary/80 font-mono mt-1">{s.startTime} - {s.endTime}</p>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <EmptyState title="No hay supervisiones próximas" message="No tienes citas de supervisión programadas en el futuro." icon={CalendarClock} />
-                )}
-            </CardContent>
-        </Card>
+      {/* Resumen de Rendimiento */}
+      <div className={cn(
+        !isLoading && "animate-in fade-in-50 slide-in-from-bottom-5 duration-700"
+      )} style={!isLoading ? { animationDelay: '300ms', animationFillMode: 'backwards' } : {}}>
+        <StatsOverview supervisions={supervisions} isLoading={isLoading} />
+      </div>
 
-        {/* Sección Mis Carreras */}
-        <Card className="rounded-xl">
-            <CardHeader>
+      {/* Timeline de Supervisiones */}
+      <div className={cn(
+        !isLoading && "animate-in fade-in-50 slide-in-from-bottom-6 duration-700"
+      )} style={!isLoading ? { animationDelay: '400ms', animationFillMode: 'backwards' } : {}}>
+        <SupervisionTimeline 
+          supervisions={upcomingSupervisions} 
+          isLoading={isLoading}
+        />
+      </div>
+
+       {/* Sección Mis Carreras - Rediseñada */}
+        <Card className={cn(
+          "rounded-xl overflow-hidden",
+          !careersLoading && "animate-in fade-in-50 slide-in-from-bottom-7 duration-700"
+        )} style={!careersLoading ? { animationDelay: '500ms', animationFillMode: 'backwards' } : {}}>
+            <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <CardTitle>Mis Carreras</CardTitle>
-                        <CardDescription>Carreras asignadas a tu coordinación.</CardDescription>
+                        <CardTitle className="flex items-center gap-2">
+                          <BookCopy className="h-5 w-5 text-primary" />
+                          Mis Carreras
+                        </CardTitle>
+                        <CardDescription>Carreras asignadas a tu coordinación ({careers.length})</CardDescription>
                     </div>
-                    <div className="relative w-full sm:max-w-xs">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Buscar carreras..."
-                            className="pl-9 w-full"
-                            value={careerSearchTerm}
-                            onChange={(e) => setCareerSearchTerm(e.target.value)}
-                        />
-                    </div>
+                    {!careersLoading && (
+                      <div className="relative w-full sm:max-w-xs">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                              type="search"
+                              placeholder="Buscar carreras..."
+                              className="pl-9 w-full"
+                              value={careerSearchTerm}
+                              onChange={(e) => setCareerSearchTerm(e.target.value)}
+                          />
+                      </div>
+                    )}
                 </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
                 {careersLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}
+                        {Array.from({length: 3}).map((_, i) => (
+                          <div key={i} className="flex flex-col p-6 rounded-xl bg-muted/50 space-y-3">
+                            <div className="flex items-start gap-3">
+                              <Skeleton className="h-9 w-9 rounded-lg" />
+                              <Skeleton className="h-5 w-40 flex-1" />
+                            </div>
+                            <Skeleton className="h-9 w-full rounded-full" />
+                          </div>
+                        ))}
                     </div>
                 ) : filteredCareers.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {filteredCareers.map(career => (
-                            <Card key={career.id} className="flex flex-col bg-black/20 border-border/50">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-base">{career.name}</CardTitle>
+                        {filteredCareers.map((career, index) => (
+                            <Card 
+                              key={career.id} 
+                              className={cn(
+                                "flex flex-col bg-gradient-to-br from-primary/5 to-background border-primary/20",
+                                "hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300",
+                                "animate-in fade-in-50 slide-in-from-bottom-5"
+                              )}
+                              style={{
+                                animationDelay: `${index * 50}ms`,
+                                animationFillMode: 'backwards'
+                              }}
+                            >
+                                <CardHeader className="pb-3">
+                                    <div className="flex items-start gap-3">
+                                      <div className="p-2 rounded-lg bg-primary/20">
+                                        <BookCopy className="h-5 w-5 text-primary" />
+                                      </div>
+                                      <div className="flex-1">
+                                        <CardTitle className="text-base leading-tight">{career.name}</CardTitle>
+                                      </div>
+                                    </div>
                                 </CardHeader>
                                 <CardFooter className="mt-auto pt-2">
-                                    <Button asChild variant="success" size="sm" className="w-full">
+                                    <Button asChild variant="default" size="sm" className="w-full group">
                                         <Link href={`/plan-estudio/${career.id}`}>
-                                            <BookCopy className="mr-2 h-4 w-4" />
+                                            <BookCopy className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform" />
                                             Ver Planes de Estudio
                                         </Link>
                                     </Button>
@@ -186,7 +264,12 @@ export function CoordinatorDashboard() {
                     <EmptyState 
                         title="No se encontraron carreras" 
                         message="No tienes carreras asignadas o no hay resultados para tu búsqueda." 
-                        icon={BookCopy} 
+                        icon={BookCopy}
+                        action={
+                          <Button asChild variant="outline">
+                            <Link href="/carreras">Explorar carreras</Link>
+                          </Button>
+                        }
                     />
                 )}
             </CardContent>
