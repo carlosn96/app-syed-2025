@@ -28,6 +28,7 @@ export default function DocentesPage() {
     const [allDocentes, setAllDocentes] = useState<Docente[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<'gallery' | 'list'>('gallery');
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -79,6 +80,27 @@ export default function DocentesPage() {
                 severity: "success",
                 summary: "Usuario Eliminado",
                 detail: "El docente ha sido eliminado correctamente.",
+            });
+            fetchDocentes();
+        } catch (error) {
+            if (error instanceof Error) {
+                toast.current?.show({
+                    severity: "error",
+                    summary: "Error al eliminar",
+                    detail: error.message,
+                });
+            }
+        }
+    };
+
+    const handleBulkDelete = async (docentes: Docente[]) => {
+        try {
+            // Delete all selected users
+            await Promise.all(docentes.map(docente => deleteUser(docente.id_usuario)));
+            toast.current?.show({
+                severity: "success",
+                summary: "Usuarios Eliminados",
+                detail: `${docentes.length} docente${docentes.length !== 1 ? 's' : ''} ${docentes.length !== 1 ? 'han' : 'ha'} sido eliminado${docentes.length !== 1 ? 's' : ''} correctamente.`,
             });
             fetchDocentes();
         } catch (error) {
@@ -156,6 +178,9 @@ export default function DocentesPage() {
                 onResetPassword={handleResetPassword}
                 showResetPassword={true}
                 showProfile={true}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                onBulkDelete={handleBulkDelete}
             />
         </div>
     )

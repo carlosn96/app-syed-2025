@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, useRef } from "react"
-import { Pencil, PlusCircle, Trash2, Search, BookCopy, Key } from "lucide-react"
+import { Pencil, PlusCircle, Trash2, Search, BookCopy, Key, Grid3X3, List } from "lucide-react"
 import { Toast } from 'primereact/toast';
 import Link from "next/link";
 
@@ -40,10 +40,19 @@ import { User, Coordinador } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
 import { EditUserForm } from "@/components/edit-user-form"
 import { ResetPasswordForm } from "@/components/reset-password-form"
+import { CoordinadoresList } from "@/components/coordinadores/coordinadores-list"
 import { Input } from "@/components/ui/input"
 import { getUsers, deleteUser, getCoordinadores } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { normalizeString } from "@/lib/utils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 export default function CoordinadoresPage() {
   const toast = useRef<Toast>(null);
@@ -51,6 +60,7 @@ export default function CoordinadoresPage() {
   const [allCoordinators, setAllCoordinators] = useState<Coordinador[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'gallery' | 'list'>('gallery');
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -127,111 +137,25 @@ export default function CoordinadoresPage() {
     }
   };
 
-  const renderCoordinatorCard = (coordinator: Coordinador) => {
-    return (
-      <Card key={coordinator.id_coordinador} className="relative flex flex-col">
-
-        {/* Botones superiores: Cambiar contraseña, Editar y Eliminar */}
-        <div className="absolute top-2 right-2 flex gap-2 z-10">
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => setSelectedUserForReset({ id: coordinator.usuario_id, name: coordinator.nombre_completo })}
-            title="Cambiar contraseña"
-          >
-            <Key className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="info"
-            onClick={() => handleEditClick(coordinator)}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button size="icon" variant="destructive">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario
-                  <span className="font-bold text-primary"> {coordinator.nombre_completo}</span>.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => handleDeleteUser(coordinator.usuario_id)}
-                >
-                  Confirmar
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-
-        {/* Header con espacio superior para los botones */}
-        <CardHeader className="pt-12">
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-base">{coordinator.nombre_completo}</CardTitle>
-              
-              <CardDescription>{coordinator.correo}</CardDescription>
-
-              <CardDescription>
-                <span className="font-semibold">Registro:</span>{" "}
-                {new Date(coordinator.fecha_registro).toLocaleDateString()}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-
-        {/* Footer con botón de "Ver carreras" ocupando todo el ancho */}
-        <CardFooter className="mt-auto">
-          <Button
-            asChild
-            size="sm"
-            variant="info-outline"
-            className="w-full"
-          >
-            <Link href={`/carrerasPorCoordinador/${coordinator.id_coordinador}`}>
-              <BookCopy className="h-4 w-4 mr-2" />
-              <span>Ver Carreras</span>
-            </Link>
-          </Button>
-        </CardFooter>
-
-      </Card>
-
-    );
+  const handleBulkDelete = async (userIds: number[]) => {
+    try {
+      await Promise.all(userIds.map(id => deleteUser(id)));
+      toast.current?.show({
+        severity: "success",
+        summary: "Usuarios Eliminados",
+        detail: `${userIds.length} coordinador${userIds.length !== 1 ? 'es' : ''} ${userIds.length !== 1 ? 'han' : 'ha'} sido eliminado${userIds.length !== 1 ? 's' : ''} correctamente.`,
+      });
+      fetchCoordinators();
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.current?.show({
+          severity: "error",
+          summary: "Error al eliminar",
+          detail: error.message,
+        });
+      }
+    }
   };
-
-  const renderSkeletonCard = (index: number) => (
-    <Card key={index}>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <Skeleton className="h-5 w-32 mb-2" />
-            <Skeleton className="h-4 w-40" />
-          </div>
-          <Skeleton className="h-6 w-20 rounded-full" />
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <Skeleton className="h-4 w-28" />
-        <div className="flex justify-end gap-2 pt-2">
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <Skeleton className="h-10 w-10 rounded-full" />
-        </div>
-      </CardContent>
-    </Card>
-  );
 
   return (
     <div className="flex flex-col gap-8">
@@ -283,22 +207,46 @@ export default function CoordinadoresPage() {
 
       {error && <p className="text-destructive text-center">{error}</p>}
 
-      <div className="relative w-full sm:w-auto sm:max-w-xs flex-grow">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Buscar coordinadores..."
-          className="pl-9 w-full"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="relative w-full sm:w-auto sm:max-w-xs flex-grow">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Buscar coordinadores..."
+            className="pl-9 w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant={viewMode === 'gallery' ? 'default' : 'outline'}
+            onClick={() => setViewMode('gallery')}
+          >
+            <Grid3X3 className="h-4 w-4 mr-1" />
+            Galería
+          </Button>
+          <Button
+            size="sm"
+            variant={viewMode === 'list' ? 'default' : 'outline'}
+            onClick={() => setViewMode('list')}
+          >
+            <List className="h-4 w-4 mr-1" />
+            Lista
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isLoading
-          ? Array.from({ length: 3 }).map((_, i) => renderSkeletonCard(i))
-          : filteredCoordinators.map(renderCoordinatorCard)}
-      </div>
+      <CoordinadoresList
+        coordinators={filteredCoordinators}
+        isLoading={isLoading}
+        viewMode={viewMode}
+        onEdit={handleEditClick}
+        onDelete={handleDeleteUser}
+        onResetPassword={(user) => setSelectedUserForReset(user)}
+        onBulkDelete={handleBulkDelete}
+      />
     </div>
   )
 }

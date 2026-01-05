@@ -1,6 +1,6 @@
 
 "use client"
-import { Pencil, Trash2, BookCopy, PlusCircle, Search } from "lucide-react"
+import { Pencil, Trash2, BookCopy, PlusCircle, Search, Grid3X3, List } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { PageTitle } from "@/components/layout/page-title"
@@ -17,12 +17,21 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useState, useEffect, useMemo, useRef } from "react"
 import { CreatePlantelForm } from "@/components/create-plantel-form"
 import { EditPlantelForm } from "@/components/edit-plantel-form"
+import { PlantelesList } from "@/components/planteles/planteles-list"
 import { Plantel } from "@/lib/modelos"
 import { getPlanteles, deletePlantel } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toast } from 'primereact/toast';
 import { Input } from "@/components/ui/input"
 import { normalizeString } from "@/lib/utils"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 export default function CampusesPage() {
   const toast = useRef<Toast>(null);
@@ -31,6 +40,7 @@ export default function CampusesPage() {
   const [plantelToEdit, setPlantelToEdit] = useState<Plantel | null>(null);
   const [plantelToDelete, setPlantelToDelete] = useState<Plantel | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState<'gallery' | 'list'>('gallery');
 
   const [planteles, setPlanteles] = useState<Plantel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,6 +109,25 @@ export default function CampusesPage() {
     }
   }
 
+  const handleBulkDelete = async (plantelIds: number[]) => {
+    try {
+      await Promise.all(plantelIds.map(id => deletePlantel(id)));
+      toast.current?.show({
+        severity: "success",
+        summary: "Planteles Eliminados",
+        detail: `${plantelIds.length} plantel${plantelIds.length !== 1 ? 'es' : ''} ${plantelIds.length !== 1 ? 'han' : 'ha'} sido eliminado${plantelIds.length !== 1 ? 's' : ''} correctamente.`,
+      });
+      fetchPlanteles();
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.current?.show({
+          severity: "error",
+          summary: "Error al eliminar",
+          detail: error.message,
+        });
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -157,83 +186,50 @@ export default function CampusesPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="relative w-full sm:max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Buscar planteles..."
-          className="pl-9 w-full"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="relative w-full sm:w-auto sm:max-w-xs flex-grow">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Buscar planteles..."
+            className="pl-9 w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant={viewMode === 'gallery' ? 'default' : 'outline'}
+            onClick={() => setViewMode('gallery')}
+          >
+            <Grid3X3 className="h-4 w-4 mr-1" />
+            Galería
+          </Button>
+          <Button
+            size="sm"
+            variant={viewMode === 'list' ? 'default' : 'outline'}
+            onClick={() => setViewMode('list')}
+          >
+            <List className="h-4 w-4 mr-1" />
+            Lista
+          </Button>
+        </div>
       </div>
 
       {error && <p className="text-destructive text-center">{error}</p>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isLoading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardHeader>
-              <CardFooter>
-                <Skeleton className="h-10 w-full" />
-              </CardFooter>
-            </Card>
-          ))
-        ) : (
-          filteredPlanteles.map((campus) => (
-            <Card key={campus.id} className="relative flex flex-col">
-
-              {/* Botones superiores: Editar y Eliminar */}
-              <div className="absolute top-2 right-2 flex gap-2 z-10">
-                <Button
-                  size="icon"
-                  variant="info"
-                  onClick={() => handleEditClick(campus)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-
-                <Button
-                  size="icon"
-                  variant="destructive"
-                  onClick={() => setPlantelToDelete(campus)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Header con padding superior para dejar espacio a los botones */}
-              <CardHeader className="pt-12">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle>{campus.name}</CardTitle>
-                    <CardDescription>{campus.location}</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-
-              {/* Footer con botón full width */}
-              <CardFooter className="mt-auto flex flex-col gap-2">
-
-                {/* Botón ancho completo */}
-                <Button asChild size="sm" variant="info-outline" className="w-full">
-                  <Link href={`/planteles/${campus.id}/carreras`}>
-                    <BookCopy className="h-4 w-4" />
-                    <span>Ver Carreras</span>
-                  </Link>
-                </Button>
-
-              </CardFooter>
-
-            </Card>
-
-          ))
-        )}
-      </div>
+      <PlantelesList
+        planteles={filteredPlanteles}
+        isLoading={isLoading}
+        viewMode={viewMode}
+        onEdit={handleEditClick}
+        onDelete={(plantelId) => {
+          const plantel = planteles.find(p => p.id === plantelId)
+          if (plantel) setPlantelToDelete(plantel)
+        }}
+        onBulkDelete={handleBulkDelete}
+      />
     </div>
   )
 }

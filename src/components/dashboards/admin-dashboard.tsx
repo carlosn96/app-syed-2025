@@ -59,11 +59,11 @@ export function AdminDashboard() {
           </>
         ) : (
           <>
-            <DashboardCard title="Alumnos" value={counts.students} icon={GraduationCap} />
-            <DashboardCard title="Docentes" value={counts.teachers} icon={School} />
-            <DashboardCard title="Coordinadores" value={counts.coordinators} icon={UserCog} />
-            <DashboardCard title="Carreras" value={counts.careers} icon={BookOpenCheck} />
-            <DashboardCard title="Planteles" value={counts.planteles} icon={Building} />
+            <DashboardCard title="Alumnos" value={counts.students} icon={GraduationCap} href="/alumnos" />
+            <DashboardCard title="Docentes" value={counts.teachers} icon={School} href="/docentes" />
+            <DashboardCard title="Coordinadores" value={counts.coordinators} icon={UserCog} href="/coordinadores" />
+            <DashboardCard title="Carreras" value={counts.careers} icon={BookOpenCheck} href="/carreras" />
+            <DashboardCard title="Planteles" value={counts.planteles} icon={Building} href="/planteles" />
           </>
         )}
       </div>

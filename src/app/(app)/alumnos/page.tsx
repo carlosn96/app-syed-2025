@@ -28,6 +28,7 @@ export default function AlumnosPage() {
   const [allAlumnos, setAllAlumnos] = useState<Alumno[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'gallery' | 'list'>('gallery');
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -86,6 +87,27 @@ export default function AlumnosPage() {
             severity: "success",
             summary: "Usuario Eliminado",
             detail: "El alumno ha sido eliminado correctamente.",
+        });
+        fetchAlumnos();
+    } catch (error) {
+        if (error instanceof Error) {
+            toast.current?.show({
+                severity: "error",
+                summary: "Error al eliminar",
+                detail: error.message,
+            });
+        }
+    }
+  };
+
+  const handleBulkDelete = async (alumnos: Alumno[]) => {
+    try {
+        // Delete all selected users
+        await Promise.all(alumnos.map(alumno => deleteUser(alumno.id_usuario)));
+        toast.current?.show({
+            severity: "success",
+            summary: "Usuarios Eliminados",
+            detail: `${alumnos.length} alumno${alumnos.length !== 1 ? 's' : ''} ${alumnos.length !== 1 ? 'han' : 'ha'} sido eliminado${alumnos.length !== 1 ? 's' : ''} correctamente.`,
         });
         fetchAlumnos();
     } catch (error) {
@@ -162,6 +184,9 @@ export default function AlumnosPage() {
         onDelete={handleDeleteUser}
         onResetPassword={handleResetPassword}
         showResetPassword={true}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onBulkDelete={handleBulkDelete}
       />
     </div>
   )

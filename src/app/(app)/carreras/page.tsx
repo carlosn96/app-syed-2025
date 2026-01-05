@@ -1,18 +1,10 @@
 "use client"
 
-import { useState, useMemo, useEffect, useRef } from "react"
-import { Pencil, PlusCircle, Trash2, Search, BookCopy, UserPlus } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { Pencil, PlusCircle, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { Toast } from 'primereact/toast';
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-  CardDescription,
-} from "@/components/ui/card"
 import { CareerSummary } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
 import {
@@ -33,14 +25,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Input } from "@/components/ui/input"
 import { useAuth } from "@/context/auth-context"
 import { getCareers, deleteCareer } from "@/services/api"
-import { Skeleton } from "@/components/ui/skeleton"
 import { CreateCareerForm } from "@/components/create-career-form"
 import { EditCareerForm } from "@/components/edit-career-form"
 import { AssignCareerToCoordinatorForm } from "@/components/assign-career-to-coordinator-form"
-import { normalizeString } from "@/lib/utils";
+import { CarrerasList } from "@/components/carreras/carreras-list"
 
 export default function CareersPage() {
   const { user } = useAuth();
@@ -54,6 +44,7 @@ export default function CareersPage() {
   const [careerToAssign, setCareerToAssign] = useState<CareerSummary | null>(null);
   const [careerToDelete, setCareerToDelete] = useState<CareerSummary | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState<'gallery' | 'list'>('gallery');
 
   const [allCareers, setAllCareers] = useState<CareerSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -117,75 +108,25 @@ export default function CareersPage() {
     }
   };
 
-  const filteredCareers = useMemo(() => {
-    if (!searchTerm) {
-      return allCareers;
+  const handleBulkDelete = async (careerIds: number[]) => {
+    try {
+      await Promise.all(careerIds.map(id => deleteCareer(id)));
+      toast.current?.show({
+        severity: "success",
+        summary: "Carreras Eliminadas",
+        detail: `${careerIds.length} carrera${careerIds.length !== 1 ? 's' : ''} ${careerIds.length !== 1 ? 'han' : 'ha'} sido eliminada${careerIds.length !== 1 ? 's' : ''} correctamente.`,
+      });
+      fetchCareers();
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.current?.show({
+          severity: "error",
+          summary: "Error al eliminar",
+          detail: error.message,
+        });
+      }
     }
-    const normalizedSearchTerm = normalizeString(searchTerm);
-    return allCareers.filter(career => {
-      const name = normalizeString(career.name);
-      const coordinator = career.coordinator ? normalizeString(career.coordinator) : '';
-      return name.includes(normalizedSearchTerm) || coordinator.includes(normalizedSearchTerm);
-    });
-  }, [allCareers, searchTerm]);
-
-  const renderDefaultView = () => {
-    if (isLoading) {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-xl" />)}
-        </div>
-      )
-    }
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCareers.map(career => (
-          <Card key={career.id} className="relative flex flex-col">
-            <div className="absolute top-2 right-2 flex gap-2 z-10">
-              <Button
-                size="icon"
-                variant="info"
-                onClick={() => handleEditClick(career)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="destructive"
-                onClick={() => setCareerToDelete(career)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-            <CardHeader className="pt-12">
-              <CardTitle>{career.name}</CardTitle>
-              <CardDescription>
-                Coordinador: {career.coordinator || "No asignado"}
-              </CardDescription>
-            </CardHeader>
-            <CardFooter className="mt-auto">
-              <div className="flex flex-col w-full gap-2">
-                <Button asChild variant="info-outline" className="w-full">
-                  <Link href={`/plan-estudio/${career.id}`}>
-                    <BookCopy className="h-4 w-4" />
-                    <span>Planes de Estudio</span>
-                  </Link>
-                </Button>
-                <Button
-                  variant="info-outline"
-                  className="w-full"
-                  onClick={() => handleAssignClick(career)}
-                >
-                  <UserPlus className="h-4 w-4" />
-                  <span>Actualizar Coordinador</span>
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-    );
-  }
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -263,23 +204,21 @@ export default function CareersPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
-        <div className="relative w-full sm:max-w-xs flex-grow">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Buscar carreras..."
-            className="pl-9 w-full"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {error && <p className="text-destructive text-center">{error}</p>}
-
-      {renderDefaultView()}
-
+      <CarrerasList
+        careers={allCareers}
+        isLoading={isLoading}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onEdit={handleEditClick}
+        onAssign={handleAssignClick}
+        onDelete={(careerId) => {
+          const career = allCareers.find(c => c.id === careerId)
+          if (career) setCareerToDelete(career)
+        }}
+        onBulkDelete={handleBulkDelete}
+      />
     </div>
   )
 }

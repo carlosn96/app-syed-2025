@@ -2,17 +2,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LucideIcon } from "lucide-react";
+import Link from "next/link";
 
 interface DashboardCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
   description?: string;
+  href?: string;
 }
 
-export function DashboardCard({ title, value, icon: Icon, description }: DashboardCardProps) {
-  return (
-    <Card className="rounded-xl">
+export function DashboardCard({ title, value, icon: Icon, description, href }: DashboardCardProps) {
+  const cardContent = (
+    <Card className={`rounded-xl ${href ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
         <Icon className="h-4 w-4 text-primary/90" />
@@ -23,6 +25,12 @@ export function DashboardCard({ title, value, icon: Icon, description }: Dashboa
       </CardContent>
     </Card>
   );
+
+  if (href) {
+    return <Link href={href}>{cardContent}</Link>;
+  }
+
+  return cardContent;
 }
 
 export function CardSkeleton() {
