@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { updatePlantel } from "@/services/api"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { Plantel } from "@/lib/modelos"
 
 const editPlantelSchema = z.object({
@@ -32,7 +32,6 @@ interface EditPlantelFormProps {
 }
 
 export function EditPlantelForm({ plantel, onSuccess }: EditPlantelFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<EditPlantelFormValues>({
@@ -65,41 +64,38 @@ export function EditPlantelForm({ plantel, onSuccess }: EditPlantelFormProps) {
   };
 
   return (
-    <>
-      <Toast ref={toast} />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="nombre"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre del Plantel</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ej. Plantel Centro" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="ubicacion"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ubicación</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ej. Av. Principal 123" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-          </Button>
-        </form>
-      </Form>
-    </>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="nombre"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre del Plantel</FormLabel>
+              <FormControl>
+                <Input placeholder="Ej. Plantel Centro" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="ubicacion"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ubicación</FormLabel>
+              <FormControl>
+                <Input placeholder="Ej. Av. Principal 123" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+        </Button>
+      </form>
+    </Form>
   )
 }

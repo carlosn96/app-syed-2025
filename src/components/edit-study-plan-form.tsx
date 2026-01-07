@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast'
 import { updateCareer, getUsers } from "@/services/api"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Career, User } from "@/lib/modelos"
 import {
   Select,
@@ -39,7 +39,6 @@ interface EditStudyPlanFormProps {
 }
 
 export function EditStudyPlanForm({ modality, onSuccess }: EditStudyPlanFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coordinators, setCoordinators] = useState<User[]>([]);
 
@@ -68,19 +67,11 @@ export function EditStudyPlanForm({ modality, onSuccess }: EditStudyPlanFormProp
 
     try {
       await updateCareer(modality.id, updatedData as Partial<Career>);
-      toast.current?.show({
-        severity: "success",
-        summary: "Plan de Estudio Actualizado",
-        detail: `La modalidad ha sido actualizada con éxito.`,
-      });
+      toast.success(`La modalidad ha sido actualizada con éxito.`);
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al actualizar",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
       setIsSubmitting(false);
@@ -89,7 +80,6 @@ export function EditStudyPlanForm({ modality, onSuccess }: EditStudyPlanFormProp
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

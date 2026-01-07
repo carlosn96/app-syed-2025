@@ -19,9 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast'
 import { assignCarreraToCoordinador, removeCarreraFromCoordinador, getCareers } from "@/services/api"
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { CareerSummary, AssignedCareer } from "@/lib/modelos"
 import { Loader } from "lucide-react"
 
@@ -42,7 +42,6 @@ export function ManageCoordinatorCareersForm({
   assignedCareers,
   onSuccess 
 }: ManageCoordinatorCareersFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [allCareers, setAllCareers] = useState<CareerSummary[]>([]);
   const [isLoadingCareers, setIsLoadingCareers] = useState(true);
@@ -63,11 +62,7 @@ export function ManageCoordinatorCareersForm({
         setAllCareers(careerData);
       } catch (error) {
         console.error("Failed to fetch careers:", error);
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: "No se pudieron cargar las carreras disponibles.",
-        });
+        toast.error("No se pudieron cargar las carreras disponibles.");
       } finally {
         setIsLoadingCareers(false);
       }
@@ -87,11 +82,7 @@ export function ManageCoordinatorCareersForm({
         id_coordinador: coordinadorId, 
         id_carrera: carreraId 
       });
-      toast.current?.show({
-        severity: "success",
-        summary: "Carrera Removida",
-        detail: `Se ha removido la carrera "${carreraName}" del coordinador.`,
-      });
+      toast.success(`Se ha removido la carrera "${carreraName}" del coordinador.`);
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
@@ -114,20 +105,12 @@ export function ManageCoordinatorCareersForm({
         id_carrera: data.id_carrera 
       });
       const careerName = allCareers.find(c => c.id === data.id_carrera)?.name || '';
-      toast.current?.show({
-        severity: "success",
-        summary: "Carrera Asignada",
-        detail: `La carrera "${careerName}" ha sido asignada al coordinador.`,
-      });
+      toast.success(`La carrera "${careerName}" ha sido asignada al coordinador.`);
       form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error al asignar",
-          detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
       setIsSubmitting(false);
@@ -136,7 +119,6 @@ export function ManageCoordinatorCareersForm({
 
   return (
     <>
-      <Toast ref={toast} />
       <div className="space-y-6">
         {/* Formulario para asignar nueva carrera */}
         <div className="border rounded-lg p-4 space-y-4">

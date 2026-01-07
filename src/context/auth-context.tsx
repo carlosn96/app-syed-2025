@@ -2,10 +2,10 @@
 
 "use client"
 
-import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { User, Roles, getRedirectPath } from '@/lib/modelos';
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
-  const toast = useRef<Toast>(null);
 
   useEffect(() => {
     setIsLoading(true);
@@ -104,11 +103,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             document.cookie = `access_token=${result.datos.access_token}; path=/; max-age=86400`; // Set cookie for 1 day
             setUser(loggedInUser);
             
-            toast.current?.show({
-              severity: "success",
-              summary: "Inicio de Sesión Exitoso",
-              detail: `¡Bienvenido de nuevo, ${loggedInUser.nombre}!`,
-            });
+            toast.success(`¡Bienvenido de nuevo, ${loggedInUser.nombre}!`);
             
             const redirectPath = getRedirectPath(loggedInUser.id_rol);
             router.replace(redirectPath);
@@ -117,20 +112,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const errorMessages = result.datos?.errors 
                 ? Object.values(result.datos.errors).flat().join(' ') 
                 : result.mensaje || "Ocurrió un error desconocido.";
-            toast.current?.show({
-              severity: "error",
-              summary: "Error al iniciar sesión",
-              detail: errorMessages,
-            });
+            toast.error(errorMessages);
             return false;
         }
     } catch (error) {
         console.error("Error during login request:", error);
-        toast.current?.show({
-          severity: "error",
-          summary: "Error de Conexión",
-          detail: "No se pudo conectar con el servidor. Por favor, inténtalo de nuevo más tarde.",
-        });
+        toast.error("No se pudo conectar con el servidor. Por favor, inténtalo de nuevo más tarde.");
         return false;
     } finally {
         setIsLoading(false);
@@ -152,7 +139,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={value}>
-        <Toast ref={toast} />
         {children}
     </AuthContext.Provider>
   );

@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast'
+import toast from 'react-hot-toast'
 import { updatePeriodo } from "@/services/api"
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Periodo } from "@/lib/modelos"
 
 const editPeriodoSchema = z.object({
@@ -30,7 +30,6 @@ interface EditPeriodoFormProps {
 }
 
 export function EditPeriodoForm({ periodo, onSuccess }: EditPeriodoFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<EditPeriodoFormValues>({
@@ -68,30 +67,27 @@ export function EditPeriodoForm({ periodo, onSuccess }: EditPeriodoFormProps) {
   };
 
   return (
-    <>
-      <Toast ref={toast} />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="nombre"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre del Periodo</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ej. A, B, C" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex justify-end gap-2">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Actualizando..." : "Actualizar Periodo"}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="nombre"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre del Periodo</FormLabel>
+              <FormControl>
+                <Input placeholder="Ej. A, B, C" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex justify-end gap-2">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Actualizando..." : "Actualizar Periodo"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

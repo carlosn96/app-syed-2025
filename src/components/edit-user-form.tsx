@@ -23,8 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useAuth } from "@/context/auth-context"
-import { Toast } from 'primereact/toast';
-import { useMemo, useState, useEffect, useRef } from "react"
+import toast from 'react-hot-toast';
+import { useMemo, useState, useEffect } from "react"
 import { User, CareerSummary } from "@/lib/modelos"
 import { updateUser, getCareers, getCarrerasForCoordinador } from "@/services/api"
 
@@ -69,7 +69,6 @@ interface EditUserFormProps {
 
 export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   const { user: loggedInUser } = useAuth();
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [careers, setCareers] = useState<CareerSummary[]>([]);
   
@@ -194,19 +193,11 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       }
       
       await updateUser(idToUpdate, dataToSend, { basePath: endpoint });
-      toast.current?.show({
-        severity: "success",
-        summary: "Usuario Actualizado",
-        detail: `El usuario ha sido actualizado con éxito.`,
-      });
+      toast.success(`El usuario ha sido actualizado con éxito.`);
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al actualizar",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
         setIsSubmitting(false);
@@ -215,7 +206,6 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
-import { useRef, useState } from "react"
+import toast from 'react-hot-toast'
+import { useState } from "react"
 import { SupervisionRubric, EvaluationRubric } from "@/lib/modelos"
 import { updateRubric, updateEvaluationRubric } from "@/services/api"
 
@@ -32,7 +32,6 @@ interface EditRubricFormProps {
 }
 
 export function EditRubricForm({ rubric, rubricType, onSuccess }: EditRubricFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<EditRubricFormValues>({
@@ -50,19 +49,11 @@ export function EditRubricForm({ rubric, rubricType, onSuccess }: EditRubricForm
       } else {
         await updateEvaluationRubric(rubric.id, { nombre: data.title });
       }
-      toast.current?.show({
-        severity: "success",
-        summary: "Rúbrica Actualizada",
-        detail: `La rúbrica ha sido actualizada a "${data.title}".`,
-      });
+      toast.success(`La rúbrica ha sido actualizada a "${data.title}".`);
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al actualizar",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
         setIsSubmitting(false);
@@ -71,7 +62,6 @@ export function EditRubricForm({ rubric, rubricType, onSuccess }: EditRubricForm
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

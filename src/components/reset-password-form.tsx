@@ -3,8 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { useState, useRef } from "react"
-import { Toast } from 'primereact/toast'
+import { useState } from "react"
+import toast from 'react-hot-toast'
 import { useAuth } from "@/context/auth-context"
 import {
     Form,
@@ -51,7 +51,6 @@ export function ResetPasswordForm({
     onSuccess,
 }: ResetPasswordFormProps) {
     const { user: currentUser } = useAuth();
-    const toast = useRef<Toast>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<ResetPasswordFormValues>({
@@ -72,21 +71,13 @@ export function ResetPasswordForm({
             });
 
 
-            toast.current?.show({
-                severity: "success",
-                summary: "Éxito",
-                detail: `Contraseña de ${userName} actualizada correctamente.`,
-            });
+            toast.success(`Contraseña de ${userName} actualizada correctamente.`);
 
             form.reset();
             onOpenChange(false);
             onSuccess?.();
         } catch (error) {
-            toast.current?.show({
-                severity: "error",
-                summary: "Error",
-                detail: error instanceof Error ? error.message : "No se pudo actualizar la contraseña.",
-            });
+            toast.error(error instanceof Error ? error.message : "No se pudo actualizar la contraseña.");
         } finally {
             setIsSubmitting(false);
         }
@@ -101,7 +92,6 @@ export function ResetPasswordForm({
 
     return (
         <>
-            <Toast ref={toast} />
             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>

@@ -14,12 +14,12 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { 
   updateGroup, 
   getNivelesCoordinador
 } from "@/services/api"
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import {
   Select,
   SelectContent,
@@ -43,7 +43,6 @@ interface EditGroupFormProps {
 }
 
 export function EditGroupForm({ group, onSuccess }: EditGroupFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [niveles, setNiveles] = useState<{ id: number; nombre: string }[]>([]);
   const [loadingNiveles, setLoadingNiveles] = useState(true);
@@ -65,11 +64,7 @@ export function EditGroupForm({ group, onSuccess }: EditGroupFormProps) {
         setNiveles(nivelesData);
       } catch (error) {
         console.error("Error al cargar niveles:", error);
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: "No se pudieron cargar los niveles.",
-        });
+        toast.error("No se pudieron cargar los niveles.");
       } finally {
         setLoadingNiveles(false);
       }
@@ -100,72 +95,69 @@ export function EditGroupForm({ group, onSuccess }: EditGroupFormProps) {
   };
 
   return (
-    <>
-      <Toast ref={toast} />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="acronimo"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Acrónimo del Grupo</FormLabel>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="acronimo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Acrónimo del Grupo</FormLabel>
+              <FormControl>
+                <Input {...field} maxLength={15} placeholder="Ej: 1A, 2B, 3C" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="codigo_inscripcion"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Código de Inscripción</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Código único del grupo" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="id_nivel"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nivel</FormLabel>
+              <Select 
+                onValueChange={field.onChange} 
+                value={String(field.value)}
+                disabled={loadingNiveles}
+              >
                 <FormControl>
-                  <Input {...field} maxLength={15} placeholder="Ej: 1A, 2B, 3C" />
+                  <SelectTrigger>
+                    <SelectValue placeholder={loadingNiveles ? "Cargando niveles..." : "Seleccione un nivel"} />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="codigo_inscripcion"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Código de Inscripción</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Código único del grupo" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="id_nivel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nivel</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
-                  value={String(field.value)}
-                  disabled={loadingNiveles}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={loadingNiveles ? "Cargando niveles..." : "Seleccione un nivel"} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {niveles.map((nivel) => (
-                      <SelectItem key={nivel.id} value={String(nivel.id)}>
-                        {nivel.nombre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-          </Button>
-        </form>
-      </Form>
-    </>
+                <SelectContent>
+                  {niveles.map((nivel) => (
+                    <SelectItem key={nivel.id} value={String(nivel.id)}>
+                      {nivel.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+        </Button>
+      </form>
+    </Form>
   )
 }
