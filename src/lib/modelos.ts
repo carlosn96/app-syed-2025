@@ -23,12 +23,15 @@ export interface User {
 
 export interface Alumno {
   id_alumno: number;
-  id_usuario: number;
-  matricula: string;
-  nombre_completo: string;
+  nombre: string;
+  apellido_paterno: string;
+  apellido_materno: string;
   correo: string;
-  id_carrera: number;
-  carrera: string;
+  id_usuario?: number;
+  matricula?: string;
+  nombre_completo?: string;
+  id_carrera?: number;
+  carrera?: string;
 }
 
 export interface Docente {

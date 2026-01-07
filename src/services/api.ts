@@ -12,10 +12,10 @@ export const getAuthToken = (): string | null => {
 
 const apiFetch = async (endpoint: string, options: RequestInit = {}, tokenOverride?: string) => {
     const token = tokenOverride || getAuthToken(); // This function is now synchronous
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        ...options.headers,
+        ...(options.headers as Record<string, string>),
     };
 
     if (token) {
@@ -434,6 +434,26 @@ export const getAlumnosForCoordinador = async (): Promise<Alumno[]> => {
     return response.datos;
 }
 
+export const getAlumnosByGroup = async (groupId: number): Promise<Alumno[]> => {
+    const response = await apiFetch(`/coordinador-grupos/${groupId}/alumnos`);
+    return response.datos ?? [];
+}
+
+export const assignAlumnosToGroup = async (data: { id_grupo: number, ids_alumnos: number[] }): Promise<void> => {
+    await apiFetch('/coordinador-grupos/asignar-alumnos-grupo', { method: 'POST', body: JSON.stringify(data) });
+}
+
+export const removeAlumnoFromGroup = async (groupId: number, alumnoId: number): Promise<void> => {
+    const response = await apiFetch(`/coordinador-grupos/${groupId}/alumnos/${alumnoId}`, { 
+        method: 'DELETE'
+    });
+    
+    // Validar que la respuesta indique éxito
+    if (!response || !response.exito) {
+        throw new Error('La respuesta de la API no indica éxito en la desmatriculación');
+    }
+}
+
 // Teacher Management
 const fetchDocentes = async (basePath: string, id?: number): Promise<Docente | Docente[]> => {
     const endpoint = id ? `${basePath}/${id}` : basePath;
@@ -452,10 +472,17 @@ const fetchDocentes = async (basePath: string, id?: number): Promise<Docente | D
 export const getDocentes = async (id?: number): Promise<Docente | Docente[]> => 
     fetchDocentes('/docentes', id);
 
+
+
 export const getDocentesForCoordinador = async (): Promise<Docente[]> => {
     const result = await apiFetch('/coordinador-docentes');
     return Array.isArray(result.datos) ? result.datos : [];
 };
+
+export const getDocenteForCoordinadorById = async (id: number): Promise<Docente> => {
+    const result = await apiFetch(`/coordinador-docentes/${id}`);
+    return result.datos;
+}
 
 export const getDocentesForCoordinadorByDetails = async (careerId: number, cicloEscolarId: number, plantelId: number, turnoId: number): Promise<Docente[]> => {
     const result = await apiFetch(`/coordinador-docentes/carrera/${careerId}/plantel/${plantelId}/turno/${turnoId}/ciclo/${cicloEscolarId}`);
@@ -541,6 +568,29 @@ export const getGroups = async (): Promise<Group[]> => {
         plantel: g.plantel,
     }));
 };
+
+export const getGroupById = async (id: number): Promise<Group> => {
+    const response = await apiFetch(`/coordinador-grupos/${id}`);
+    const g = response.datos;
+    return {
+        id_grupo: g.id_grupo,
+        acronimo: g.acronimo,
+        codigo_inscripcion: g.codigo_inscripcion,
+        id_plan_estudio: g.id_plan_estudio,
+        id_nivel: g.id_nivel,
+        nivel: g.nivel || '', // Si no viene en la respuesta, dejar vacío
+        id_carrera: g.id_carrera,
+        carrera: g.carrera || '', // Si no viene en la respuesta, dejar vacío
+        id_modalidad: g.id_modalidad,
+        modalidad: g.modalidad || '', // Si no viene en la respuesta, dejar vacío
+        id_turno: g.id_turno,
+        turno: g.turno || '', // Si no viene en la respuesta, dejar vacío
+        id_plantel: g.id_plantel,
+        plantel: g.plantel || '', // Si no viene en la respuesta, dejar vacío
+    };
+};
+
+
 export const createGroup = (data: any): Promise<Group> => {
     return apiFetch('/coordinador-grupos', { method: 'POST', body: JSON.stringify(data) });
 };
@@ -616,17 +666,6 @@ export const getMateriasAsignadas = async (grupoId: number, cicloEscolarId: numb
             hora_fin: h.hora_fin
         })) : []
     }));*/
-};
-
-// Teacher data for schedules/evaluations
-export const getTeachers = async (): Promise<Teacher[]> => {
-    console.warn("getTeachers is using mock data. Implement API endpoint.");
-    return Promise.resolve([
-        { id: 1, name: "Carlos Ramírez Pérez" },
-        { id: 2, name: "Laura Rojas Mendoza" },
-        { id: 3, name: "Ricardo Palma Solis" },
-        { id: 4, name: "Mónica Salazar Cruz" },
-    ]);
 };
 
 // Evaluation Period Management
@@ -940,4 +979,9 @@ export const updateCicloEscolar = async (id: number, data: { anio: number; id_ca
 
 export const deleteCicloEscolar = async (id: number): Promise<void> => {
     await apiFetch(`/ciclos-escolares/${id}`, { method: 'DELETE' });
+};
+
+
+export const crearDocente = async(data: any): Promise<void> => {
+    return apiFetch('/docentes', { method: 'POST', body: JSON.stringify(data) });
 };
