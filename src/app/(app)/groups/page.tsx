@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Pencil, PlusCircle, Trash2, Search, QrCode, MoreVertical } from "lucide-react"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 
 import { Button } from "@/components/ui/button"
 import { PageTitle } from "@/components/layout/page-title"
@@ -70,10 +70,9 @@ import { normalizeString } from "@/lib/utils";
 // Componente para mostrar el código QR con skeleton
 interface QRCodeContentProps {
   group: Group;
-  toast: React.RefObject<Toast>;
 }
 
-function QRCodeContent({ group, toast }: QRCodeContentProps) {
+function QRCodeContent({ group }: QRCodeContentProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   // Resetear el estado cuando cambia el grupo
@@ -106,11 +105,7 @@ function QRCodeContent({ group, toast }: QRCodeContentProps) {
           className="w-full"
           onClick={() => {
             navigator.clipboard.writeText(group.codigo_inscripcion);
-            toast.current?.show({
-              severity: 'success',
-              summary: 'Copiado',
-              detail: 'Código copiado al portapapeles',
-            });
+            toast.success('Código copiado al portapapeles');
           }}
         >
           Copiar Código
@@ -163,7 +158,6 @@ function GroupActionsMenu({ group, onQRClick, onEditClick, onDeleteClick }: Grou
 
 export default function GroupsPage() {
   const router = useRouter();
-  const toast = useRef<Toast>(null);
   
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -247,7 +241,7 @@ export default function GroupsPage() {
 
 
   const handleSuccess = (message: { summary: string, detail: string }) => {
-    toast.current?.show({ severity: 'success', ...message });
+    toast.success(message.detail);
     setIsCreateModalOpen(false);
     setIsEditModalOpen(false);
     fetchGroups();
@@ -275,20 +269,12 @@ export default function GroupsPage() {
     if (!groupToDelete) return;
     try {
         await deleteGroup(groupToDelete.id_grupo);
-        toast.current?.show({
-            severity: "success",
-            summary: "Grupo Eliminado",
-            detail: `El grupo ${groupToDelete.acronimo} ha sido eliminado.`,
-        });
+        toast.success(`El grupo ${groupToDelete.acronimo} ha sido eliminado.`);
         setGroupToDelete(null);
         fetchGroups();
     } catch (error) {
         if (error instanceof Error) {
-            toast.current?.show({
-                severity: "error",
-                summary: "Error al eliminar",
-                detail: error.message,
-            });
+            toast.error(error.message);
         }
     }
   }
@@ -300,7 +286,7 @@ export default function GroupsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
+      
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle>Gestión de Grupos</PageTitle>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
@@ -348,7 +334,7 @@ export default function GroupsPage() {
             </DialogDescription>
           </DialogHeader>
           {groupForQR && (
-            <QRCodeContent group={groupForQR} toast={toast} />
+            <QRCodeContent group={groupForQR} />
           )}
         </DialogContent>
       </Dialog>

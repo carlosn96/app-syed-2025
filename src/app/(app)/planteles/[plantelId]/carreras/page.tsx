@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react"
 import { Pencil, PlusCircle, Trash2, Search, BookCopy } from "lucide-react"
 import { useParams } from "next/navigation"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 
 import {
   Card,
@@ -51,7 +51,6 @@ export default function PlantelCarrerasPage() {
   const params = useParams();
   const plantelId = Number(params.plantelId);
   const { user } = useAuth();
-  const toast = useRef<Toast>(null);
 
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [careerToRemove, setCareerToRemove] = useState<AssignedCareer | null>(null);
@@ -87,7 +86,7 @@ export default function PlantelCarrerasPage() {
   }, [plantelId]);
   
   const handleSuccess = (message: { summary: string, detail: string }) => {
-    toast.current?.show({ severity: 'success', ...message });
+    toast.success(message.detail);
     setIsAssignModalOpen(false);
     fetchData();
   }
@@ -96,20 +95,12 @@ export default function PlantelCarrerasPage() {
     if (!careerToRemove || !plantel) return;
     try {
         await removeCarreraFromPlantel({ id_plantel: plantel.id, id_carrera: careerToRemove.id_carrera });
-        toast.current?.show({
-            severity: "success",
-            summary: "Carrera Desasignada",
-            detail: `La carrera ${careerToRemove.carrera} ha sido desasignada del plantel.`,
-        });
+        toast.success(`La carrera ${careerToRemove.carrera} ha sido desasignada del plantel.`);
         setCareerToRemove(null);
         fetchData();
     } catch (error) {
        if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al desasignar",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     }
   }
@@ -170,7 +161,7 @@ export default function PlantelCarrerasPage() {
   
   return (
     <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
+      
       <FloatingBackButton />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col">

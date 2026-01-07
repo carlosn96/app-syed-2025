@@ -1,9 +1,10 @@
 
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { PlusCircle } from "lucide-react"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 import { Button } from "@/components/ui/button"
 import { PageTitle } from "@/components/layout/page-title"
@@ -15,6 +16,12 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { User, Docente } from "@/lib/modelos"
 import { CreateUserForm } from "@/components/create-user-form"
 import { EditUserForm } from "@/components/edit-user-form"
@@ -23,7 +30,7 @@ import { deleteUser, getDocentes } from "@/services/api"
 import { DocentesList } from "@/components/docentes/docentes-list"
 
 export default function DocentesPage() {
-    const toast = useRef<Toast>(null);
+    const router = useRouter();
     const [searchTerm, setSearchTerm] = useState("");
     const [allDocentes, setAllDocentes] = useState<Docente[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -76,19 +83,11 @@ export default function DocentesPage() {
     const handleDeleteUser = async (docente: Docente) => {
         try {
             await deleteUser(docente.id_usuario);
-            toast.current?.show({
-                severity: "success",
-                summary: "Usuario Eliminado",
-                detail: "El docente ha sido eliminado correctamente.",
-            });
+            toast.success("El docente ha sido eliminado correctamente.");
             fetchDocentes();
         } catch (error) {
             if (error instanceof Error) {
-                toast.current?.show({
-                    severity: "error",
-                    summary: "Error al eliminar",
-                    detail: error.message,
-                });
+                toast.error(error.message);
             }
         }
     };
@@ -97,19 +96,11 @@ export default function DocentesPage() {
         try {
             // Delete all selected users
             await Promise.all(docentes.map(docente => deleteUser(docente.id_usuario)));
-            toast.current?.show({
-                severity: "success",
-                summary: "Usuarios Eliminados",
-                detail: `${docentes.length} docente${docentes.length !== 1 ? 's' : ''} ${docentes.length !== 1 ? 'han' : 'ha'} sido eliminado${docentes.length !== 1 ? 's' : ''} correctamente.`,
-            });
+            toast.success(`${docentes.length} docente${docentes.length !== 1 ? 's' : ''} ${docentes.length !== 1 ? 'han' : 'ha'} sido eliminado${docentes.length !== 1 ? 's' : ''} correctamente.`);
             fetchDocentes();
         } catch (error) {
             if (error instanceof Error) {
-                toast.current?.show({
-                    severity: "error",
-                    summary: "Error al eliminar",
-                    detail: error.message,
-                });
+                toast.error(error.message);
             }
         }
     };
@@ -120,26 +111,36 @@ export default function DocentesPage() {
 
     return (
         <div className="flex flex-col gap-8">
-            <Toast ref={toast} />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <PageTitle>Gestión de Docentes</PageTitle>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Crear Docente
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => setIsCreateModalOpen(true)}>
+                            Crear Docente Individual
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/docentes/create-bulk')}>
+                            Crear Docentes en Bloque
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
                 <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                        <DialogTrigger asChild>
-                            <Button>
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                Crear Docente
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>Crear Nuevo Docente</DialogTitle>
-                                <DialogDescription>
-                                    Completa el formulario para registrar una nueva cuenta de docente.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <CreateUserForm defaultRole="docente" onSuccess={() => { setIsCreateModalOpen(false); fetchDocentes(); }} />
-                        </DialogContent>
-                    </Dialog>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Crear Nuevo Docente</DialogTitle>
+                            <DialogDescription>
+                                Completa el formulario para registrar una nueva cuenta de docente.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <CreateUserForm defaultRole="docente" onSuccess={() => { setIsCreateModalOpen(false); fetchDocentes(); }} />
+                    </DialogContent>
+                </Dialog>
             </div>
 
             <ResetPasswordForm 

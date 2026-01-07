@@ -20,8 +20,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { LoadingSpinner } from "@/components/loading-spinner";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('coordi@mailinator.com');
-  const [password, setPassword] = useState('987654');
+  const [email, setEmail] = useState('juancarlos.gonzalez@universidad-une.com');
+  const [password, setPassword] = useState('123456');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login, user, isLoading: isAuthLoading } = useAuth();

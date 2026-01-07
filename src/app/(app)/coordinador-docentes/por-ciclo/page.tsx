@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Toast } from 'primereact/toast'
+import toast from 'react-hot-toast'
 import { Search, Eye, Mail, GraduationCap, BookOpen } from "lucide-react"
 
 import { PageTitle } from "@/components/layout/page-title"
@@ -35,7 +35,6 @@ import { useAuth } from "@/context/auth-context"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function DocentesPorCicloPage() {
-    const toast = useRef<Toast>(null)
     const { user } = useAuth()
 
     // Filters
@@ -91,11 +90,7 @@ export default function DocentesPorCicloPage() {
 
             } catch (error) {
                 console.error("Error loading filter options:", error)
-                toast.current?.show({
-                    severity: "error",
-                    summary: "Error",
-                    detail: "No se pudieron cargar las opciones de filtro"
-                })
+                toast.error("No se pudieron cargar las opciones de filtro")
             } finally {
                 setIsLoadingFilters(false)
             }
@@ -124,11 +119,7 @@ export default function DocentesPorCicloPage() {
                 setDocentes(Array.isArray(data) ? data : [])
             } catch (error) {
                 console.error("Error loading docentes:", error)
-                toast.current?.show({
-                    severity: "error",
-                    summary: "Error",
-                    detail: "No se pudieron cargar los docentes"
-                })
+                toast.error("No se pudieron cargar los docentes")
                 setDocentes([])
             } finally {
                 setIsLoadingDocentes(false)
@@ -245,7 +236,7 @@ export default function DocentesPorCicloPage() {
 
     return (
         <div className="flex flex-col gap-6">
-            <Toast ref={toast} />
+            
 
             <PageTitle>Docentes por Ciclo</PageTitle>
 

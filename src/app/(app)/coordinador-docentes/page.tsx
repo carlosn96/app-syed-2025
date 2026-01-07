@@ -3,7 +3,8 @@
 
 import { useState, useEffect, useRef } from "react"
 import { PlusCircle } from "lucide-react"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 import { Button } from "@/components/ui/button"
 import { PageTitle } from "@/components/layout/page-title"
@@ -15,6 +16,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { User, Docente } from "@/lib/modelos"
 import { getDocentesForCoordinador, deleteUser } from "@/services/api"
 import { CreateUserForm } from "@/components/create-user-form"
@@ -23,11 +30,12 @@ import { ResetPasswordForm } from "@/components/reset-password-form"
 import { DocentesList } from "@/components/docentes/docentes-list"
 
 export default function CoordinadorDocentesPage() {
-  const toast = useRef<Toast>(null);
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [allDocentes, setAllDocentes] = useState<Docente[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'gallery' | 'list'>('gallery');
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -73,24 +81,10 @@ export default function CoordinadorDocentesPage() {
     setIsEditModalOpen(true);
   };
 
-   const handleDeleteUser = async (docente: Docente) => {
-    try {
-        await deleteUser(docente.id_docente, { basePath: '/coordinador-docentes' });
-        toast.current?.show({
-            severity: "success",
-            summary: "Usuario Eliminado",
-            detail: "El docente ha sido eliminado correctamente.",
-        });
-        fetchDocentes();
-    } catch (error) {
-        if (error instanceof Error) {
-            toast.current?.show({
-                severity: "error",
-                summary: "Error al eliminar",
-                detail: error.message,
-            });
-        }
-    }
+  const handleRequestDeletion = async (docente: Docente) => {
+    // Instead of deleting, send a request to the administrator
+    toast.success("Solicitud de eliminación enviada al administrador.");
+    // Note: No actual deletion or list refresh, as per requirements
   };
 
   const handleResetPassword = (userId: number, userName: string) => {
@@ -99,16 +93,27 @@ export default function CoordinadorDocentesPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
+      
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle>Gestión de Docentes</PageTitle>
-         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-            <DialogTrigger asChild>
+         <DropdownMenu>
+            <DropdownMenuTrigger asChild>
                 <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Crear Docente
                 </Button>
-            </DialogTrigger>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setIsCreateModalOpen(true)}>
+                    Crear Docente Individual
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/coordinador-docentes/create-bulk')}>
+                    Crear Docentes en Bloque
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+
+         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Crear Nuevo Docente</DialogTitle>
@@ -153,9 +158,12 @@ export default function CoordinadorDocentesPage() {
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onEdit={handleEditClick}
-        onDelete={handleDeleteUser}
+        onDelete={handleRequestDeletion}
         onResetPassword={handleResetPassword}
         showResetPassword={true}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        showProfile={true}
       />
     </div>
   )

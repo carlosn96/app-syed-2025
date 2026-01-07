@@ -14,14 +14,14 @@ import {
 } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { useState, useEffect, useMemo, useRef } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { CreatePlantelForm } from "@/components/create-plantel-form"
 import { EditPlantelForm } from "@/components/edit-plantel-form"
 import { PlantelesList } from "@/components/planteles/planteles-list"
 import { Plantel } from "@/lib/modelos"
 import { getPlanteles, deletePlantel } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { Input } from "@/components/ui/input"
 import { normalizeString } from "@/lib/utils"
 import {
@@ -34,7 +34,6 @@ import {
 } from "@/components/ui/table"
 
 export default function CampusesPage() {
-  const toast = useRef<Toast>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [plantelToEdit, setPlantelToEdit] = useState<Plantel | null>(null);
@@ -112,26 +111,17 @@ export default function CampusesPage() {
   const handleBulkDelete = async (plantelIds: number[]) => {
     try {
       await Promise.all(plantelIds.map(id => deletePlantel(id)));
-      toast.current?.show({
-        severity: "success",
-        summary: "Planteles Eliminados",
-        detail: `${plantelIds.length} plantel${plantelIds.length !== 1 ? 'es' : ''} ${plantelIds.length !== 1 ? 'han' : 'ha'} sido eliminado${plantelIds.length !== 1 ? 's' : ''} correctamente.`,
-      });
+      toast.success(`${plantelIds.length} plantel${plantelIds.length !== 1 ? 'es' : ''} ${plantelIds.length !== 1 ? 'han' : 'ha'} sido eliminado${plantelIds.length !== 1 ? 's' : ''} correctamente.`);
       fetchPlanteles();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error al eliminar",
-          detail: error.message,
-        });
+        toast.error(error.message);
       }
     }
   };
 
   return (
     <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle>Gestión de Planteles</PageTitle>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>

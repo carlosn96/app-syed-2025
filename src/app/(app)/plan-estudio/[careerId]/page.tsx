@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams, useRouter } from 'next/navigation'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { CareerSummary, StudyPlanRecord } from '@/lib/modelos'
 import { useAuth } from '@/context/auth-context'
@@ -42,12 +42,11 @@ import {
 } from '@/services/api'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FloatingBackButton } from '@/components/ui/floating-back-button'
-import { Toast } from 'primereact/toast'
+import toast from 'react-hot-toast'
 
 export default function PlanEstudioPage() {
     const params = useParams()
     const router = useRouter()
-    const toast = useRef<Toast>(null)
     const { user } = useAuth()
 
     const careerId = Number(params.careerId)
@@ -115,11 +114,7 @@ export default function PlanEstudioPage() {
         try {
             await deleteStudyPlan(planToDelete.id)
 
-            toast.current?.show({
-                severity: "success",
-                summary: "Plan Eliminado",
-                detail: `El plan de estudio para la modalidad "${planToDelete.name}" ha sido eliminado exitosamente.`,
-            })
+            toast.success(`El plan de estudio para la modalidad "${planToDelete.name}" ha sido eliminado exitosamente.`)
 
             // Recargar datos después de eliminar
             await fetchData()
@@ -127,11 +122,7 @@ export default function PlanEstudioPage() {
         } catch (error) {
             console.error("Error al eliminar plan:", error)
 
-            toast.current?.show({
-                severity: "error",
-                summary: "Error al Eliminar",
-                detail: error instanceof Error ? error.message : "No se pudo eliminar el plan de estudio.",
-            })
+            toast.error(error instanceof Error ? error.message : "No se pudo eliminar el plan de estudio.")
         } finally {
             setPlanToDelete(null)
         }
@@ -185,7 +176,6 @@ export default function PlanEstudioPage() {
 
     return (
         <div className="flex flex-col gap-8">
-            <Toast ref={toast} />
             <FloatingBackButton />
 
             {/* Diálogo de confirmación de eliminación */}

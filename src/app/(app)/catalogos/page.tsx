@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Toast } from 'primereact/toast'
+import toast from 'react-hot-toast'
 import { normalizeString } from "@/lib/utils"
 import { Periodo, CicloEscolar } from "@/lib/modelos"
 import { getPeriodos, deletePeriodo, getCiclosEscolares, deleteCicloEscolar } from "@/services/api"
@@ -26,7 +26,6 @@ import {
 import { Badge } from "@/components/ui/badge"
 
 export default function CatalogosPage() {
-  const toast = useRef<Toast>(null);
   const [activeTab, setActiveTab] = useState("periodos");
 
   // Periodos state
@@ -54,11 +53,7 @@ export default function CatalogosPage() {
       const data = await getPeriodos();
       setPeriodos(data);
     } catch (err: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: err.message || 'Error al cargar los periodos',
-      });
+      toast.error(err.message || 'Error al cargar los periodos');
     } finally {
       setIsPeriodosLoading(false);
     }
@@ -71,11 +66,7 @@ export default function CatalogosPage() {
       const data = await getCiclosEscolares();
       setCiclosEscolares(data);
     } catch (err: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: err.message || 'Error al cargar los ciclos escolares',
-      });
+      toast.error(err.message || 'Error al cargar los ciclos escolares');
     } finally {
       setIsCiclosLoading(false);
     }
@@ -120,28 +111,20 @@ export default function CatalogosPage() {
     if (!periodoToDelete) return;
     try {
       await deletePeriodo(periodoToDelete.id);
-      toast.current?.show({
-        severity: "success",
-        summary: "Periodo Eliminado",
-        detail: `El periodo ${periodoToDelete.nombre} ha sido eliminado.`,
-      });
+      toast.success(`El periodo ${periodoToDelete.nombre} ha sido eliminado.`);
       setPeriodoToDelete(null);
       fetchPeriodos();
       fetchCiclosEscolares();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error al eliminar",
-          detail: error.message,
-        });
+        toast.error(error.message);
       }
     }
   };
 
   // Ciclo Escolar Handlers
   const handleCicloSuccess = (message: { summary: string, detail: string }) => {
-    toast.current?.show({ severity: 'success', ...message });
+    toast.success(message.detail);
     setIsCreateCicloOpen(false);
     setIsEditCicloOpen(false);
     fetchCiclosEscolares();
@@ -165,18 +148,13 @@ export default function CatalogosPage() {
       fetchCiclosEscolares();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error al eliminar",
-          detail: error.message,
-        });
+        toast.error(error.message);
       }
     }
   };
 
   return (
     <div className="flex flex-col gap-6">
-      <Toast ref={toast} />
       
       <div>
         <PageTitle>Gestión de Catálogos</PageTitle>

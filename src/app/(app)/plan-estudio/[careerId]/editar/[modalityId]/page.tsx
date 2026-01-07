@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Search, ChevronRight, ChevronLeft, Save, AlertCircle } from 'lucide-react'
-import { Toast } from 'primereact/toast'
+import toast from 'react-hot-toast'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { normalizeString } from '@/lib/utils'
@@ -34,7 +34,6 @@ interface StudyPlanDetail {
 export default function EditarPlanEstudioPage() {
     const params = useParams()
     const router = useRouter()
-    const toast = useRef<Toast>(null)
     
     // Los parámetros vienen de la URL: /plan-estudio/[careerId]/editar/[id]
     const careerId = Number(params.careerId)
@@ -145,11 +144,7 @@ export default function EditarPlanEstudioPage() {
                 console.error("=== Error completo al cargar datos ===", err)
                 const errorMessage = err instanceof Error ? err.message : "Ocurrió un error inesperado"
                 setError(errorMessage)
-                toast.current?.show({ 
-                    severity: 'error', 
-                    summary: 'Error', 
-                    detail: errorMessage
-                })
+                toast.error(errorMessage)
             } finally {
                 setIsLoading(false)
                 console.log('=== Fin de carga de datos ===')
@@ -161,11 +156,7 @@ export default function EditarPlanEstudioPage() {
     
     const handleProceedToSubjects = () => {
         if (numberOfSemesters < 1 || numberOfSemesters > 12) {
-            toast.current?.show({ 
-                severity: 'warn', 
-                summary: 'Semestres inválidos', 
-                detail: 'El número de semestres debe estar entre 1 y 12.' 
-            })
+            toast('El número de semestres debe estar entre 1 y 12.')
             return
         }
         setStep(2)
@@ -227,20 +218,12 @@ export default function EditarPlanEstudioPage() {
         )
 
         if (materias.length === 0) {
-            toast.current?.show({ 
-                severity: 'warn', 
-                summary: 'Plan vacío', 
-                detail: 'Debes seleccionar al menos una materia para el plan.' 
-            })
+            toast('Debes seleccionar al menos una materia para el plan.')
             return
         }
 
         if (!hasChanges) {
-            toast.current?.show({ 
-                severity: 'info', 
-                summary: 'Sin cambios', 
-                detail: 'No se han realizado cambios en el plan.' 
-            })
+            toast('No se han realizado cambios en el plan.')
             return
         }
         
@@ -254,11 +237,7 @@ export default function EditarPlanEstudioPage() {
             setIsSubmitting(true)
             await updateStudyPlan(planId, payload)
             
-            toast.current?.show({ 
-                severity: 'success', 
-                summary: 'Plan Actualizado', 
-                detail: 'El plan de estudio se ha actualizado exitosamente.' 
-            })
+            toast.success('El plan de estudio se ha actualizado exitosamente.')
             
             setTimeout(() => {
                 router.push(`/plan-estudio/${careerId}`)
@@ -266,11 +245,7 @@ export default function EditarPlanEstudioPage() {
             
         } catch (error) {
             console.error("Error al actualizar plan:", error)
-            toast.current?.show({
-                severity: "error",
-                summary: "Error al Actualizar",
-                detail: error instanceof Error ? error.message : "No se pudo actualizar el plan de estudio.",
-            })
+            toast.error(error instanceof Error ? error.message : "No se pudo actualizar el plan de estudio.")
         } finally {
             setIsSubmitting(false)
         }
@@ -495,7 +470,7 @@ export default function EditarPlanEstudioPage() {
 
     return (
         <div className="flex flex-col gap-8">
-            <Toast ref={toast} />
+            
             <FloatingBackButton />
             <div className="flex flex-col">
                 <PageTitle>Editar Plan de Estudio</PageTitle>

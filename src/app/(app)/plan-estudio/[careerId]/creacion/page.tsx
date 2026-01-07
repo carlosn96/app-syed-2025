@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams, useRouter } from 'next/navigation'
-import { useState, useEffect, useMemo, useRef, useCallback, memo, useTransition } from 'react'
+import { useState, useEffect, useMemo, useCallback, memo, useTransition } from 'react'
 import { Button } from "@/components/ui/button"
 import { PageTitle } from "@/components/layout/page-title"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
@@ -13,7 +13,7 @@ import { CareerSummary, Modality, Subject } from '@/lib/modelos'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Search, ChevronRight, ChevronLeft, Save, X, BookOpen } from 'lucide-react'
-import { Toast } from 'primereact/toast'
+import toast from 'react-hot-toast'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { normalizeString } from '@/lib/utils'
@@ -117,7 +117,6 @@ AssignedSubjectItem.displayName = 'AssignedSubjectItem'
 export default function CrearPlanEstudioPage() {
     const params = useParams()
     const router = useRouter()
-    const toast = useRef<Toast>(null)
     const careerId = Number(params.careerId)
     
     const [career, setCareer] = useState<CareerSummary | null>(null)
@@ -311,11 +310,7 @@ export default function CrearPlanEstudioPage() {
         )
 
         if (materias.length === 0) {
-            toast.current?.show({ 
-                severity: 'warn', 
-                summary: 'Plan vacío', 
-                detail: 'Debes seleccionar al menos una materia para crear el plan.' 
-            })
+            toast("Debes seleccionar al menos una materia para crear el plan.")
             return
         }
         
@@ -329,11 +324,7 @@ export default function CrearPlanEstudioPage() {
             setIsSubmitting(true)
             await createStudyPlan(payload)
             
-            toast.current?.show({ 
-                severity: 'success', 
-                summary: 'Plan Creado', 
-                detail: 'El plan de estudio se ha creado exitosamente.' 
-            })
+            toast.success("El plan de estudio se ha creado exitosamente.")
             
             setTimeout(() => {
                 router.push(`/plan-estudio/${careerId}`)
@@ -341,11 +332,7 @@ export default function CrearPlanEstudioPage() {
             
         } catch (error) {
             console.error("Error al crear plan:", error)
-            toast.current?.show({
-                severity: "error",
-                summary: "Error al Crear",
-                detail: error instanceof Error ? error.message : "No se pudo crear el plan de estudio.",
-            })
+            toast.error(error instanceof Error ? error.message : "No se pudo crear el plan de estudio.")
         } finally {
             setIsSubmitting(false)
         }
@@ -660,7 +647,6 @@ export default function CrearPlanEstudioPage() {
 
     return (
         <div className="flex flex-col gap-8">
-            <Toast ref={toast} />
             <FloatingBackButton />
             <div className="flex flex-col">
                 <PageTitle>Crear Plan de Estudio</PageTitle>

@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { PlusCircle } from "lucide-react"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 
 import { Button } from "@/components/ui/button"
 import { PageTitle } from "@/components/layout/page-title"
@@ -23,7 +23,6 @@ import { getAlumnosForCoordinador, deleteUser } from "@/services/api"
 import { AlumnosList } from "@/components/alumnos/alumnos-list"
 
 export default function CoordinadorAlumnosPage() {
-    const toast = useRef<Toast>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [allAlumnos, setAllAlumnos] = useState<Alumno[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -59,17 +58,17 @@ export default function CoordinadorAlumnosPage() {
 
     const handleEditClick = (alumno: Alumno) => {
         const userForEdit: User = {
-            id: alumno.id_usuario,
+            id: alumno.id_usuario || 0,
             id_alumno: alumno.id_alumno,
-            nombre_completo: alumno.nombre_completo,
+            nombre_completo: alumno.nombre_completo || '',
             nombre: '',
             apellido_paterno: '',
             apellido_materno: '',
             correo: alumno.correo,
             id_rol: 4,
             rol: 'alumno',
-            matricula: alumno.matricula,
-            id_carrera: alumno.id_carrera,
+            matricula: alumno.matricula || '',
+            id_carrera: alumno.id_carrera || 0,
             fecha_registro: '',
             ultimo_acceso: '',
             grado_academico: '',
@@ -81,19 +80,11 @@ export default function CoordinadorAlumnosPage() {
     const handleDeleteUser = async (alumno: Alumno) => {
         try {
             await deleteUser(alumno.id_alumno, { basePath: '/coordinador-alumnos' });
-            toast.current?.show({
-                severity: "success",
-                summary: "Usuario Eliminado",
-                detail: "El alumno ha sido eliminado correctamente.",
-            });
+            toast.success("El alumno ha sido eliminado correctamente.");
             fetchAlumnos();
         } catch (error) {
             if (error instanceof Error) {
-                toast.current?.show({
-                    severity: "error",
-                    summary: "Error al eliminar",
-                    detail: error.message,
-                });
+                toast.error(error.message);
             }
         }
     };
@@ -104,7 +95,7 @@ export default function CoordinadorAlumnosPage() {
 
     return (
         <div className="flex flex-col gap-8">
-            <Toast ref={toast} />
+            
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <PageTitle>Gestión de Alumnos</PageTitle>
                 <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>

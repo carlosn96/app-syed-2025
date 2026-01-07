@@ -26,13 +26,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import useToast from "@/hooks/use-toast"
-import { Teacher, User, Career, Group, Schedule } from "@/lib/modelos"
+import { Teacher, User, Career, CareerSummary, Group, Schedule } from "@/lib/modelos"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useAuth } from "@/context/auth-context"
 import { Input } from "@/components/ui/input"
-import { getCareers, getSchedules, getUsers, getTeachers, getGroups, createSupervision } from "@/services/api"
+import { getCareers, getSchedules, getUsers, getGroups, createSupervision } from "@/services/api"
 
 const createSupervisionSchema = z.object({
   coordinatorId: z.string().min(1, "Por favor, seleccione un coordinador."),
@@ -64,7 +64,7 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [allCareers, setAllCareers] = useState<Career[]>([]);
+  const [allCareers, setAllCareers] = useState<CareerSummary[]>([]);
   const [allSchedules, setAllSchedules] = useState<Schedule[]>([]);
   const [allTeachers, setAllTeachers] = useState<Teacher[]>([]);
   const [allGroups, setAllGroups] = useState<Group[]>([]);
@@ -77,17 +77,15 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
 
   useEffect(() => {
     const fetchData = async () => {
-        const [users, careers, schedules, teachers, groups] = await Promise.all([
+        const [users, careers, schedules, groups] = await Promise.all([
             getUsers(),
             getCareers(),
             getSchedules(),
-            getTeachers(),
             getGroups()
         ]);
         setAllUsers(users);
         setAllCareers(careers);
         setAllSchedules(schedules);
-        setAllTeachers(teachers);
         setAllGroups(groups);
     }
     fetchData();
@@ -118,7 +116,7 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
             const teacherSchedules = allSchedules.filter(s => s.teacherId === teacher.id);
             const teacherGroupIds = [...new Set(teacherSchedules.map(s => s.groupId))];
             const teacherGroups = allGroups.filter(g => teacherGroupIds.includes(g.id_grupo));
-            const teacherCareerName = teacherGroups.length > 0 ? teacherGroups[0].career : "N/A";
+            const teacherCareerName = teacherGroups.length > 0 ? teacherGroups[0].carrera : "N/A";
             teacherCareers[String(teacher.id)] = teacherCareerName;
         });
     }

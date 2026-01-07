@@ -3,6 +3,7 @@ import './globals.css';
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/context/auth-context';
 import ColorProvider from '@/components/ui/color-provider';
 
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <ColorProvider>
           <AuthProvider>
+            <Toaster position="top-right" />
             {children}
           </AuthProvider>
         </ColorProvider>

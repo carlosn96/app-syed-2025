@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { PlusCircle } from "lucide-react"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 
 import { Button } from "@/components/ui/button"
 import { PageTitle } from "@/components/layout/page-title"
@@ -23,7 +23,6 @@ import { getAlumnos, deleteUser } from "@/services/api"
 import { AlumnosList } from "@/components/alumnos/alumnos-list"
 
 export default function AlumnosPage() {
-  const toast = useRef<Toast>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [allAlumnos, setAllAlumnos] = useState<Alumno[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,17 +60,17 @@ export default function AlumnosPage() {
 
   const handleEditClick = (alumno: Alumno) => {
     const userForEdit: User = {
-        id: alumno.id_usuario,
+        id: alumno.id_usuario || 0,
         id_alumno: alumno.id_alumno,
-        nombre_completo: alumno.nombre_completo,
+        nombre_completo: alumno.nombre_completo || '',
         nombre: '', // Will be derived in form
         apellido_paterno: '', // Will be derived in form
         apellido_materno: '', // Will be derived in form
         correo: alumno.correo,
         id_rol: 4, // Alumno role
         rol: 'alumno',
-        matricula: alumno.matricula,
-        id_carrera: alumno.id_carrera,
+        matricula: alumno.matricula || '',
+        id_carrera: alumno.id_carrera || 0,
         fecha_registro: '', 
         ultimo_acceso: '',
         grado_academico: '', // Added to satisfy User type
@@ -81,34 +80,37 @@ export default function AlumnosPage() {
   };
 
   const handleDeleteUser = async (alumno: Alumno) => {
+    if (!alumno.id_usuario) {
+        toast.error("No se puede eliminar el alumno: ID de usuario no disponible.");
+        return;
+    }
     try {
         await deleteUser(alumno.id_usuario);
-        toast.current?.show({
-            severity: "success",
-            summary: "Usuario Eliminado",
-            detail: "El alumno ha sido eliminado correctamente.",
-        });
+        toast.success("El alumno ha sido eliminado correctamente.");
         fetchAlumnos();
     } catch (error) {
         if (error instanceof Error) {
-            toast.current?.show({
-                severity: "error",
-                summary: "Error al eliminar",
-                detail: error.message,
-            });
+            toast.error(error.message);
         }
     }
   };
 
   const handleBulkDelete = async (alumnos: Alumno[]) => {
+    const validAlumnos = alumnos.filter(alumno => alumno.id_usuario);
+    
+    if (validAlumnos.length === 0) {
+        toast.error("No se pueden eliminar los alumnos: IDs de usuario no disponibles.");
+        return;
+    }
+    
+    if (validAlumnos.length < alumnos.length) {
+        toast(`${alumnos.length - validAlumnos.length} alumno(s) no se pudieron procesar por falta de ID de usuario.`);
+    }
+    
     try {
         // Delete all selected users
-        await Promise.all(alumnos.map(alumno => deleteUser(alumno.id_usuario)));
-        toast.current?.show({
-            severity: "success",
-            summary: "Usuarios Eliminados",
-            detail: `${alumnos.length} alumno${alumnos.length !== 1 ? 's' : ''} ${alumnos.length !== 1 ? 'han' : 'ha'} sido eliminado${alumnos.length !== 1 ? 's' : ''} correctamente.`,
-        });
+        await Promise.all(validAlumnos.map(alumno => deleteUser(alumno.id_usuario!)));
+        toast.success(`${validAlumnos.length} alumno${validAlumnos.length !== 1 ? 's' : ''} ${validAlumnos.length !== 1 ? 'han' : 'ha'} sido eliminado${validAlumnos.length !== 1 ? 's' : ''} correctamente.`);
         fetchAlumnos();
     } catch (error) {
         if (error instanceof Error) {
@@ -127,7 +129,7 @@ export default function AlumnosPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
+      
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle>Gestión de Alumnos</PageTitle>
            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>

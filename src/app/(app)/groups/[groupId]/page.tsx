@@ -1,59 +1,66 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, Users, UserPlus, QrCode, Settings } from "lucide-react"
-import { Toast } from 'primereact/toast'
+import { Users, UserPlus, Settings } from "lucide-react"
+import toast, { Toaster } from 'react-hot-toast'
 
-import { Button } from "@/components/ui/button"
-import { PageTitle } from "@/components/layout/page-title"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Group } from "@/lib/modelos"
-import { getGroups } from "@/services/api"
+import { getGroupById } from "@/services/api"
+import { TooltipProvider } from "@/components/ui/tooltip"
+
+import { GroupHeader } from "@/components/groups/group-header"
+import { SummaryCardsGrid } from "@/components/groups/summary-cards-grid"
+import { StudentsList } from "@/components/groups/students-list"
+import { EnrollmentDialog } from "@/components/groups/enrollment-dialog"
+import { GroupInfo } from "@/components/groups/group-info"
+import { useGroupStudents } from "@/hooks/use-group-students"
+import { useEnrollmentDialog } from "@/hooks/use-enrollment-dialog"
 
 export default function GroupDetailsPage() {
   const params = useParams()
   const router = useRouter()
-  const toast = useRef<Toast>(null)
-  
+
   const groupId = Number(params.groupId)
   const [group, setGroup] = useState<Group | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isAssigning, setIsAssigning] = useState(false)
+
+  const {
+    alumnosInscritos,
+    isReloadingAlumnos,
+    removingAlumnoId,
+    handleRemoveAlumno,
+    handleAssignAlumnos
+  } = useGroupStudents(groupId)
+
+  const {
+    isEnrollDialogOpen,
+    setIsEnrollDialogOpen,
+    availableAlumnos,
+    selectedAlumnos,
+    isLoadingAlumnos,
+    searchTerm,
+    setSearchTerm,
+    handleSelectAlumno,
+    handleSelectAll,
+    resetDialog
+  } = useEnrollmentDialog(alumnosInscritos)
 
   useEffect(() => {
     const fetchGroupDetails = async () => {
       try {
-        const groups = await getGroups()
-        const foundGroup = groups.find(g => g.id_grupo === groupId)
-        if (foundGroup) {
-          setGroup(foundGroup)
+        const group = await getGroupById(groupId)
+        if (group) {
+          setGroup(group)
         } else {
-          toast.current?.show({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Grupo no encontrado',
-          })
-          router.push('/groups')
+          toast.error('Grupo no encontrado')
+          setTimeout(() => router.push('/groups'), 1000)
         }
       } catch (error) {
-        toast.current?.show({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo cargar la información del grupo',
-        })
+        toast.error('No se pudo cargar la información del grupo')
       } finally {
         setIsLoading(false)
       }
@@ -61,6 +68,36 @@ export default function GroupDetailsPage() {
 
     fetchGroupDetails()
   }, [groupId, router])
+
+  const handleAssign = async () => {
+    if (selectedAlumnos.size === 0) return
+
+    setIsAssigning(true)
+    try {
+      await handleAssignAlumnos(selectedAlumnos)
+      toast.success(`${selectedAlumnos.size} alumno(s) inscrito(s) correctamente`)
+      resetDialog()
+    } catch (error) {
+      toast.error('No se pudieron inscribir los alumnos')
+    } finally {
+      setIsAssigning(false)
+    }
+  }
+
+  const handleRemoveStudent = async (alumnoId: number) => {
+    try {
+      await handleRemoveAlumno(alumnoId)
+      toast.success('Alumno desmatriculado correctamente')
+    } catch (error: any) {
+      let errorMessage = 'No se pudo desmatricular al alumno'
+      if (error?.message?.includes('respuesta de la API no indica éxito')) {
+        errorMessage = 'La operación no se completó correctamente en el servidor'
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
+      toast.error(errorMessage)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -82,183 +119,75 @@ export default function GroupDetailsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
-      
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push('/groups')}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex-1">
-          <PageTitle>Grupo {group.acronimo}</PageTitle>
-          <p className="text-muted-foreground mt-1">
-            {group.carrera} • {group.modalidad} • {group.turno}
-          </p>
-        </div>
-        <Button variant="outline" onClick={() => {}}>
-          <QrCode className="mr-2 h-4 w-4" />
-          Ver código QR
-        </Button>
-      </div>
+    <TooltipProvider>
+      <div className="flex flex-col gap-6">
 
-      {/* Cards de resumen */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+        <GroupHeader
+          group={group}
+          onBack={() => router.push('/groups')}
+        />
+
+        <SummaryCardsGrid
+          group={group}
+          enrolledCount={alumnosInscritos.length}
+        />
+
+        <Tabs defaultValue="students" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="students" className="gap-2">
+              <Users className="h-4 w-4" />
               Alumnos Inscritos
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              estudiantes activos
-            </p>
-          </CardContent>
-        </Card>
+            </TabsTrigger>
+            <TabsTrigger value="requests" className="gap-2">
+              <UserPlus className="h-4 w-4" />
+              Solicitudes de Inscripción
+            </TabsTrigger>
+            <TabsTrigger value="info" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Información del Grupo
+            </TabsTrigger>
+          </TabsList>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Solicitudes Pendientes
-            </CardTitle>
-            <UserPlus className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              por revisar
-            </p>
-          </CardContent>
-        </Card>
+          <TabsContent value="students" className="mt-6">
+            <StudentsList
+              alumnos={alumnosInscritos}
+              isReloading={isReloadingAlumnos}
+              onEnrollClick={() => setIsEnrollDialogOpen(true)}
+              onRemoveStudent={handleRemoveStudent}
+              removingStudentId={removingAlumnoId}
+            />
+          </TabsContent>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Nivel
-            </CardTitle>
-            <Settings className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{group.nivel}</div>
-            <p className="text-xs text-muted-foreground">
-              semestre/cuatrimestre
-            </p>
-          </CardContent>
-        </Card>
+          <TabsContent value="requests" className="mt-6">
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <UserPlus className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold">No hay solicitudes pendientes</h3>
+              <p className="text-muted-foreground mt-2">
+                Las solicitudes de inscripción aparecerán aquí
+              </p>
+            </div>
+          </TabsContent>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Plantel
-            </CardTitle>
-            <Settings className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold">{group.plantel || 'N/A'}</div>
-            <p className="text-xs text-muted-foreground">
-              ubicación
-            </p>
-          </CardContent>
-        </Card>
+          <TabsContent value="info" className="mt-6">
+            <GroupInfo group={group} />
+          </TabsContent>
+        </Tabs>
+
+        <EnrollmentDialog
+          isOpen={isEnrollDialogOpen}
+          onOpenChange={setIsEnrollDialogOpen}
+          groupAcronimo={group.acronimo}
+          availableAlumnos={availableAlumnos}
+          isLoading={isLoadingAlumnos}
+          selectedAlumnos={selectedAlumnos}
+          onSelectAlumno={handleSelectAlumno}
+          onSelectAll={handleSelectAll}
+          onAssign={handleAssign}
+          isAssigning={isAssigning}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
       </div>
-
-      {/* Tabs con contenido */}
-      <Tabs defaultValue="students" className="w-full">
-        <TabsList>
-          <TabsTrigger value="students">Alumnos Inscritos</TabsTrigger>
-          <TabsTrigger value="requests">Solicitudes de Inscripción</TabsTrigger>
-          <TabsTrigger value="info">Información del Grupo</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="students" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Alumnos Inscritos</CardTitle>
-              <CardDescription>
-                Lista de estudiantes que pertenecen a este grupo
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold">No hay alumnos inscritos</h3>
-                <p className="text-muted-foreground mt-2">
-                  Los estudiantes aparecerán aquí una vez que se inscriban al grupo
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="requests" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Solicitudes de Inscripción</CardTitle>
-              <CardDescription>
-                Solicitudes pendientes de aprobación para este grupo
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <UserPlus className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold">No hay solicitudes pendientes</h3>
-                <p className="text-muted-foreground mt-2">
-                  Las solicitudes de inscripción aparecerán aquí
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="info" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Información del Grupo</CardTitle>
-              <CardDescription>
-                Detalles y configuración del grupo
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="font-semibold">Acrónimo:</div>
-                  <div className="col-span-2">{group.acronimo}</div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="font-semibold">Código de Inscripción:</div>
-                  <div className="col-span-2 font-mono">{group.codigo_inscripcion}</div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="font-semibold">Carrera:</div>
-                  <div className="col-span-2">{group.carrera}</div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="font-semibold">Modalidad:</div>
-                  <div className="col-span-2">{group.modalidad}</div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="font-semibold">Turno:</div>
-                  <div className="col-span-2">{group.turno}</div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="font-semibold">Nivel:</div>
-                  <div className="col-span-2">{group.nivel}</div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="font-semibold">Plantel:</div>
-                  <div className="col-span-2">{group.plantel || 'No asignado'}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+    </TooltipProvider>
   )
 }

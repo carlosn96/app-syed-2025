@@ -34,6 +34,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FloatingBackButton } from "@/components/ui/floating-back-button"
 import type { TeacherProfileData } from "@/lib/teacher-data"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useAuth } from "@/context/auth-context";
 
 const getScoreColor = (score: number) => {
   if (score < 60) return 'hsl(var(--destructive))';
@@ -54,16 +55,18 @@ export default function TeacherProfileClientPage() {
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
   const teacherId = Number(useParams().id);
+  const { user } = useAuth();
 
   useEffect(() => {
     async function loadData() {
-      if (isNaN(teacherId)) {
+      if (isNaN(teacherId) || !user) {
         setLoading(false);
         return;
       }
       
       try {
-        const data = await getTeacherProfileData(teacherId);
+        const data = await getTeacherProfileData(teacherId, user);
+        console.log('Loaded teacher profile data:', data);
         setProfileData(data);
       } catch (error) {
         console.error('Error loading teacher data:', error);

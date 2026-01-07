@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
-import { Toast } from 'primereact/toast'
+import toast from 'react-hot-toast'
 import { Plus, Search, UserPlus, Mail, GraduationCap as GraduationCapIcon, Sparkles, Loader2, ChevronDown, ChevronUp, Clock, X } from "lucide-react"
 
 import { PageTitle } from "@/components/layout/page-title"
@@ -42,7 +42,6 @@ import { LoadingSpinner } from "@/components/loading-spinner"
 
 
 export default function DocentesPorCicloPage() {
-    const toast = useRef<Toast>(null)
     const { user } = useAuth()
 
     // Filters
@@ -97,11 +96,7 @@ export default function DocentesPorCicloPage() {
                 }
             } catch (error) {
                 console.error("Error updating planteles for carrera:", error)
-                toast.current?.show({
-                    severity: "error",
-                    summary: "Error",
-                    detail: "No se pudieron actualizar los planteles para la carrera seleccionada"
-                })
+                toast.error("No se pudieron actualizar los planteles para la carrera seleccionada")
             }
         }
 
@@ -156,11 +151,7 @@ export default function DocentesPorCicloPage() {
 
             } catch (error) {
                 console.error("Error loading filter options:", error)
-                toast.current?.show({
-                    severity: "error",
-                    summary: "Error",
-                    detail: "No se pudieron cargar las opciones de filtro"
-                })
+                toast.error("No se pudieron cargar las opciones de filtro")
             } finally {
                 setIsLoadingFilters(false)
             }
@@ -183,11 +174,7 @@ export default function DocentesPorCicloPage() {
             setHasMore(docentesData.length > ITEMS_PER_PAGE)
         } catch (error) {
             console.error("Error loading docentes:", error)
-            toast.current?.show({
-                severity: "error",
-                summary: "Error",
-                detail: "No se pudieron cargar los docentes"
-            })
+            toast.error("No se pudieron cargar los docentes")
             setAllDocentes([])
             setDisplayedDocentes([])
         } finally {
@@ -272,11 +259,7 @@ export default function DocentesPorCicloPage() {
                 setMaterias(allMaterias)
             } catch (error) {
                 console.error("Error loading materias:", error)
-                toast.current?.show({
-                    severity: "error",
-                    summary: "Error",
-                    detail: error instanceof Error ? error.message : "No se pudieron cargar las materias"
-                })
+                toast.error(error instanceof Error ? error.message : "No se pudieron cargar las materias")
                 setMaterias([])
             } finally {
                 setIsLoadingMaterias(false)
@@ -305,11 +288,7 @@ export default function DocentesPorCicloPage() {
                 setGrupos(gruposData)
             } catch (error) {
                 console.error("Error loading grupos:", error)
-                toast.current?.show({
-                    severity: "error",
-                    summary: "Error",
-                    detail: "No se pudieron cargar los grupos"
-                })
+                toast.error("No se pudieron cargar los grupos")
                 setGrupos([])
             } finally {
                 setIsLoadingGrupos(false)
@@ -371,11 +350,7 @@ export default function DocentesPorCicloPage() {
 
     const handleAddHorario = () => {
         if (!selectedDia || !horaInicio || !horaFin) {
-            toast.current?.show({
-                severity: "warn",
-                summary: "Campos incompletos",
-                detail: "Por favor completa todos los campos del horario"
-            })
+            toast("Por favor completa todos los campos del horario")
             return
         }
 
@@ -404,20 +379,12 @@ export default function DocentesPorCicloPage() {
 
     const handleSaveAssignment = async () => {
         if (!selectedDocente || !selectedMateria || !selectedCarrera || !selectedPlantel || !selectedTurno || !selectedCicloEscolar || !selectedModalidad || !selectedGrupo) {
-            toast.current?.show({
-                severity: "warn",
-                summary: "Campos incompletos",
-                detail: "Por favor selecciona todos los campos requeridos incluyendo el grupo"
-            })
+            toast("Por favor selecciona todos los campos requeridos incluyendo el grupo")
             return
         }
 
         if (horarios.length === 0) {
-            toast.current?.show({
-                severity: "warn",
-                summary: "Horarios requeridos",
-                detail: "Por favor agrega al menos un horario para la materia"
-            })
+            toast("Por favor agrega al menos un horario para la materia")
             return
         }
 
@@ -439,11 +406,7 @@ export default function DocentesPorCicloPage() {
                 horarios: horariosParaEnviar
             })
 
-            toast.current?.show({
-                severity: "success",
-                summary: "Asignación exitosa",
-                detail: `${selectedDocente.nombre_completo} ha sido asignado a la materia`
-            })
+            toast.success(`${selectedDocente.nombre_completo} ha sido asignado a la materia`)
 
             // Reload materias asignadas to update the list
             await loadMateriasAsignadas()
@@ -454,11 +417,7 @@ export default function DocentesPorCicloPage() {
             setHorarios([])
         } catch (error) {
             console.error("Error assigning docente to materia:", error)
-            toast.current?.show({
-                severity: "error",
-                summary: "Error",
-                detail: "No se pudo asignar el docente a la materia: " + (error instanceof Error ? error.message : "")
-            })
+            toast.error("No se pudo asignar el docente a la materia: " + (error instanceof Error ? error.message : ""))
         } finally {
             setIsSavingAssignment(false)
         }
@@ -476,7 +435,7 @@ export default function DocentesPorCicloPage() {
 
     return (
         <div className="flex flex-col gap-8">
-            <Toast ref={toast} />
+            
 
             <PageTitle>Asignación de Docentes</PageTitle>
 

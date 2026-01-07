@@ -8,8 +8,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Teacher } from '@/lib/modelos';
-import { getTeachers, createEvaluation } from '@/services/api';
-import { Toast } from 'primereact/toast';
+import { createEvaluation } from '@/services/api';
+import toast from 'react-hot-toast';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -60,70 +60,45 @@ export default function StudentEvaluationPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const toast = useRef<Toast>(null);
   const teacherId = Number(params.teacherId);
-  
+
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchTeacher = async () => {
-        setIsLoading(true);
-        try {
-            const allTeachers = await getTeachers();
-            const currentTeacher = allTeachers.find(t => t.id === teacherId) || null;
-            setTeacher(currentTeacher);
-        } catch (error) {
-            console.error("Failed to fetch teacher", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    fetchTeacher();
-  }, [teacherId]);
 
   const form = useForm<EvaluationFormValues>({
     resolver: zodResolver(evaluationSchema),
   });
-  
+
   const { control, handleSubmit } = form;
 
   const onSubmit = async (data: EvaluationFormValues) => {
     if (!user || !teacher) return;
-    
+
     const clarityScore = ratingMap[data.clarity];
     const engagementScore = ratingMap[data.engagement];
     const punctualityScore = ratingMap[data.punctuality];
     const knowledgeScore = ratingMap[data.knowledge];
 
     const newEvaluation = {
-        student: "Alumno Anónimo", // In a real app, this would come from the user context
-        teacherName: teacher.name,
-        groupName: user.grupo || "Desconocido",
-        feedback: data.feedback,
-        overallRating: Math.round((clarityScore + engagementScore + punctualityScore + knowledgeScore) / 4),
-        ratings: {
-            clarity: data.clarity,
-            engagement: data.engagement,
-            punctuality: data.punctuality,
-            knowledge: data.knowledge,
-        }
+      student: "Alumno Anónimo", // In a real app, this would come from the user context
+      teacherName: teacher.name,
+      groupName: user.grupo || "Desconocido",
+      feedback: data.feedback,
+      overallRating: Math.round((clarityScore + engagementScore + punctualityScore + knowledgeScore) / 4),
+      ratings: {
+        clarity: data.clarity,
+        engagement: data.engagement,
+        punctuality: data.punctuality,
+        knowledge: data.knowledge,
+      }
     };
 
     try {
-        await createEvaluation(newEvaluation);
-        toast.current?.show({
-            severity: "success",
-            summary: "Evaluación Enviada",
-            detail: `Gracias por evaluar a ${teacher.name}.`,
-        });
-        router.push('/evaluations');
+      await createEvaluation(newEvaluation);
+      toast.success(`Gracias por evaluar a ${teacher.name}.`);
+      router.push('/evaluations');
     } catch (error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al enviar",
-            detail: "No se pudo guardar la evaluación. Inténtalo de nuevo."
-        })
+      toast.error("No se pudo guardar la evaluación. Inténtalo de nuevo.");
     }
   };
 
@@ -166,7 +141,7 @@ export default function StudentEvaluationPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
+
       <Card className="rounded-xl">
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardHeader>
@@ -177,60 +152,43 @@ export default function StudentEvaluationPage() {
           </CardHeader>
           <CardContent className="space-y-8">
             {ratingCategories.map((category, index) => (
-                <div key={category.name}>
-                    <Controller
-                        name={category.name}
-                        control={control}
-                        render={({ field, fieldState }) => (
-                            <FormItem>
-                                <Label className="text-base">{category.label}</Label>
-                                <FormControl>
-                                    <RadioGroup
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                        className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-2"
-                                    >
-                                        {evaluationOptions.map(option => (
-                                            <FormItem key={option.value} className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value={option.value} id={`${category.name}-${option.value}`} />
-                                                </FormControl>
-                                                <Label htmlFor={`${category.name}-${option.value}`} className="font-normal">
-                                                    {option.label}
-                                                </Label>
-                                            </FormItem>
-                                        ))}
-                                    </RadioGroup>
-                                </FormControl>
-                                 {fieldState.error && <p className="text-sm text-destructive mt-2">{fieldState.error.message}</p>}
-                            </FormItem>
-                        )}
-                    />
-                    {index < ratingCategories.length -1 && <Separator className="mt-8" />}
-                </div>
-            ))}
-             <Separator className="mt-8"/>
-             <div>
+              <div key={category.name}>
                 <Controller
-                    name="feedback"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                        <FormItem>
-                             <Label htmlFor="feedback" className="text-base">Comentarios Adicionales</Label>
-                             <CardDescription>Proporciona retroalimentación constructiva sobre el desempeño del docente.</CardDescription>
-                             <FormControl>
-                                <Textarea
-                                    id="feedback"
-                                    placeholder="Escribe tus comentarios aquí..."
-                                    className="mt-2"
-                                    rows={5}
-                                    {...field}
-                                />
-                             </FormControl>
-                              {fieldState.error && <p className="text-sm text-destructive mt-1">{fieldState.error.message}</p>}
-                        </FormItem>
-                    )}
+                  name={category.name}
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <Label className="text-base">{category.label}</Label>
+                      
+                      {fieldState.error && <p className="text-sm text-destructive mt-2">{fieldState.error.message}</p>}
+                    </FormItem>
+                  )}
                 />
+                {index < ratingCategories.length - 1 && <Separator className="mt-8" />}
+              </div>
+            ))}
+            <Separator className="mt-8" />
+            <div>
+              <Controller
+                name="feedback"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <Label htmlFor="feedback" className="text-base">Comentarios Adicionales</Label>
+                    <CardDescription>Proporciona retroalimentación constructiva sobre el desempeño del docente.</CardDescription>
+                    <FormControl>
+                      <Textarea
+                        id="feedback"
+                        placeholder="Escribe tus comentarios aquí..."
+                        className="mt-2"
+                        rows={5}
+                        {...field}
+                      />
+                    </FormControl>
+                    {fieldState.error && <p className="text-sm text-destructive mt-1">{fieldState.error.message}</p>}
+                  </FormItem>
+                )}
+              />
             </div>
           </CardContent>
           <CardFooter>
@@ -245,12 +203,12 @@ export default function StudentEvaluationPage() {
 }
 
 type FormItemProps = {
-    children: React.ReactNode
+  children: React.ReactNode
 }
 function FormItem({ children }: FormItemProps) {
-    return <div className="space-y-2">{children}</div>
+  return <div className="space-y-2">{children}</div>
 }
 
 function FormControl({ children }: FormItemProps) {
-    return <div>{children}</div>
+  return <div>{children}</div>
 }

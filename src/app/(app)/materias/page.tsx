@@ -1,9 +1,9 @@
 
 "use client"
 
-import { useState, useMemo, useEffect, useRef } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Pencil, PlusCircle, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 
 import {
   Card,
@@ -58,7 +58,6 @@ import {
 
 
 export default function SubjectsPage() {
-  const toast = useRef<Toast>(null);
   
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -108,20 +107,12 @@ export default function SubjectsPage() {
     if (!subjectToDelete) return;
     try {
         await deleteSubject(subjectToDelete.id);
-        toast.current?.show({
-            severity: "success",
-            summary: "Materia Eliminada",
-            detail: `La materia ${subjectToDelete.name} ha sido eliminada.`,
-        });
+        toast.success(`La materia ${subjectToDelete.name} ha sido eliminada.`);
         setSubjectToDelete(null);
         fetchSubjects();
     } catch (error) {
         if (error instanceof Error) {
-            toast.current?.show({
-                severity: "error",
-                summary: "Error al eliminar",
-                detail: error.message,
-            });
+            toast.error(error.message);
         }
     }
   };
@@ -144,7 +135,6 @@ export default function SubjectsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle>Gestión de Materias</PageTitle>
          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useRef } from "react"
-import { Toast } from "primereact/toast"
+import toast from 'react-hot-toast'
 
 import { SupervisionProvider, useSupervision } from "@/context/supervision-context"
 import { 
@@ -34,7 +34,6 @@ function transformRubrics(apiRubrics: typeof supervisionRubrics): RubroEvaluacio
 // Inner component that uses the context
 function SupervisionEvaluateContent() {
   const router = useRouter()
-  const toast = useRef<Toast>(null)
   const params = useParams()
   const supervisionId = Number(params.supervisionId)
   
@@ -106,7 +105,6 @@ function SupervisionEvaluateContent() {
 
   return (
     <>
-      <Toast ref={toast} position="top-center" />
       
       {/* Render based on current view */}
       {currentRubro ? (

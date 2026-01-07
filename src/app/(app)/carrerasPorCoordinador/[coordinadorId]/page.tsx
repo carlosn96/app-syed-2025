@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { BookCopy, Search, Plus, X, ChevronRight } from "lucide-react"
-import { Toast } from 'primereact/toast'
+import toast from 'react-hot-toast'
 
 import {
   Card,
@@ -31,7 +31,6 @@ export default function CarrerasPorCoordinadorPage() {
   const router = useRouter();
   const coordinadorId = Number(params.coordinadorId);
 
-  const toast = useRef<Toast>(null);
   const [coordinator, setCoordinator] = useState<Coordinador | null>(null);
   const [assignedCareers, setAssignedCareers] = useState<AssignedCareer[]>([]);
   const [allCareers, setAllCareers] = useState<CareerSummary[]>([]);
@@ -179,7 +178,7 @@ export default function CarrerasPorCoordinadorPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Toast ref={toast} />
+      
       <FloatingBackButton />
       
       <div className="flex flex-col gap-2">

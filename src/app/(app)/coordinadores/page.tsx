@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react"
 import { Pencil, PlusCircle, Trash2, Search, BookCopy, Key, Grid3X3, List } from "lucide-react"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge"
@@ -55,7 +55,6 @@ import {
 } from "@/components/ui/table"
 
 export default function CoordinadoresPage() {
-  const toast = useRef<Toast>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [allCoordinators, setAllCoordinators] = useState<Coordinador[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -120,19 +119,11 @@ export default function CoordinadoresPage() {
   const handleDeleteUser = async (userId: number) => {
     try {
       await deleteUser(userId);
-      toast.current?.show({
-        severity: "success",
-        summary: "Usuario Eliminado",
-        detail: "El coordinador ha sido eliminado correctamente.",
-      });
+      toast.success("El coordinador ha sido eliminado correctamente.");
       fetchCoordinators();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error al eliminar",
-          detail: error.message,
-        });
+        toast.error(error.message);
       }
     }
   };
@@ -140,26 +131,18 @@ export default function CoordinadoresPage() {
   const handleBulkDelete = async (userIds: number[]) => {
     try {
       await Promise.all(userIds.map(id => deleteUser(id)));
-      toast.current?.show({
-        severity: "success",
-        summary: "Usuarios Eliminados",
-        detail: `${userIds.length} coordinador${userIds.length !== 1 ? 'es' : ''} ${userIds.length !== 1 ? 'han' : 'ha'} sido eliminado${userIds.length !== 1 ? 's' : ''} correctamente.`,
-      });
+      toast.success(`${userIds.length} coordinador${userIds.length !== 1 ? 'es' : ''} ${userIds.length !== 1 ? 'han' : 'ha'} sido eliminado${userIds.length !== 1 ? 's' : ''} correctamente.`);
       fetchCoordinators();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error al eliminar",
-          detail: error.message,
-        });
+        toast.error(error.message);
       }
     }
   };
 
   return (
     <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
+      
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle>Gestión de Coordinadores</PageTitle>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>

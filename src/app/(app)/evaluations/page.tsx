@@ -38,7 +38,7 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/context/auth-context"
 import { Pencil, FilePenLine, PlusCircle } from "lucide-react"
 import Link from "next/link"
-import { getEvaluationPeriods, getSchedules, getTeachers } from "@/services/api"
+import { getEvaluationPeriods, getSchedules } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function EvaluationsPage() {
@@ -55,14 +55,12 @@ export default function EvaluationsPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-        const [periodsData, schedulesData, teachersData] = await Promise.all([
+        const [periodsData, schedulesData] = await Promise.all([
             getEvaluationPeriods(),
-            getSchedules(),
-            getTeachers()
+            getSchedules()
         ]);
         setEvaluationPeriods(periodsData.map(p => ({ ...p, startDate: new Date(p.startDate!), endDate: new Date(p.endDate!) })));
         setSchedules(schedulesData);
-        setAllTeachers(teachersData);
     } catch(err: any) {
         setError(err.message || 'Error al cargar los datos');
     } finally {

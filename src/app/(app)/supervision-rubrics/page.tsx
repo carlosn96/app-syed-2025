@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Pencil, Trash2, PlusCircle, MoreVertical } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -48,7 +48,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getSupervisionRubrics, getEvaluationRubrics, deleteCriterion, deleteEvaluationCriterion, deleteEvaluationRubric } from "@/services/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Toast } from "primereact/toast"
+import toast from 'react-hot-toast'
 import { nullable } from "zod"
 
 type RubricType = 'supervision' | 'evaluation';
@@ -73,7 +73,6 @@ function normalizeItems(arr: any[], scope: string) {
 }
 
 export default function SupervisionRubricsPage() {
-  const toast = useRef<Toast>(null);
   const [activeTab, setActiveTab] = useState<RubricType>('supervision');
 
   const [isRubricModalOpen, setIsRubricModalOpen] = useState(false)
@@ -145,19 +144,11 @@ export default function SupervisionRubricsPage() {
       } else {
         await deleteEvaluationCriterion(criterionToDelete.id as number);
       }
-      toast.current?.show({
-        severity: "success",
-        summary: "Criterio Eliminado",
-        detail: `El criterio ha sido eliminado correctamente.`,
-      });
+      toast.success(`El criterio ha sido eliminado correctamente.`);
       fetchRubrics();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error al eliminar",
-          detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
       setCriterionToDelete(null);
@@ -168,19 +159,11 @@ export default function SupervisionRubricsPage() {
     if (!rubricToDelete) return;
     try {
       await deleteEvaluationRubric(rubricToDelete.id);
-      toast.current?.show({
-        severity: "success",
-        summary: "Rúbrica Eliminada",
-        detail: `La rúbrica ha sido eliminada correctamente.`,
-      });
+      toast.success(`La rúbrica ha sido eliminada correctamente.`);
       fetchRubrics();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error al eliminar",
-          detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
       setRubricToDelete(null);
@@ -439,7 +422,6 @@ export default function SupervisionRubricsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle>Gestión de Rúbricas</PageTitle>
       </div>

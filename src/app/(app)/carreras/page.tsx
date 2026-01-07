@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { Pencil, PlusCircle, Trash2 } from "lucide-react"
 import Link from "next/link"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 
 import { CareerSummary } from "@/lib/modelos"
 import { Button } from "@/components/ui/button"
@@ -34,7 +34,6 @@ import { CarrerasList } from "@/components/carreras/carreras-list"
 
 export default function CareersPage() {
   const { user } = useAuth();
-  const toast = useRef<Toast>(null);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -69,7 +68,7 @@ export default function CareersPage() {
   }, []);
 
   const handleSuccess = (message: { summary: string, detail: string }) => {
-    toast.current?.show({ severity: 'success', ...message });
+    toast.success(message.detail);
     setIsCreateModalOpen(false);
     setIsEditModalOpen(false);
     setIsAssignModalOpen(false);
@@ -90,20 +89,12 @@ export default function CareersPage() {
     if (!careerToDelete) return;
     try {
       await deleteCareer(careerToDelete.id);
-      toast.current?.show({
-        severity: "success",
-        summary: "Carrera Eliminada",
-        detail: `La carrera ${careerToDelete.name} ha sido eliminada.`,
-      });
+      toast.success(`La carrera ${careerToDelete.name} ha sido eliminada.`);
       setCareerToDelete(null);
       fetchCareers();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error al eliminar",
-          detail: error.message,
-        });
+        toast.error(error.message);
       }
     }
   };
@@ -111,26 +102,18 @@ export default function CareersPage() {
   const handleBulkDelete = async (careerIds: number[]) => {
     try {
       await Promise.all(careerIds.map(id => deleteCareer(id)));
-      toast.current?.show({
-        severity: "success",
-        summary: "Carreras Eliminadas",
-        detail: `${careerIds.length} carrera${careerIds.length !== 1 ? 's' : ''} ${careerIds.length !== 1 ? 'han' : 'ha'} sido eliminada${careerIds.length !== 1 ? 's' : ''} correctamente.`,
-      });
+      toast.success(`${careerIds.length} carrera${careerIds.length !== 1 ? 's' : ''} ${careerIds.length !== 1 ? 'han' : 'ha'} sido eliminada${careerIds.length !== 1 ? 's' : ''} correctamente.`);
       fetchCareers();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error al eliminar",
-          detail: error.message,
-        });
+        toast.error(error.message);
       }
     }
   };
 
   return (
     <div className="flex flex-col gap-8">
-      <Toast ref={toast} />
+      
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
           Carreras

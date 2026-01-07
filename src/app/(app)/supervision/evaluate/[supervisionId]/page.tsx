@@ -2,7 +2,7 @@
 "use client"
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
@@ -80,7 +80,6 @@ const createValidationSchema = (rubrics: SupervisionRubric[]) => {
 export default function EvaluateSupervisionPage() {
     const params = useParams()
     const router = useRouter()
-    const toast = useRef<Toast>(null);
     const supervisionId = Number(params.supervisionId)
     const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
 
@@ -173,11 +172,7 @@ export default function EvaluateSupervisionPage() {
 
         console.log("Evaluación completada. Datos:", data, "Calificación:", calculatedScores.final);
         
-        toast.current?.show({
-            severity: "success",
-            summary: "Supervisión Completada",
-            detail: `La evaluación para ${supervision.teacher} ha sido guardada con una calificación de ${calculatedScores.final}%.`,
-        });
+        toast.success(`La evaluación para ${supervision.teacher} ha sido guardada con una calificación de ${calculatedScores.final}%.`);
 
         router.push('/supervisions-management');
     }
@@ -337,7 +332,6 @@ export default function EvaluateSupervisionPage() {
     
     return (
         <div className="flex flex-col gap-8">
-            <Toast ref={toast} />
             <FloatingBackButton />
              <form onSubmit={handleSubmit(onSubmit)}>
                 <Card className="rounded-xl">
