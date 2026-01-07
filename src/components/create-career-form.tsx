@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { createCareer } from "@/services/api"
-import { useState, useRef } from "react"
+import { useState } from "react"
 
 const createCareerSchema = z.object({
   nombre: z.string().min(1, "El nombre de la carrera es requerido."),
@@ -29,7 +29,6 @@ interface CreateCareerFormProps {
 }
 
 export function CreateCareerForm({ onSuccess }: CreateCareerFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateCareerFormValues>({
@@ -43,19 +42,15 @@ export function CreateCareerForm({ onSuccess }: CreateCareerFormProps) {
     setIsSubmitting(true);
     try {
       await createCareer({ nombre: data.nombre });
-      
+      toast.success(`La carrera ${data.nombre} ha sido creada.`);
       onSuccess?.({
         summary: "Carrera Creada",
         detail: `La carrera ${data.nombre} ha sido creada.`,
       });
       form.reset();
     } catch (error) {
-      if (error instanceof Error && toast.current) {
-        toast.current.show({
-            severity: "error",
-            summary: "Error al crear",
-            detail: error.message,
-        });
+      if (error instanceof Error) {
+        toast.error(error.message);
       }
     } finally {
         setIsSubmitting(false);
@@ -64,7 +59,6 @@ export function CreateCareerForm({ onSuccess }: CreateCareerFormProps) {
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

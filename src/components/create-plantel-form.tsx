@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { createPlantel } from "@/services/api"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { Plantel } from "@/lib/modelos"
 
 const createPlantelSchema = z.object({
@@ -31,7 +31,6 @@ interface CreatePlantelFormProps {
 }
 
 export function CreatePlantelForm({ onSuccess }: CreatePlantelFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreatePlantelFormValues>({
@@ -46,18 +45,15 @@ export function CreatePlantelForm({ onSuccess }: CreatePlantelFormProps) {
     setIsSubmitting(true);
     try {
       await createPlantel(data);
+      toast.success(`El plantel ${data.nombre} ha sido creado con éxito.`);
       onSuccess?.({
         summary: "Plantel Creado",
         detail: `El plantel ${data.nombre} ha sido creado con éxito.`,
       });
       form.reset();
     } catch (error) {
-      if (error instanceof Error && toast.current) {
-        toast.current.show({
-            severity: "error",
-            summary: "Error al crear plantel",
-            detail: error.message,
-        });
+      if (error instanceof Error) {
+        toast.error(error.message);
       }
     } finally {
       setIsSubmitting(false);
@@ -66,7 +62,6 @@ export function CreatePlantelForm({ onSuccess }: CreatePlantelFormProps) {
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

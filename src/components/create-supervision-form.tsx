@@ -7,7 +7,7 @@ import { z } from "zod"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { es } from "date-fns/locale"
-import React, { useState, useEffect, useMemo, useRef } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 
 import {
   Form,
@@ -25,14 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { Teacher, User, Career, Group, Schedule } from "@/lib/modelos"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useAuth } from "@/context/auth-context"
 import { Input } from "@/components/ui/input"
-import { getCareers, getSchedules, getUsers, getTeachers, getGroups, createSupervision } from "@/services/api"
+import { getCareers, getSchedules, getUsers, getGroups, createSupervision } from "@/services/api"
 
 const createSupervisionSchema = z.object({
   coordinatorId: z.string().min(1, "Por favor, seleccione un coordinador."),
@@ -59,7 +59,6 @@ const timeOptions = Array.from({ length: 15 }, (_, i) => {
 
 
 export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps) {
-  const toast = useRef<Toast>(null);
   const { user } = useAuth();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,17 +76,13 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
 
   useEffect(() => {
     const fetchData = async () => {
-        const [users, careers, schedules, teachers, groups] = await Promise.all([
+        const [users, schedules, groups] = await Promise.all([
             getUsers(),
-            getCareers(),
             getSchedules(),
-            getTeachers(),
             getGroups()
         ]);
         setAllUsers(users);
-        setAllCareers(careers);
         setAllSchedules(schedules);
-        setAllTeachers(teachers);
         setAllGroups(groups);
     }
     fetchData();
@@ -104,21 +99,14 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
         
         const teacherIdsInCoordinatedCareers = new Set<number>();
         
-        allGroups.forEach(group => {
-            if (coordinatedCareers.includes(group.career)) {
-                allSchedules.filter(s => s.groupId === group.id).forEach(schedule => {
-                    teacherIdsInCoordinatedCareers.add(schedule.teacherId);
-                });
-            }
-        });
 
         availableTeachers = allTeachers.filter(t => teacherIdsInCoordinatedCareers.has(t.id));
 
         availableTeachers.forEach(teacher => {
             const teacherSchedules = allSchedules.filter(s => s.teacherId === teacher.id);
             const teacherGroupIds = [...new Set(teacherSchedules.map(s => s.groupId))];
-            const teacherGroups = allGroups.filter(g => teacherGroupIds.includes(g.id));
-            const teacherCareerName = teacherGroups.length > 0 ? teacherGroups[0].career : "N/A";
+            const teacherGroups = allGroups.filter(g => teacherGroupIds.includes(g.id_grupo));
+            const teacherCareerName = "N/A";
             teacherCareers[String(teacher.id)] = teacherCareerName;
         });
     }
@@ -177,20 +165,12 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
 
     try {
       await createSupervision(submissionData);
-      toast.current?.show({
-        severity: "success",
-        summary: "Cita Agendada",
-        detail: `La supervisión para el ${format(data.date, "PPP", { locale: es })} ha sido agendada.`,
-      });
+      toast.success(`La supervisión para el ${format(data.date, "PPP", { locale: es })} ha sido agendada.`);
       form.reset({ coordinatorId: defaultCoordinator, teacherId: "", careerName: "", date: undefined, startTime: "", endTime: "" });
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al agendar",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
         setIsSubmitting(false);
@@ -199,7 +179,6 @@ export function CreateSupervisionForm({ onSuccess }: CreateSupervisionFormProps)
 
   return (
     <>
-    <Toast ref={toast} />
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {user?.rol !== 'coordinador' && (

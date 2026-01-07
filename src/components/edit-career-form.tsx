@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { updateCareer } from "@/services/api"
 import { useState, useRef } from "react"
 import { CareerSummary } from "@/lib/modelos"
@@ -31,7 +31,6 @@ interface EditCareerFormProps {
 }
 
 export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<EditCareerFormValues>({
@@ -51,11 +50,7 @@ export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
       });
     } catch (error) {
       if (error instanceof Error && toast.current) {
-        toast.current.show({
-            severity: "error",
-            summary: "Error al actualizar",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
       setIsSubmitting(false);
@@ -63,29 +58,26 @@ export function EditCareerForm({ career, onSuccess }: EditCareerFormProps) {
   };
 
   return (
-    <>
-      <Toast ref={toast} />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre de la Carrera</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ej. Ingeniería en Software" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-          </Button>
-        </form>
-      </Form>
-    </>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre de la Carrera</FormLabel>
+              <FormControl>
+                <Input placeholder="Ej. Ingeniería en Software" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+        </Button>
+      </form>
+    </Form>
   )
 }
 

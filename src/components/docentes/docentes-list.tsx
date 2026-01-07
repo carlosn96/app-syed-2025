@@ -48,6 +48,7 @@ interface DocentesListProps {
   viewMode?: 'gallery' | 'list'
   onViewModeChange?: (mode: 'gallery' | 'list') => void
   onBulkDelete?: (docentes: Docente[]) => void
+  isCoordinator?: boolean
 }
 
 export function DocentesList({
@@ -62,9 +63,12 @@ export function DocentesList({
   showProfile = false,
   viewMode = 'gallery',
   onViewModeChange,
-  onBulkDelete
+  onBulkDelete,
+  isCoordinator = false
 }: DocentesListProps) {
   const [selectedDocentes, setSelectedDocentes] = useState<Set<number>>(new Set())
+
+  const showBulkActions = !!onBulkDelete
 
   const filteredDocentes = useMemo(() => {
     if (!searchTerm) {
@@ -108,12 +112,14 @@ export function DocentesList({
 
   const renderTableRow = (docente: Docente) => (
     <TableRow key={docente.id_docente}>
-      <TableCell>
-        <Checkbox
-          checked={selectedDocentes.has(docente.id_docente)}
-          onCheckedChange={(checked) => handleSelectDocente(docente.id_docente, checked as boolean)}
-        />
-      </TableCell>
+      {showBulkActions && (
+        <TableCell>
+          <Checkbox
+            checked={selectedDocentes.has(docente.id_docente)}
+            onCheckedChange={(checked) => handleSelectDocente(docente.id_docente, checked as boolean)}
+          />
+        </TableCell>
+      )}
       <TableCell className="font-medium">{docente.nombre_completo}</TableCell>
       <TableCell>{docente.correo}</TableCell>
       <TableCell>{docente.grado_academico}</TableCell>
@@ -141,21 +147,23 @@ export function DocentesList({
             <AlertDialogTrigger asChild>
               <Button size="sm" variant="destructive">
                 <Trash2 className="h-4 w-4 mr-1" />
-                Eliminar
+                {isCoordinator ? "Solicitar Eliminación" : "Eliminar"}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                <AlertDialogTitle>{isCoordinator ? "¿Enviar solicitud de eliminación?" : "¿Eliminar docente?"}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario
-                  <span className="font-bold text-white"> {docente.nombre_completo}</span>.
+                  {isCoordinator 
+                    ? `Esto enviará una solicitud de eliminación del docente ${docente.nombre_completo} al administrador.`
+                    : `Esto eliminará permanentemente al docente ${docente.nombre_completo}.`
+                  }
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
                 <AlertDialogAction onClick={() => onDelete(docente)}>
-                  Confirmar
+                  {isCoordinator ? "Enviar Solicitud" : "Eliminar"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -197,7 +205,7 @@ export function DocentesList({
 
   const renderSkeletonTableRow = (index: number) => (
     <TableRow key={index}>
-      <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+      {showBulkActions && <TableCell><Skeleton className="h-4 w-4" /></TableCell>}
       <TableCell><Skeleton className="h-4 w-32" /></TableCell>
       <TableCell><Skeleton className="h-4 w-40" /></TableCell>
       <TableCell><Skeleton className="h-4 w-28" /></TableCell>
@@ -265,7 +273,7 @@ export function DocentesList({
         </div>
       ) : (
         <>
-          {selectedDocentes.size > 0 && (
+          {selectedDocentes.size > 0 && showBulkActions && (
             <div className="flex items-center gap-4 mb-4 p-4 bg-muted rounded-lg">
               <span className="text-sm font-medium">
                 {selectedDocentes.size} docente{selectedDocentes.size !== 1 ? 's' : ''} seleccionado{selectedDocentes.size !== 1 ? 's' : ''}
@@ -297,12 +305,14 @@ export function DocentesList({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={isAllSelected}
-                    onCheckedChange={handleSelectAll}
-                  />
-                </TableHead>
+                {showBulkActions && (
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={isAllSelected}
+                      onCheckedChange={handleSelectAll}
+                    />
+                  </TableHead>
+                )}
                 <TableHead>Nombre Completo</TableHead>
                 <TableHead>Correo</TableHead>
                 <TableHead>Grado Académico</TableHead>

@@ -19,15 +19,15 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Checkbox } from "./ui/checkbox"
 import { ScrollArea } from "./ui/scroll-area"
 import { getCareers, createEvaluationPeriod } from "@/services/api"
-import { Career } from "@/lib/modelos"
+import { CareerSummary } from "@/lib/modelos"
 
 const evaluationPeriodSchema = z.object({
   name: z.string().min(1, "El nombre del periodo es requerido."),
@@ -53,9 +53,8 @@ export function CreateEvaluationPeriodForm({
 }: {
   onSuccess?: () => void
 }) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [careers, setCareers] = useState<Career[]>([]);
+  const [careers, setCareers] = useState<CareerSummary[]>([]);
   
   const uniqueCareerNames = useMemo(() => [...new Set(careers.map(item => item.name))], [careers]);
 
@@ -90,20 +89,12 @@ export function CreateEvaluationPeriodForm({
     setIsSubmitting(true);
     try {
         await createEvaluationPeriod(data);
-        toast.current?.show({
-            severity: "success",
-            summary: "Periodo de Evaluación Creado",
-            detail: `El periodo "${data.name}" ha sido agendado.`,
-        });
+        toast.success(`El periodo "${data.name}" ha sido agendado.`);
         form.reset();
         onSuccess?.();
     } catch (error) {
          if (error instanceof Error) {
-            toast.current?.show({
-                severity: "error",
-                summary: "Error al crear",
-                detail: error.message,
-            });
+            toast.error(error.message);
         }
     } finally {
         setIsSubmitting(false);
@@ -112,7 +103,6 @@ export function CreateEvaluationPeriodForm({
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

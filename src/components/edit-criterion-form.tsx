@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { updateCriterion, updateEvaluationCriterion } from "@/services/api"
 import { SupervisionCriterion, EvaluationCriterion } from "@/lib/modelos"
-import { useRef, useState } from "react"
+import { useState } from "react"
 
 const editCriterionSchema = z.object({
   text: z.string().min(1, "El texto del criterio es requerido."),
@@ -32,7 +32,6 @@ interface EditCriterionFormProps {
 }
 
 export function EditCriterionForm({ criterion, rubricType, onSuccess }: EditCriterionFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<EditCriterionFormValues>({
@@ -44,7 +43,7 @@ export function EditCriterionForm({ criterion, rubricType, onSuccess }: EditCrit
 
   const onSubmit = async (data: EditCriterionFormValues) => {
     if (!criterion) {
-        toast.current?.show({ severity: "error", summary: "Error", detail: "Datos del criterio incompletos." });
+        toast.error("Datos del criterio incompletos.");
         return;
     }
     setIsSubmitting(true);
@@ -55,19 +54,11 @@ export function EditCriterionForm({ criterion, rubricType, onSuccess }: EditCrit
         } else {
             await updateEvaluationCriterion(criterion.id as number, { descripcion: data.text });
         }
-      toast.current?.show({
-        severity: "success",
-        summary: "Criterio Actualizado",
-        detail: `El criterio ha sido actualizado correctamente.`,
-      });
+      toast.success("El criterio ha sido actualizado correctamente.");
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al actualizar",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
         setIsSubmitting(false);
@@ -75,28 +66,25 @@ export function EditCriterionForm({ criterion, rubricType, onSuccess }: EditCrit
   };
 
   return (
-    <>
-      <Toast ref={toast} />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="text"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Texto del Criterio</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Ej. El docente utiliza ejemplos relevantes..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-          </Button>
-        </form>
-      </Form>
-    </>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="text"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Texto del Criterio</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Ej. El docente utiliza ejemplos relevantes..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+        </Button>
+      </form>
+    </Form>
   )
 }

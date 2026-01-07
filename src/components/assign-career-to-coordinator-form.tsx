@@ -20,9 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { assignCarreraToCoordinador, getCoordinadores, removeCarreraFromCoordinador } from "@/services/api"
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { CareerSummary, Coordinador } from "@/lib/modelos"
 import { Loader, Trash2 } from "lucide-react"
 
@@ -38,7 +38,6 @@ interface AssignCareerToCoordinatorFormProps {
 }
 
 export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCareerToCoordinatorFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coordinators, setCoordinators] = useState<Coordinador[]>([]);
   const [isLoadingCoordinators, setIsLoadingCoordinators] = useState(true);
@@ -84,29 +83,22 @@ export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCaree
 
     const currentCoordinator = coordinators.find(c => c.nombre_completo === career.coordinator);
     if (!currentCoordinator) {
-      toast.current?.show({
-        severity: "warn",
-        summary: "No se puede remover",
-        detail: "No se pudo encontrar el coordinador asignado actualmente.",
-      });
+      toast("No se pudo encontrar el coordinador asignado actualmente.");
       return;
     }
 
     setIsRemoving(true);
     try {
       await removeCarreraFromCoordinador({ id_coordinador: currentCoordinator.id_coordinador, id_carrera: career.id });
+      toast.success(`Se ha removido la asignación de ${currentCoordinator.nombre_completo} de ${career.name}.`);
       onSuccess?.({
         summary: "Coordinador Removido",
         detail: `Se ha removido la asignación de ${currentCoordinator.nombre_completo} de ${career.name}.`,
       });
       form.reset({ id_coordinador: undefined });
     } catch (error) {
-      if (error instanceof Error && toast.current) {
-        toast.current.show({
-          severity: "error",
-          summary: "Error al remover",
-          detail: error.message,
-        });
+      if (error instanceof Error) {
+        toast.error(error.message);
       }
     } finally {
       setIsRemoving(false);
@@ -118,17 +110,14 @@ export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCaree
     try {
       await assignCarreraToCoordinador({ id_coordinador: data.id_coordinador, id_carrera: career.id });
       const coordinatorName = coordinators.find(c => c.id_coordinador === data.id_coordinador)?.nombre_completo || '';
+      toast.success(`${coordinatorName} ha sido asignado a ${career.name}.`);
       onSuccess?.({
         summary: "Coordinador Asignado",
         detail: `${coordinatorName} ha sido asignado a ${career.name}.`,
       });
     } catch (error) {
-      if (error instanceof Error && toast.current) {
-        toast.current.show({
-            severity: "error",
-            summary: "Error al asignar",
-            detail: error.message,
-        });
+      if (error instanceof Error) {
+        toast.error(error.message);
       }
     } finally {
       setIsSubmitting(false);
@@ -137,7 +126,6 @@ export function AssignCareerToCoordinatorForm({ career, onSuccess }: AssignCaree
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

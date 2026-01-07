@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { PageTitle } from "@/components/layout/page-title";
 import { User, Schedule, Evaluation, Supervision, Subject, Teacher } from '@/lib/modelos';
-import { getSchedules, getEvaluations, getSupervisions, getSubjects, getTeachers } from '@/services/api';
+import { getSchedules, getEvaluations, getSupervisions, getSubjects } from '@/services/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { EmptyState } from './empty-state';
 import { DashboardCard, CardSkeleton } from './dashboard-card';

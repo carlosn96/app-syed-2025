@@ -20,9 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Toast } from 'primereact/toast'
+import toast from 'react-hot-toast'
 import { createCicloEscolar, getPeriodos } from "@/services/api"
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Periodo } from "@/lib/modelos"
 
 const createCicloEscolarSchema = z.object({
@@ -40,7 +40,6 @@ interface CreateCicloEscolarFormProps {
 }
 
 export function CreateCicloEscolarForm({ onSuccess }: CreateCicloEscolarFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [periodos, setPeriodos] = useState<Periodo[]>([]);
   const [isLoadingPeriodos, setIsLoadingPeriodos] = useState(true);
@@ -79,18 +78,15 @@ export function CreateCicloEscolarForm({ onSuccess }: CreateCicloEscolarFormProp
     try {
       await createCicloEscolar(data);
       const periodo = periodos.find(p => p.id === data.id_cat_periodo);
+      toast.success(`El ciclo escolar ${data.anio}-${periodo?.nombre || ''} ha sido creado con éxito.`);
       onSuccess?.({
         summary: "Ciclo Escolar Creado",
         detail: `El ciclo escolar ${data.anio}-${periodo?.nombre || ''} ha sido creado con éxito.`,
       });
       form.reset();
     } catch (error) {
-      if (error instanceof Error && toast.current) {
-        toast.current.show({
-            severity: "error",
-            summary: "Error al crear ciclo escolar",
-            detail: error.message,
-        });
+      if (error instanceof Error) {
+        toast.error(error.message);
       }
     } finally {
       setIsSubmitting(false);
@@ -99,7 +95,6 @@ export function CreateCicloEscolarForm({ onSuccess }: CreateCicloEscolarFormProp
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

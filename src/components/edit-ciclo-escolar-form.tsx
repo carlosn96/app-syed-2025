@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Toast } from 'primereact/toast'
+import toast from 'react-hot-toast';
 import { updateCicloEscolar, getPeriodos } from "@/services/api"
 import { useState, useRef, useEffect } from "react"
 import { CicloEscolar, Periodo } from "@/lib/modelos"
@@ -41,7 +41,6 @@ interface EditCicloEscolarFormProps {
 }
 
 export function EditCicloEscolarForm({ ciclo, onSuccess }: EditCicloEscolarFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [periodos, setPeriodos] = useState<Periodo[]>([]);
   const [isLoadingPeriodos, setIsLoadingPeriodos] = useState(true);
@@ -62,11 +61,7 @@ export function EditCicloEscolarForm({ ciclo, onSuccess }: EditCicloEscolarFormP
         setPeriodos(data);
       } catch (error) {
         if (error instanceof Error) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.message,
-          });
+          toast.error(error.message);
         }
       } finally {
         setIsLoadingPeriodos(false);
@@ -93,11 +88,7 @@ export function EditCicloEscolarForm({ ciclo, onSuccess }: EditCicloEscolarFormP
       });
     } catch (error) {
       if (error instanceof Error && toast.current) {
-        toast.current.show({
-            severity: "error",
-            summary: "Error al actualizar ciclo escolar",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
       setIsSubmitting(false);
@@ -105,64 +96,61 @@ export function EditCicloEscolarForm({ ciclo, onSuccess }: EditCicloEscolarFormP
   };
 
   return (
-    <>
-      <Toast ref={toast} />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="anio"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Año</FormLabel>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="anio"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Año</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  placeholder="Ej. 2024" 
+                  {...field}
+                  min="2000"
+                  max="2100"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="id_cat_periodo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Periodo</FormLabel>
+              <Select 
+                onValueChange={field.onChange} 
+                value={field.value?.toString()}
+                disabled={isLoadingPeriodos}
+              >
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="Ej. 2024" 
-                    {...field}
-                    min="2000"
-                    max="2100"
-                  />
+                  <SelectTrigger>
+                    <SelectValue placeholder={isLoadingPeriodos ? "Cargando..." : "Selecciona un periodo"} />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="id_cat_periodo"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Periodo</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
-                  value={field.value?.toString()}
-                  disabled={isLoadingPeriodos}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingPeriodos ? "Cargando..." : "Selecciona un periodo"} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {periodos.map((periodo) => (
-                      <SelectItem key={periodo.id} value={periodo.id.toString()}>
-                        {periodo.nombre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex justify-end gap-2">
-            <Button type="submit" disabled={isSubmitting || isLoadingPeriodos}>
-              {isSubmitting ? "Actualizando..." : "Actualizar Ciclo Escolar"}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </>
+                <SelectContent>
+                  {periodos.map((periodo) => (
+                    <SelectItem key={periodo.id} value={periodo.id.toString()}>
+                      {periodo.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex justify-end gap-2">
+          <Button type="submit" disabled={isSubmitting || isLoadingPeriodos}>
+            {isSubmitting ? "Actualizando..." : "Actualizar Ciclo Escolar"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

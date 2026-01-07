@@ -1,12 +1,12 @@
 
 "use client"
 
-import { useState, useEffect, useMemo, useRef, FormEvent } from 'react';
+import { useState, useEffect, useMemo, FormEvent } from 'react';
 import { CalendarClock, BookUser, ArrowRight } from 'lucide-react';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { User, Schedule, EvaluationPeriod, Teacher, Group } from '@/lib/modelos';
-import { getSchedules, getEvaluationPeriods, getSubjects, getTeachers, getGroups } from '@/services/api';
+import { getSchedules, getEvaluationPeriods, getSubjects, getGroups } from '@/services/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { EmptyState } from './empty-state';
 import { Badge } from '../ui/badge';
@@ -16,7 +16,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { PageTitle } from "@/components/layout/page-title";
 import { useAuth } from '@/context/auth-context';
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 
 interface StudentDashboardProps {
   user: User;
@@ -25,7 +25,6 @@ interface StudentDashboardProps {
 function JoinGroupForm({ onGroupJoined }: { onGroupJoined: (groupName: string) => void }) {
     const [code, setCode] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const toast = useRef<Toast>(null);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -35,19 +34,11 @@ function JoinGroupForm({ onGroupJoined }: { onGroupJoined: (groupName: string) =
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         if (code) {
-             toast.current?.show({
-                severity: "success",
-                summary: "¡Te has unido al grupo!",
-                detail: "Ahora puedes ver tu horario y evaluaciones.",
-            });
+             toast.success("Ahora puedes ver tu horario y evaluaciones.");
             // Simulate joining a group. In a real app, the API would return the group.
             onGroupJoined("COMPINCO2024A"); 
         } else {
-             toast.current?.show({
-                severity: "error",
-                summary: "Código Inválido",
-                detail: "Por favor, ingresa un código de grupo válido.",
-            });
+             toast.error("Por favor, ingresa un código de grupo válido.");
         }
 
         setIsLoading(false);
@@ -55,7 +46,6 @@ function JoinGroupForm({ onGroupJoined }: { onGroupJoined: (groupName: string) =
 
     return (
         <>
-            <Toast ref={toast} />
             <Card className="rounded-xl max-w-md mx-auto">
                  <form onSubmit={handleSubmit}>
                     <CardHeader>
@@ -102,16 +92,14 @@ export function StudentDashboard({ user: initialUser }: StudentDashboardProps) {
       if (user?.grupo) {
         try {
           setIsLoading(true);
-          const [schedulesData, periodsData, subjectsData, teachersData] = await Promise.all([
+          const [schedulesData, periodsData, subjectsData] = await Promise.all([
             getSchedules(),
             getEvaluationPeriods(),
             getSubjects(),
-            getTeachers(),
           ]);
           setSchedules(schedulesData);
           setEvaluationPeriods(periodsData);
           setSubjects(subjectsData);
-          setTeachers(teachersData);
         } catch (error) {
           console.error("Error fetching student dashboard data:", error);
         } finally {
@@ -233,5 +221,3 @@ export function StudentDashboard({ user: initialUser }: StudentDashboardProps) {
     </div>
   );
 }
-
-    

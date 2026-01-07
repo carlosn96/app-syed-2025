@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast'
+import toast from 'react-hot-toast'
 import { createPeriodo } from "@/services/api"
-import { useState, useRef } from "react"
+import { useState } from "react"
 
 const createPeriodoSchema = z.object({
   nombre: z.string().min(1, "El nombre del periodo es requerido.").max(10, "El nombre es muy largo"),
@@ -28,7 +28,6 @@ interface CreatePeriodoFormProps {
 }
 
 export function CreatePeriodoForm({ onSuccess }: CreatePeriodoFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreatePeriodoFormValues>({
@@ -42,18 +41,15 @@ export function CreatePeriodoForm({ onSuccess }: CreatePeriodoFormProps) {
     setIsSubmitting(true);
     try {
       await createPeriodo(data);
+      toast.success(`El periodo ${data.nombre} ha sido creado con éxito.`);
       onSuccess?.({
         summary: "Periodo Creado",
         detail: `El periodo ${data.nombre} ha sido creado con éxito.`,
       });
       form.reset();
     } catch (error) {
-      if (error instanceof Error && toast.current) {
-        toast.current.show({
-            severity: "error",
-            summary: "Error al crear periodo",
-            detail: error.message,
-        });
+      if (error instanceof Error) {
+        toast.error(error.message);
       }
     } finally {
       setIsSubmitting(false);
@@ -62,7 +58,6 @@ export function CreatePeriodoForm({ onSuccess }: CreatePeriodoFormProps) {
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

@@ -21,8 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Toast } from 'primereact/toast';
-import { useRef, useState } from "react"
+import toast from 'react-hot-toast';
+import { useState } from "react"
 import { createRubric, createEvaluationRubric } from "@/services/api"
 
 const createRubricSchema = z.object({
@@ -38,7 +38,6 @@ interface CreateRubricFormProps {
 }
 
 export function CreateRubricForm({ rubricType, onSuccess }: CreateRubricFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateRubricFormValues>({
@@ -62,20 +61,12 @@ export function CreateRubricForm({ rubricType, onSuccess }: CreateRubricFormProp
         await createEvaluationRubric({ nombre: data.title });
       }
       
-      toast.current?.show({
-        severity: "success",
-        summary: "Rúbrica Creada",
-        detail: `La rúbrica "${data.title}" ha sido creada con éxito.`,
-      });
+      toast.success(`La rúbrica "${data.title}" ha sido creada con éxito.`);
       form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al crear la rúbrica",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
         setIsSubmitting(false);
@@ -84,7 +75,6 @@ export function CreateRubricForm({ rubricType, onSuccess }: CreateRubricFormProp
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

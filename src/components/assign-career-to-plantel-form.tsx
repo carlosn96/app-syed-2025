@@ -20,9 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { assignCarreraToPlantel } from "@/services/api"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { CareerSummary } from "@/lib/modelos"
 
 const assignCareerSchema = z.object({
@@ -38,7 +38,6 @@ interface AssignCareerToPlantelFormProps {
 }
 
 export function AssignCareerToPlantelForm({ plantelId, availableCareers, onSuccess }: AssignCareerToPlantelFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<AssignCareerFormValues>({
@@ -50,6 +49,7 @@ export function AssignCareerToPlantelForm({ plantelId, availableCareers, onSucce
     try {
       await assignCarreraToPlantel({ id_plantel: plantelId, id_carrera: data.id_carrera });
       const careerName = availableCareers.find(c => c.id === data.id_carrera)?.name || '';
+      toast.success(`La carrera ${careerName} ha sido asignada con éxito.`);
       onSuccess?.({
         summary: "Carrera Asignada",
         detail: `La carrera ${careerName} ha sido asignada con éxito.`,
@@ -57,11 +57,7 @@ export function AssignCareerToPlantelForm({ plantelId, availableCareers, onSucce
       form.reset();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al asignar",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
       setIsSubmitting(false);
@@ -70,7 +66,6 @@ export function AssignCareerToPlantelForm({ plantelId, availableCareers, onSucce
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

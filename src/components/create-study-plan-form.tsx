@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { createStudyPlan } from "@/services/api" // Assuming a similar function for study plans
-import { useState, useRef } from "react"
+import { useState } from "react"
 
 const createStudyPlanSchema = z.object({
   modality: z.string().min(1, "El nombre de la modalidad es requerido."),
@@ -34,7 +34,6 @@ interface CreateStudyPlanFormProps {
 
 
 export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator }: CreateStudyPlanFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateStudyPlanFormValues>({
@@ -48,11 +47,7 @@ export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator
   const onSubmit = async (data: CreateStudyPlanFormValues) => {
     setIsSubmitting(true);
     if (!campus || !coordinator) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: "No se pudo determinar el plantel o coordinador para este plan.",
-        });
+        toast.error("No se pudo determinar el plantel o coordinador para este plan.");
         setIsSubmitting(false);
         return;
     }
@@ -64,20 +59,12 @@ export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator
     };
     try {
       await createStudyPlan(newPlanData); 
-      toast.current?.show({
-        severity: "success",
-        summary: "Plan de Estudio Creado",
-        detail: `La modalidad ${data.modality} ha sido creada para ${careerName}.`,
-      });
+      toast.success(`La modalidad ${data.modality} ha sido creada para ${careerName}.`);
       form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al crear",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
         setIsSubmitting(false);
@@ -86,7 +73,6 @@ export function CreateStudyPlanForm({ onSuccess, careerName, campus, coordinator
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

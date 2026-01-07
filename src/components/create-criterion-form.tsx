@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { createCriterion, createEvaluationCriterion } from "@/services/api"
 import { SupervisionRubric, EvaluationRubric } from "@/lib/modelos"
-import { useRef, useState } from "react"
+import { useState } from "react"
 
 const createCriterionSchema = z.object({
   text: z.string().min(1, "El texto del criterio es requerido."),
@@ -32,7 +32,6 @@ interface CreateCriterionFormProps {
 }
 
 export function CreateCriterionForm({ rubric, rubricType, onSuccess }: CreateCriterionFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateCriterionFormValues>({
@@ -44,11 +43,7 @@ export function CreateCriterionForm({ rubric, rubricType, onSuccess }: CreateCri
 
   const onSubmit = async (data: CreateCriterionFormValues) => {
     if (!rubric) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: "No se ha seleccionado una rúbrica.",
-        });
+        toast.error("No se ha seleccionado una rúbrica.");
         return;
     }
     setIsSubmitting(true);
@@ -60,20 +55,12 @@ export function CreateCriterionForm({ rubric, rubricType, onSuccess }: CreateCri
         await createEvaluationCriterion({ descripcion: data.text, id_rubro: rubric.id });
       }
 
-      toast.current?.show({
-        severity: "success",
-        summary: "Criterio Añadido",
-        detail: `El criterio ha sido añadido a la rúbrica con éxito.`,
-      });
+      toast.success(`El criterio ha sido añadido a la rúbrica con éxito.`);
       form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al añadir criterio",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
       setIsSubmitting(false);
@@ -82,7 +69,6 @@ export function CreateCriterionForm({ rubric, rubricType, onSuccess }: CreateCri
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

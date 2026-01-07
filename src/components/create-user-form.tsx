@@ -22,8 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useAuth } from "@/context/auth-context"
-import { Toast } from 'primereact/toast';
-import { useMemo, useState, useEffect, useRef } from "react"
+import toast from 'react-hot-toast'
+import { useMemo, useState, useEffect } from "react"
 import { CareerSummary } from "@/lib/modelos"
 import { createUser, getCareers, getCarrerasForCoordinador } from "@/services/api"
 import { Roles } from "@/lib/modelos";
@@ -69,7 +69,6 @@ interface CreateUserFormProps {
 
 export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) {
   const { user: loggedInUser } = useAuth();
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [careers, setCareers] = useState<CareerSummary[]>([]);
   const [selectedRole, setSelectedRole] = useState<Role>(defaultRole || "docente");
@@ -86,11 +85,7 @@ export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) 
             setCareers(careersData);
         } catch (error) {
             console.error("Failed to fetch careers", error);
-            toast.current?.show({
-                severity: "error",
-                summary: "Error al cargar carreras",
-                detail: "No se pudieron obtener las carreras para el formulario."
-            })
+            toast.error("No se pudieron obtener las carreras para el formulario.")
         }
     };
     if (selectedRole === 'alumno') {
@@ -166,20 +161,12 @@ export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) 
       }
       
       await createUser(dataToSend, { basePath: endpoint });
-      toast.current?.show({
-        severity: "success",
-        summary: "Usuario Creado",
-        detail: `El usuario ${data.nombre} ha sido creado con éxito.`,
-      });
+      toast.success(`El usuario ${data.nombre} ha sido creado con éxito.`);
       form.reset();
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Error al crear usuario",
-            detail: error.message,
-        });
+        toast.error(error.message);
       }
     } finally {
         setIsSubmitting(false);
@@ -188,7 +175,6 @@ export function CreateUserForm({ onSuccess, defaultRole }: CreateUserFormProps) 
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {!defaultRole && (

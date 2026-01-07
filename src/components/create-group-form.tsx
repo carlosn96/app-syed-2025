@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Toast } from 'primereact/toast';
+import toast from 'react-hot-toast';
 import { 
   createGroup, 
   getCarrerasForCoordinador, 
@@ -23,7 +23,7 @@ import {
   getTurnosCoordinador,
   getNivelesCoordinador
 } from "@/services/api"
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import {
   Select,
   SelectContent,
@@ -49,7 +49,6 @@ interface CreateGroupFormProps {
 }
 
 export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
-  const toast = useRef<Toast>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // State for data
@@ -88,11 +87,7 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
         setNiveles(nivelesData);
       } catch (error) {
         console.error("Error al cargar datos iniciales:", error);
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: "No se pudieron cargar los datos iniciales.",
-        });
+        toast.error("No se pudieron cargar los datos iniciales.");
       } finally {
         setLoadingCareers(false);
       }
@@ -127,11 +122,7 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
         form.setValue("id_plantel", 0);
       } catch (error) {
         console.error("Error al cargar datos de la carrera:", error);
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: "No se pudieron cargar los planes o planteles.",
-        });
+        toast.error("No se pudieron cargar los planes o planteles.");
       } finally {
         setLoadingPlans(false);
         setLoadingPlanteles(false);
@@ -145,6 +136,7 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
     setIsSubmitting(true);
     try {
       await createGroup(data);
+      toast.success(`El grupo ${data.acronimo} ha sido creado exitosamente.`);
       onSuccess?.({
         summary: "Grupo Creado",
         detail: `El grupo ${data.acronimo} ha sido creado exitosamente.`,
@@ -153,12 +145,8 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
       setStudyPlans([]);
       setPlanteles([]);
     } catch (error) {
-      if (error instanceof Error && toast.current) {
-        toast.current.show({
-          severity: "error",
-          summary: "Error al crear grupo",
-          detail: error.message,
-        });
+      if (error instanceof Error) {
+        toast.error(error.message);
       }
     } finally {
       setIsSubmitting(false);
@@ -167,7 +155,6 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
 
   return (
     <>
-      <Toast ref={toast} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Acrónimo del grupo */}
